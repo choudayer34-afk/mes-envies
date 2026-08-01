@@ -36,6 +36,8 @@ function init() {
     registerServiceWorker();
 
     log("Application prête.");
+    
+    initModal();
 
 }
 
@@ -148,5 +150,45 @@ function closeModal() {
     document
         .getElementById("modalOverlay")
         .classList.add("hidden");
+
+}
+
+function initModal() {
+
+    document
+        .getElementById("cancelModal")
+        .addEventListener(
+            "click",
+            closeModal
+        );
+
+    document
+        .getElementById("saveEnvie")
+        .addEventListener(
+            "click",
+            saveCurrentEnvie
+        );
+
+}
+
+
+function saveCurrentEnvie() {
+
+    const input =
+        document.getElementById("envieInput");
+
+    const titre =
+        input.value.trim();
+
+    if (!titre)
+        return;
+
+    saveEnvie(titre);
+
+    closeModal();
+
+    renderEnvies();
+
+    showToast("✓ Envie ajoutée");
 
 }
