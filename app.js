@@ -35,7 +35,7 @@ function init() {
     initMainButton();
 
     registerServiceWorker();
-
+renderEnvies();
     log("Application prête.");
     
     initModal();
@@ -185,5 +185,54 @@ function saveCurrentEnvie() {
     renderEnvies();
 
     showToast("✓ Envie ajoutée");
+
+}
+
+function renderEnvies() {
+
+    const container =
+        document.getElementById("enviesContainer");
+
+    if (!container)
+        return;
+
+    const envies = getEnvies();
+
+    container.innerHTML = "";
+
+    envies.forEach(envie => {
+
+        const card =
+            document.createElement("div");
+
+        card.className = "envie-card";
+
+        card.innerHTML = `
+            <h3>${envie.titre}</h3>
+        `;
+
+        container.appendChild(card);
+
+    });
+
+}
+
+function showToast(message) {
+
+    const toast =
+        document.getElementById("toast");
+
+    if (!toast)
+        return;
+
+    toast.textContent = message;
+
+    toast.classList.add("visible");
+
+    setTimeout(() => {
+
+        toast.classList.remove("visible");
+
+    }, 2500);
 
 }
