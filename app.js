@@ -133,9 +133,10 @@ function openModal() {
     const overlay =
         document.getElementById("modalOverlay");
 
-    overlay.classList.remove("hidden");
-}
+    const input =
+        document.getElementById("envieInput");
 
+    overlay.classList.remove("hidden");
 
     input.value = "";
 
@@ -144,6 +145,7 @@ function openModal() {
     }, 100);
 
 }
+
 
 
 function closeModal() {
