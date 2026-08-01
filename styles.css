@@ -250,13 +250,26 @@ font-size:36px;
 
 }
 
-.mainButton{
+.mainButton {
 
-font-size:20px;
+    width: 100%;
 
-padding:20px;
+    background: var(--color-primary);
+
+    color: white;
+
+    border: none;
+
+    border-radius: 24px;
+
+    padding: 22px;
+
+    font-size: 22px;
+
+    font-weight: 600;
 
 }
+
 
 .card{
 
@@ -398,15 +411,14 @@ padding:20px;
 }
 .sectionTitle {
 
+    font-size: 32px;
+
     color: var(--color-primary);
 
-    font-size: 24px;
-
-    font-weight: 700;
-
-    margin-bottom: 16px;
+    margin-bottom: 20px;
 
 }
+
 
 .envie-card {
 
