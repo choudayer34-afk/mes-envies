@@ -34,6 +34,7 @@ const APP = {
 let currentEditId = null;
 let currentCategorie = "general";
 let currentDeleteId = null;
+let currentEnvieId = null;
 
 /*=========================================================
  Initialisation
@@ -57,7 +58,12 @@ initDeleteModal();
     log("Application prête.");
     
     initModal();
-
+document
+    .getElementById("closeFiche")
+    .addEventListener(
+        "click",
+        closeFiche
+    );
 }
 
 function initDeleteModal() {
@@ -389,6 +395,36 @@ const CATEGORIES = {
 
 };
 
+function openEnvie(id) {
+
+    currentEnvieId = id;
+
+    const envie = getEnvies().find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    document.getElementById("ficheTitre").textContent =
+        envie.titre;
+
+    document.getElementById("ficheCategorie").textContent =
+        CATEGORIES[envie.categorie]?.label || "Général";
+
+    document.getElementById("ficheDescription").value =
+        envie.description || "";
+
+    document.getElementById("ficheOverlay")
+        .classList.remove("hidden");
+
+}
+function closeFiche() {
+
+    document
+        .getElementById("ficheOverlay")
+        .classList.add("hidden");
+
+}
+
 
 function renderEnvies() {
 
@@ -436,6 +472,11 @@ Elle apparaîtra ici automatiquement.
         const card =
             document.createElement("div");
 
+        card.addEventListener("click", () => {
+
+    openEnvie(envie.id);
+
+});
         card.className = "envie-card";
 
        card.innerHTML = `
@@ -475,7 +516,9 @@ Elle apparaîtra ici automatiquement.
 
         editBtn.addEventListener(
             "click",
-            () => editEnvie(envie)
+            (event) => {
+                event.stopPropagation();
+                editEnvie(envie);}
         );
 
         const deleteBtn =
@@ -483,7 +526,9 @@ Elle apparaîtra ici automatiquement.
 
         deleteBtn.addEventListener(
             "click",
-            () => removeEnvie(envie.id)
+            (event) => {
+                event.stopPropagation();
+                removeEnvie(envie.id);}
         );
 
         container.appendChild(card);
