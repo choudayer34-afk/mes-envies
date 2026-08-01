@@ -39,3 +39,20 @@
 ### 🎯 Objectif atteint
 
 Capturer une idée en moins de 3 secondes.
+
+## 0.2.0 - Première capture
+
+### Ajouté
+
+- Capture d'une envie
+- Boîte de réception 📥 À trier
+- Stockage local
+- Modale EnVie
+- Toast de confirmation
+- Modification d'une envie
+- Suppression d'une envie
+
+### Vision
+
+Une idée doit pouvoir être capturée en moins de 3 secondes.
+
