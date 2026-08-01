@@ -7,9 +7,13 @@
 ==========================================================
 */
 
-"use strict";
 import { saveEnvie } from "./storage.js";
 import { getEnvies } from "./storage.js";
+
+"use strict";
+
+alert("app.js chargé");
+
 /*=========================================================
  Configuration
 =========================================================*/
