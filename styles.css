@@ -264,4 +264,94 @@ padding:20px;
 
 }
 
+#fab {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+
+    width: 64px;
+    height: 64px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: #69b8b8;
+    color: white;
+
+    font-size: 32px;
+    cursor: pointer;
+
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+}
+
+.envie-card{
+    background:white;
+    padding:16px;
+    margin-bottom:12px;
+    border-radius:16px;
+    box-shadow:0 2px 10px rgba(0,0,0,.05);
+}
+
+.modal-overlay{
+    position:fixed;
+    inset:0;
+
+    background:rgba(0,0,0,.3);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.modal{
+    width:90%;
+    max-width:420px;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:24px;
+}
+
+.modal input{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+
+    border:1px solid #ddd;
+    border-radius:12px;
+}
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    margin-top:20px;
+}
+
+.toast{
+    position:fixed;
+
+    left:50%;
+    bottom:90px;
+
+    transform:translateX(-50%);
+
+    background:#222;
+    color:white;
+
+    padding:12px 20px;
+
+    border-radius:999px;
+
+    opacity:0;
+
+    transition:.3s;
+}
+
+.toast.visible{
+    opacity:1;
+}
+
 }
