@@ -68,4 +68,18 @@ Une idée doit pouvoir être capturée en moins de 3 secondes.
 ### Vision
 
 La boîte de réception devient le point d'entrée principal d'EnVie.
+## 0.2.1
+
+### Ajouté
+
+- Compteur d'envies
+- État vide
+- Modification d'une envie
+- Suppression d'une envie
+- Amélioration visuelle de la boîte de réception
+
+### Vision
+
+L'utilisateur peut désormais capturer, retrouver,
+modifier et supprimer une idée localement.
 
