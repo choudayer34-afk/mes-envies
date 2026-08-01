@@ -270,8 +270,8 @@ const inboxTitle =
 
 if (inboxTitle) {
 
-    inboxTitle.textContent =
-        📥 À trier (${envies.length});
+    inboxTitle.textContent =`
+        📥 À trier (${envies.length})`;
 
 }
 
