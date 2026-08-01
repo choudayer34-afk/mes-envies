@@ -131,7 +131,7 @@ function log(message) {
 }
 
 function openModal() {
-
+alert("98");
     console.log("openModal appelé");
 
     const overlay =
