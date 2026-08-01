@@ -9,7 +9,7 @@
 */
 
 import {
-    saveEnvie,
+    createEnvie,
     getEnvies,
     deleteEnvie,
     updateEnvie
@@ -285,7 +285,9 @@ function saveCurrentEnvie() {
 
     } else {
 
-        saveEnvie(titre);
+       createEnvie({
+    titre
+});
 
         showToast(
             "✓ Envie ajoutée"
