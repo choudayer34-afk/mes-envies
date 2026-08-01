@@ -12,6 +12,7 @@ import {
     createEnvie,
     getEnvies,
     deleteEnvie,
+    toggleFavorite,
     updateEnvie
 } from "./js/storage.js";
 
