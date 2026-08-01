@@ -282,12 +282,11 @@ if (envies.length === 0) {
     container.innerHTML = `
         <div class="emptyState">
 
-            Aucune envie pour le moment.
-
-            <br><br>
-
-            Appuyez sur 💡 Une envie
-            pour commencer.
+          Aucune envie pour le moment 🌱
+<br><br>
+Ajoutez votre première idée.
+<br><br>
+Elle apparaîtra ici automatiquement.
 
         </div>`
     ;
