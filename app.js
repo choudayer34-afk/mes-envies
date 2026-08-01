@@ -263,7 +263,37 @@ function renderEnvies() {
 
     const envies = getEnvies();
 
+const inboxTitle =
+    document.getElementById(
+        "inboxTitle"
+    );
+
+if (inboxTitle) {
+
+    inboxTitle.textContent =
+        📥 À trier (${envies.length});
+
+}
+
     container.innerHTML = "";
+    
+if (envies.length === 0) {
+
+    container.innerHTML = `
+        <div class="emptyState">
+
+            Aucune envie pour le moment.
+
+            <br><br>
+
+            Appuyez sur 💡 Une envie
+            pour commencer.
+
+        </div>`
+    ;
+
+    return;
+}
 
     envies.forEach(envie => {
 
