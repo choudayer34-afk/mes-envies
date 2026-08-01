@@ -28,7 +28,7 @@ const APP = {
 document.addEventListener("DOMContentLoaded", init);
 
 function init() {
-
+alert("ok");
     log("Initialisation...");
 
     updateTitle();
