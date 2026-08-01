@@ -13,6 +13,7 @@ import { getEnvies } from "./storage.js";
 /*=========================================================
  Configuration
 =========================================================*/
+alert("app.js chargé");
 
 const APP = {
     name: "EnVie",
