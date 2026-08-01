@@ -61,11 +61,12 @@ function initMainButton() {
 
 function onNewIdea() {
 
-    console.log("Bouton cliqué");
+    alert("clic OK");
 
     openModal();
 
 }
+
 
 
 /*=========================================================
