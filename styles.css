@@ -394,6 +394,31 @@ padding:20px;
     color: var(--color-text);
 
 }
+.envie-card {
+
+    background: var(--color-card);
+
+    border: 1px solid var(--color-border);
+
+    border-radius: var(--radius-medium);
+
+    padding: 20px;
+
+    margin-bottom: 12px;
+
+    box-shadow: var(--shadow-small);
+
+}
+
+.envieTitle {
+
+    font-size: 18px;
+
+    font-weight: 600;
+
+    color: var(--color-text);
+
+}
 
 
 }
