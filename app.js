@@ -221,11 +221,13 @@ function renderEnvies() {
             document.createElement("div");
 
         card.className = "envie-card";
-card.innerHTML = 
-    <div class="envieTitle">
-        ${envie.titre}
-    </div>
-;
+
+        card.innerHTML = 
+            <div class="envieTitle">
+                ${envie.titre}
+            </div>
+        ;
+
 
 
         container.appendChild(card);
