@@ -15,19 +15,33 @@ export function createEnvie({
 
     envies.unshift({
 
-        id: crypto.randomUUID(),
+    id: crypto.randomUUID(),
 
-        titre,
+    titre,
 
-        categorie,
+    categorie,
 
-        statut: "inbox",
+    description: "",
 
-        createdAt: Date.now(),
+    photos: [],
 
-        updatedAt: Date.now()
+    tags: [],
 
-    });
+    lieu: null,
+
+    date: null,
+
+    voyageId: null,
+
+    archived: false,
+
+    statut: "inbox",
+
+    createdAt: Date.now(),
+
+    updatedAt: Date.now()
+
+});
 
     localStorage.setItem(
         STORAGE_KEY,
