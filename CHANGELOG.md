@@ -1,4 +1,4 @@
- # Changelog
+je # Changelog
 
 ## [0.1.0] - Sprint 2 (en cours)
 
@@ -83,3 +83,21 @@ La boîte de réception devient le point d'entrée principal d'EnVie.
 L'utilisateur peut désormais capturer, retrouver,
 modifier et supprimer une idée localement.
 
+## 0.2.2
+
+### Ajouté
+
+- Modification d'une envie via modale EnVie
+- Suppression d'une envie via modale EnVie
+- Compteur d'envies
+- État vide amélioré
+
+### Amélioré
+
+- Suppression des fenêtres natives prompt()
+- Suppression des fenêtres natives confirm()
+
+### Vision
+
+Toutes les interactions passent désormais
+par des composants EnVie réutilisables.
