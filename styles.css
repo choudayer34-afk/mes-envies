@@ -431,6 +431,35 @@ padding:20px;
     margin-top:14px;
 
 }
+.actionButton {
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:10px 14px;
+
+    border-radius:12px;
+
+    font-size:14px;
+
+}
+
+.editButton {
+
+    background:var(--color-primary);
+
+    color:white;
+
+}
+
+.deleteButton {
+
+    background:#ef4444;
+
+    color:white;
+
+}
 
 
 }
