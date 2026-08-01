@@ -25,3 +25,17 @@
 - Modification
 - Suppression
 - Archivage local
+
+## 0.2.0
+
+### ✨ Première capture
+
+- Ajout d'une envie
+- Stockage local
+- Boîte de réception 📥 À trier
+- Fenêtre modale EnVie
+- Notifications Toast
+
+### 🎯 Objectif atteint
+
+Capturer une idée en moins de 3 secondes.
