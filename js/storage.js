@@ -1,25 +1,5 @@
 const STORAGE_KEY = "envie_envies";
-const LAST_VERSION_KEY =
-    "envie_last_version_seen";
 
-const currentVersion =
-    APP.version;
-
-const lastVersion =
-    localStorage.getItem(
-        LAST_VERSION_KEY
-    );
-
-if (lastVersion !== currentVersion) {
-
-    showReleaseNotes();
-
-    localStorage.setItem(
-        LAST_VERSION_KEY,
-        currentVersion
-    );
-
-}
 
 
 export function getEnvies() {
