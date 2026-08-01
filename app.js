@@ -14,12 +14,12 @@ import { getEnvies } from "./js/storage.js";
 
 "use strict";
 
-alert("app.js chargé");
+
 
 /*=========================================================
  Configuration
 =========================================================*/
-alert("app.js chargé");
+
 
 const APP = {
     name: "EnVie",
@@ -34,7 +34,7 @@ const APP = {
 document.addEventListener("DOMContentLoaded", init);
 
 function init() {
-alert("ok");
+
     log("Initialisation...");
 
     updateTitle();
@@ -68,7 +68,7 @@ function initMainButton() {
 
 function onNewIdea() {
 
-    alert("clic OK");
+  
 
     openModal();
 
@@ -133,7 +133,7 @@ function log(message) {
 }
 
 function openModal() {
-alert("98");
+
     console.log("openModal appelé");
 
     const overlay =
