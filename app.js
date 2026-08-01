@@ -251,7 +251,26 @@ function initModal() {
             "click",
             closeModal
         );
+document
+    .querySelectorAll(".categorieChip")
+    .forEach(chip => {
 
+        chip.addEventListener("click", () => {
+
+            document
+                .querySelectorAll(".categorieChip")
+                .forEach(c =>
+                    c.classList.remove("active")
+                );
+
+            chip.classList.add("active");
+
+            currentCategorie =
+                chip.dataset.categorie;
+
+        });
+
+    });
     document
         .getElementById("saveEnvie")
         .addEventListener(
@@ -286,8 +305,12 @@ function saveCurrentEnvie() {
 
     } else {
 
-       createEnvie({
-    titre
+   createEnvie({
+
+    titre,
+
+    categorie: currentCategorie
+
 });
 
         showToast(
