@@ -559,5 +559,17 @@ padding:20px;
     font:inherit;
 
 }
+.favoriteButton{
 
+    border:none;
+
+    background:none;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+    margin-right:8px;
+
+}
 }
