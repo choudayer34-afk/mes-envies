@@ -1,4 +1,4 @@
-i /* ==========================================================
+/* ==========================================================
    EnVie
    Toutes nos idées, au même endroit.
    Styles principaux - Sprint 1
@@ -297,25 +297,6 @@ padding:20px;
     box-shadow: 0 4px 16px rgba(0,0,0,.15);
 }
 
-.envie-card {
-
-    background: white;
-
-    border: 2px solid
-        rgba(111,175,196,.15);
-
-    border-radius:
-        var(--radius-medium);
-
-    padding: 20px;
-
-    margin-bottom: 12px;
-
-    box-shadow:
-        var(--shadow-small);
-
-}
-
 
 
 .modal-overlay{
@@ -504,13 +485,7 @@ padding:20px;
         var(--color-border);
 
 }
-.envieTitle {
 
-    font-size: 18px;
-
-    font-weight: 600;
-
-}
 
 .envieActions {
 
@@ -522,19 +497,7 @@ padding:20px;
 
 }
 
-.actionButton {
 
-    border: none;
-
-    cursor: pointer;
-
-    padding: 10px 14px;
-
-    border-radius: 12px;
-
-    font-size: 14px;
-
-}
 
 .editButton {
 
