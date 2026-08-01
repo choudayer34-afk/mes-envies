@@ -50,9 +50,64 @@ function init() {
 
     registerServiceWorker();
 renderEnvies();
+initDeleteModal();
+
+
     log("Application prête.");
     
     initModal();
+
+}
+
+function initDeleteModal() {
+
+    document
+        .getElementById(
+            "cancelDelete"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                document
+                    .getElementById(
+                        "deleteModal"
+                    )
+                    .classList.add(
+                        "hidden"
+                    );
+
+            }
+        );
+
+    document
+        .getElementById(
+            "confirmDelete"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                deleteEnvie(
+                    currentDeleteId
+                );
+
+                renderEnvies();
+
+                showToast(
+                    "✓ Envie supprimée"
+                );
+
+                document
+                    .getElementById(
+                        "deleteModal"
+                    )
+                    .classList.add(
+                        "hidden"
+                    );
+
+            }
+        );
 
 }
 
@@ -260,23 +315,19 @@ function editEnvie(envie) {
 
 function removeEnvie(id) {
 
-    const confirmation =
-        confirm(
-            "Supprimer cette envie ?"
-        );
+    currentDeleteId = id;
 
-    if (!confirmation)
-        return;
+    document
+        .getElementById("deleteText")
+        .textContent =
+        "Cette envie sera supprimée définitivement.";
 
-    deleteEnvie(id);
-
-    renderEnvies();
-
-    showToast(
-        "✓ Envie supprimée"
-    );
+    document
+        .getElementById("deleteModal")
+        .classList.remove("hidden");
 
 }
+
 
 
 function renderEnvies() {
