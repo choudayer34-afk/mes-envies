@@ -61,9 +61,12 @@ function initMainButton() {
 
 function onNewIdea() {
 
+    console.log("Bouton cliqué");
+
     openModal();
 
 }
+
 
 /*=========================================================
  Service Worker
@@ -123,13 +126,14 @@ function log(message) {
 
 function openModal() {
 
+    console.log("openModal appelé");
+
     const overlay =
         document.getElementById("modalOverlay");
 
-    const input =
-        document.getElementById("envieInput");
-
     overlay.classList.remove("hidden");
+}
+
 
     input.value = "";
 
