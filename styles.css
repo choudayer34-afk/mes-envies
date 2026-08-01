@@ -358,4 +358,31 @@ padding:20px;
     display: none;
 }
 
+#toast {
+    position: fixed;
+
+    left: 50%;
+    bottom: 100px;
+
+    transform: translateX(-50%);
+
+    background: #1f2937;
+    color: white;
+
+    padding: 12px 20px;
+
+    border-radius: 999px;
+
+    opacity: 0;
+
+    transition: .3s;
+
+    z-index: 2000;
+}
+
+#toast.visible {
+    opacity: 1;
+}
+
+
 }
