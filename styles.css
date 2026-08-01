@@ -516,6 +516,14 @@ padding:20px;
     color: white;
 
 }
+.envieCategory{
 
+    margin-top:6px;
+
+    font-size:.85rem;
+
+    color:var(--color-text-light);
+
+}
 
 }
