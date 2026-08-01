@@ -138,11 +138,7 @@ function openModal() {
 
     overlay.classList.remove("hidden");
 
-    input.value = "";
-
-    setTimeout(() => {
-        input.focus();
-    }, 100);
+    
 
 }
 
