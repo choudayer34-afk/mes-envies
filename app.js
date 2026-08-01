@@ -60,13 +60,7 @@ function initMainButton() {
 
 function onNewIdea() {
 
-    alert(
-`Bienvenue dans EnVie 🌱
-
-Très bientôt, tu pourras capturer une idée en moins de 3 secondes.
-
-Sprint 1 - Version ${APP.version}`
-    );
+    openModal();
 
 }
 
