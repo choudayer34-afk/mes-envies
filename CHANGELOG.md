@@ -55,4 +55,17 @@ Capturer une idée en moins de 3 secondes.
 ### Vision
 
 Une idée doit pouvoir être capturée en moins de 3 secondes.
+## 0.2.1
+
+### Ajouté
+
+- Compteur d'envies
+- État vide
+- Actions Modifier
+- Actions Supprimer
+- Amélioration visuelle des cartes
+
+### Vision
+
+La boîte de réception devient le point d'entrée principal d'EnVie.
 
