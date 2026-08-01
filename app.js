@@ -32,6 +32,7 @@ const APP = {
     debug: true
 };
 let currentEditId = null;
+let currentCategorie = "general";
 let currentDeleteId = null;
 
 /*=========================================================
