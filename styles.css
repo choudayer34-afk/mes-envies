@@ -284,13 +284,29 @@ padding:20px;
     box-shadow: 0 4px 16px rgba(0,0,0,.15);
 }
 
-.envie-card{
-    background:white;
-    padding:16px;
-    margin-bottom:12px;
-    border-radius:16px;
-    box-shadow:0 2px 10px rgba(0,0,0,.05);
+.envie-card {
+
+    background:
+        var(--color-card);
+
+    border:
+        1px solid
+        var(--color-border);
+
+    border-radius:
+        var(--radius-medium);
+
+    padding:
+        20px;
+
+    margin-bottom:
+        12px;
+
+    box-shadow:
+        var(--shadow-small);
+
 }
+
 
 .modal-overlay{
     position:fixed;
