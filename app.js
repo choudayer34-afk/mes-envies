@@ -31,6 +31,8 @@ const APP = {
     version: "0.1.0",
     debug: true
 };
+let currentEditId = null;
+let currentDeleteId = null;
 
 /*=========================================================
  Initialisation
@@ -137,9 +139,17 @@ function log(message) {
 
 }
 
-function openModal() {
+function openModal(
+    title = "💡 Une envie",
+    value = "",
+    editId = null
+) {
 
-    console.log("openModal appelé");
+    currentEditId = editId;
+
+    document.querySelector(
+        "#modalOverlay h2"
+    ).textContent = title;
 
     const overlay =
         document.getElementById("modalOverlay");
@@ -147,15 +157,24 @@ function openModal() {
     const input =
         document.getElementById("envieInput");
 
-    overlay.classList.remove("hidden");
+    const saveButton =
+        document.getElementById("saveEnvie");
 
-    input.value = "";
+    input.value = value;
+
+    saveButton.textContent = `
+        editId
+            ? "Enregistrer"
+            : "Ajouter"`;
+
+    overlay.classList.remove("hidden");
 
     setTimeout(() => {
         input.focus();
     }, 100);
 
 }
+
 
 
 
@@ -198,39 +217,46 @@ function saveCurrentEnvie() {
     if (!titre)
         return;
 
-    saveEnvie(titre);
+    if (currentEditId) {
+
+        updateEnvie(
+            currentEditId,
+            titre
+        );
+
+        showToast(
+            "✓ Envie modifiée"
+        );
+
+    } else {
+
+        saveEnvie(titre);
+
+        showToast(
+            "✓ Envie ajoutée"
+        );
+
+    }
+
+    currentEditId = null;
 
     closeModal();
 
     renderEnvies();
 
-    showToast("✓ Envie ajoutée");
-
 }
+
 
 function editEnvie(envie) {
 
-    const nouveauTitre =
-        prompt(
-            "Modifier l'envie",
-            envie.titre
-        );
-
-    if (!nouveauTitre)
-        return;
-
-    updateEnvie(
-        envie.id,
-        nouveauTitre.trim()
-    );
-
-    renderEnvies();
-
-    showToast(
-        "✓ Envie modifiée"
+    openModal(
+        "✏️ Modifier l'envie",
+        envie.titre,
+        envie.id
     );
 
 }
+
 
 function removeEnvie(id) {
 
