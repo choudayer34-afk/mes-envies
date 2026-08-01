@@ -6,6 +6,25 @@ export function getEnvies() {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 }
 
+export function toggleFavorite(id) {
+
+    const envies = getEnvies();
+
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie) return;
+
+    envie.favorite = !envie.favorite;
+
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(envies)
+    );
+
+}
+
 export function createEnvie({
     titre,
     categorie = "general",
