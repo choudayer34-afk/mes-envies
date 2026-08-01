@@ -123,3 +123,30 @@ function log(message) {
     );
 
 }
+
+function openModal() {
+
+    const overlay =
+        document.getElementById("modalOverlay");
+
+    const input =
+        document.getElementById("envieInput");
+
+    overlay.classList.remove("hidden");
+
+    input.value = "";
+
+    setTimeout(() => {
+        input.focus();
+    }, 100);
+
+}
+
+
+function closeModal() {
+
+    document
+        .getElementById("modalOverlay")
+        .classList.add("hidden");
+
+}
