@@ -383,6 +383,17 @@ padding:20px;
 #toast.visible {
     opacity: 1;
 }
+.sectionTitle {
+
+    font-size: 24px;
+
+    font-weight: 700;
+
+    margin-bottom: 16px;
+
+    color: var(--color-text);
+
+}
 
 
 }
