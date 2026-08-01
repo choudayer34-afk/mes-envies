@@ -217,10 +217,10 @@ function openModal(
 
     input.value = value;
 
-    saveButton.textContent = `
+    saveButton.textContent = 
         editId
             ? "Enregistrer"
-            : "Ajouter"`;
+            : "Ajouter";
 
     overlay.classList.remove("hidden");
 
