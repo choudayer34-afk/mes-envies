@@ -8,8 +8,13 @@
 ==========================================================
 */
 
-import { saveEnvie } from "./js/storage.js";
-import { getEnvies } from "./js/storage.js";
+import {
+    saveEnvie,
+    getEnvies,
+    deleteEnvie,
+    updateEnvie
+} from "./js/storage.js";
+
 
 
 "use strict";
