@@ -286,26 +286,23 @@ padding:20px;
 
 .envie-card {
 
-    background:
-        var(--color-card);
+    background: white;
 
-    border:
-        1px solid
-        var(--color-border);
+    border: 2px solid
+        rgba(111,175,196,.15);
 
     border-radius:
         var(--radius-medium);
 
-    padding:
-        20px;
+    padding: 20px;
 
-    margin-bottom:
-        12px;
+    margin-bottom: 12px;
 
     box-shadow:
         var(--shadow-small);
 
 }
+
 
 
 .modal-overlay{
@@ -401,15 +398,16 @@ padding:20px;
 }
 .sectionTitle {
 
+    color: var(--color-primary);
+
     font-size: 24px;
 
     font-weight: 700;
 
     margin-bottom: 16px;
 
-    color: var(--color-text);
-
 }
+
 .envie-card {
 
     background: var(--color-card);
@@ -463,11 +461,12 @@ padding:20px;
 
 .editButton {
 
-    background:var(--color-primary);
+    background: var(--color-primary);
 
-    color:white;
+    color: white;
 
 }
+
 
 .deleteButton {
 
