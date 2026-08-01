@@ -227,19 +227,50 @@ function renderEnvies() {
 
         card.className = "envie-card";
 
-        card.innerHTML = `
+        card.innerHTML = 
             <div class="envieTitle">
                 ${envie.titre}
-            </div>`
+            </div>
+
+            <div class="envieActions">
+
+                <button
+                    class="actionButton editButton"
+                    data-id="${envie.id}">
+                    Modifier
+                </button>
+
+                <button
+                    class="actionButton deleteButton"
+                    data-id="${envie.id}">
+                    Supprimer
+                </button>
+
+            </div>
         ;
 
+        const editBtn =
+            card.querySelector(".editButton");
 
+        editBtn.addEventListener(
+            "click",
+            () => editEnvie(envie)
+        );
+
+        const deleteBtn =
+            card.querySelector(".deleteButton");
+
+        deleteBtn.addEventListener(
+            "click",
+            () => removeEnvie(envie.id)
+        );
 
         container.appendChild(card);
 
     });
 
 }
+
 
 function showToast(message) {
 
