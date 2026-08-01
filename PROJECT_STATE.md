@@ -40,3 +40,19 @@ Aucune.
 Stockage local uniquement.
 
 Firebase reporté au Sprint 3.
+
+## Version actuelle
+
+0.2.1
+
+## Fonctionnalités terminées
+
+- Capture d'une envie
+- Boîte de réception À trier
+- Stockage local
+- Modale de saisie
+- Notifications Toast
+- Modification
+- Suppression
+- Compteur d'envies
+- État vide
