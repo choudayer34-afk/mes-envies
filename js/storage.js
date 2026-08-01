@@ -6,19 +6,36 @@ export function getEnvies() {
     return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 }
 
-export function saveEnvie(titre) {
+export function createEnvie({
+    titre,
+    categorie = "general"
+}) {
+
     const envies = getEnvies();
 
     envies.unshift({
+
         id: crypto.randomUUID(),
+
         titre,
+
+        categorie,
+
         statut: "inbox",
+
         createdAt: Date.now(),
+
         updatedAt: Date.now()
+
     });
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(envies)
+    );
+
 }
+
 
 export function deleteEnvie(id) {
     const envies = getEnvies().filter(envie => envie.id !== id);
