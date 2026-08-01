@@ -8,7 +8,8 @@ export function getEnvies() {
 
 export function createEnvie({
     titre,
-    categorie = "general"
+    categorie = "general",
+    favorite: false
 }) {
 
     const envies = getEnvies();
