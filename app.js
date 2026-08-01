@@ -437,6 +437,7 @@ function renderEnvies() {
 
     const envies = getEnvies();
 
+
 const inboxTitle =
     document.getElementById(
         "inboxTitle"
@@ -482,17 +483,22 @@ Elle apparaîtra ici automatiquement.
 
        card.innerHTML = `
 
-           <div class="envieTitle">
+   <div class="envieHeader">
 
-    ${CATEGORIES[envie.categorie]?.emoji || "💡"}
+    <button
+        class="favoriteButton"
+        data-id="${envie.id}">
+        ${envie.favorite ? "⭐" : "☆"}
+    </button>
 
-    ${envie.titre}
+    <div class="envieTitle">
+        ${CATEGORIES[envie.categorie]?.emoji || "💡"}
+        ${envie.titre}
+    </div>
 
 </div>
 <div class="envieCategory">
-
     ${CATEGORIES[envie.categorie]?.label || "Général"}
-
 </div>
 
             <div class="envieActions">
@@ -525,6 +531,22 @@ Elle apparaîtra ici automatiquement.
         const deleteBtn =
             card.querySelector(".deleteButton");
 
+        const favoriteBtn =
+    card.querySelector(".favoriteButton");
+
+favoriteBtn.addEventListener(
+    "click",
+    (event) => {
+
+        event.stopPropagation();
+
+        toggleFavorite(envie.id);
+
+        renderEnvies();
+
+    }
+);
+        
         deleteBtn.addEventListener(
             "click",
             (event) => {
