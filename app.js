@@ -222,10 +222,10 @@ function renderEnvies() {
 
         card.className = "envie-card";
 
-        card.innerHTML = 
+        card.innerHTML = `
             <div class="envieTitle">
                 ${envie.titre}
-            </div>
+            </div>`
         ;
 
 
