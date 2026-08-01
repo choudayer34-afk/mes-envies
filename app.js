@@ -8,7 +8,8 @@
 */
 
 "use strict";
-
+import { saveEnvie } from "./storage.js";
+import { getEnvies } from "./storage.js";
 /*=========================================================
  Configuration
 =========================================================*/
