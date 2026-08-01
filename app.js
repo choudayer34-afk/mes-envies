@@ -208,6 +208,51 @@ function saveCurrentEnvie() {
 
 }
 
+function editEnvie(envie) {
+
+    const nouveauTitre =
+        prompt(
+            "Modifier l'envie",
+            envie.titre
+        );
+
+    if (!nouveauTitre)
+        return;
+
+    updateEnvie(
+        envie.id,
+        nouveauTitre.trim()
+    );
+
+    renderEnvies();
+
+    showToast(
+        "✓ Envie modifiée"
+    );
+
+}
+
+function removeEnvie(id) {
+
+    const confirmation =
+        confirm(
+            "Supprimer cette envie ?"
+        );
+
+    if (!confirmation)
+        return;
+
+    deleteEnvie(id);
+
+    renderEnvies();
+
+    showToast(
+        "✓ Envie supprimée"
+    );
+
+}
+
+
 function renderEnvies() {
 
     const container =
