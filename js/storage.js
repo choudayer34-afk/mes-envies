@@ -27,41 +27,42 @@ export function toggleFavorite(id) {
 
 export function createEnvie({
     titre,
-    categorie = "general",
-    favorite: false
+    categorie = "general"
 }) {
 
     const envies = getEnvies();
 
     envies.unshift({
 
-    id: crypto.randomUUID(),
+        id: crypto.randomUUID(),
 
-    titre,
+        titre,
 
-    categorie,
+        categorie,
 
-    description: "",
+        favorite: false,
 
-    photos: [],
+        description: "",
 
-    tags: [],
+        photos: [],
 
-    lieu: null,
+        tags: [],
 
-    date: null,
+        lieu: null,
 
-    voyageId: null,
+        date: null,
 
-    archived: false,
+        voyageId: null,
 
-    statut: "inbox",
+        archived: false,
 
-    createdAt: Date.now(),
+        statut: "inbox",
 
-    updatedAt: Date.now()
+        createdAt: Date.now(),
 
-});
+        updatedAt: Date.now()
+
+    });
 
     localStorage.setItem(
         STORAGE_KEY,
