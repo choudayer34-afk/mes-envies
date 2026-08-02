@@ -931,4 +931,58 @@ padding:20px;
     transform:scale(.98);
 
 }
+
+.lieuSuggestions{
+
+    margin-top:8px;
+
+    border-radius:16px;
+
+    overflow:hidden;
+
+}
+
+.lieuItem{
+
+    padding:14px 16px;
+
+    background:white;
+
+    border-bottom:1px solid #EEF2F4;
+
+    cursor:pointer;
+
+    transition:.15s;
+
+}
+
+.lieuItem:last-child{
+
+    border-bottom:none;
+
+}
+
+.lieuItem:hover{
+
+    background:#F6FAFB;
+
+}
+
+.lieuNom{
+
+    font-weight:600;
+
+    color:#263238;
+
+}
+
+.lieuAdresse{
+
+    margin-top:4px;
+
+    font-size:13px;
+
+    color:#7A8A94;
+
+}
 }
