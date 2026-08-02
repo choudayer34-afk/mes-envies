@@ -16,7 +16,8 @@ import {
     updateEnvie
 } from "./js/storage.js";
 
-
+import { searchPlaces }
+    from "./services/geocoding.js";
 
 "use strict";
 
@@ -65,6 +66,8 @@ document
         "click",
         closeFiche
     );
+    
+    testGeocoding();
 }
 
 function initDeleteModal() {
@@ -581,6 +584,17 @@ function showToast(message) {
         toast.classList.remove("visible");
 
     }, 2500);
+
+}
+
+async function testGeocoding() {
+
+    const places =
+        await searchPlaces(
+            "Lac du Salagou"
+        );
+
+    console.log(places);
 
 }
 
