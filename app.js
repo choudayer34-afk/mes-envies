@@ -612,3 +612,43 @@ async function testGeocoding() {
 
 }
 
+function initDatePicker() {
+
+    const button =
+        document.getElementById("chooseDate");
+
+    const input =
+        document.getElementById("envieDate");
+
+    const label =
+        document.getElementById("dateLabel");
+
+    button.addEventListener("click", () => {
+
+        input.showPicker?.();
+
+        input.click();
+
+    });
+
+    input.addEventListener("change", () => {
+
+        if (!input.value)
+            return;
+
+        const date =
+            new Date(input.value);
+
+        label.textContent =
+            date.toLocaleDateString(
+                "fr-FR",
+                {
+                    day:"numeric",
+                    month:"long",
+                    year:"numeric"
+                }
+            );
+
+    });
+
+}
