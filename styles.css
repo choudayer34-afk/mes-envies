@@ -1004,23 +1004,47 @@ padding:20px;
 
 }
 
-.checklistRow{
+.checklistRow {
 
-    padding:10px 0;
+    display: flex;
 
-    border-bottom:1px solid #ECEFF1;
+    align-items: center;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid #ECEFF1;
 
 }
 
-.checklistRow label{
+.checklistRow label {
 
-    display:flex;
+    display: flex;
 
-    align-items:center;
+    align-items: center;
 
-    gap:12px;
+    gap: 12px;
 
-    cursor:pointer;
+    width: 100%;
+
+    cursor: pointer;
+
+}
+
+.checklistRow input[type="checkbox"] {
+
+    width: 20px;
+
+    height: 20px;
+
+    flex-shrink: 0;
+
+    cursor: pointer;
+
+}
+
+.checklistRow span {
+
+    flex: 1;
 
 }
 }
