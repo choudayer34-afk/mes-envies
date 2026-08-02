@@ -691,4 +691,20 @@ padding:20px;
     transform:scale(1.05);
 
 }
+
+.fieldTitle{
+
+    display:block;
+
+    margin-top:18px;
+
+    margin-bottom:8px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    color:#4A5560;
+
+}
 }
