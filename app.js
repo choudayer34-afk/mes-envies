@@ -319,10 +319,23 @@ function saveCurrentEnvie() {
 
     titre,
 
-    categorie: currentCategorie
+    categorie: currentCategorie,
+
+    lieu: {
+
+        nom: "",
+
+        adresse: "",
+
+        latitude: null,
+
+        longitude: null
+
+    },
+
+    date: null
 
 });
-
         showToast(
             "✓ Envie ajoutée"
         );
