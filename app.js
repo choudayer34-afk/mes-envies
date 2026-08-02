@@ -60,6 +60,7 @@ initDeleteModal();
     log("Application prête.");
     
     initModal();
+    initDateModal();
     initDatePicker();
 document
     .getElementById("closeFiche")
@@ -650,5 +651,29 @@ function initDatePicker() {
             );
 
     });
+
+}
+
+function initDateModal(){
+
+    document
+        .getElementById("chooseDate")
+        .addEventListener("click", () => {
+
+            document
+                .getElementById("dateModal")
+                .classList.remove("hidden");
+
+        });
+
+    document
+        .getElementById("cancelDate")
+        .addEventListener("click", () => {
+
+            document
+                .getElementById("dateModal")
+                .classList.add("hidden");
+
+        });
 
 }
