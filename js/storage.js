@@ -48,7 +48,21 @@ export function createEnvie({
 
         tags: [],
 
-        lieu: null,
+        lieu: {
+
+    nom: "",
+
+    adresse: "",
+
+    ville: "",
+
+    pays: "",
+
+    latitude: null,
+
+    longitude: null
+
+},
 
         date: null,
 
