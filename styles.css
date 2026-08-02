@@ -985,4 +985,22 @@ padding:20px;
     color:#7A8A94;
 
 }
+
+.urlItem{
+
+    padding:10px 0;
+
+    border-bottom:1px solid #EDF1F3;
+
+}
+
+.urlItem a{
+
+    color:#2F80ED;
+
+    text-decoration:none;
+
+    word-break:break-word;
+
+}
 }
