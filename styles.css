@@ -502,22 +502,10 @@ padding:20px;
 
 }
 
-.editButton {
-
-    background: var(--color-primary);
-
-    color: white;
-
-}
 
 
-.deleteButton {
 
-    background:#ef4444;
 
-    color:white;
-
-}
 
 .emptyState {
 
@@ -537,15 +525,6 @@ padding:20px;
 }
 
 
-.envieActions {
-
-    display: flex;
-
-    gap: 10px;
-
-    margin-top: 16px;
-
-}
 
 
 
@@ -660,53 +639,7 @@ padding:20px;
 
 }
 
-.categorieChip{
 
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    gap:8px;
-
-    min-width:120px;
-
-    height:46px;
-
-    padding:0 18px;
-
-    border:none;
-
-    border-radius:999px;
-
-    background:#EEF4F6;
-
-    color:#4B5B66;
-
-    font-size:15px;
-
-    font-weight:500;
-
-    cursor:pointer;
-
-    transition:all .20s ease;
-
-}
-
-.categorieChip.active{
-
-    background:#6FAFC4;
-
-    color:white;
-
-    font-weight:600;
-
-    transform:translateY(-2px);
-
-    box-shadow:0 6px 18px rgba(111,175,196,.35);
-
-}
 
 .categorieSelector{
 
@@ -1048,19 +981,7 @@ padding:20px;
 
 }
 
-.checklistRow{
 
-    display:flex;
-
-    align-items:center;
-
-    gap:12px;
-
-    padding:10px 0;
-
-    border-bottom:1px solid #ECEFF1;
-
-}
 
 .checkLabel{
 
@@ -1096,5 +1017,19 @@ padding:20px;
 
     transform:scale(1.1);
 
+}
+
+/* Correction zoom automatique iPhone */
+input,
+textarea,
+select,
+button {
+    font-size:16px;
+}
+
+.modal input,
+.modal textarea,
+.modal select {
+    font-size:16px;
 }
 }
