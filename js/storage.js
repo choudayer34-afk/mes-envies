@@ -53,6 +53,8 @@ export function createEnvie({
 
         photos: [],
         
+        checklist: [],
+        
         urls: [],
 
         tags: [],
@@ -157,6 +159,78 @@ export function removeUrl(envieId, urlId) {
         envie.urls.filter(u => u.id !== urlId);
 
     envie.updatedAt = Date.now();
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(envies)
+    );
+
+}
+
+export function addChecklistItem(envieId, texte){
+
+    const envies = getEnvies();
+
+    const envie = envies.find(e => e.id === envieId);
+
+    if(!envie) return;
+
+    envie.checklist ??= [];
+
+    envie.checklist.push({
+
+        id: crypto.randomUUID(),
+
+        texte,
+
+        checked:false
+
+    });
+
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(envies)
+    );
+
+}
+
+export function toggleChecklistItem(envieId,itemId){
+
+    const envies=getEnvies();
+
+    const envie=envies.find(e=>e.id===envieId);
+
+    if(!envie) return;
+
+    const item=envie.checklist.find(i=>i.id===itemId);
+
+    if(!item) return;
+
+    item.checked=!item.checked;
+
+    envie.updatedAt=Date.now();
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(envies)
+    );
+
+}
+
+export function deleteChecklistItem(envieId,itemId){
+
+    const envies=getEnvies();
+
+    const envie=envies.find(e=>e.id===envieId);
+
+    if(!envie) return;
+
+    envie.checklist=
+        envie.checklist.filter(i=>i.id!==itemId);
+
+    envie.updatedAt=Date.now();
 
     localStorage.setItem(
         STORAGE_KEY,
