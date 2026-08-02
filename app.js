@@ -444,6 +444,48 @@ function openEnvie(id) {
     document.getElementById("ficheDescription").value =
         envie.description || "";
         
+        const checklist =
+    document.getElementById("checklistContainer");
+
+checklist.innerHTML = "";
+
+(envie.checklist || []).forEach(item=>{
+
+    const row =
+        document.createElement("div");
+
+    row.className="checklistRow";
+
+    row.innerHTML=`
+
+        <label>
+
+            <input
+                type="checkbox"
+                ${item.checked ? "checked" : ""}>
+
+            ${item.texte}
+
+        </label>
+
+    `;
+
+    row.querySelector("input")
+        .addEventListener("change",()=>{
+
+            toggleChecklistItem(
+                currentEnvieId,
+                item.id
+            );
+
+            openEnvie(currentEnvieId);
+
+        });
+
+    checklist.appendChild(row);
+
+});
+
         const urlList =
     document.getElementById("urlList");
 
