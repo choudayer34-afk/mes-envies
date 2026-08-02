@@ -864,4 +864,32 @@ padding:20px;
 
 }
 
+.dateButton{
+
+    width:100%;
+
+    height:50px;
+
+    padding:0 16px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#F5F8F9;
+
+    color:#4B5B66;
+
+    font-size:16px;
+
+    font-weight:500;
+
+}
+
 }
