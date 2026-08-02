@@ -42,6 +42,7 @@ let currentEditId = null;
 let currentCategorie = "general";
 let currentDeleteId = null;
 let currentEnvieId = null;
+let currentUrlEnvieId = null;
 
 /*=========================================================
  Initialisation
