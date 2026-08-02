@@ -785,4 +785,61 @@ padding:20px;
     color:#4A5560;
 
 }
+
+.primaryButton{
+
+    flex:1;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#6FAFC4;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+.primaryButton:active{
+
+    transform:scale(.98);
+
+}
+
+.secondaryButton{
+
+    flex:1;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#EEF4F6;
+
+    color:#4B5B66;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+.secondaryButton:active{
+
+    transform:scale(.98);
+
+}
+
 }
