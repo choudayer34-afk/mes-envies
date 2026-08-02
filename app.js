@@ -413,6 +413,9 @@ function openEnvie(id) {
 
     document.getElementById("ficheDescription").value =
         envie.description || "";
+        
+        document.getElementById("ficheLieu").value =
+    envie.lieu?.nom || "";
 
     document.getElementById("ficheOverlay")
         .classList.remove("hidden");
