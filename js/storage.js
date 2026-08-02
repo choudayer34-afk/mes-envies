@@ -52,6 +52,8 @@ export function createEnvie({
         description: "",
 
         photos: [],
+        
+        urls: [],
 
         tags: [],
 
@@ -110,4 +112,55 @@ export function updateEnvie(id, titre) {
     envie.updatedAt = Date.now();
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+}
+
+export function addUrl(id, url) {
+
+    const envies = getEnvies();
+
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.urls ??= [];
+
+    envie.urls.push({
+
+        id: crypto.randomUUID(),
+
+        url,
+
+        createdAt: Date.now()
+
+    });
+
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(envies)
+    );
+
+}
+
+export function removeUrl(envieId, urlId) {
+
+    const envies = getEnvies();
+
+    const envie = envies.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    envie.urls =
+        envie.urls.filter(u => u.id !== urlId);
+
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(envies)
+    );
+
 }
