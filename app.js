@@ -493,6 +493,22 @@ checklist.innerHTML = "";
 
 });
 
+row.querySelector(".deleteChecklistButton")
+    .addEventListener("click", (event) => {
+
+        event.stopPropagation();
+
+        deleteChecklistItem(
+            currentEnvieId,
+            item.id
+        );
+
+        openEnvie(currentEnvieId);
+
+        showToast("✓ Élément supprimé");
+
+    });
+
         const urlList =
     document.getElementById("urlList");
 
