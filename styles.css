@@ -892,4 +892,43 @@ padding:20px;
 
 }
 
+.dateChoices{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:12px;
+
+    margin-top:20px;
+
+}
+
+.dateChoice{
+
+    width:100%;
+
+    height:52px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#F4F7F8;
+
+    text-align:left;
+
+    padding:0 18px;
+
+    font-size:16px;
+
+    font-weight:500;
+
+}
+
+.dateChoice:active{
+
+    transform:scale(.98);
+
+}
 }
