@@ -842,4 +842,26 @@ padding:20px;
 
 }
 
+.locationButton{
+
+    width:100%;
+
+    height:46px;
+
+    margin-top:10px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#F5F8F9;
+
+    color:#56707E;
+
+    font-size:15px;
+
+    font-weight:600;
+
+}
+
 }
