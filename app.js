@@ -743,3 +743,28 @@ function initUrlModal(){
         .addEventListener("click",saveCurrentUrl);
 
 }
+
+function saveCurrentUrl(){
+
+    const input=
+        document.getElementById("urlInput");
+
+    const url=input.value.trim();
+
+    if(!url)
+        return;
+
+    addUrl(
+        currentUrlEnvieId,
+        url
+    );
+
+    document
+        .getElementById("urlModal")
+        .classList.add("hidden");
+
+    openEnvie(currentUrlEnvieId);
+
+    showToast("✓ Lien ajouté");
+
+}
