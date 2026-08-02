@@ -437,6 +437,31 @@ function openEnvie(id) {
     document.getElementById("ficheDescription").value =
         envie.description || "";
         
+        const urlList =
+    document.getElementById("urlList");
+
+urlList.innerHTML = "";
+
+(envie.urls || []).forEach(link => {
+
+    const div =
+        document.createElement("div");
+
+    div.className = "urlItem";
+
+    div.innerHTML = `
+        <a href="${link.url}"
+           target="_blank">
+
+            ${link.url}
+
+        </a>
+    `;
+
+    urlList.appendChild(div);
+
+});
+
         document.getElementById("ficheLieu").value =
     envie.lieu?.nom || "";
 
