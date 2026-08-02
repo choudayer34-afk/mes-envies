@@ -46,6 +46,7 @@ let currentCategorie = "general";
 let currentDeleteId = null;
 let currentEnvieId = null;
 let currentUrlEnvieId = null;
+let currentChecklistEnvieId = null;
 
 /*=========================================================
  Initialisation
@@ -65,6 +66,7 @@ function init() {
 renderEnvies();
 initDeleteModal();
 initUrlModal();
+initChecklistModal();
 
 
     log("Application prête.");
@@ -769,5 +771,65 @@ function saveCurrentUrl(){
     openEnvie(currentUrlEnvieId);
 
     showToast("✓ Lien ajouté");
+
+}
+
+function initChecklistModal(){
+
+    document
+        .getElementById("addChecklistButton")
+        .addEventListener("click",()=>{
+
+            currentChecklistEnvieId=currentEnvieId;
+
+            document
+                .getElementById("checklistInput")
+                .value="";
+
+            document
+                .getElementById("checklistModal")
+                .classList.remove("hidden");
+
+        });
+
+    document
+        .getElementById("cancelChecklist")
+        .addEventListener("click",()=>{
+
+            document
+                .getElementById("checklistModal")
+                .classList.add("hidden");
+
+        });
+
+    document
+        .getElementById("saveChecklist")
+        .addEventListener("click",saveChecklistItem);
+
+}
+
+function saveChecklistItem(){
+
+    const input =
+        document.getElementById("checklistInput");
+
+    const texte =
+        input.value.trim();
+
+    if(!texte)
+        return;
+
+    addChecklistItem(
+        currentChecklistEnvieId,
+        texte
+    );
+
+    document
+        .getElementById("checklistModal")
+        .classList.add("hidden");
+
+    openEnvie(currentChecklistEnvieId);
+
+    showToast("✓ Élément ajouté");
 
 }
