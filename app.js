@@ -61,6 +61,7 @@ function init() {
     registerServiceWorker();
 renderEnvies();
 initDeleteModal();
+initUrlModal();
 
 
     log("Application prête.");
@@ -706,5 +707,39 @@ function initDateModal(){
                 .classList.add("hidden");
 
         });
+
+}
+
+function initUrlModal(){
+
+    document
+        .getElementById("addUrlButton")
+        .addEventListener("click",()=>{
+
+            currentUrlEnvieId=currentEnvieId;
+
+            document
+                .getElementById("urlInput")
+                .value="";
+
+            document
+                .getElementById("urlModal")
+                .classList.remove("hidden");
+
+        });
+
+    document
+        .getElementById("cancelUrl")
+        .addEventListener("click",()=>{
+
+            document
+                .getElementById("urlModal")
+                .classList.add("hidden");
+
+        });
+
+    document
+        .getElementById("saveUrl")
+        .addEventListener("click",saveCurrentUrl);
 
 }
