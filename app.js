@@ -456,19 +456,26 @@ checklist.innerHTML = "";
 
     row.className="checklistRow";
 
-    row.innerHTML=`
+    row.innerHTML = `
 
-        <label>
+<label class="checkLabel">
 
-            <input
-                type="checkbox"
-                ${item.checked ? "checked" : ""}>
+    <input
+        type="checkbox"
+        ${item.checked ? "checked" : ""}>
 
-            ${item.texte}
+    <span>${item.texte}</span>
 
-        </label>
+</label>
 
-    `;
+<button
+    class="deleteChecklistButton">
+
+    🗑️
+
+</button>
+
+`;
 
     row.querySelector("input")
         .addEventListener("change",()=>{
