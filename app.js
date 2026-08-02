@@ -13,7 +13,9 @@ import {
     getEnvies,
     deleteEnvie,
     toggleFavorite,
-    updateEnvie
+    updateEnvie,
+    addUrl,
+removeUrl
 } from "./js/storage.js";
 
 import { searchPlaces }
@@ -21,6 +23,7 @@ import { searchPlaces }
 
 import { searchLocation }
 from "./js/location.js";
+
 "use strict";
 
 
