@@ -60,6 +60,7 @@ initDeleteModal();
     log("Application prête.");
     
     initModal();
+    initDatePicker();
 document
     .getElementById("closeFiche")
     .addEventListener(
