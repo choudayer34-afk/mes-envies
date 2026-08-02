@@ -1003,4 +1003,24 @@ padding:20px;
     word-break:break-word;
 
 }
+
+.checklistRow{
+
+    padding:10px 0;
+
+    border-bottom:1px solid #ECEFF1;
+
+}
+
+.checklistRow label{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    cursor:pointer;
+
+}
 }
