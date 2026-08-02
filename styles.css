@@ -1047,4 +1047,54 @@ padding:20px;
     flex: 1;
 
 }
+
+.checklistRow{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:10px 0;
+
+    border-bottom:1px solid #ECEFF1;
+
+}
+
+.checkLabel{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    flex:1;
+
+}
+
+.deleteChecklistButton{
+
+    border:none;
+
+    background:none;
+
+    font-size:20px;
+
+    cursor:pointer;
+
+    opacity:.55;
+
+    transition:.2s;
+
+}
+
+.deleteChecklistButton:hover{
+
+    opacity:1;
+
+    transform:scale(1.1);
+
+}
 }
