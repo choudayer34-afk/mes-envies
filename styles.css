@@ -610,4 +610,29 @@ padding:20px;
 
 }
 
+.categorieChip{
+
+    background:#F3F5F7;
+
+    color:#555;
+
+    border:2px solid transparent;
+
+    transition:.2s;
+
+}
+
+.categorieChip.active{
+
+    background:#6FAFC4;
+
+    color:white;
+
+    border-color:#4E91A8;
+
+    transform:scale(1.05);
+
+    font-weight:600;
+
+}
 }
