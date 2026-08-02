@@ -26,8 +26,15 @@ export function toggleFavorite(id) {
 }
 
 export function createEnvie({
+
     titre,
-    categorie = "general"
+
+    categorie = "general",
+
+    lieu = {},
+
+    date = null
+
 }) {
 
     const envies = getEnvies();
