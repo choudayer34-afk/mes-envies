@@ -19,6 +19,8 @@ import {
 import { searchPlaces }
     from "./services/geocoding.js";
 
+import { searchLocation }
+from "./js/location.js";
 "use strict";
 
 
