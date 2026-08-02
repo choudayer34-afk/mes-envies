@@ -488,11 +488,6 @@ checklist.innerHTML = "";
             openEnvie(currentEnvieId);
 
         });
-
-    checklist.appendChild(row);
-
-});
-
 row.querySelector(".deleteChecklistButton")
     .addEventListener("click", (event) => {
 
@@ -508,6 +503,11 @@ row.querySelector(".deleteChecklistButton")
         showToast("✓ Élément supprimé");
 
     });
+    checklist.appendChild(row);
+
+});
+
+
 
         const urlList =
     document.getElementById("urlList");
