@@ -3,6 +3,7 @@ import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
 import { renderPeriode } from "./periode.js";
 import { getEnvies, updateEnvieCategorie } from "./storage.js";
+import { renderVoyageSection } from "./voyage.js";
 
 let currentEnvieId = null;
 
@@ -34,6 +35,7 @@ export function openEnvie(id) {
 
 
     document.getElementById("ficheDescription").value = envie.description || "";
+    renderVoyageSection(envie);
 
  renderPeriode(envie);
     renderChecklist(envie);
