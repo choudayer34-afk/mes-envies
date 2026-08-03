@@ -239,3 +239,53 @@ async function reverseGeocode(latitude, longitude) {
     };
 
 }
+
+export function renderLieuActions(envie) {
+
+    const container = document.getElementById("ficheLieuActions");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    const { latitude, longitude, adresse, nom } = envie.lieu || {};
+
+    if (!latitude || !longitude) {
+        return;
+    }
+
+    const itineraireButton = document.createElement("a");
+    itineraireButton.className = "secondaryButton lieuActionButton";
+    itineraireButton.textContent = "🧭 Itinéraire";
+    itineraireButton.href = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+    itineraireButton.target = "_blank";
+    itineraireButton.rel = "noopener";
+
+    const copyButton = document.createElement("button");
+    copyButton.type = "button";
+    copyButton.className = "secondaryButton lieuActionButton";
+    copyButton.textContent = "📋 Copier l'adresse";
+
+    copyButton.addEventListener("click", async () => {
+
+        const texte = adresse || nom || `${latitude}, ${longitude}`;
+
+        try {
+            await navigator.clipboard.writeText(texte);
+            copyButton.textContent = "✓ Copié";
+        } catch {
+            copyButton.textContent = "Échec";
+        }
+
+        setTimeout(() => {
+            copyButton.textContent = "📋 Copier l'adresse";
+        }, 2000);
+
+    });
+
+    container.appendChild(itineraireButton);
+    container.appendChild(copyButton);
+
+}
+
