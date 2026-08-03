@@ -630,6 +630,8 @@ window.onerror = function(message, source, lineno) {
             <button class="categorieChip active" type="button" data-target="templates">🧳 Modèles de checklist</button>
             <button class="categorieChip" type="button" data-target="categories">🏷️ Catégories de checklist</button>
             <button class="categorieChip" type="button" data-target="personnes">👤 Personnes du foyer</button>
+        <button class="categorieChip" type="button" data-target="envieCategories">🎯 Catégories d'envie</button>
+
         </div>
 
         <div id="adminChecklistTemplates" class="adminSection">
@@ -661,6 +663,15 @@ window.onerror = function(message, source, lineno) {
             </button>
 
         </div>
+<div id="adminEnvieCategories" class="adminSection hidden">
+
+    <div id="envieCategoriesList"></div>
+
+    <button id="addEnvieCategorieButton" class="secondaryButton">
+        ➕ Nouvelle catégorie
+    </button>
+
+</div>
 
         <button id="showFoyerCodeButton" class="secondaryButton" style="margin-top:24px;">
             🔑 Voir le code du foyer
