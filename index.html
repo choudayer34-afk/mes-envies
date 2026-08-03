@@ -1,24 +1,12 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-        <script>
-window.onerror = function(message, source, lineno, colno) {
-    document.body.innerHTML =
-        '<div style="position:fixed;inset:0;background:#fff;color:#c00;padding:20px;font-family:monospace;font-size:14px;white-space:pre-wrap;z-index:99999;overflow:auto;">'
-        + 'ERREUR JS\n\n'
-        + message + '\n\n'
-        + 'Fichier : ' + source + '\n'
-        + 'Ligne : ' + lineno
-        + '</div>';
-};
-</script>
 
     <meta name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover">
 
     <title>EnVie</title>
-
 
     <meta name="theme-color" content="#6FAFC4">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +15,7 @@ window.onerror = function(message, source, lineno, colno) {
 
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="styles.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 
 </head>
 
@@ -42,7 +30,6 @@ window.onerror = function(message, source, lineno, colno) {
     <div class="logo">
         🌱
     </div>
-
 
     <h1>EnVie</h1>
 
@@ -67,9 +54,10 @@ window.onerror = function(message, source, lineno, colno) {
         </span>
 
     </button>
-<button id="btnCarte" class="secondaryButton" style="margin-bottom:24px;">
-    🗺️ Voir la carte
-</button>
+
+    <button id="btnCarte" class="secondaryButton" style="margin-bottom:24px;">
+        🗺️ Voir la carte
+    </button>
 
     <section class="card">
 
@@ -84,23 +72,22 @@ window.onerror = function(message, source, lineno, colno) {
         </p>
 
     </section>
-<section class="inboxSection">
 
- <h2
-    id="inboxTitle"
-    class="sectionTitle"
->
-    📥 À trier
-</h2>
+    <section class="inboxSection">
 
+        <h2
+            id="inboxTitle"
+            class="sectionTitle"
+        >
+            📥 À trier
+        </h2>
 
-    <section id="enviesContainer"></section>
+        <section id="enviesContainer"></section>
 
-</section>
-
-
+    </section>
 
 </main>
+
 <div id="modalOverlay" class="modal-overlay hidden">
 
     <div class="modal">
@@ -112,122 +99,121 @@ window.onerror = function(message, source, lineno, colno) {
             type="text"
             placeholder="Mon envie..."
         >
+
         <label class="fieldTitle">
-    Catégorie
-</label>
+            Catégorie
+        </label>
+
         <div id="categorieSelector" class="categorieSelector">
 
-    <button class="categorieChip active"
-            data-categorie="general">
-        💡 Idée
-    </button>
+            <button class="categorieChip active"
+                    data-categorie="general">
+                💡 Idée
+            </button>
 
-    <button class="categorieChip"
-            data-categorie="voyage">
-        ✈️ Voyage
-    </button>
+            <button class="categorieChip"
+                    data-categorie="voyage">
+                ✈️ Voyage
+            </button>
 
-    <button class="categorieChip"
-            data-categorie="maison">
-        🏠 Maison
-    </button>
+            <button class="categorieChip"
+                    data-categorie="maison">
+                🏠 Maison
+            </button>
 
-    <button class="categorieChip"
-            data-categorie="jardin">
-        🌿 Jardin
-    </button>
+            <button class="categorieChip"
+                    data-categorie="jardin">
+                🌿 Jardin
+            </button>
 
-    <button class="categorieChip"
-            data-categorie="courses">
-        🛒 Courses
-    </button>
+            <button class="categorieChip"
+                    data-categorie="courses">
+                🛒 Courses
+            </button>
 
-    <button class="categorieChip"
-            data-categorie="evenement">
-        📅 Sortie
-    </button>
-
-</div>
-<div class="field">
-
-    <label class="fieldTitle">
-        Lieu
-    </label>
-
-    <div class="lieuInputWrapper">
-        <input
-            id="envieLieu"
-            type="text"
-            placeholder="Ajouter un lieu"
-            autocomplete="off">
-        <button
-            type="button"
-            id="clearEnvieLieu"
-            class="lieuClearButton"
-            aria-label="Effacer le lieu">
-            ✕
-        </button>
-    </div>
-
-    <div
-        id="creationlieuSuggestions"
-        class="lieuSuggestions">
-    </div>
-
-    <button
-        id="btnLocate"
-        class="locationButton">
-        📍 Utiliser ma position
-    </button>
-
-</div>
-
-<div class="field">
-
-<label class="fieldTitle">
-    Date ou période
-</label>
-
-<button
-    id="chooseDate"
-    class="dateButton">
-
-    <span id="dateLabel">
-        Choisir...
-    </span>
-
-    <span>
-        ▾
-    </span>
-
-</button>
-
-<input
-    id="envieDate"
-    type="date"
-    hidden>
-
-</div>
-        <div class="modal-actions">
-
-  <button
-    id="cancelModal"
-    class="secondaryButton">
-
-    Annuler
-
-</button>
-
-<button
-    id="saveEnvie"
-    class="primaryButton">
-
-    Ajouter
-
-</button>
+            <button class="categorieChip"
+                    data-categorie="evenement">
+                📅 Sortie
+            </button>
 
         </div>
 
+        <div class="field">
+
+            <label class="fieldTitle">
+                Lieu
+            </label>
+
+            <div class="lieuInputWrapper">
+                <input
+                    id="envieLieu"
+                    type="text"
+                    placeholder="Ajouter un lieu"
+                    autocomplete="off">
+                <button
+                    type="button"
+                    id="clearEnvieLieu"
+                    class="lieuClearButton"
+                    aria-label="Effacer le lieu">
+                    ✕
+                </button>
+            </div>
+
+            <div
+                id="creationlieuSuggestions"
+                class="lieuSuggestions">
+            </div>
+
+            <button
+                id="btnLocate"
+                class="locationButton">
+                📍 Utiliser ma position
+            </button>
+
+        </div>
+
+        <div class="field">
+
+            <label class="fieldTitle">
+                Date ou période
+            </label>
+
+            <button
+                id="chooseDate"
+                class="dateButton">
+
+                <span id="dateLabel">
+                    Choisir...
+                </span>
+
+                <span>
+                    ▾
+                </span>
+
+            </button>
+
+            <input
+                id="envieDate"
+                type="date"
+                hidden>
+
+        </div>
+
+        <div class="modal-actions">
+
+            <button
+                id="cancelModal"
+                class="secondaryButton">
+                Annuler
+            </button>
+
+            <button
+                id="saveEnvie"
+                class="primaryButton">
+                Ajouter
+            </button>
+
+        </div>
 
     </div>
 
@@ -260,6 +246,7 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+
 <div id="ficheOverlay" class="modal-overlay hidden">
 
     <div class="modal">
@@ -267,222 +254,216 @@ window.onerror = function(message, source, lineno, colno) {
         <button
             id="closeFiche"
             class="backButton">
-
             ← Retour
-
         </button>
 
         <h2 id="ficheTitre"></h2>
 
-       <div id="ficheCategorieSelector" class="categorieSelector fiche"></div>
+        <div id="ficheCategorieSelector" class="categorieSelector fiche"></div>
 
-      
-<div class="ficheSection"></div>
-<div class="accordion">
+        <div class="ficheSection"></div>
 
-    <button
-        class="accordionHeader"
-        data-target="periodeSection">
-        <span>📅 Période</span>
-        <span class="accordionIcon">▾</span>
-    </button>
+        <div class="accordion">
 
-    <div
-        id="periodeSection"
-        class="accordionContent hidden">
+            <button
+                class="accordionHeader"
+                data-target="periodeSection">
+                <span>📅 Période</span>
+                <span class="accordionIcon">▾</span>
+            </button>
 
-        <button id="fichePeriodeButton" class="dateButton">
-            <span id="fichePeriodeLabel">Choisir...</span>
-            <span>▾</span>
-        </button>
-        <div class="field">
-    <label class="fieldTitle">Nombre de personnes</label>
-    <input id="fichePersonnes" type="number" min="1" value="1" class="numberInput">
-</div>
+            <div
+                id="periodeSection"
+                class="accordionContent hidden">
 
+                <button id="fichePeriodeButton" class="dateButton">
+                    <span id="fichePeriodeLabel">Choisir...</span>
+                    <span>▾</span>
+                </button>
 
-    </div>
+                <div class="field">
+                    <label class="fieldTitle">Nombre de personnes</label>
+                    <input id="fichePersonnes" type="number" min="1" value="1" class="numberInput">
+                </div>
 
-</div>
-<div class="accordion">
+            </div>
 
-    <button
-        class="accordionHeader"
-        data-target="voyageSection">
-        <span>🧳 Voyage</span>
-        <span class="accordionIcon">▾</span>
-    </button>
+        </div>
 
-    <div
-        id="voyageSection"
-        class="accordionContent hidden">
+        <div class="accordion">
 
-        <div id="ficheVoyageContent"></div>
+            <button
+                class="accordionHeader"
+                data-target="voyageSection">
+                <span>🧳 Voyage</span>
+                <span class="accordionIcon">▾</span>
+            </button>
 
-    </div>
+            <div
+                id="voyageSection"
+                class="accordionContent hidden">
 
-</div>
+                <div id="ficheVoyageContent"></div>
 
-<div class="accordion">
+            </div>
 
-    <button
-        class="accordionHeader"
-        data-target="lieuSection">
-        <span>📍 Lieu</span>
-        <span class="accordionIcon">▾</span>
-    </button>
+        </div>
 
-   <div
-    id="lieuSection"
-    class="accordionContent hidden">
+        <div class="accordion">
 
-    <div class="lieuInputWrapper">
-        <input
-            id="ficheLieu"
-            type="text"
-            placeholder="Ajouter un lieu..."
-            autocomplete="off">
-        <button
-            type="button"
-            id="clearFicheLieu"
-            class="lieuClearButton"
-            aria-label="Effacer le lieu">
-            ✕
-        </button>
-    </div>
+            <button
+                class="accordionHeader"
+                data-target="lieuSection">
+                <span>📍 Lieu</span>
+                <span class="accordionIcon">▾</span>
+            </button>
 
-    <div
-        id="fichelieuSuggestions"
-        class="suggestions">
-    </div>
+            <div
+                id="lieuSection"
+                class="accordionContent hidden">
 
-    <button
-        id="btnLocateFiche"
-        class="locationButton">
-        📍 Utiliser ma position
-    </button>
+                <div class="lieuInputWrapper">
+                    <input
+                        id="ficheLieu"
+                        type="text"
+                        placeholder="Ajouter un lieu..."
+                        autocomplete="off">
+                    <button
+                        type="button"
+                        id="clearFicheLieu"
+                        class="lieuClearButton"
+                        aria-label="Effacer le lieu">
+                        ✕
+                    </button>
+                </div>
 
-    <div id="ficheLieuActions" class="lieuActionsRow"></div>
+                <div
+                    id="fichelieuSuggestions"
+                    class="suggestions">
+                </div>
 
-</div>
+                <button
+                    id="btnLocateFiche"
+                    class="locationButton">
+                    📍 Utiliser ma position
+                </button>
 
-<div id="ficheLieuActions" class="lieuActionsRow"></div>
+                <div id="ficheLieuActions" class="lieuActionsRow"></div>
 
-    </div>
+            </div>
 
-</div>
-<div class="accordion">
+        </div>
 
-    <button
-        class="accordionHeader"
-        data-target="evaluationSection">
-        <span>⭐ Évaluation</span>
-        <span class="accordionIcon">▾</span>
-    </button>
+        <div class="accordion">
 
-    <div
-        id="evaluationSection"
-        class="accordionContent hidden">
+            <button
+                class="accordionHeader"
+                data-target="evaluationSection">
+                <span>⭐ Évaluation</span>
+                <span class="accordionIcon">▾</span>
+            </button>
 
-        <div id="ficheEvaluationContent"></div>
+            <div
+                id="evaluationSection"
+                class="accordionContent hidden">
 
-    </div>
+                <div id="ficheEvaluationContent"></div>
 
-</div>
+            </div>
 
-<div class="accordion">
+        </div>
 
-    <button
-        class="accordionHeader"
-        data-target="ficheDescriptionSection">
-        <span>📝 Description</span>
-        <span class="accordionIcon">▾</span>
-    </button>
+        <div class="accordion">
 
-    <div
-        id="ficheDescriptionSection"
-        class="accordionContent hidden">
+            <button
+                class="accordionHeader"
+                data-target="ficheDescriptionSection">
+                <span>📝 Description</span>
+                <span class="accordionIcon">▾</span>
+            </button>
 
-        <textarea
-            id="ficheDescription"
-            placeholder="Ajouter une description..."
-        ></textarea>
+            <div
+                id="ficheDescriptionSection"
+                class="accordionContent hidden">
 
-    </div>
+                <textarea
+                    id="ficheDescription"
+                    placeholder="Ajouter une description..."
+                ></textarea>
 
-</div>
+            </div>
 
-<div class="accordion">
+        </div>
 
-    <button
-        class="accordionHeader"
-        data-target="checklistSection">
-        <span>🧳 À emporter</span>
-        <span class="accordionIcon">▾</span>
-    </button>
+        <div class="accordion">
 
-<div
-    id="checklistSection"
-    class="accordionContent hidden">
+            <button
+                class="accordionHeader"
+                data-target="checklistSection">
+                <span>🧳 À emporter</span>
+                <span class="accordionIcon">▾</span>
+            </button>
 
-    <div class="itemTypeToggle" id="checklistViewToggle">
-        <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
-        <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
-    </div>
+            <div
+                id="checklistSection"
+                class="accordionContent hidden">
 
-    <div id="checklistContainer"></div>
+                <div class="itemTypeToggle" id="checklistViewToggle">
+                    <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
+                    <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
+                </div>
 
-    <div class="checklistButtonsRow">
+                <div id="checklistContainer"></div>
 
-        <button
-            id="addChecklistButton"
-            class="secondaryButton">
-            ➕ Ajouter un élément
-        </button>
+                <div class="checklistButtonsRow">
 
-        <button
-            id="useTemplateButton"
-            class="secondaryButton">
-            📋 Depuis un modèle
-        </button>
+                    <button
+                        id="addChecklistButton"
+                        class="secondaryButton">
+                        ➕ Ajouter un élément
+                    </button>
 
-    </div>
+                    <button
+                        id="useTemplateButton"
+                        class="secondaryButton">
+                        📋 Depuis un modèle
+                    </button>
 
-</div>
+                </div>
 
+            </div>
 
+        </div>
 
-</div>
+        <div class="accordion">
 
-<div class="accordion">
+            <button
+                class="accordionHeader"
+                data-target="lienSection">
+                <span>🔗 Ajouter un lien</span>
+                <span class="accordionIcon">▾</span>
+            </button>
 
-    <button
-        class="accordionHeader"
-        data-target="lienSection">
-        <span>🔗 Ajouter un lien</span>
-        <span class="accordionIcon">▾</span>
-    </button>
+            <div
+                id="lienSection"
+                class="accordionContent hidden">
 
-    <div
-        id="lienSection"
-        class="accordionContent hidden">
+                <div id="urlList"></div>
 
-        <div id="urlList"></div>
+                <button
+                    id="addUrlButton"
+                    class="secondaryButton">
+                    ➕ Ajouter un élément
+                </button>
 
-        <button
-            id="addUrlButton"
-            class="secondaryButton">
-            ➕ Ajouter un élément
-        </button>
+            </div>
 
-    </div>
-
-</div>
-
+        </div>
 
     </div>
 
 </div>
+
 <div id="dateModal" class="modal-overlay hidden">
 
     <div class="modal">
@@ -527,7 +508,6 @@ window.onerror = function(message, source, lineno, colno) {
 
 </div>
 
-
 <div id="urlModal" class="modal-overlay hidden">
 
     <div class="modal">
@@ -544,17 +524,13 @@ window.onerror = function(message, source, lineno, colno) {
             <button
                 id="cancelUrl"
                 class="secondaryButton">
-
                 Annuler
-
             </button>
 
             <button
                 id="saveUrl"
                 class="primaryButton">
-
                 Ajouter
-
             </button>
 
         </div>
@@ -562,6 +538,7 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+
 <div id="adminModal" class="modal-overlay hidden">
 
     <div class="modal">
@@ -572,48 +549,46 @@ window.onerror = function(message, source, lineno, colno) {
 
         <div class="fieldTitle">Éléments administrables</div>
 
-   <div id="adminMenu" class="categorieSelector fiche">
-    <button class="categorieChip active" type="button" data-target="templates">🧳 Modèles de checklist</button>
-    <button class="categorieChip" type="button" data-target="categories">🏷️ Catégories de checklist</button>
-    <button class="categorieChip" type="button" data-target="personnes">👤 Personnes du foyer</button>
-</div>
+        <div id="adminMenu" class="categorieSelector fiche">
+            <button class="categorieChip active" type="button" data-target="templates">🧳 Modèles de checklist</button>
+            <button class="categorieChip" type="button" data-target="categories">🏷️ Catégories de checklist</button>
+            <button class="categorieChip" type="button" data-target="personnes">👤 Personnes du foyer</button>
+        </div>
 
+        <div id="adminChecklistTemplates" class="adminSection">
 
-<div id="adminChecklistTemplates" class="adminSection">
+            <div id="templatesList"></div>
 
-    <div id="templatesList"></div>
+            <button id="addTemplateButton" class="secondaryButton">
+                ➕ Nouveau modèle
+            </button>
 
-    <button id="addTemplateButton" class="secondaryButton">
-        ➕ Nouveau modèle
-    </button>
+        </div>
 
-</div>
+        <div id="adminChecklistCategories" class="adminSection hidden">
 
-<div id="adminChecklistCategories" class="adminSection hidden">
+            <div id="checklistCategoriesList"></div>
 
-    <div id="checklistCategoriesList"></div>
+            <button id="addChecklistCategorieButton" class="secondaryButton">
+                ➕ Nouvelle catégorie
+            </button>
 
-    <button id="addChecklistCategorieButton" class="secondaryButton">
-        ➕ Nouvelle catégorie
-    </button>
+        </div>
 
-</div>
-<div id="adminPersonnesFoyer" class="adminSection hidden">
+        <div id="adminPersonnesFoyer" class="adminSection hidden">
 
-    <div id="personnesList"></div>
+            <div id="personnesList"></div>
 
-    <button id="addPersonneButton" class="secondaryButton">
-        ➕ Nouvelle personne
-    </button>
+            <button id="addPersonneButton" class="secondaryButton">
+                ➕ Nouvelle personne
+            </button>
 
-</div>
-
-
-        
+        </div>
 
     </div>
 
 </div>
+
 <div id="templateEditModal" class="modal-overlay hidden">
 
     <div class="modal">
@@ -635,11 +610,12 @@ window.onerror = function(message, source, lineno, colno) {
             <button type="button" class="itemTypeChip" data-type="parPersonne">Par personne</button>
             <button type="button" class="itemTypeChip" data-type="parJour">Par jour</button>
         </div>
-<label class="fieldTitle">Catégorie</label>
-<label class="fieldTitle">Quantité de base</label>
-<input id="templateItemQuantite" type="number" min="1" value="1" class="numberInput">
 
-<select id="templateItemCategorie" class="categorieSelect"></select>
+        <label class="fieldTitle">Quantité de base</label>
+        <input id="templateItemQuantite" type="number" min="1" value="1" class="numberInput">
+
+        <label class="fieldTitle">Catégorie</label>
+        <select id="templateItemCategorie" class="categorieSelect"></select>
 
         <button id="addTemplateItemButton" class="secondaryButton" style="margin-top:14px;">
             ➕ Ajouter l'élément
@@ -655,16 +631,16 @@ window.onerror = function(message, source, lineno, colno) {
 
         <h2>Ajouter un élément</h2>
 
-      <input
-    id="checklistInput"
-    type="text"
-    placeholder="Ex : Gourde"
-    autocomplete="off">
+        <input
+            id="checklistInput"
+            type="text"
+            placeholder="Ex : Gourde"
+            autocomplete="off">
 
-<div id="checklistSuggestions" class="lieuSuggestions"></div>
-<label class="fieldTitle">Pour qui ?</label>
-<div id="checklistPersonnesSelector" class="categorieSelector fiche"></div>
+        <div id="checklistSuggestions" class="lieuSuggestions"></div>
 
+        <label class="fieldTitle">Pour qui ?</label>
+        <div id="checklistPersonnesSelector" class="categorieSelector fiche"></div>
 
         <div class="modal-actions">
 
@@ -712,6 +688,7 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+
 <div id="enviePickerModal" class="modal-overlay hidden">
 
     <div class="modal">
@@ -725,6 +702,7 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+
 <div id="mapModal" class="modal-overlay hidden">
 
     <div class="modal mapModal">
@@ -736,11 +714,10 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 
 <script type="module" src="app.js"></script>
-
-
 
 </body>
 </html>
