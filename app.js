@@ -900,13 +900,18 @@ function saveChecklistItem(){
 
 }
 
-function initAccordions(){
+
+
+function initAccordions() {
 
     document
         .querySelectorAll(".accordionHeader")
-        .forEach(button=>{
+        .forEach(button => {
 
-            button.addEventListener("click",()=>{
+            const icon =
+                button.querySelector(".accordionIcon");
+
+            button.addEventListener("click", () => {
 
                 const section =
                     document.getElementById(
@@ -914,6 +919,15 @@ function initAccordions(){
                     );
 
                 section.classList.toggle("hidden");
+
+                if (icon) {
+
+                    icon.textContent =
+                        section.classList.contains("hidden")
+                            ? "▸"
+                            : "▾";
+
+                }
 
             });
 
