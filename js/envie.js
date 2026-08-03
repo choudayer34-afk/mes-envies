@@ -16,7 +16,7 @@ export function getCurrentEnvieId() {
 
 export const CATEGORIES = {
     general: { emoji: "💡", label: "Idée" },
-    voyage: { emoji: "✈️", label: "Voyage" }
+    voyage: { emoji: "✈️", label: "Voyage" },
         projet: { emoji: "🛠️", label: "Projet" },
     maison: { emoji: "🏠", label: "Maison" },
     jardin: { emoji: "🌿", label: "Jardin" },
