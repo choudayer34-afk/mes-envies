@@ -760,3 +760,72 @@ button {
     background:#6FAFC4;
     color:white;
 }
+
+.header{
+    position:relative;
+}
+
+.settingsButton{
+    position:absolute;
+    top:24px;
+    left:20px;
+    width:44px;
+    height:44px;
+    border:none;
+    border-radius:50%;
+    background:var(--color-card);
+    box-shadow:var(--shadow-small);
+    font-size:20px;
+    cursor:pointer;
+}
+
+.adminSection{
+    margin-top:24px;
+}
+
+.templateRow{
+    background:var(--color-card);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-medium);
+    padding:16px;
+    margin-bottom:12px;
+}
+
+.templateRowNom{
+    font-weight:600;
+}
+
+.templateRowNom small{
+    font-weight:400;
+    color:var(--color-text-light);
+}
+
+.templateRowActions{
+    display:flex;
+    gap:10px;
+    margin-top:12px;
+}
+
+.itemTypeToggle{
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+}
+
+.itemTypeChip{
+    flex:1;
+    height:40px;
+    border:none;
+    border-radius:14px;
+    background:#EEF4F6;
+    color:#4B5B66;
+    font-size:13px;
+    font-weight:600;
+    transition:.2s;
+}
+
+.itemTypeChip.active{
+    background:#6FAFC4;
+    color:white;
+}
+
