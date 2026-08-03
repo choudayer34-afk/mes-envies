@@ -332,29 +332,40 @@ window.onerror = function(message, source, lineno, colno) {
         <span class="accordionIcon">▾</span>
     </button>
 
+   <div
+    id="lieuSection"
+    class="accordionContent hidden">
+
+    <div class="lieuInputWrapper">
+        <input
+            id="ficheLieu"
+            type="text"
+            placeholder="Ajouter un lieu..."
+            autocomplete="off">
+        <button
+            type="button"
+            id="clearFicheLieu"
+            class="lieuClearButton"
+            aria-label="Effacer le lieu">
+            ✕
+        </button>
+    </div>
+
     <div
-        id="lieuSection"
-        class="accordionContent hidden">
+        id="fichelieuSuggestions"
+        class="suggestions">
+    </div>
 
-        <div class="lieuInputWrapper">
-            <input
-                id="ficheLieu"
-                type="text"
-                placeholder="Ajouter un lieu..."
-                autocomplete="off">
-            <button
-                type="button"
-                id="clearFicheLieu"
-                class="lieuClearButton"
-                aria-label="Effacer le lieu">
-                ✕
-            </button>
-        </div>
+    <button
+        id="btnLocateFiche"
+        class="locationButton">
+        📍 Utiliser ma position
+    </button>
 
-        <div
-            id="fichelieuSuggestions"
-            class="suggestions">
-        </div>
+    <div id="ficheLieuActions" class="lieuActionsRow"></div>
+
+</div>
+
 <div id="ficheLieuActions" class="lieuActionsRow"></div>
 
     </div>
