@@ -49,7 +49,7 @@ export function initModal() {
             const nouvelle = getEnvies()[0];
 
             if (nouvelle) {
-                openEnvie(nouvelle.id);
+                openEnvie(nouvelle.id, null);
             }
 
         }, 400);
