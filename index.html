@@ -247,8 +247,29 @@
         <p id="ficheCategorie"></p>
         <div class="ficheSection">
 
-    <label>📍 Lieu</label>
+    
 
+    
+
+</div>
+
+<div class="accordion">
+
+    <button
+        class="accordionHeader"
+        data-target="lieuSection">
+
+            📍 Lieu
+
+        <span>▾</span>
+
+    </button>
+
+    <div
+        id="lieuSection"
+        class="accordionContent">
+
+       
     <input
         id="ficheLieu"
         type="text"
@@ -263,34 +284,95 @@
 
 </div>
 
-        <textarea
+<div class="accordion">
+
+    <button
+        class="accordionHeader"
+        data-target="ficheDescriptionSection">
+
+            📝 Description
+
+        <span>▾</span>
+
+    </button>
+
+    <div
+        id="ficheDescriptionSection"
+        class="accordionContent">
+
+     
+
+    <textarea
             id="ficheDescription"
             placeholder="Ajouter une description..."
         ></textarea>
+
+    </div>
+
+</div>
+       
         
-        <h3>À emporter</h3>
+<div class="accordion">
 
-<div id="checklistContainer"></div>
+    <button
+        class="accordionHeader"
+        data-target="checklistSection">
 
-<button
-    id="addChecklistButton"
-    class="secondaryButton">
+        🧳 À emporter
 
-➕ Ajouter un élément
+        <span>▾</span>
 
-</button>
+    </button>
 
-<h3>Liens</h3>
+    <div
+        id="checklistSection"
+        class="accordionContent">
 
-<div id="urlList"></div>
+        <div id="checklistContainer"></div>
 
-<button
-    id="addUrlButton"
-    class="secondaryButton">
+        <button
+            id="addChecklistButton"
+            class="secondaryButton">
 
-    🔗 Ajouter un lien
+            ➕ Ajouter un élément
 
-</button>
+        </button>
+
+    </div>
+
+</div>
+
+<div class="accordion">
+
+    <button
+        class="accordionHeader"
+        data-target="lienSection">
+
+        🔗 Ajouter un lien
+
+        <span>▾</span>
+
+    </button>
+
+    <div
+        id="lienSection"
+        class="accordionContent">
+
+        <div id="urlList"></div>
+
+        <button
+            id="addUrlButton"
+            class="secondaryButton">
+
+            ➕ Ajouter un élément
+
+        </button>
+
+    </div>
+
+</div>
+
+
     </div>
 
 </div>
