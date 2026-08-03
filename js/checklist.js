@@ -134,7 +134,13 @@ function createChecklistRow(item, envie, personneContext = null) {
     const row = document.createElement("div");
     row.className = "checklistRow";
 
-    const prefix = item.quantite > 1 ? `${item.quantite}× ` : "";
+        const usePersonneCheckbox = personneContext && item.assignedTo && item.assignedTo.length > 1;
+    const isChecked = usePersonneCheckbox
+        ? !!(item.checkedBy && item.checkedBy[personneContext])
+        : item.checked;
+
+    const prefix = formatQuantitePrefix(item, personneContext);
+
     const assignLabel = formatAssignLabel(item.assignedTo);
 
     const usePersonneCheckbox = personneContext && item.assignedTo && item.assignedTo.length > 1;
@@ -147,7 +153,8 @@ function createChecklistRow(item, envie, personneContext = null) {
             <input type="checkbox" ${isChecked ? "checked" : ""}>
             <span>
                 ${prefix}${item.texte}
-                    <small class="assignBadge">${assignLabel}${!personneContext ? formatProgressBadge(item) : ""}</small>
+                                    <small class="assignBadge">${assignLabel}${item.parPersonne && !personneContext ? ` (${item.quantite}/pers)` : ""}${!personneContext ? formatProgressBadge(item) : ""}</small>
+
 
 
             </span>
@@ -519,12 +526,23 @@ function applyTemplate(templateId) {
     if (!envie || !template)
         return;
 
-    template.items.forEach(item => {
+        template.items.forEach(item => {
 
-        const quantite = computeQuantite(item, envie);
-        addChecklistItem(envieId, item.texte, quantite, item.categorieId, []);
+        if (item.type === "parPersonne") {
+
+            const personnesIds = envie.personnesIds || [];
+
+            addChecklistItem(envieId, item.texte, item.quantite, item.categorieId, personnesIds, null, true);
+
+        } else {
+
+            const quantite = computeQuantite(item, envie);
+            addChecklistItem(envieId, item.texte, quantite, item.categorieId, []);
+
+        }
 
     });
+
 
     document.getElementById("templatePickerModal").classList.add("hidden");
 
@@ -549,3 +567,18 @@ function formatProgressBadge(item) {
 
 }
 
+function formatQuantitePrefix(item, personneContext) {
+
+    if (!item.parPersonne) {
+        return item.quantite > 1 ? `${item.quantite}× ` : "";
+    }
+
+    if (personneContext) {
+        return item.quantite > 1 ? `${item.quantite}× ` : "";
+    }
+
+    const total = item.quantite * (item.assignedTo?.length || 1);
+
+    return `${total}× `;
+
+}
