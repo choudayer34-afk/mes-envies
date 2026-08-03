@@ -255,6 +255,27 @@
         <p id="ficheCategorie"></p>
       
 <div class="ficheSection"></div>
+<div class="accordion">
+
+    <button
+        class="accordionHeader"
+        data-target="periodeSection">
+        <span>📅 Période</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div
+        id="periodeSection"
+        class="accordionContent hidden">
+
+        <button id="fichePeriodeButton" class="dateButton">
+            <span id="fichePeriodeLabel">Choisir...</span>
+            <span>▾</span>
+        </button>
+
+    </div>
+
+</div>
 
 <div class="accordion">
 
@@ -375,41 +396,44 @@
 
         <h2>Date ou période</h2>
 
-        <div class="dateChoices">
+        <div id="dateChoicesList" class="dateChoices">
+            <button class="dateChoice" data-value="today">📅 Aujourd'hui</button>
+            <button class="dateChoice" data-value="tomorrow">🌅 Demain</button>
+            <button class="dateChoice" data-value="weekend">🏖️ Ce week-end</button>
+            <button class="dateChoice" data-value="custom">📆 Choisir une date…</button>
+        </div>
 
-            <button class="dateChoice" data-value="today">
-                📅 Aujourd'hui
-            </button>
+        <div id="customPeriodePanel" class="customPeriodePanel hidden">
 
-            <button class="dateChoice" data-value="tomorrow">
-                🌅 Demain
-            </button>
+            <div class="periodeTypeToggle">
+                <button type="button" class="periodeTypeChip active" data-type="single">Date unique</button>
+                <button type="button" class="periodeTypeChip" data-type="range">Plage (du/au)</button>
+            </div>
 
-            <button class="dateChoice" data-value="weekend">
-                🏖️ Ce week-end
-            </button>
+            <div class="field">
+                <label class="fieldTitle">Date</label>
+                <input id="periodeStart" type="date">
+            </div>
 
-            <button class="dateChoice" data-value="custom">
-                📆 Choisir une date…
+            <div class="field hidden" id="periodeEndField">
+                <label class="fieldTitle">Au</label>
+                <input id="periodeEnd" type="date">
+            </div>
+
+            <button id="validateCustomPeriode" class="primaryButton">
+                Valider
             </button>
 
         </div>
 
         <div class="modal-actions">
-
-            <button
-                id="cancelDate"
-                class="secondaryButton">
-
-                Annuler
-
-            </button>
-
+            <button id="cancelDate" class="secondaryButton">Annuler</button>
         </div>
 
     </div>
 
 </div>
+
 
 <div id="urlModal" class="modal-overlay hidden">
 
