@@ -21,6 +21,7 @@ import { initAuth } from "./js/auth.js";
 
 import { initVoyage } from "./js/voyage.js";
 import { initCarte } from "./js/carte.js";
+import { initEnviesSync } from "./js/storage.js";
 
 import { initChecklistModal } from "./js/checklist.js";
 import { initUrlModal } from "./js/urls.js";
