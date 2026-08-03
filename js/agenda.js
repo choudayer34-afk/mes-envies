@@ -124,10 +124,13 @@ function createAgendaRow(envie) {
 
     });
 
-    row.querySelector(".editAgendaButton").addEventListener("click", () => {
+       row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        event.preventDefault();
         closeAgenda();
         openEnvie(envie.id);
     });
+
 
     return row;
 
