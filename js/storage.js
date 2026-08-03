@@ -247,15 +247,17 @@ export function removeUrl(envieId, urlId) {
 
 }
 
-export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null, assignedTo = []) {
+export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null, assignedTo = [], id = null) {
 
     const envie = enviesCache.find(e => e.id === envieId);
 
     if (!envie)
-        return;
+        return null;
+
+    const newId = id || crypto.randomUUID();
 
     const checklist = [...(envie.checklist || []), {
-        id: crypto.randomUUID(),
+        id: newId,
         texte,
         quantite,
         categorieId,
@@ -267,7 +269,10 @@ export function addChecklistItem(envieId, texte, quantite = 1, categorieId = nul
 
     rememberChecklistItem(texte, categorieId);
 
+    return newId;
+
 }
+
 
 export function toggleChecklistItem(envieId, itemId) {
 
