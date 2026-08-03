@@ -21,9 +21,14 @@
 
 <header class="header">
 
+    <button id="btnSettings" class="settingsButton" aria-label="Paramètres">
+        ⚙️
+    </button>
+
     <div class="logo">
         🌱
     </div>
+
 
     <h1>EnVie</h1>
 
@@ -466,6 +471,62 @@
             </button>
 
         </div>
+
+    </div>
+
+</div>
+<div id="adminModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeAdmin" class="backButton">← Retour</button>
+
+        <h2>⚙️ Paramètres</h2>
+
+        <div class="fieldTitle">Éléments administrables</div>
+
+        <div id="adminMenu" class="categorieSelector fiche">
+            <button class="categorieChip active" type="button">🧳 Modèles de checklist</button>
+        </div>
+
+        <div id="adminChecklistTemplates" class="adminSection">
+
+            <div id="templatesList"></div>
+
+            <button id="addTemplateButton" class="secondaryButton">
+                ➕ Nouveau modèle
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+<div id="templateEditModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeTemplateEdit" class="backButton">← Retour</button>
+
+        <label class="fieldTitle">Nom du modèle</label>
+        <input id="templateNomInput" type="text" placeholder="Ex : Randonnée">
+
+        <label class="fieldTitle" style="margin-top:24px;">Éléments</label>
+        <div id="templateItemsList"></div>
+
+        <div class="field">
+            <input id="templateItemInput" type="text" placeholder="Nouvel élément...">
+        </div>
+
+        <div class="itemTypeToggle">
+            <button type="button" class="itemTypeChip active" data-type="fixe">Fixe</button>
+            <button type="button" class="itemTypeChip" data-type="parPersonne">Par personne</button>
+            <button type="button" class="itemTypeChip" data-type="parJour">Par jour</button>
+        </div>
+
+        <button id="addTemplateItemButton" class="secondaryButton" style="margin-top:14px;">
+            ➕ Ajouter l'élément
+        </button>
 
     </div>
 
