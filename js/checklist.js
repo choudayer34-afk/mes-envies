@@ -1,9 +1,10 @@
 import {
-    addChecklistItem, toggleChecklistItem, deleteChecklistItem,
+    addChecklistItem, toggleChecklistItem, toggleChecklistItemForPersonne, deleteChecklistItem,
     getChecklistTemplates, getEnvies, getChecklistCategories,
     getChecklistLibrary, getPersonnes, createPersonne,
     updateChecklistItemAssignment
 } from "./storage.js";
+
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { computeQuantite } from "./periode.js";
