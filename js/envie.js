@@ -1,3 +1,4 @@
+import { renderLieuActions } from "./location.js";
 
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
@@ -44,6 +45,7 @@ export function openEnvie(id) {
 
 
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
+    renderLieuActions(envie);
 
     document.getElementById("ficheOverlay").classList.remove("hidden");
 
