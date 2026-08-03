@@ -107,6 +107,9 @@
     </button>
 
 <div class="homeIconRow">
+    <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
+        📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
+    </button>
     <button id="btnCarte" class="iconButtonRow" title="Voir la carte" aria-label="Voir la carte">
         🗺️
     </button>
@@ -114,6 +117,7 @@
         📆
     </button>
 </div>
+
 
 
     <section class="card">
@@ -130,18 +134,7 @@
 
     </section>
 
-    <section class="inboxSection">
 
-        <h2
-            id="inboxTitle"
-            class="sectionTitle"
-        >
-            📥 À trier
-        </h2>
-
-        <section id="enviesContainer"></section>
-
-    </section>
 
 </main>
 
@@ -781,6 +774,20 @@
     </div>
 
 </div>
+<div id="inboxModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeInbox" class="backButton">← Retour</button>
+
+        <h2 id="inboxTitle">📥 À trier</h2>
+
+        <section id="enviesContainer"></section>
+
+    </div>
+
+</div>
+
 <div id="agendaModal" class="modal-overlay hidden">
 
     <div class="modal">
