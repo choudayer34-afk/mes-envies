@@ -6,8 +6,63 @@ import { getCategorieById, openEvaluationAccordion, openEnvie } from "./envie.js
 
 
 export function initAgenda() {
+
     document.getElementById("btnAgenda").addEventListener("click", openAgenda);
     document.getElementById("closeAgenda").addEventListener("click", closeAgenda);
+
+    const container = document.getElementById("agendaContent");
+
+    container.addEventListener("click", (event) => {
+
+        const button = event.target.closest('[data-action="edit"]');
+
+        if (button) {
+
+            const row = button.closest("[data-envie-id]");
+            const envieId = row?.dataset.envieId;
+
+            if (envieId) {
+                closeAgenda();
+                openEnvie(envieId);
+            }
+
+            return;
+
+        }
+
+    });
+
+    container.addEventListener("change", (event) => {
+
+        if (event.target.type !== "checkbox")
+            return;
+
+        const row = event.target.closest("[data-envie-id]");
+        const envieId = row?.dataset.envieId;
+
+        if (!envieId)
+            return;
+
+        const envie = getEnvies().find(e => e.id === envieId);
+
+        if (!envie)
+            return;
+
+        const nouvelEtat = !envie.realise;
+
+        updateEnvieRealise(envieId, nouvelEtat);
+
+        if (nouvelEtat) {
+            closeAgenda();
+            openEnvie(envieId);
+            openEvaluationAccordion();
+        } else {
+            renderAgenda();
+        }
+
+    });
+
+}
 }
 
 function openAgenda() {
@@ -93,56 +148,15 @@ function createAgendaRow(envie) {
 
     const row = document.createElement("div");
     row.className = "checklistRow";
+    row.dataset.envieId = envie.id;
 
     row.innerHTML = `
         <label class="checkLabel">
             <input type="checkbox" ${envie.realise ? "checked" : ""}>
             <span>${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
         </label>
-        <button class="editAgendaButton" title="Modifier">✏️</button>
+        <button class="editAgendaButton" data-action="edit" title="Modifier">✏️</button>
     `;
-
-    const checkbox = row.querySelector("input");
-
-    checkbox.addEventListener("change", () => {
-
-        const nouvelEtat = !envie.realise;
-
-        updateEnvieRealise(envie.id, nouvelEtat);
-
-        if (nouvelEtat) {
-
-            closeAgenda();
-            openEnvie(envie.id);
-            openEvaluationAccordion();
-
-        } else {
-
-            renderAgenda();
-
-        }
-
-    });
-
-       row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
-
-        console.log("Crayon cliqué, envie=" + JSON.stringify({ id: envie?.id, titre: envie?.titre }));
-
-        event.stopPropagation();
-        event.preventDefault();
-
-        try {
-            closeAgenda();
-            console.log("closeAgenda OK");
-            openEnvie(envie.id);
-            console.log("openEnvie OK");
-        } catch (err) {
-            console.error("ERREUR dans le handler crayon: " + err.message);
-        }
-
-    });
-
-
 
     return row;
 
