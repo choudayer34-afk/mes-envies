@@ -22,7 +22,8 @@ export function initModal() {
         .addEventListener("click", saveCurrentEnvie);
 
 }
-function renderCreationCategorieSelector() {
+export function renderCreationCategorieSelector() {
+
 
     const container = document.getElementById("categorieSelector");
     const categories = getEnvieCategories();
