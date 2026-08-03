@@ -1054,3 +1054,8 @@ button {
     margin-top:16px;
     cursor:pointer;
 }
+
+.authScreen.hidden{
+    display:none;
+}
+
