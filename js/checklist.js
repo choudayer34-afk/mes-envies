@@ -1,5 +1,8 @@
-import { toggleChecklistItem, deleteChecklistItem } from "./storage.js";
-import { openEnvie } from "./envie.js";
+import { addChecklistItem, toggleChecklistItem, deleteChecklistItem } from "./storage.js";
+import { openEnvie, getCurrentEnvieId } from "./envie.js";
+import { showToast } from "./toast.js";
+
+let currentChecklistEnvieId = null;
 
 export function renderChecklist(envie) {
 
@@ -24,12 +27,11 @@ export function renderChecklist(envie) {
             openEnvie(envie.id);
         });
 
-        row.querySelector(".deleteChecklistButton")
-            .addEventListener("click", (event) => {
-                event.stopPropagation();
-                deleteChecklistItem(envie.id, item.id);
-                openEnvie(envie.id);
-            });
+        row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
+            event.stopPropagation();
+            deleteChecklistItem(envie.id, item.id);
+            openEnvie(envie.id);
+        });
 
         checklist.appendChild(row);
 
@@ -37,4 +39,39 @@ export function renderChecklist(envie) {
 
 }
 
+export function initChecklistModal() {
 
+    document.getElementById("addChecklistButton").addEventListener("click", () => {
+
+        currentChecklistEnvieId = getCurrentEnvieId();
+
+        document.getElementById("checklistInput").value = "";
+        document.getElementById("checklistModal").classList.remove("hidden");
+
+    });
+
+    document.getElementById("cancelChecklist").addEventListener("click", () => {
+        document.getElementById("checklistModal").classList.add("hidden");
+    });
+
+    document.getElementById("saveChecklist").addEventListener("click", saveChecklistItem);
+
+}
+
+function saveChecklistItem() {
+
+    const input = document.getElementById("checklistInput");
+    const texte = input.value.trim();
+
+    if (!texte)
+        return;
+
+    addChecklistItem(currentChecklistEnvieId, texte);
+
+    document.getElementById("checklistModal").classList.add("hidden");
+
+    openEnvie(currentChecklistEnvieId);
+
+    showToast("✓ Élément ajouté");
+
+}
