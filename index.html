@@ -368,11 +368,13 @@ window.onerror = function(message, source, lineno, colno) {
         <span class="accordionIcon">▾</span>
     </button>
 
-    <div
-        id="checklistSection"
-        class="accordionContent hidden">
+  <div
+    id="checklistSection"
+    class="accordionContent hidden">
 
-        <div id="checklistContainer"></div>
+    <div id="checklistContainer"></div>
+
+    <div class="checklistButtonsRow">
 
         <button
             id="addChecklistButton"
@@ -380,7 +382,16 @@ window.onerror = function(message, source, lineno, colno) {
             ➕ Ajouter un élément
         </button>
 
+        <button
+            id="useTemplateButton"
+            class="secondaryButton">
+            📋 Depuis un modèle
+        </button>
+
     </div>
+
+</div>
+
 
 </div>
 
@@ -590,6 +601,19 @@ window.onerror = function(message, source, lineno, colno) {
             </button>
 
         </div>
+
+    </div>
+
+</div>
+<div id="templatePickerModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeTemplatePicker" class="backButton">← Retour</button>
+
+        <h2>📋 Choisir un modèle</h2>
+
+        <div id="templatePickerList"></div>
 
     </div>
 
