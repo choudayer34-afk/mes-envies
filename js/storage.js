@@ -165,7 +165,7 @@ export function removeUrl(envieId, urlId) {
 
 }
 
-export function addChecklistItem(envieId, texte){
+export function addChecklistItem(envieId, texte, quantite = 1){
 
     const envies = getEnvies();
 
@@ -181,6 +181,8 @@ export function addChecklistItem(envieId, texte){
 
         texte,
 
+        quantite,
+
         checked:false
 
     });
@@ -193,6 +195,7 @@ export function addChecklistItem(envieId, texte){
     );
 
 }
+
 
 export function toggleChecklistItem(envieId,itemId){
 
