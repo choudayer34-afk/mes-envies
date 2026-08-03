@@ -132,26 +132,34 @@
         Lieu
     </label>
 
-    <input
-        id="envieLieu"
-        type="text"
-        placeholder="Ajouter un lieu">
-<div
-    id="creationlieuSuggestions"
-    class="lieuSuggestions">
+    <div class="lieuInputWrapper">
+        <input
+            id="envieLieu"
+            type="text"
+            placeholder="Ajouter un lieu"
+            autocomplete="off">
+        <button
+            type="button"
+            id="clearEnvieLieu"
+            class="lieuClearButton"
+            aria-label="Effacer le lieu">
+            ✕
+        </button>
+    </div>
+
+    <div
+        id="creationlieuSuggestions"
+        class="lieuSuggestions">
+    </div>
+
+    <button
+        id="btnLocate"
+        class="locationButton">
+        📍 Utiliser ma position
+    </button>
 
 </div>
-<button
-    id="btnLocate"
-    class="locationButton">
 
-    📍 Utiliser ma position
-
-</button>
-
-    <div id="lieuSuggestions"></div>
-
-</div>
 <div class="field">
 
 <label class="fieldTitle">
@@ -245,44 +253,44 @@
         <h2 id="ficheTitre"></h2>
 
         <p id="ficheCategorie"></p>
-        <div class="ficheSection">
-
-    
-
-    
-
-</div>
+      
+<div class="ficheSection"></div>
 
 <div class="accordion">
 
     <button
         class="accordionHeader"
         data-target="lieuSection">
-
-           <span>📍 Lieu</span>
-
-       
+        <span>📍 Lieu</span>
         <span class="accordionIcon">▾</span>
-
     </button>
 
     <div
         id="lieuSection"
-        class="accordionContent">
+        class="accordionContent hidden">
 
-       
-    <input
-        id="ficheLieu"
-        type="text"
-        placeholder="Ajouter un lieu..."
-        autocomplete="off"
-    >
+        <div class="lieuInputWrapper">
+            <input
+                id="ficheLieu"
+                type="text"
+                placeholder="Ajouter un lieu..."
+                autocomplete="off">
+            <button
+                type="button"
+                id="clearFicheLieu"
+                class="lieuClearButton"
+                aria-label="Effacer le lieu">
+                ✕
+            </button>
+        </div>
 
-    <div
-        id="fichelieuSuggestions"
-        class="suggestions">
+        <div
+            id="fichelieuSuggestions"
+            class="suggestions">
+        </div>
+
     </div>
-</div>
+
 </div>
 
 <div class="accordion">
@@ -290,20 +298,15 @@
     <button
         class="accordionHeader"
         data-target="ficheDescriptionSection">
-
-            <span>📝 Description</span>
-
+        <span>📝 Description</span>
         <span class="accordionIcon">▾</span>
-
     </button>
 
     <div
         id="ficheDescriptionSection"
-        class="accordionContent">
+        class="accordionContent hidden">
 
-     
-
-    <textarea
+        <textarea
             id="ficheDescription"
             placeholder="Ajouter une description..."
         ></textarea>
@@ -311,32 +314,26 @@
     </div>
 
 </div>
-       
-        
+
 <div class="accordion">
 
     <button
         class="accordionHeader"
         data-target="checklistSection">
-
         <span>🧳 À emporter</span>
-
         <span class="accordionIcon">▾</span>
-
     </button>
 
     <div
         id="checklistSection"
-        class="accordionContent">
+        class="accordionContent hidden">
 
         <div id="checklistContainer"></div>
 
         <button
             id="addChecklistButton"
             class="secondaryButton">
-
             ➕ Ajouter un élément
-
         </button>
 
     </div>
@@ -348,25 +345,20 @@
     <button
         class="accordionHeader"
         data-target="lienSection">
-
         <span>🔗 Ajouter un lien</span>
-
         <span class="accordionIcon">▾</span>
-
     </button>
 
     <div
         id="lienSection"
-        class="accordionContent">
+        class="accordionContent hidden">
 
         <div id="urlList"></div>
 
         <button
             id="addUrlButton"
             class="secondaryButton">
-
             ➕ Ajouter un élément
-
         </button>
 
     </div>
