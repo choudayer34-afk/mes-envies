@@ -137,6 +137,6 @@ function log(message) {
     if (!APP.debug)
         return;
 
-    console.log(`[EnVie] ${message}`);
+  
 
 }
