@@ -53,6 +53,19 @@ export function initLocation() {
             );
         });
     }
+    
+        const btnLocateFiche = document.getElementById("btnLocateFiche");
+
+    if (btnLocateFiche) {
+        btnLocateFiche.addEventListener("click", () => {
+            useCurrentLocation(
+                document.getElementById("ficheLieu"),
+                (place) => { updateEnvieLieu(getCurrentEnvieId(), place); },
+                btnLocateFiche
+            );
+        });
+    }
+
 
     initClearButton(
         document.getElementById("clearEnvieLieu"),
