@@ -577,4 +577,19 @@ export function deletePersonne(id) {
     savePersonnes(getPersonnes().filter(p => p.id !== id));
 }
 
+export function updateEnvieEvaluation(id, critere, valeur) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.evaluation ??= { note: 0, enfants: 0, difficulte: 0 };
+    envie.evaluation[critere] = valeur;
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
 
