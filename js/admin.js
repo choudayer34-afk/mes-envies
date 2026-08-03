@@ -126,6 +126,27 @@ export function initAdmin() {
         renderItemCategorieOptions();
 
     });
+    
+        document.getElementById("addTemplateItemButton").addEventListener("click", () => {
+
+        const input = document.getElementById("templateItemInput");
+        const texte = input.value.trim();
+
+        const quantiteInput = document.getElementById("templateItemQuantite");
+        const quantite = parseInt(quantiteInput.value, 10) || 1;
+
+        if (!texte || !currentTemplateId)
+            return;
+
+        addTemplateItem(currentTemplateId, texte, currentItemType, currentItemCategorieId, quantite);
+
+        input.value = "";
+        quantiteInput.value = 1;
+
+        renderTemplateItems();
+
+    });
+
 
 }
 
@@ -234,11 +255,12 @@ function renderTemplateItems() {
 
     const categories = getChecklistCategories();
 
-    const typeLabel = {
-        fixe: "",
-        parPersonne: "👤 par personne",
-        parJour: "📅 par jour"
+       const typeLabel = {
+        fixe: item => item.quantite > 1 ? `${item.quantite}×` : "",
+        parPersonne: item => `${item.quantite}× 👤 par personne`,
+        parJour: item => `${item.quantite}× 📅 par jour`
     };
+
 
     container.innerHTML = "";
 
@@ -254,10 +276,11 @@ function renderTemplateItems() {
         row.className = "checklistRow";
 
         row.innerHTML = `
-            <span class="checkLabel">
+                        <span class="checkLabel">
                 ${categorie ? categorie.emoji : ""} ${item.texte}
-                <small>${[typeLabel[item.type], categorie?.nom].filter(Boolean).join(" · ")}</small>
+                <small>${[typeLabel[item.type](item), categorie?.nom].filter(Boolean).join(" · ")}</small>
             </span>
+
             <button class="deleteChecklistButton">🗑️</button>
         `;
 
