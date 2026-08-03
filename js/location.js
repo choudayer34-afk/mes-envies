@@ -1,4 +1,4 @@
-export function searchLocation(query){
+export async function searchLocation(query){
 
     if(query.length < 3)
         return [];
