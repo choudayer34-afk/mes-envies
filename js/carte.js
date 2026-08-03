@@ -1,5 +1,6 @@
 import { getEnvies } from "./storage.js";
-import { openEnvie } from "./envie.js";
+import { getCategorieById, openEnvie } from "./envie.js";
+
 
 let map = null;
 let markersLayer = null;
@@ -67,7 +68,7 @@ function renderMarkers(voyageId) {
         const marker = L.marker([envie.lieu.latitude, envie.lieu.longitude]).addTo(markersLayer);
 
         marker.bindPopup(`
-            <strong>${CATEGORIES[envie.categorie]?.emoji || "💡"} ${envie.titre}</strong><br>
+            <strong>${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</strong><br>
             <button class="mapPopupButton" data-id="${envie.id}">Ouvrir</button>
         `);
 
