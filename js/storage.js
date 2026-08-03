@@ -340,3 +340,45 @@ export function deleteTemplateItem(templateId, itemId) {
 
 }
 
+const CHECKLIST_CATEGORIES_KEY = "envie_checklist_categories";
+
+export function getChecklistCategories() {
+    return JSON.parse(localStorage.getItem(CHECKLIST_CATEGORIES_KEY)) || [];
+}
+
+function saveChecklistCategories(categories) {
+    localStorage.setItem(CHECKLIST_CATEGORIES_KEY, JSON.stringify(categories));
+}
+
+export function createChecklistCategory(nom, emoji = "🏷️") {
+
+    const categories = getChecklistCategories();
+
+    const categorie = { id: crypto.randomUUID(), nom, emoji };
+
+    categories.push(categorie);
+    saveChecklistCategories(categories);
+
+    return categorie;
+
+}
+
+export function renameChecklistCategory(id, nom, emoji) {
+
+    const categories = getChecklistCategories();
+    const categorie = categories.find(c => c.id === id);
+
+    if (!categorie)
+        return;
+
+    categorie.nom = nom;
+    categorie.emoji = emoji;
+
+    saveChecklistCategories(categories);
+
+}
+
+export function deleteChecklistCategory(id) {
+    saveChecklistCategories(getChecklistCategories().filter(c => c.id !== id));
+}
+
