@@ -170,11 +170,18 @@ function createChecklistRow(item, envie, personneContext = null) {
         openAssignModal(envie.id, item);
     });
 
-    row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
+      row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
+
         event.stopPropagation();
+
+        if (!window.confirm(`Supprimer "${item.texte}" ?`))
+            return;
+
         deleteChecklistItem(envie.id, item.id);
         openEnvie(envie.id);
+
     });
+
 
     return row;
 
