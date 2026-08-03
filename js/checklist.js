@@ -127,7 +127,7 @@ export function groupByCategorie(items, categories) {
 
 }
 
-function createChecklistRow(item, envie) {
+function createChecklistRow(item, envie, personneContext = null) {
 
     const row = document.createElement("div");
     row.className = "checklistRow";
@@ -135,9 +135,14 @@ function createChecklistRow(item, envie) {
     const prefix = item.quantite > 1 ? `${item.quantite}× ` : "";
     const assignLabel = formatAssignLabel(item.assignedTo);
 
+    const usePersonneCheckbox = personneContext && item.assignedTo && item.assignedTo.length > 1;
+    const isChecked = usePersonneCheckbox
+        ? !!(item.checkedBy && item.checkedBy[personneContext])
+        : item.checked;
+
     row.innerHTML = `
         <label class="checkLabel">
-            <input type="checkbox" ${item.checked ? "checked" : ""}>
+            <input type="checkbox" ${isChecked ? "checked" : ""}>
             <span>
                 ${prefix}${item.texte}
                 <small class="assignBadge">${assignLabel}</small>
@@ -148,8 +153,15 @@ function createChecklistRow(item, envie) {
     `;
 
     row.querySelector("input").addEventListener("change", () => {
-        toggleChecklistItem(envie.id, item.id);
+
+        if (usePersonneCheckbox) {
+            toggleChecklistItemForPersonne(envie.id, item.id, personneContext);
+        } else {
+            toggleChecklistItem(envie.id, item.id);
+        }
+
         openEnvie(envie.id);
+
     });
 
     row.querySelector(".assignItemButton").addEventListener("click", (event) => {
@@ -166,6 +178,7 @@ function createChecklistRow(item, envie) {
     return row;
 
 }
+
 
 function formatAssignLabel(assignedTo) {
 
