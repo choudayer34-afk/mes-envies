@@ -1,35 +1,9 @@
-export function openEnvie(id){
+import { getEnvies } from "./storage.js";
+import { renderChecklist } from "./checklist.js";
+import { renderUrls } from "./urls.js";
 
-}
+let currentEnvieId = null;
 
-export function closeFiche(){
-
-}
-
-export function renderHeader(envie){
-
-}
-
-export function renderCategorie(envie){
-
-}
-
-export function renderPeriode(envie){
-
-}
-
-export function renderLieu(envie){
-
-}
-
-export function renderChecklist(envie){
-
-}
-
-export function renderUrls(envie){
-
-}
-
-export function renderDescription(envie){
-
+export function getCurrentEnvieId() {
+    return currentEnvieId;
 }
