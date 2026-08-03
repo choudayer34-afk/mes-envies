@@ -48,7 +48,8 @@ export function initLocation() {
         btnLocate.addEventListener("click", () => {
             useCurrentLocation(
                 document.getElementById("envieLieu"),
-                (place) => { selectedLieu = place; }
+                (place) => { selectedLieu = place; },
+                btnLocate
             );
         });
     }
@@ -108,11 +109,18 @@ function setupAutocomplete(input, suggestionsBox, onSelect) {
 
 }
 
-export function useCurrentLocation(input, onSelect) {
+export function useCurrentLocation(input, onSelect, button = null) {
 
     if (!("geolocation" in navigator)) {
         console.error("Géolocalisation non supportée par ce navigateur.");
         return;
+    }
+
+    const originalLabel = button?.textContent;
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = "📍 Localisation...";
     }
 
     navigator.geolocation.getCurrentPosition(
@@ -129,15 +137,29 @@ export function useCurrentLocation(input, onSelect) {
 
             onSelect(place);
 
+            resetButton(button, originalLabel);
+
         },
 
         (error) => {
             console.error("Géolocalisation refusée ou indisponible.", error);
+            resetButton(button, originalLabel);
         }
 
     );
 
 }
+
+function resetButton(button, originalLabel) {
+
+    if (!button)
+        return;
+
+    button.disabled = false;
+    button.textContent = originalLabel;
+
+}
+
 
 function showPrecision(input, accuracy) {
 
