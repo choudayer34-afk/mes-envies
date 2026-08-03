@@ -9,11 +9,16 @@ import { removePersonneFromChecklistItem } from "./storage.js";
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { computeQuantite } from "./periode.js";
+import {
+    addMultipleChecklistItems, getChecklistCategories, createChecklistCategory
+} from "./storage.js";
 
 let currentChecklistEnvieId = null;
 let currentAssignedTo = [];
 let currentAssignItemId = null;
 let viewMode = "categorie";
+let currentBulkCategorieId = null;
+
 
 export function renderChecklist(envie) {
 
@@ -59,6 +64,7 @@ function renderByCategorie(items, envie, checklist) {
 function renderByPersonne(items, envie, checklist) {
 
     const personnes = getPersonnes();
+    const categories = getChecklistCategories();
 
     if (personnes.length === 0) {
         checklist.innerHTML = `<div class="emptyState">Aucune personne du foyer créée pour l'instant.</div>`;
@@ -74,28 +80,35 @@ function renderByPersonne(items, envie, checklist) {
         if (concernes.length === 0)
             return;
 
-        const header = document.createElement("div");
-        header.className = "checklistCategorieHeader";
-        header.textContent = `👤 ${personne.nom}`;
+        const personneHeader = document.createElement("div");
+        personneHeader.className = "checklistCategorieHeader";
+        personneHeader.textContent = `👤 ${personne.nom}`;
+        checklist.appendChild(personneHeader);
 
-        checklist.appendChild(header);
+        groupByCategorie(concernes, categories).forEach(group => {
 
-               concernes.forEach(item => {
-            checklist.appendChild(createChecklistRow(item, envie, personne.id));
+            if (group.categorie !== undefined) {
+
+                const subHeader = document.createElement("div");
+                subHeader.className = "checklistSousCategorieHeader";
+                subHeader.textContent = group.categorie
+                    ? `${group.categorie.emoji} ${group.categorie.nom}`
+                    : "Sans catégorie";
+
+                checklist.appendChild(subHeader);
+
+            }
+
+            group.items.forEach(item => {
+                checklist.appendChild(createChecklistRow(item, envie, personne.id));
+            });
+
         });
-
 
     });
 
-    const sansAssignation = items.filter(i => i.assignedTo?.length === 0);
-
-    if (sansAssignation.length > 0 && personnes.length === 0) {
-        sansAssignation.forEach(item => {
-            checklist.appendChild(createChecklistRow(item, envie));
-        });
-    }
-
 }
+
 
 export function groupByCategorie(items, categories) {
 
@@ -293,19 +306,22 @@ function renderPersonneSelector(container, selected, onChange) {
 
 export function initChecklistModal() {
 
-        document.getElementById("addChecklistButton").addEventListener("click", () => {
+           document.getElementById("addChecklistButton").addEventListener("click", () => {
 
         currentChecklistEnvieId = getCurrentEnvieId();
         currentAssignedTo = [];
+        currentBulkCategorieId = null;
 
         document.getElementById("checklistInput").value = "";
         document.getElementById("checklistSuggestions").innerHTML = "";
 
         refreshCreationSelector();
+        renderBulkCategorieSelector();
 
         document.getElementById("checklistModal").classList.remove("hidden");
 
     });
+
 
 
     document.getElementById("cancelChecklist").addEventListener("click", () => {
@@ -360,6 +376,71 @@ export function initChecklistModal() {
 
 }
 
+function renderBulkCategorieSelector() {
+
+    const container = document.getElementById("checklistCategorieBulkSelector");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    const noneChip = document.createElement("button");
+    noneChip.type = "button";
+    noneChip.className = "categorieChip" + (!currentBulkCategorieId ? " active" : "");
+    noneChip.textContent = "Sans catégorie";
+
+    noneChip.addEventListener("click", () => {
+        currentBulkCategorieId = null;
+        renderBulkCategorieSelector();
+    });
+
+    container.appendChild(noneChip);
+
+    getChecklistCategories().forEach(cat => {
+
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "categorieChip" + (currentBulkCategorieId === cat.id ? " active" : "");
+        chip.textContent = `${cat.emoji} ${cat.nom}`;
+
+        chip.addEventListener("click", () => {
+            currentBulkCategorieId = cat.id;
+            renderBulkCategorieSelector();
+        });
+
+        container.appendChild(chip);
+
+    });
+
+    const addWrapper = document.createElement("div");
+    addWrapper.className = "personneAddRow";
+    addWrapper.innerHTML = `<input type="text" placeholder="+ Nouvelle catégorie..." class="personneAddInput">`;
+
+    const addInput = addWrapper.querySelector("input");
+
+    addInput.addEventListener("keydown", (event) => {
+
+        if (event.key !== "Enter")
+            return;
+
+        const nom = addInput.value.trim();
+
+        if (!nom)
+            return;
+
+        const cat = createChecklistCategory(nom, "🏷️");
+
+        currentBulkCategorieId = cat.id;
+
+        setTimeout(renderBulkCategorieSelector, 300);
+
+    });
+
+    container.appendChild(addWrapper);
+
+}
+
 function refreshCreationSelector() {
 
     renderPersonneSelector(
@@ -376,14 +457,14 @@ function refreshCreationSelector() {
 function saveChecklistItem() {
 
     const input = document.getElementById("checklistInput");
-    const texte = input.value.trim();
+    const lignes = input.value.split("\n").map(l => l.trim()).filter(Boolean);
 
-    if (!texte)
+    if (lignes.length === 0)
         return;
 
-    const id = crypto.randomUUID();
+    const categorieId = currentBulkCategorieId;
 
-    addChecklistItem(currentChecklistEnvieId, texte, 1, null, [], id);
+    const newItems = addMultipleChecklistItems(currentChecklistEnvieId, lignes, categorieId, currentAssignedTo);
 
     document.getElementById("checklistModal").classList.add("hidden");
 
@@ -393,18 +474,17 @@ function saveChecklistItem() {
 
         const optimisticEnvie = {
             ...envie,
-            checklist: [...(envie.checklist || []), {
-                id, texte, quantite: 1, categorieId: null, assignedTo: [], checked: false
-            }]
+            checklist: [...(envie.checklist || []), ...newItems]
         };
 
         renderChecklist(optimisticEnvie);
 
     }
 
-    showToast("✓ Élément ajouté");
+    showToast(`✓ ${lignes.length} élément${lignes.length > 1 ? "s" : ""} ajouté${lignes.length > 1 ? "s" : ""}`);
 
 }
+
 
 
 function setupChecklistAutocomplete() {
