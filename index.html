@@ -199,25 +199,30 @@
                 Date ou période
             </label>
 
-            <button
-                id="chooseDate"
-                class="dateButton">
+                       <div class="dateButtonRow">
+                <button
+                    id="chooseDate"
+                    class="dateButton">
 
-                <span id="dateLabel">
-                    Choisir...
-                </span>
+                    <span id="dateLabel">
+                        Choisir...
+                    </span>
 
-                <span>
-                    ▾
-                </span>
+                    <span>
+                        ▾
+                    </span>
 
-            </button>
+                </button>
+                <button type="button" id="clearDateCreation" class="dateClearButton" aria-label="Effacer la date">✕</button>
+            </div>
 
             <input
                 id="envieDate"
                 type="date"
                 hidden>
 
+
+           
         </div>
 <button id="advancedModeButton" class="secondaryButton" style="margin-top:16px;width:100%;">
     ⚙️ Mode avancé
@@ -305,10 +310,14 @@
                 id="periodeSection"
                 class="accordionContent hidden">
 
-                <button id="fichePeriodeButton" class="dateButton">
-                    <span id="fichePeriodeLabel">Choisir...</span>
-                    <span>▾</span>
-                </button>
+                               <div class="dateButtonRow">
+                    <button id="fichePeriodeButton" class="dateButton">
+                        <span id="fichePeriodeLabel">Choisir...</span>
+                        <span>▾</span>
+                    </button>
+                    <button type="button" id="clearDateFiche" class="dateClearButton" aria-label="Effacer la date">✕</button>
+                </div>
+
 
                 <div class="field">
                     <label class="fieldTitle">Nombre de personnes</label>
