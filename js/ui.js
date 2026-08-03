@@ -1,88 +1,88 @@
- import { getEnvies } from "./storage.js";
-import { deleteEnvie } from "./storage.js";
-import { updateEnvie } from "./storage.js";
-
-import { showModal } from "./modal.js";
-import { showToast } from "./toast.js";
+import { getEnvies, toggleFavorite } from "./storage.js";
+import { CATEGORIES, openEnvie } from "./envie.js";
+import { editEnvie, removeEnvie } from "./modal.js";
 
 export function renderEnvies() {
 
-    const container =
-        document.getElementById("envies-list");
+    const container = document.getElementById("enviesContainer");
+
+    if (!container)
+        return;
 
     const envies = getEnvies();
 
+    const inboxTitle = document.getElementById("inboxTitle");
+
+    if (inboxTitle) {
+        inboxTitle.textContent = `📥 À trier (${envies.length})`;
+    }
+
     container.innerHTML = "";
 
-    if (!envies.length) {
+    if (envies.length === 0) {
 
         container.innerHTML = `
-            <div class="empty-state">
-                Aucune envie pour le moment.
-            </div>
-        `;
+            <div class="emptyState">
+              Aucune envie pour le moment 🌱
+              <br><br>
+              Ajoutez votre première idée.
+              <br><br>
+              Elle apparaîtra ici automatiquement.
+            </div>`;
 
         return;
+
     }
 
     envies.forEach(envie => {
+        container.appendChild(createEnvieCard(envie));
+    });
 
-        const card = document.createElement("div");
+}
 
-        card.className = "envie-card";
+function createEnvieCard(envie) {
 
-        card.innerHTML = `
-            <div class="envie-title">
+    const card = document.createElement("div");
+    card.className = "envie-card";
+
+    card.addEventListener("click", () => {
+        openEnvie(envie.id);
+    });
+
+    card.innerHTML = `
+        <div class="envieHeader">
+            <button class="favoriteButton" data-id="${envie.id}">
+                ${envie.favorite ? "⭐" : "☆"}
+            </button>
+            <div class="envieTitle">
+                ${CATEGORIES[envie.categorie]?.emoji || "💡"}
                 ${envie.titre}
             </div>
+        </div>
+        <div class="envieCategory">
+            ${CATEGORIES[envie.categorie]?.label || "Général"}
+        </div>
+        <div class="envieActions">
+            <button class="actionButton editButton" data-id="${envie.id}">Modifier</button>
+            <button class="actionButton deleteButton" data-id="${envie.id}">Supprimer</button>
+        </div>`;
 
-            <div class="envie-actions">
-                <button class="edit-btn">
-                    Modifier
-                </button>
-
-                <button class="delete-btn">
-                    Supprimer
-                </button>
-            </div>
-        `;
-
-        card.querySelector(".edit-btn")
-            .addEventListener("click", () => {
-
-                showModal({
-                    title: "Modifier l'envie",
-                    value: envie.titre,
-                    confirmText: "Enregistrer",
-
-                    onConfirm: (titre) => {
-
-                        updateEnvie(envie.id, titre);
-
-                        renderEnvies();
-
-                        showToast("✓ Envie modifiée");
-                    }
-                });
-
-            });
-
-        card.querySelector(".delete-btn")
-            .addEventListener("click", () => {
-
-                if (
-                    !window.confirm(
-                        "Supprimer cette envie ?"
-                    )
-                ) return;
-
-                deleteEnvie(envie.id);
-
-                renderEnvies();
-
-                showToast("✓ Envie supprimée");
-            });
-
-        container.appendChild(card);
+    card.querySelector(".editButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        editEnvie(envie);
     });
+
+    card.querySelector(".deleteButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        removeEnvie(envie.id);
+    });
+
+    card.querySelector(".favoriteButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleFavorite(envie.id);
+        renderEnvies();
+    });
+
+    return card;
+
 }
