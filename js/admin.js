@@ -3,6 +3,7 @@ import {
     deleteEnvieCategoryDef, moveEnvieCategory
 } from "./storage.js";
 
+import { renderCreationCategorieSelector } from "./modal.js";
 
 import { groupByCategorie } from "./checklist.js";
 import {
