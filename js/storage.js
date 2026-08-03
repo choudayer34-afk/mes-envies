@@ -30,7 +30,7 @@ export function createEnvie({
     categorie = "general",
     lieu = {},
             date,
-        personnes: 1
+        personnes = 1
 
 }) {
 
