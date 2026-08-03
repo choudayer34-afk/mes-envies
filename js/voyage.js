@@ -97,11 +97,12 @@ function createVoyageItemRow(enfant, voyageEnvie) {
             ${CATEGORIES[enfant.categorie]?.emoji || "💡"} ${enfant.titre}
         </div>
         <div class="templateRowActions">
-            <button class="actionButton realiseButton">${enfant.realise ? "↩️ Annuler" : "✓ Réalisé"}</button>
-            <button class="actionButton editButton">Ouvrir</button>
-            <button class="actionButton deleteButton">Retirer</button>
+            <button class="actionButton realiseButton" title="${enfant.realise ? "Annuler" : "Réalisé"}">${enfant.realise ? "↩️" : "✅"}</button>
+            <button class="actionButton editButton" title="Ouvrir">👁️</button>
+            <button class="actionButton deleteButton" title="Retirer">✕</button>
         </div>
     `;
+
 
     row.querySelector(".realiseButton").addEventListener("click", () => {
         updateEnvieRealise(enfant.id, !enfant.realise);
