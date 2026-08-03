@@ -63,7 +63,29 @@ document.addEventListener("click", (event) => {
         return;
 
     const el = event.target;
-    window.debugLogs.push(`CLICK sur: 
+    window.debugLogs.push(`CLICK sur: <${el.tagName}> id="${el.id}" class="${el.className}"`);
+    renderDebug();
+
+}, true);
+
+window.toggleDebug = function() {
+
+    window.debugEnabled = !window.debugEnabled;
+    localStorage.setItem("envie_debug", window.debugEnabled ? "1" : "0");
+
+    if (window.debugEnabled) {
+        window.debugLogs.push("--- Debug activé ---");
+        renderDebug();
+    } else {
+        const box = document.getElementById("debugBox");
+        if (box) box.remove();
+    }
+
+    const btn = document.getElementById("debugToggleBtn");
+    if (btn) btn.textContent = window.debugEnabled ? "🐞 Debug: ON" : "🐞 Debug: OFF";
+
+};
+</script>
 
 
 
