@@ -1,52 +1,167 @@
-export function showModal({
-    title,
-    value = "",
-    confirmText = "Ajouter",
-    onConfirm
-}) {
+import { deleteEnvie, updateEnvie, createEnvie } from "./storage.js";
+import { renderEnvies } from "./ui.js";
+import { showToast } from "./toast.js";
+import { getSelectedLieu, resetSelectedLieu } from "./location.js";
 
-    const overlay = document.createElement("div");
+let currentEditId = null;
+let currentCategorie = "general";
+let currentDeleteId = null;
 
-    overlay.className = "modal-overlay";
+/* ---------- Modale création / édition ---------- */
 
-    overlay.innerHTML = `
-        <div class="modal">
-            <h2>${title}</h2>
+export function initModal() {
 
-            <input
-                id="envie-input"
-                type="text"
-                value="${value}"
-                placeholder="Mon envie..."
-            >
+    document.getElementById("cancelModal")
+        .addEventListener("click", closeModal);
 
-            <div class="modal-actions">
-                <button id="cancel-btn">Annuler</button>
-                <button id="confirm-btn">${confirmText}</button>
-            </div>
-        </div>
-    `;
+    document.querySelectorAll(".categorieChip").forEach(chip => {
 
-    document.body.appendChild(overlay);
+        chip.addEventListener("click", () => {
 
-    const input = overlay.querySelector("#envie-input");
+            document.querySelectorAll(".categorieChip")
+                .forEach(c => c.classList.remove("active"));
 
-    input.focus();
+            chip.classList.add("active");
+            currentCategorie = chip.dataset.categorie;
 
-    overlay.querySelector("#cancel-btn")
-        .addEventListener("click", () => {
-            overlay.remove();
         });
 
-    overlay.querySelector("#confirm-btn")
-        .addEventListener("click", () => {
+    });
 
-            const texte = input.value.trim();
+    document.getElementById("saveEnvie")
+        .addEventListener("click", saveCurrentEnvie);
 
-            if (!texte) return;
+}
 
-            onConfirm(texte);
+export function openModal(title = "💡 Une envie", value = "", editId = null) {
 
-            overlay.remove();
+    currentEditId = editId;
+
+    document.querySelector("#modalOverlay h2").textContent = title;
+
+    const overlay = document.getElementById("modalOverlay");
+    const input = document.getElementById("envieInput");
+    const saveButton = document.getElementById("saveEnvie");
+
+    input.value = value;
+    saveButton.textContent = editId ? "Enregistrer" : "Ajouter";
+
+    overlay.classList.remove("hidden");
+
+    setTimeout(() => { input.focus(); }, 100);
+
+}
+
+export function closeModal() {
+    document.getElementById("modalOverlay").classList.add("hidden");
+}
+
+export function editEnvie(envie) {
+    openModal("✏️ Modifier l'envie", envie.titre, envie.id);
+}
+
+function saveCurrentEnvie() {
+
+    const input = document.getElementById("envieInput");
+    const titre = input.value.trim();
+
+    if (!titre)
+        return;
+
+    if (currentEditId) {
+
+        updateEnvie(currentEditId, titre);
+        showToast("✓ Envie modifiée");
+
+    } else {
+
+        createEnvie({
+            titre,
+            categorie: currentCategorie,
+            lieu: getSelectedLieu(),
+            date: null
         });
+
+        resetSelectedLieu();
+        showToast("✓ Envie ajoutée");
+
+    }
+
+    currentEditId = null;
+    closeModal();
+    renderEnvies();
+
+}
+
+/* ---------- Modale suppression ---------- */
+
+export function initDeleteModal() {
+
+    document.getElementById("cancelDelete").addEventListener("click", () => {
+        document.getElementById("deleteModal").classList.add("hidden");
+    });
+
+    document.getElementById("confirmDelete").addEventListener("click", () => {
+
+        deleteEnvie(currentDeleteId);
+        renderEnvies();
+        showToast("✓ Envie supprimée");
+
+        document.getElementById("deleteModal").classList.add("hidden");
+
+    });
+
+}
+
+export function removeEnvie(id) {
+
+    currentDeleteId = id;
+
+    document.getElementById("deleteText").textContent =
+        "Cette envie sera supprimée définitivement.";
+
+    document.getElementById("deleteModal").classList.remove("hidden");
+
+}
+
+/* ---------- Date (placeholder, logique complète en Sprint XII) ---------- */
+
+export function initDateModal() {
+
+    document.getElementById("chooseDate").addEventListener("click", () => {
+        document.getElementById("dateModal").classList.remove("hidden");
+    });
+
+    document.getElementById("cancelDate").addEventListener("click", () => {
+        document.getElementById("dateModal").classList.add("hidden");
+    });
+
+}
+
+export function initDatePicker() {
+
+    const button = document.getElementById("chooseDate");
+    const input = document.getElementById("envieDate");
+    const label = document.getElementById("dateLabel");
+
+    button.addEventListener("click", () => {
+        input.showPicker?.();
+        input.click();
+    });
+
+    input.addEventListener("change", () => {
+
+        if (!input.value)
+            return;
+
+        const date = new Date(input.value);
+
+        label.textContent = date.toLocaleDateString("fr-FR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        });
+
+    });
+
 }
