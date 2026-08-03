@@ -42,6 +42,7 @@ export function createEnvie({
         titre,
         categorie,
         favorite: false,
+        realise: false,
         description: "",
         photos: [],
         checklist: [],
@@ -421,4 +422,20 @@ export function updateEnvieVoyage(id, voyageId) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
 
 }
+
+export function updateEnvieRealise(id, realise) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.realise = realise;
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
+
 
