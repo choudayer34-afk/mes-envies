@@ -313,7 +313,7 @@ export function initChecklistModal() {
         currentBulkCategorieId = null;
 
         document.getElementById("checklistInput").value = "";
-        document.getElementById("checklistSuggestions").innerHTML = "";
+    
 
         refreshCreationSelector();
         renderBulkCategorieSelector();
