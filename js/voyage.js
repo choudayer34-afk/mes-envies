@@ -1,7 +1,8 @@
-import { getEnvies, updateEnvieVoyage } from "./storage.js";
+
 import { openEnvie, CATEGORIES } from "./envie.js";
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
+import { getEnvies, updateEnvieVoyage, updateEnvieRealise } from "./storage.js";
 
 export function renderVoyageSection(envie) {
 
@@ -28,33 +29,16 @@ function renderVoyageContenu(envie, container) {
         container.innerHTML = `<div class="emptyState">Ce voyage ne contient aucune envie pour l'instant.</div>`;
     }
 
-    enfants.forEach(enfant => {
+    sortAndGroupByDate(enfants).forEach(group => {
 
-        const row = document.createElement("div");
-        row.className = "templateRow";
+        const header = document.createElement("div");
+        header.className = "checklistCategorieHeader";
+        header.textContent = group.label;
+        container.appendChild(header);
 
-        row.innerHTML = `
-            <div class="templateRowNom">
-                ${CATEGORIES[enfant.categorie]?.emoji || "💡"} ${enfant.titre}
-            </div>
-            <div class="templateRowActions">
-                <button class="actionButton editButton">Ouvrir</button>
-                <button class="actionButton deleteButton">Retirer</button>
-            </div>
-        `;
-
-        row.querySelector(".editButton").addEventListener("click", () => {
-            openEnvie(enfant.id);
+        group.items.forEach(enfant => {
+            container.appendChild(createVoyageItemRow(enfant, envie));
         });
-
-        row.querySelector(".deleteButton").addEventListener("click", () => {
-            updateEnvieVoyage(enfant.id, null);
-            renderVoyageSection(envie);
-            renderEnvies();
-            showToast("✓ Retiré du voyage");
-        });
-
-        container.appendChild(row);
 
     });
 
@@ -70,6 +54,89 @@ function renderVoyageContenu(envie, container) {
     container.appendChild(addButton);
 
 }
+
+function createVoyageItemRow(enfant, voyageEnvie) {
+
+    const row = document.createElement("div");
+    row.className = "templateRow" + (enfant.realise ? " realise" : "");
+
+    row.innerHTML = `
+        <div class="templateRowNom">
+            ${CATEGORIES[enfant.categorie]?.emoji || "💡"} ${enfant.titre}
+        </div>
+        <div class="templateRowActions">
+            <button class="actionButton realiseButton">${enfant.realise ? "↩️ Annuler" : "✓ Réalisé"}</button>
+            <button class="actionButton editButton">Ouvrir</button>
+            <button class="actionButton deleteButton">Retirer</button>
+        </div>
+    `;
+
+    row.querySelector(".realiseButton").addEventListener("click", () => {
+        updateEnvieRealise(enfant.id, !enfant.realise);
+        renderVoyageSection(voyageEnvie);
+    });
+
+    row.querySelector(".editButton").addEventListener("click", () => {
+        openEnvie(enfant.id);
+    });
+
+    row.querySelector(".deleteButton").addEventListener("click", () => {
+        updateEnvieVoyage(enfant.id, null);
+        renderVoyageSection(voyageEnvie);
+        renderEnvies();
+        showToast("✓ Retiré du voyage");
+    });
+
+    return row;
+
+}
+
+function sortAndGroupByDate(envies) {
+
+    const withDate = envies.filter(e => e.date?.start);
+    const withoutDate = envies.filter(e => !e.date?.start);
+
+    withDate.sort((a, b) => new Date(b.date.start) - new Date(a.date.start));
+
+    const groups = [];
+
+    withDate.forEach(envie => {
+
+        const key = envie.date.type === "range"
+            ? `${envie.date.start}_${envie.date.end}`
+            : envie.date.start;
+
+        let group = groups.find(g => g.key === key);
+
+        if (!group) {
+            group = { key, label: formatGroupLabel(envie.date), items: [] };
+            groups.push(group);
+        }
+
+        group.items.push(envie);
+
+    });
+
+    if (withoutDate.length > 0) {
+        groups.push({ key: "none", label: "Sans date", items: withoutDate });
+    }
+
+    return groups;
+
+}
+
+function formatGroupLabel(date) {
+
+    const formatDate = (iso) =>
+        new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+    if (date.type === "range" && date.end)
+        return `Du ${formatDate(date.start)} au ${formatDate(date.end)}`;
+
+    return formatDate(date.start);
+
+}
+
 
 function renderRattachement(envie, container) {
 
