@@ -3,14 +3,39 @@ import { CATEGORIES, openEnvie } from "./envie.js";
 import { editEnvie, removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 
+function isContainer(categorie) {
+    return categorie === "voyage" || categorie === "projet";
+}
+
+function isUntriaged(envie) {
+
+    if (envie.voyageId)
+        return false;
+
+    if (isContainer(envie.categorie)) {
+        const { statut } = computeContainerStatus(envie);
+        return statut === "planifie";
+    }
+
+    return !envie.date?.start;
+
+}
+
 export function renderEnvies() {
+
+    renderHomeSections();
+    renderInboxList();
+
+}
+
+function renderInboxList() {
 
     const container = document.getElementById("enviesContainer");
 
     if (!container)
         return;
 
-    const envies = getEnvies().filter(e => !e.voyageId);
+    const envies = getEnvies().filter(isUntriaged);
 
     const badge = document.getElementById("inboxBadge");
 
@@ -42,6 +67,51 @@ export function renderEnvies() {
 
 }
 
+function renderHomeSections() {
+
+    const envies = getEnvies();
+    const today = new Date().toISOString().slice(0, 10);
+
+    const ajourdhuiItems = envies.filter(e =>
+        !e.voyageId && !isContainer(e.categorie) && e.date?.start === today
+    );
+
+    const continuerItems = envies.filter(e => {
+
+        if (!isContainer(e.categorie))
+            return false;
+
+        const { statut } = computeContainerStatus(e);
+        return statut === "en_cours";
+
+    });
+
+    renderSection("ajourdhuiSection", "ajourdhuiContainer", ajourdhuiItems);
+    renderSection("continuerSection", "continuerContainer", continuerItems);
+
+}
+
+function renderSection(sectionId, containerId, items) {
+
+    const section = document.getElementById(sectionId);
+    const container = document.getElementById(containerId);
+
+    if (!section || !container)
+        return;
+
+    if (items.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    section.classList.remove("hidden");
+    container.innerHTML = "";
+
+    items.forEach(envie => {
+        container.appendChild(createEnvieCard(envie));
+    });
+
+}
 
 function createEnvieCard(envie) {
 
@@ -52,11 +122,9 @@ function createEnvieCard(envie) {
         openEnvie(envie.id);
     });
 
-    const isContainer = envie.categorie === "voyage" || envie.categorie === "projet";
-
     let statutHtml = "";
 
-    if (isContainer) {
+    if (isContainer(envie.categorie)) {
 
         const { statut, pourcentage } = computeContainerStatus(envie);
 
@@ -87,7 +155,7 @@ function createEnvieCard(envie) {
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
         </div>`;
-    
+
     card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
         editEnvie(envie);
