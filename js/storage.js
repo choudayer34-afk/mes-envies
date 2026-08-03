@@ -29,7 +29,9 @@ export function createEnvie({
     titre,
     categorie = "general",
     lieu = {},
-    date
+            date,
+        personnes: 1
+
 }) {
 
     const envies = getEnvies();
