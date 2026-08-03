@@ -119,11 +119,13 @@ export function useCurrentLocation(input, onSelect) {
 
         async (position) => {
 
-            const { latitude, longitude } = position.coords;
+            const { latitude, longitude, accuracy } = position.coords;
             const place = await reverseGeocode(latitude, longitude);
 
             if (input)
                 input.value = place.nom;
+
+            showPrecision(input, accuracy);
 
             onSelect(place);
 
@@ -136,6 +138,24 @@ export function useCurrentLocation(input, onSelect) {
     );
 
 }
+
+function showPrecision(input, accuracy) {
+
+    if (!input)
+        return;
+
+    let label = input.parentElement.querySelector(".lieuPrecision");
+
+    if (!label) {
+        label = document.createElement("small");
+        label.className = "lieuPrecision";
+        input.insertAdjacentElement("afterend", label);
+    }
+
+    label.textContent = `📶 Précision : ± ${Math.round(accuracy)} m`;
+
+}
+
 
 async function reverseGeocode(latitude, longitude) {
 
