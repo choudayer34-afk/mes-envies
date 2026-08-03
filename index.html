@@ -278,6 +278,11 @@
             <span id="fichePeriodeLabel">Choisir...</span>
             <span>▾</span>
         </button>
+        <div class="field">
+    <label class="fieldTitle">Nombre de personnes</label>
+    <input id="fichePersonnes" type="number" min="1" value="1" class="numberInput">
+</div>
+
 
     </div>
 
@@ -538,6 +543,9 @@
             <button type="button" class="itemTypeChip" data-type="parJour">Par jour</button>
         </div>
 <label class="fieldTitle">Catégorie</label>
+<label class="fieldTitle">Quantité de base</label>
+<input id="templateItemQuantite" type="number" min="1" value="1" class="numberInput">
+
 <select id="templateItemCategorie" class="categorieSelect"></select>
 
         <button id="addTemplateItemButton" class="secondaryButton" style="margin-top:14px;">
