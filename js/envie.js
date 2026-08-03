@@ -1,7 +1,8 @@
-import { getEnvies } from "./storage.js";
+
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
 import { renderPeriode } from "./periode.js";
+import { getEnvies, updateEnvieCategorie } from "./storage.js";
 
 let currentEnvieId = null;
 
@@ -29,8 +30,8 @@ export function openEnvie(id) {
 
     document.getElementById("ficheTitre").textContent = envie.titre;
 
-    document.getElementById("ficheCategorie").textContent =
-        CATEGORIES[envie.categorie]?.label || "Général";
+      renderCategorieSelector(envie);
+
 
     document.getElementById("ficheDescription").value = envie.description || "";
 
@@ -43,6 +44,33 @@ export function openEnvie(id) {
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
 
     document.getElementById("ficheOverlay").classList.remove("hidden");
+
+}
+
+function renderCategorieSelector(envie) {
+
+    const container = document.getElementById("ficheCategorieSelector");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    Object.entries(CATEGORIES).forEach(([key, data]) => {
+
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "categorieChip" + (key === envie.categorie ? " active" : "");
+        chip.textContent = `${data.emoji} ${data.label}`;
+
+        chip.addEventListener("click", () => {
+            updateEnvieCategorie(envie.id, key);
+            renderCategorieSelector({ ...envie, categorie: key });
+        });
+
+        container.appendChild(chip);
+
+    });
 
 }
 
