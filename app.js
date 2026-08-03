@@ -67,6 +67,7 @@ renderEnvies();
 initDeleteModal();
 initUrlModal();
 initChecklistModal();
+initAccordions();
 
 
     log("Application prête.");
@@ -896,5 +897,26 @@ function saveChecklistItem(){
     openEnvie(currentChecklistEnvieId);
 
     showToast("✓ Élément ajouté");
+
+}
+
+function initAccordions(){
+
+    document
+        .querySelectorAll(".accordionHeader")
+        .forEach(button=>{
+
+            button.addEventListener("click",()=>{
+
+                const section =
+                    document.getElementById(
+                        button.dataset.target
+                    );
+
+                section.classList.toggle("hidden");
+
+            });
+
+        });
 
 }
