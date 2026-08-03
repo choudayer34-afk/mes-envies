@@ -89,6 +89,16 @@ export function initDateModal() {
             openDateModal();
         });
     }
+    document.getElementById("clearDateCreation").addEventListener("click", () => {
+        selectedPeriode = null;
+        updateLabel(document.getElementById("dateLabel"), null);
+    });
+
+    document.getElementById("clearDateFiche").addEventListener("click", () => {
+        updateEnvieDate(getCurrentEnvieId(), null);
+        propagateDateToGroup(getCurrentEnvieId(), null);
+        updateLabel(document.getElementById("fichePeriodeLabel"), null);
+    });
 
     document.getElementById("cancelDate").addEventListener("click", closeDateModal);
 
