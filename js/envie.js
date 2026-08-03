@@ -129,7 +129,7 @@ export function closeFiche() {
     }
 
 }
-}
+
 
 export function initAccordions() {
 
