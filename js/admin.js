@@ -16,6 +16,7 @@ export function initAdmin() {
 
     document.getElementById("btnSettings").addEventListener("click", openAdmin);
     document.getElementById("closeAdmin").addEventListener("click", closeAdmin);
+    document.getElementById("showFoyerCodeButton").addEventListener("click", showFoyerCode);
 
         document.querySelectorAll("#adminMenu .categorieChip").forEach(chip => {
 
