@@ -143,7 +143,7 @@ function createEnvieCard(envie) {
                 ${envie.favorite ? "⭐" : "☆"}
             </button>
             <div class="envieTitle">
-                ${CATEGORIES[envie.categorie]?.emoji || "💡"}
+                ${getCategorieById(envie.categorie)?.emoji || "💡"}
                 ${envie.titre}
             </div>
         </div>
