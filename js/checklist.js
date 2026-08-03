@@ -147,7 +147,9 @@ function createChecklistRow(item, envie, personneContext = null) {
             <input type="checkbox" ${isChecked ? "checked" : ""}>
             <span>
                 ${prefix}${item.texte}
-                <small class="assignBadge">${assignLabel}</small>
+                    <small class="assignBadge">${assignLabel}${!personneContext ? formatProgressBadge(item) : ""}</small>
+
+
             </span>
         </label>
         <button class="assignItemButton" title="Attribuer">👤</button>
@@ -531,3 +533,19 @@ function applyTemplate(templateId) {
     showToast(`✓ Modèle "${template.nom}" appliqué`);
 
 }
+
+function formatProgressBadge(item) {
+
+    if (!item.assignedTo || item.assignedTo.length <= 1)
+        return "";
+
+    const doneCount = item.assignedTo.filter(id => item.checkedBy?.[id]).length;
+    const total = item.assignedTo.length;
+
+    if (doneCount === 0 || doneCount === total)
+        return "";
+
+    return ` · ${doneCount}/${total} fait`;
+
+}
+
