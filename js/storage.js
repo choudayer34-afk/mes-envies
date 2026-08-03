@@ -241,6 +241,11 @@ export function toggleChecklistItem(envieId,itemId){
 
     item.checked=!item.checked;
 
+    if (item.assignedTo && item.assignedTo.length > 1) {
+        item.checkedBy = item.checkedBy || {};
+        item.assignedTo.forEach(id => { item.checkedBy[id] = item.checked; });
+    }
+
     envie.updatedAt=Date.now();
 
     localStorage.setItem(
@@ -249,6 +254,31 @@ export function toggleChecklistItem(envieId,itemId){
     );
 
 }
+
+export function toggleChecklistItemForPersonne(envieId, itemId, personneId) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const item = envie.checklist.find(i => i.id === itemId);
+
+    if (!item)
+        return;
+
+    item.checkedBy = item.checkedBy || {};
+    item.checkedBy[personneId] = !item.checkedBy[personneId];
+
+    item.checked = item.assignedTo.every(id => item.checkedBy[id]);
+
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
+
 
 export function deleteChecklistItem(envieId,itemId){
 
