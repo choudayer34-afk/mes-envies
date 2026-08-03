@@ -10,6 +10,7 @@
 "use strict";
 
 import { initFoyerDataSync } from "./js/storage.js";
+import { initFicheTitre } from "./js/envie.js";
 
 import { renderEnvies } from "./js/ui.js";
 import {
@@ -52,6 +53,7 @@ function init() {
     initAdmin();
         initVoyage();
             initCarte();
+    initFicheTitre();
 
     initEnviesSync(() => {
         renderEnvies();
