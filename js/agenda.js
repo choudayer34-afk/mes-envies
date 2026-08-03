@@ -99,13 +99,10 @@ function createAgendaRow(envie) {
             <input type="checkbox" ${envie.realise ? "checked" : ""}>
             <span>${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
         </label>
+        <button class="editAgendaButton" title="Modifier">✏️</button>
     `;
 
     const checkbox = row.querySelector("input");
-
-    checkbox.addEventListener("click", (event) => {
-        event.stopPropagation();
-    });
 
     checkbox.addEventListener("change", () => {
 
@@ -127,8 +124,7 @@ function createAgendaRow(envie) {
 
     });
 
-
-    row.addEventListener("click", () => {
+    row.querySelector(".editAgendaButton").addEventListener("click", () => {
         closeAgenda();
         openEnvie(envie.id);
     });
@@ -136,4 +132,3 @@ function createAgendaRow(envie) {
     return row;
 
 }
-
