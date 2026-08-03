@@ -29,7 +29,8 @@ from "./js/location.js";
 
 import {
     openEnvie,
-    closeFiche
+    closeFiche,
+    CATEGORIES
 } from "./js/envie.js";
 
 import {
