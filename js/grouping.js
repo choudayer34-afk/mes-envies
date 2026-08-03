@@ -50,7 +50,7 @@ export function groupAndSort(envies) {
 
 }
 
-function formatDateLabel(date) {
+export function formatDateLabel(date) {
 
     const formatDate = (iso) =>
         new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
@@ -61,3 +61,5 @@ function formatDateLabel(date) {
     return formatDate(date.start);
 
 }
+
+
