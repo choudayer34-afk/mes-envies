@@ -70,7 +70,7 @@ function init() {
     updateTitle();
 
     initMainButton();
-
+initLocation();
     registerServiceWorker();
 renderEnvies();
 initDeleteModal();
