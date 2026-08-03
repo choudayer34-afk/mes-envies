@@ -20,6 +20,54 @@
 </head>
 
 <body>
+<div id="authScreen" class="authScreen">
+
+    <div class="authCard">
+
+        <div class="logo">🌱</div>
+        <h1 style="font-size:32px;">EnVie</h1>
+
+        <input id="authEmail" type="email" placeholder="Email" autocomplete="email">
+        <input id="authPassword" type="password" placeholder="Mot de passe" autocomplete="current-password">
+
+        <p id="authError" class="authError"></p>
+
+        <button id="authSubmitButton" class="primaryButton" style="width:100%;margin-top:10px;">
+            Se connecter
+        </button>
+
+        <button id="authToggleMode" class="linkButton">
+            Créer un compte
+        </button>
+
+    </div>
+
+</div>
+
+<div id="foyerScreen" class="authScreen hidden">
+
+    <div class="authCard">
+
+        <h2>🏡 Votre foyer</h2>
+
+        <p class="fieldTitle">Créer un nouveau foyer</p>
+        <input id="foyerNomInput" type="text" placeholder="Nom du foyer (ex : Famille Martin)">
+        <button id="createFoyerButton" class="primaryButton" style="width:100%;margin-top:10px;">
+            Créer
+        </button>
+
+        <p class="fieldTitle" style="margin-top:28px;">Ou rejoindre un foyer existant</p>
+        <input id="foyerCodeInput" type="text" placeholder="Code du foyer">
+        <button id="joinFoyerButton" class="secondaryButton" style="width:100%;margin-top:10px;">
+            Rejoindre
+        </button>
+
+        <p id="foyerError" class="authError"></p>
+
+    </div>
+
+</div>
+<div id="appRoot" class="hidden">
 
 <header class="header">
 
@@ -586,6 +634,9 @@
         </div>
 
     </div>
+<button id="logoutButton" class="secondaryButton" style="margin-top:24px;">
+    🚪 Se déconnecter
+</button>
 
 </div>
 
@@ -713,6 +764,7 @@
 
     </div>
 
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
