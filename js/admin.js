@@ -6,6 +6,7 @@ import {
     renameChecklistCategory, deleteChecklistCategory, getPersonnes, createPersonne,
     renamePersonne, deletePersonne
 } from "./storage.js";
+import { showFoyerCode } from "./auth.js";
 
 let currentTemplateId = null;
 let currentItemType = "fixe";
