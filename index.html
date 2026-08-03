@@ -781,16 +781,18 @@ window.toggleDebug = function() {
 
         <h2>Ajouter un élément</h2>
 
-        <input
-            id="checklistInput"
-            type="text"
-            placeholder="Ex : Gourde"
-            autocomplete="off">
+    <textarea
+    id="checklistInput"
+    placeholder="Un élément par ligne...&#10;Ex :&#10;Gourde&#10;Lampe frontale&#10;Trousse de secours"
+    rows="4"
+    style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:16px;box-sizing:border-box;resize:vertical;"
+></textarea>
 
-        <div id="checklistSuggestions" class="lieuSuggestions"></div>
+<label class="fieldTitle">Catégorie</label>
+<div id="checklistCategorieBulkSelector" class="categorieSelector fiche"></div>
 
-        <label class="fieldTitle">Pour qui ?</label>
-        <div id="checklistPersonnesSelector" class="categorieSelector fiche"></div>
+<label class="fieldTitle">Pour qui ?</label>
+<div id="checklistPersonnesSelector" class="categorieSelector fiche"></div>
 
         <div class="modal-actions">
 
