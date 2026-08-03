@@ -52,6 +52,22 @@ window.onerror = function(message, source, lineno) {
 };
 </script>
 
+<script>
+document.addEventListener("click", (event) => {
+
+    const el = event.target;
+    const info = `CLICK sur: <${el.tagName}> id="${el.id}" class="${el.className}"`;
+
+    window.debugLogs.push(info);
+
+    let box = document.getElementById("debugBox");
+    if (box) {
+        const content = box.querySelector("#debugContent");
+        if (content) content.textContent = window.debugLogs.join("\n\n");
+    }
+
+}, true);
+</script>
 
 
     <meta name="viewport"
