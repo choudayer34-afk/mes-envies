@@ -11,6 +11,7 @@ import {
     renameChecklistCategory,
     deleteChecklistCategory
 } from "./storage.js";
+import { groupByCategorie } from "./checklist.js";
 
 let currentTemplateId = null;
 let currentItemType = "fixe";
@@ -241,45 +242,59 @@ function renderTemplateItems() {
 
     const categories = getChecklistCategories();
 
-       const typeLabel = {
+    const typeLabel = {
         fixe: item => item.quantite > 1 ? `${item.quantite}×` : "",
         parPersonne: item => `${item.quantite}× 👤 par personne`,
         parJour: item => `${item.quantite}× 📅 par jour`
     };
 
-
     container.innerHTML = "";
 
     if (template.items.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucun élément pour l'instant.</div>`;
+        return;
     }
 
-    template.items.forEach(item => {
+    groupByCategorie(template.items, categories).forEach(group => {
 
-        const categorie = categories.find(c => c.id === item.categorieId);
+        if (group.categorie !== undefined) {
 
-        const row = document.createElement("div");
-        row.className = "checklistRow";
+            const header = document.createElement("div");
+            header.className = "checklistCategorieHeader";
+            header.textContent = group.categorie
+                ? `${group.categorie.emoji} ${group.categorie.nom}`
+                : "Sans catégorie";
 
-        row.innerHTML = `
-                        <span class="checkLabel">
-                ${categorie ? categorie.emoji : ""} ${item.texte}
-                <small>${[typeLabel[item.type](item), categorie?.nom].filter(Boolean).join(" · ")}</small>
-            </span>
+            container.appendChild(header);
 
-            <button class="deleteChecklistButton">🗑️</button>
-        `;
+        }
 
-        row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
-            deleteTemplateItem(currentTemplateId, item.id);
-            renderTemplateItems();
+        group.items.forEach(item => {
+
+            const row = document.createElement("div");
+            row.className = "checklistRow";
+
+            row.innerHTML = `
+                <span class="checkLabel">
+                    ${item.texte}
+                    <small>${typeLabel[item.type](item)}</small>
+                </span>
+                <button class="deleteChecklistButton">🗑️</button>
+            `;
+
+            row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
+                deleteTemplateItem(currentTemplateId, item.id);
+                renderTemplateItems();
+            });
+
+            container.appendChild(row);
+
         });
-
-        container.appendChild(row);
 
     });
 
 }
+
 
 function renderItemCategorieOptions() {
 
