@@ -52,6 +52,9 @@ function init() {
         initVoyage();
             initCarte();
 
+    initEnviesSync(() => {
+        renderEnvies();
+    });
 
 
     renderEnvies();
