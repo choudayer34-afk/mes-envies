@@ -1,4 +1,5 @@
 import { deleteEnvie, updateEnvie, createEnvie, getEnvies } from "./storage.js";
+import { closeAllOverlaysExcept } from "./modal-utils.js";
 
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
@@ -105,6 +106,7 @@ export function openModal(title = "💡 Une envie", value = "", editId = null) {
 
     input.value = value;
     saveButton.textContent = editId ? "Enregistrer" : "Ajouter";
+    closeAllOverlaysExcept("modalOverlay");
 
     overlay.classList.remove("hidden");
 
@@ -182,6 +184,7 @@ export function removeEnvie(id) {
 
     document.getElementById("deleteText").textContent =
         "Cette envie sera supprimée définitivement.";
+    closeAllOverlaysExcept("deleteModal");
 
     document.getElementById("deleteModal").classList.remove("hidden");
 
