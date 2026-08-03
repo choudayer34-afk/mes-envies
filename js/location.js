@@ -15,3 +15,19 @@ export async function searchLocation(query){
     return await response.json();
 
 }
+
+export function initLocation(){
+
+}
+
+export function searchLocation(){
+
+}
+
+export function useCurrentLocation(){
+
+}
+
+export function selectLocation(){
+
+}
