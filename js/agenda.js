@@ -2,8 +2,7 @@ import { getEnvies, updateEnvieRealise } from "./storage.js";
 import { groupAndSort } from "./grouping.js";
 
 import { groupForAgenda } from "./grouping.js";
-import {  openEvaluationAccordion } from "./envie.js";
-import { getCategorieById, isContainer } from "./envie.js";
+import { getCategorieById, openEvaluationAccordion, openEnvie } from "./envie.js";
 
 
 export function initAgenda() {
