@@ -117,24 +117,36 @@ async function resolveFoyer(uid) {
 
 function initFoyerScreen() {
 
-    document.getElementById("createFoyerButton").addEventListener("click", async () => {
+        document.getElementById("createFoyerButton").addEventListener("click", async () => {
 
         const nom = document.getElementById("foyerNomInput").value.trim();
+        const errorEl = document.getElementById("foyerError");
+
+        errorEl.textContent = "";
 
         if (!nom)
             return;
 
-        const foyerId = crypto.randomUUID().slice(0, 8);
+        try {
 
-        await setDoc(doc(db, "foyers", foyerId), { nom, createdAt: Date.now() });
-        await setDoc(doc(db, "users", auth.currentUser.uid), { foyerId });
+            const foyerId = crypto.randomUUID().slice(0, 8);
 
-        currentFoyerId = foyerId;
+            await setDoc(doc(db, "foyers", foyerId), { nom, createdAt: Date.now() });
+            await setDoc(doc(db, "users", auth.currentUser.uid), { foyerId });
 
-        alert(`Foyer créé ! Code à partager : ${foyerId}`);
+            currentFoyerId = foyerId;
 
-        hideAuthScreens();
-        onReadyCallback();
+            alert(`Foyer créé ! Code à partager : ${foyerId}`);
+
+            hideAuthScreens();
+            onReadyCallback();
+
+        } catch (error) {
+
+            console.error(error);
+            errorEl.textContent = `Erreur : ${error.code || error.message}`;
+
+        }
 
     });
 
@@ -147,7 +159,7 @@ function initFoyerScreen() {
 
         if (!code)
             return;
-
+try {
         const foyerDoc = await getDoc(doc(db, "foyers", code));
 
         if (!foyerDoc.exists()) {
@@ -161,7 +173,12 @@ function initFoyerScreen() {
 
         hideAuthScreens();
         onReadyCallback();
+} catch (error) {
 
+            console.error(error);
+            errorEl.textContent = `Erreur : ${error.code || error.message}`;
+
+        }
     });
 
 }
