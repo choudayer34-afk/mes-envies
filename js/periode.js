@@ -1,0 +1,179 @@
+import { updateEnvieDate } from "./storage.js";
+import { getCurrentEnvieId } from "./envie.js";
+
+let selectedPeriode = null;
+let currentType = "single";
+let context = "creation"; // "creation" | "fiche"
+
+export function getSelectedPeriode() {
+    return selectedPeriode;
+}
+
+export function resetSelectedPeriode() {
+    selectedPeriode = null;
+    updateLabel(document.getElementById("dateLabel"), null);
+}
+
+export function renderPeriode(envie) {
+    updateLabel(document.getElementById("fichePeriodeLabel"), envie.date);
+}
+
+export function formatPeriode(periode) {
+
+    if (!periode || !periode.type)
+        return "Choisir...";
+
+    const formatDate = (iso) =>
+        new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+    switch (periode.type) {
+        case "today": return "📅 Aujourd'hui";
+        case "tomorrow": return "🌅 Demain";
+        case "weekend": return "🏖️ Ce week-end";
+        case "single": return periode.start ? formatDate(periode.start) : "Choisir...";
+        case "range": return periode.start && periode.end
+            ? `Du ${formatDate(periode.start)} au ${formatDate(periode.end)}`
+            : "Choisir...";
+        default: return "Choisir...";
+    }
+
+}
+
+function quickPeriode(type) {
+
+    const today = new Date();
+    const iso = (d) => d.toISOString().slice(0, 10);
+
+    if (type === "today")
+        return { type, start: iso(today), end: null };
+
+    if (type === "tomorrow") {
+        const d = new Date(today);
+        d.setDate(d.getDate() + 1);
+        return { type, start: iso(d), end: null };
+    }
+
+    if (type === "weekend") {
+        const day = today.getDay();
+        const daysUntilSaturday = (6 - day + 7) % 7;
+        const d = new Date(today);
+        d.setDate(d.getDate() + daysUntilSaturday);
+        return { type, start: iso(d), end: null };
+    }
+
+    return null;
+
+}
+
+function updateLabel(labelEl, periode) {
+
+    if (!labelEl)
+        return;
+
+    labelEl.textContent = formatPeriode(periode);
+
+}
+
+export function initDateModal() {
+
+    document.getElementById("chooseDate").addEventListener("click", () => {
+        context = "creation";
+        openDateModal();
+    });
+
+    const fichePeriodeButton = document.getElementById("fichePeriodeButton");
+
+    if (fichePeriodeButton) {
+        fichePeriodeButton.addEventListener("click", () => {
+            context = "fiche";
+            openDateModal();
+        });
+    }
+
+    document.getElementById("cancelDate").addEventListener("click", closeDateModal);
+
+    document.querySelectorAll(".dateChoice").forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const value = button.dataset.value;
+
+            if (value === "custom") {
+                showCustomPanel();
+                return;
+            }
+
+            applyPeriode(quickPeriode(value));
+            closeDateModal();
+
+        });
+
+    });
+
+    document.querySelectorAll(".periodeTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            currentType = chip.dataset.type;
+
+            document.querySelectorAll(".periodeTypeChip")
+                .forEach(c => c.classList.remove("active"));
+
+            chip.classList.add("active");
+
+            document.getElementById("periodeEndField")
+                .classList.toggle("hidden", currentType !== "range");
+
+        });
+
+    });
+
+    document.getElementById("validateCustomPeriode").addEventListener("click", () => {
+
+        const start = document.getElementById("periodeStart").value;
+        const end = document.getElementById("periodeEnd").value;
+
+        if (!start)
+            return;
+
+        if (currentType === "range" && !end)
+            return;
+
+        applyPeriode({
+            type: currentType,
+            start,
+            end: currentType === "range" ? end : null
+        });
+
+        closeDateModal();
+
+    });
+
+}
+
+function openDateModal() {
+    document.getElementById("customPeriodePanel").classList.add("hidden");
+    document.getElementById("dateChoicesList").classList.remove("hidden");
+    document.getElementById("dateModal").classList.remove("hidden");
+}
+
+function closeDateModal() {
+    document.getElementById("dateModal").classList.add("hidden");
+}
+
+function showCustomPanel() {
+    document.getElementById("dateChoicesList").classList.add("hidden");
+    document.getElementById("customPeriodePanel").classList.remove("hidden");
+}
+
+function applyPeriode(periode) {
+
+    if (context === "creation") {
+        selectedPeriode = periode;
+        updateLabel(document.getElementById("dateLabel"), periode);
+    } else {
+        updateEnvieDate(getCurrentEnvieId(), periode);
+        updateLabel(document.getElementById("fichePeriodeLabel"), periode);
+    }
+
+}
