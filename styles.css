@@ -871,3 +871,18 @@ button {
 .checklistButtonsRow .secondaryButton{
     flex:1;
 }
+
+.checklistCategorieHeader{
+    font-size:13px;
+    font-weight:700;
+    color:var(--color-text-light);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-top:16px;
+    margin-bottom:6px;
+}
+
+.checklistCategorieHeader:first-child{
+    margin-top:0;
+}
+
