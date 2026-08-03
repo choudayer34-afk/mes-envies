@@ -130,3 +130,25 @@ export function initAccordions() {
     });
 
 }
+export function openEvaluationAccordion() {
+
+    const section = document.getElementById("evaluationSection");
+    const header = document.querySelector('.accordionHeader[data-target="evaluationSection"]');
+
+    if (!section || !header)
+        return;
+
+    section.classList.remove("hidden");
+
+    const icon = header.querySelector(".accordionIcon");
+
+    if (icon)
+        icon.textContent = "▾";
+
+    setTimeout(() => {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 150);
+
+}
+
+
