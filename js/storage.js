@@ -265,3 +265,78 @@ export function updateEnvieCategorie(id, categorie) {
 
 }
 
+const TEMPLATES_KEY = "envie_checklist_templates";
+
+export function getChecklistTemplates() {
+    return JSON.parse(localStorage.getItem(TEMPLATES_KEY)) || [];
+}
+
+function saveTemplates(templates) {
+    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+}
+
+export function getTemplate(id) {
+    return getChecklistTemplates().find(t => t.id === id);
+}
+
+export function createTemplate(nom) {
+
+    const templates = getChecklistTemplates();
+
+    const template = { id: crypto.randomUUID(), nom, items: [] };
+
+    templates.push(template);
+    saveTemplates(templates);
+
+    return template;
+
+}
+
+export function renameTemplate(id, nom) {
+
+    const templates = getChecklistTemplates();
+    const template = templates.find(t => t.id === id);
+
+    if (!template)
+        return;
+
+    template.nom = nom;
+    saveTemplates(templates);
+
+}
+
+export function deleteTemplate(id) {
+    saveTemplates(getChecklistTemplates().filter(t => t.id !== id));
+}
+
+export function addTemplateItem(templateId, texte, type = "fixe") {
+
+    const templates = getChecklistTemplates();
+    const template = templates.find(t => t.id === templateId);
+
+    if (!template)
+        return;
+
+    template.items.push({
+        id: crypto.randomUUID(),
+        texte,
+        type
+    });
+
+    saveTemplates(templates);
+
+}
+
+export function deleteTemplateItem(templateId, itemId) {
+
+    const templates = getChecklistTemplates();
+    const template = templates.find(t => t.id === templateId);
+
+    if (!template)
+        return;
+
+    template.items = template.items.filter(i => i.id !== itemId);
+    saveTemplates(templates);
+
+}
+
