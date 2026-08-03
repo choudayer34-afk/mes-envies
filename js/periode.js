@@ -1,5 +1,6 @@
-import { updateEnvieDate, updateEnviePersonnes } from "./storage.js";
+
 import { getCurrentEnvieId } from "./envie.js";
+import { updateEnvieDate, updateEnviePersonnes, propagateDateToGroup } from "./storage.js";
 
 
 let selectedPeriode = null;
@@ -186,10 +187,12 @@ function applyPeriode(periode) {
         updateLabel(document.getElementById("dateLabel"), periode);
     } else {
         updateEnvieDate(getCurrentEnvieId(), periode);
+        propagateDateToGroup(getCurrentEnvieId(), periode);
         updateLabel(document.getElementById("fichePeriodeLabel"), periode);
     }
 
 }
+
 
 export function getDureeJours(periode) {
 
