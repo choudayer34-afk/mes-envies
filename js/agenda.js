@@ -97,7 +97,7 @@ function createAgendaRow(envie) {
     row.innerHTML = `
         <label class="checkLabel">
             <input type="checkbox" ${envie.realise ? "checked" : ""}>
-            <span>${CATEGORIES[envie.categorie]?.emoji || "💡"} ${envie.titre}</span>
+            <span>${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
         </label>
     `;
 
