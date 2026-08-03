@@ -27,16 +27,23 @@ export function isContainer(categorieId) {
 }
 
 
-export function openEnvie(id) {
+let returnToContainerId = null;
+
+export function openEnvie(id, returnTo = null) {
+
+    if (returnTo !== undefined && returnTo !== null) {
+        returnToContainerId = returnTo;
+    }
 
     currentEnvieId = id;
 
     const envie = getEnvies().find(e => e.id === id);
 
-   
-
     if (!envie)
         return;
+
+    // ... reste de la fonction inchangé ...
+
 
 
 
@@ -109,7 +116,19 @@ function renderCategorieSelector(envie) {
 
 
 export function closeFiche() {
+
     document.getElementById("ficheOverlay").classList.add("hidden");
+
+    if (returnToContainerId) {
+
+        const containerId = returnToContainerId;
+        returnToContainerId = null;
+
+        openEnvie(containerId);
+
+    }
+
+}
 }
 
 export function initAccordions() {
