@@ -51,10 +51,17 @@ export function initAccordions() {
     document.querySelectorAll(".accordionHeader").forEach(button => {
 
         const icon = button.querySelector(".accordionIcon");
+        const section = document.getElementById(button.dataset.target);
+
+        if (!section)
+            return;
+
+        if (icon) {
+            icon.textContent = section.classList.contains("hidden") ? "▸" : "▾";
+        }
 
         button.addEventListener("click", () => {
 
-            const section = document.getElementById(button.dataset.target);
             section.classList.toggle("hidden");
 
             if (icon) {
