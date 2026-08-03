@@ -117,7 +117,7 @@ async function resolveFoyer(uid) {
 
 function initFoyerScreen() {
 
-        document.getElementById("createFoyerButton").addEventListener("click", async () => {
+          document.getElementById("createFoyerButton").addEventListener("click", async () => {
 
         const nom = document.getElementById("foyerNomInput").value.trim();
         const errorEl = document.getElementById("foyerError");
@@ -127,28 +127,36 @@ function initFoyerScreen() {
         if (!nom)
             return;
 
-        try {
-
-            const foyerId = crypto.randomUUID().slice(0, 8);
-
-            await setDoc(doc(db, "foyers", foyerId), { nom, createdAt: Date.now() });
-            await setDoc(doc(db, "users", auth.currentUser.uid), { foyerId });
-
-            currentFoyerId = foyerId;
-
-            alert(`Foyer créé ! Code à partager : ${foyerId}`);
-
-            hideAuthScreens();
-            onReadyCallback();
-
-        } catch (error) {
-
-            console.error(error);
-            errorEl.textContent = `Erreur : ${error.code || error.message}`;
-
+        if (!auth.currentUser) {
+            errorEl.textContent = "Erreur : utilisateur non authentifié.";
+            return;
         }
 
+        const foyerId = crypto.randomUUID().slice(0, 8);
+
+        try {
+            await setDoc(doc(db, "foyers", foyerId), { nom, createdAt: Date.now() });
+        } catch (error) {
+            errorEl.textContent = `Erreur écriture foyer : ${error.code}`;
+            return;
+        }
+
+        try {
+            await setDoc(doc(db, "users", auth.currentUser.uid), { foyerId });
+        } catch (error) {
+            errorEl.textContent = `Erreur écriture user : ${error.code}`;
+            return;
+        }
+
+        currentFoyerId = foyerId;
+
+        alert(`Foyer créé ! Code à partager : ${foyerId}`);
+
+        hideAuthScreens();
+        onReadyCallback();
+
     });
+
 
     document.getElementById("joinFoyerButton").addEventListener("click", async () => {
 
