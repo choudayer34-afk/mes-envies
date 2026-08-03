@@ -311,7 +311,7 @@ export function deleteTemplate(id) {
     saveTemplates(getChecklistTemplates().filter(t => t.id !== id));
 }
 
-export function addTemplateItem(templateId, texte, type = "fixe", categorieId = null) {
+export function addTemplateItem(templateId, texte, type = "fixe", categorieId = null, quantite = 1) {
 
     const templates = getChecklistTemplates();
     const template = templates.find(t => t.id === templateId);
@@ -323,12 +323,29 @@ export function addTemplateItem(templateId, texte, type = "fixe", categorieId = 
         id: crypto.randomUUID(),
         texte,
         type,
-        categorieId
+        categorieId,
+        quantite
     });
 
     saveTemplates(templates);
 
 }
+
+export function updateEnviePersonnes(id, personnes) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.personnes = Math.max(1, personnes);
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
+
 
 
 export function deleteTemplateItem(templateId, itemId) {
