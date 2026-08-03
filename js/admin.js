@@ -159,25 +159,26 @@ export function initAdmin() {
 
     });
 
-        document.getElementById("addTemplateItemButton").addEventListener("click", () => {
+      document.getElementById("addTemplateItemButton").addEventListener("click", () => {
 
         const input = document.getElementById("templateItemInput");
-        const texte = input.value.trim();
+        const lignes = input.value.split("\n").map(l => l.trim()).filter(Boolean);
 
         const quantiteInput = document.getElementById("templateItemQuantite");
         const quantite = parseInt(quantiteInput.value, 10) || 1;
 
-        if (!texte || !currentTemplateId)
+        if (lignes.length === 0 || !currentTemplateId)
             return;
 
-        addTemplateItem(currentTemplateId, texte, currentItemType, currentItemCategorieId, quantite);
+        addMultipleTemplateItems(currentTemplateId, lignes, currentItemCategorieId, currentItemType, quantite);
 
         input.value = "";
         quantiteInput.value = 1;
 
-        renderTemplateItems();
+        setTimeout(renderTemplateItems, 300);
 
     });
+
 
 
 }
