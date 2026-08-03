@@ -61,6 +61,9 @@ function init() {
     initEnviesSync(() => {
         renderEnvies();
     });
+    initEnvieCategoriesSync(() => {
+        renderEnvies();
+    });
 
     initFoyerDataSync(() => {});
 
