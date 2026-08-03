@@ -3,8 +3,9 @@ import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
+import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
 
-import { removeFromJourGroup } from "./storage.js";
+
 
 
 import { renderEnvies } from "./ui.js";
@@ -144,6 +145,8 @@ function createVoyageItemRow(enfant, voyageEnvie) {
     row.dataset.dragId = enfant.id;
 
     const isInAdhocGroup = !!enfant.jourGroupId;
+    const isInDatedGroup = !!enfant.date?.start;
+    const canUngroup = isInAdhocGroup || isInDatedGroup;
 
     row.innerHTML = `
         <span class="dragHandle">⠿</span>
@@ -151,18 +154,25 @@ function createVoyageItemRow(enfant, voyageEnvie) {
             ${getCategorieById(enfant.categorie)?.emoji || "💡"} ${enfant.titre}
         </div>
         <div class="templateRowActions">
-            ${isInAdhocGroup ? `<button class="actionButton ungroupButton" title="Retirer du groupe">🔓</button>` : ""}
+            ${canUngroup ? `<button class="actionButton ungroupButton" title="Retirer du groupe">🔓</button>` : ""}
             <button class="actionButton realiseButton" title="${enfant.realise ? "Annuler" : "Réalisé"}">${enfant.realise ? "↩️" : "✅"}</button>
             <button class="actionButton editButton" title="Ouvrir">👁️</button>
             <button class="actionButton deleteButton" title="Retirer">✕</button>
         </div>
     `;
 
-    if (isInAdhocGroup) {
+    if (canUngroup) {
 
         row.querySelector(".ungroupButton").addEventListener("click", () => {
-            removeFromJourGroup(enfant.id);
+
+            if (isInAdhocGroup) {
+                removeFromJourGroup(enfant.id);
+            } else {
+                updateEnvieDate(enfant.id, null);
+            }
+
             renderVoyageSection(voyageEnvie);
+
         });
 
     }
@@ -207,6 +217,7 @@ function createVoyageItemRow(enfant, voyageEnvie) {
     return row;
 
 }
+
 
 
 function renderRattachement(envie, container) {
