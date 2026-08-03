@@ -50,7 +50,7 @@ function createEnvieCard(envie) {
         openEnvie(envie.id);
     });
 
-    card.innerHTML = `
+       card.innerHTML = `
         <div class="envieHeader">
             <button class="favoriteButton" data-id="${envie.id}">
                 ${envie.favorite ? "⭐" : "☆"}
@@ -64,9 +64,10 @@ function createEnvieCard(envie) {
             ${CATEGORIES[envie.categorie]?.label || "Général"}
         </div>
         <div class="envieActions">
-            <button class="actionButton editButton" data-id="${envie.id}">Modifier</button>
-            <button class="actionButton deleteButton" data-id="${envie.id}">Supprimer</button>
+            <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
+            <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
         </div>`;
+
 
     card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
