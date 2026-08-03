@@ -603,10 +603,14 @@ window.onerror = function(message, source, lineno, colno) {
 
         <h2>Ajouter un élément</h2>
 
-        <input
-            id="checklistInput"
-            type="text"
-            placeholder="Ex : Gourde">
+      <input
+    id="checklistInput"
+    type="text"
+    placeholder="Ex : Gourde"
+    autocomplete="off">
+
+<div id="checklistSuggestions" class="lieuSuggestions"></div>
+
 
         <div class="modal-actions">
 
