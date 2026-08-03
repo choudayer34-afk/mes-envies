@@ -16,6 +16,7 @@ import {
     openModal
 } from "./js/modal.js";
 import { initDateModal } from "./js/periode.js";
+import { initAuth } from "./js/auth.js";
 
 import { initVoyage } from "./js/voyage.js";
 import { initCarte } from "./js/carte.js";
