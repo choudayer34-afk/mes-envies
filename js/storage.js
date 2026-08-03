@@ -273,212 +273,216 @@ export function updateChecklistItemAssignment(envieId, itemId, assignedTo) {
 }
 
 
+let templatesCache = [];
+let categoriesCache = [];
+let personnesCache = [];
+let libraryCache = [];
 
+export function initFoyerDataSync(onChange) {
 
+    const foyerId = getFoyerId();
 
-const TEMPLATES_KEY = "envie_checklist_templates";
+    onSnapshot(collection(db, "foyers", foyerId, "checklistTemplates"), (snap) => {
+        templatesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+    });
 
-export function getChecklistTemplates() {
-    return JSON.parse(localStorage.getItem(TEMPLATES_KEY)) || [];
+    onSnapshot(collection(db, "foyers", foyerId, "checklistCategories"), (snap) => {
+        categoriesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+    });
+
+    onSnapshot(collection(db, "foyers", foyerId, "personnes"), (snap) => {
+        personnesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+    });
+
+    onSnapshot(collection(db, "foyers", foyerId, "checklistLibrary"), (snap) => {
+        libraryCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+    });
+
 }
 
-function saveTemplates(templates) {
-    localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+/* ---------- Modèles de checklist ---------- */
+
+export function getChecklistTemplates() {
+    return templatesCache;
 }
 
 export function getTemplate(id) {
-    return getChecklistTemplates().find(t => t.id === id);
+    return templatesCache.find(t => t.id === id);
 }
 
 export function createTemplate(nom) {
 
-    const templates = getChecklistTemplates();
+    const id = crypto.randomUUID();
 
-    const template = { id: crypto.randomUUID(), nom, items: [] };
+    setDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", id), { nom, items: [] })
+        .catch(console.error);
 
-    templates.push(template);
-    saveTemplates(templates);
-
-    return template;
+    return { id, nom, items: [] };
 
 }
 
 export function renameTemplate(id, nom) {
-
-    const templates = getChecklistTemplates();
-    const template = templates.find(t => t.id === id);
-
-    if (!template)
-        return;
-
-    template.nom = nom;
-    saveTemplates(templates);
-
+    updateDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", id), { nom }).catch(console.error);
 }
 
 export function deleteTemplate(id) {
-    saveTemplates(getChecklistTemplates().filter(t => t.id !== id));
+    deleteDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", id)).catch(console.error);
 }
 
 export function addTemplateItem(templateId, texte, type = "fixe", categorieId = null, quantite = 1) {
 
-    const templates = getChecklistTemplates();
-    const template = templates.find(t => t.id === templateId);
+    const template = getTemplate(templateId);
 
     if (!template)
         return;
 
-    template.items.push({
-        id: crypto.randomUUID(),
-        texte,
-        type,
-        categorieId,
-        quantite
-    });
+    const items = [...(template.items || []), {
+        id: crypto.randomUUID(), texte, type, categorieId, quantite
+    }];
 
-    saveTemplates(templates);
+    updateDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", templateId), { items })
+        .catch(console.error);
 
 }
-
-
-
 
 export function deleteTemplateItem(templateId, itemId) {
 
-    const templates = getChecklistTemplates();
-    const template = templates.find(t => t.id === templateId);
+    const template = getTemplate(templateId);
 
     if (!template)
         return;
 
-    template.items = template.items.filter(i => i.id !== itemId);
-    saveTemplates(templates);
+    updateDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", templateId), {
+        items: template.items.filter(i => i.id !== itemId)
+    }).catch(console.error);
 
 }
 
-const CHECKLIST_CATEGORIES_KEY = "envie_checklist_categories";
+/* ---------- Catégories de checklist ---------- */
 
 export function getChecklistCategories() {
-    return JSON.parse(localStorage.getItem(CHECKLIST_CATEGORIES_KEY)) || [];
-}
-
-function saveChecklistCategories(categories) {
-    localStorage.setItem(CHECKLIST_CATEGORIES_KEY, JSON.stringify(categories));
+    return categoriesCache;
 }
 
 export function createChecklistCategory(nom, emoji = "🏷️") {
 
-    const categories = getChecklistCategories();
+    const id = crypto.randomUUID();
 
-    const categorie = { id: crypto.randomUUID(), nom, emoji };
+    setDoc(doc(db, "foyers", getFoyerId(), "checklistCategories", id), { nom, emoji })
+        .catch(console.error);
 
-    categories.push(categorie);
-    saveChecklistCategories(categories);
-
-    return categorie;
+    return { id, nom, emoji };
 
 }
 
 export function renameChecklistCategory(id, nom, emoji) {
-
-    const categories = getChecklistCategories();
-    const categorie = categories.find(c => c.id === id);
-
-    if (!categorie)
-        return;
-
-    categorie.nom = nom;
-    categorie.emoji = emoji;
-
-    saveChecklistCategories(categories);
-
+    updateDoc(doc(db, "foyers", getFoyerId(), "checklistCategories", id), { nom, emoji })
+        .catch(console.error);
 }
 
 export function deleteChecklistCategory(id) {
-    saveChecklistCategories(getChecklistCategories().filter(c => c.id !== id));
+    deleteDoc(doc(db, "foyers", getFoyerId(), "checklistCategories", id)).catch(console.error);
 }
 
-
-
-const CHECKLIST_LIBRARY_KEY = "envie_checklist_library";
-
-export function getChecklistLibrary() {
-    return JSON.parse(localStorage.getItem(CHECKLIST_LIBRARY_KEY)) || [];
-}
-
-function saveChecklistLibrary(items) {
-    localStorage.setItem(CHECKLIST_LIBRARY_KEY, JSON.stringify(items));
-}
-
-function rememberChecklistItem(texte, categorieId = null) {
-
-    const library = getChecklistLibrary();
-
-    const existing = library.find(
-        i => i.texte.toLowerCase() === texte.toLowerCase()
-    );
-
-    if (existing) {
-        existing.categorieId = categorieId ?? existing.categorieId;
-        existing.updatedAt = Date.now();
-    } else {
-        library.unshift({
-            id: crypto.randomUUID(),
-            texte,
-            categorieId,
-            updatedAt: Date.now()
-        });
-    }
-
-    saveChecklistLibrary(library.slice(0, 200));
-
-}
-
-const PERSONNES_KEY = "envie_personnes_foyer";
+/* ---------- Personnes du foyer ---------- */
 
 export function getPersonnes() {
-    return JSON.parse(localStorage.getItem(PERSONNES_KEY)) || [];
-}
-
-function savePersonnes(personnes) {
-    localStorage.setItem(PERSONNES_KEY, JSON.stringify(personnes));
+    return personnesCache;
 }
 
 export function createPersonne(nom) {
 
-    const personnes = getPersonnes();
-
-    const existing = personnes.find(
-        p => p.nom.toLowerCase() === nom.toLowerCase()
-    );
+    const existing = personnesCache.find(p => p.nom.toLowerCase() === nom.toLowerCase());
 
     if (existing)
         return existing;
 
-    const personne = { id: crypto.randomUUID(), nom };
+    const id = crypto.randomUUID();
 
-    personnes.push(personne);
-    savePersonnes(personnes);
+    setDoc(doc(db, "foyers", getFoyerId(), "personnes", id), { nom }).catch(console.error);
 
-    return personne;
+    return { id, nom };
 
 }
 
 export function renamePersonne(id, nom) {
-
-    const personnes = getPersonnes();
-    const personne = personnes.find(p => p.id === id);
-
-    if (!personne)
-        return;
-
-    personne.nom = nom;
-    savePersonnes(personnes);
-
+    updateDoc(doc(db, "foyers", getFoyerId(), "personnes", id), { nom }).catch(console.error);
 }
 
 export function deletePersonne(id) {
-    savePersonnes(getPersonnes().filter(p => p.id !== id));
+    deleteDoc(doc(db, "foyers", getFoyerId(), "personnes", id)).catch(console.error);
 }
+
+/* ---------- Bibliothèque d'éléments de checklist ---------- */
+
+export function getChecklistLibrary() {
+    return libraryCache;
+}
+
+function rememberChecklistItem(texte, categorieId = null) {
+
+    const existing = libraryCache.find(i => i.texte.toLowerCase() === texte.toLowerCase());
+
+    if (existing) {
+
+        updateDoc(doc(db, "foyers", getFoyerId(), "checklistLibrary", existing.id), {
+            categorieId: categorieId ?? existing.categorieId,
+            updatedAt: Date.now()
+        }).catch(console.error);
+
+    } else {
+
+        const id = crypto.randomUUID();
+
+        setDoc(doc(db, "foyers", getFoyerId(), "checklistLibrary", id), {
+            texte, categorieId, updatedAt: Date.now()
+        }).catch(console.error);
+
+    }
+
+}
+
+/* ---------- Migration one-shot (localStorage -> Firestore) ---------- */
+
+export async function migrateLocalDataToFoyer(foyerId) {
+
+    const oldTemplates = JSON.parse(localStorage.getItem("envie_checklist_templates")) || [];
+    const oldCategories = JSON.parse(localStorage.getItem("envie_checklist_categories")) || [];
+    const oldPersonnes = JSON.parse(localStorage.getItem("envie_personnes_foyer")) || [];
+    const oldLibrary = JSON.parse(localStorage.getItem("envie_checklist_library")) || [];
+    const oldEnvies = JSON.parse(localStorage.getItem("envie_envies")) || [];
+
+    for (const t of oldTemplates) {
+        await setDoc(doc(db, "foyers", foyerId, "checklistTemplates", t.id), { nom: t.nom, items: t.items || [] });
+    }
+
+    for (const c of oldCategories) {
+        await setDoc(doc(db, "foyers", foyerId, "checklistCategories", c.id), { nom: c.nom, emoji: c.emoji });
+    }
+
+    for (const p of oldPersonnes) {
+        await setDoc(doc(db, "foyers", foyerId, "personnes", p.id), { nom: p.nom });
+    }
+
+    for (const item of oldLibrary) {
+        await setDoc(doc(db, "foyers", foyerId, "checklistLibrary", item.id), {
+            texte: item.texte, categorieId: item.categorieId, updatedAt: item.updatedAt || Date.now()
+        });
+    }
+
+    for (const envie of oldEnvies) {
+        const { id, ...data } = envie;
+        await setDoc(doc(db, "foyers", foyerId, "envies", id), data);
+    }
+
+}
+
+
+
+
 
 
