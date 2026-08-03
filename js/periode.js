@@ -1,6 +1,7 @@
 
 import { getCurrentEnvieId } from "./envie.js";
-import { updateEnvieDate, updateEnviePersonnes, propagateDateToGroup } from "./storage.js";
+import { updateEnvieDate, propagateDateToGroup } from "./storage.js";
+
 import { updateEnviePersonnesIds, getPersonnes } from "./storage.js";
 
 
