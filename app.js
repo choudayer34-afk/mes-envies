@@ -13,6 +13,7 @@ import { initEnvieCategoriesSync } from "./js/storage.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
+import { renderCreationCategorieSelector } from "./js/modal.js";
 
 import { renderEnvies } from "./js/ui.js";
 import {
@@ -63,7 +64,9 @@ function init() {
     });
     initEnvieCategoriesSync(() => {
         renderEnvies();
+        renderCreationCategorieSelector();
     });
+
 
     initFoyerDataSync(() => {});
 
