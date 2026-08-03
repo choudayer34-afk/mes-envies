@@ -255,17 +255,24 @@ export function renderLieuActions(envie) {
         return;
     }
 
-    const itineraireButton = document.createElement("a");
-    itineraireButton.className = "secondaryButton lieuActionButton";
-    itineraireButton.textContent = "🧭 Itinéraire";
-    itineraireButton.href = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
-    itineraireButton.target = "_blank";
-    itineraireButton.rel = "noopener";
+    const googleButton = document.createElement("a");
+    googleButton.className = "secondaryButton lieuActionButton";
+    googleButton.textContent = "🧭 Google Maps";
+    googleButton.href = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+    googleButton.target = "_blank";
+    googleButton.rel = "noopener";
+
+    const wazeButton = document.createElement("a");
+    wazeButton.className = "secondaryButton lieuActionButton";
+    wazeButton.textContent = "🚗 Waze";
+    wazeButton.href = `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`;
+    wazeButton.target = "_blank";
+    wazeButton.rel = "noopener";
 
     const copyButton = document.createElement("button");
     copyButton.type = "button";
     copyButton.className = "secondaryButton lieuActionButton";
-    copyButton.textContent = "📋 Copier l'adresse";
+    copyButton.textContent = "📋 Copier";
 
     copyButton.addEventListener("click", async () => {
 
@@ -279,12 +286,13 @@ export function renderLieuActions(envie) {
         }
 
         setTimeout(() => {
-            copyButton.textContent = "📋 Copier l'adresse";
+            copyButton.textContent = "📋 Copier";
         }, 2000);
 
     });
 
-    container.appendChild(itineraireButton);
+    container.appendChild(googleButton);
+    container.appendChild(wazeButton);
     container.appendChild(copyButton);
 
 }
