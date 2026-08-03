@@ -9,12 +9,12 @@ export function getCurrentEnvieId() {
 }
 
 export const CATEGORIES = {
-    general: { emoji: "💡", label: "Général" },
+    general: { emoji: "💡", label: "Idée" },
     voyage: { emoji: "✈️", label: "Voyage" },
     maison: { emoji: "🏠", label: "Maison" },
     jardin: { emoji: "🌿", label: "Jardin" },
     courses: { emoji: "🛒", label: "Courses" },
-    evenement: { emoji: "📅", label: "Événement" }
+    evenement: { emoji: "📅", label: "Sortie" }
 };
 
 export function openEnvie(id) {
