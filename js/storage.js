@@ -200,9 +200,10 @@ export function updateEnvieCategorie(id, categorie) {
     patchEnvie(id, { categorie });
 }
 
-export function updateEnviePersonnes(id, personnes) {
-    patchEnvie(id, { personnes: Math.max(1, personnes) });
+export function updateEnviePersonnesIds(id, personnesIds) {
+    patchEnvie(id, { personnesIds });
 }
+
 
 export function updateEnvieVoyage(id, voyageId) {
     patchEnvie(id, { voyageId });
@@ -247,7 +248,7 @@ export function removeUrl(envieId, urlId) {
 
 }
 
-export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null, assignedTo = [], id = null) {
+export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null, assignedTo = [], id = null, parPersonne = false) {
 
     const envie = enviesCache.find(e => e.id === envieId);
 
@@ -262,7 +263,9 @@ export function addChecklistItem(envieId, texte, quantite = 1, categorieId = nul
         quantite,
         categorieId,
         assignedTo,
-        checked: false
+        parPersonne,
+        checked: false,
+        checkedBy: {}
     }];
 
     patchEnvie(envieId, { checklist });
@@ -272,6 +275,7 @@ export function addChecklistItem(envieId, texte, quantite = 1, categorieId = nul
     return newId;
 
 }
+
 
 
 export function toggleChecklistItem(envieId, itemId) {
