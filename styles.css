@@ -1095,3 +1095,39 @@ button {
     border-radius:var(--radius-medium);
 }
 
+.homeIconRow{
+    display:flex;
+    gap:10px;
+    margin-bottom:24px;
+}
+
+.iconButtonRow{
+    flex:1;
+    height:50px;
+    border:none;
+    border-radius:16px;
+    background:#EEF4F6;
+    font-size:22px;
+    cursor:pointer;
+}
+
+.templateRowActions .actionButton{
+    width:38px;
+    height:38px;
+    padding:0;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.envieActions .actionButton{
+    width:38px;
+    height:38px;
+    padding:0;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
