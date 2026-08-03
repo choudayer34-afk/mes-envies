@@ -982,3 +982,8 @@ button {
     font-size:15px;
 }
 
+.lieuManualItem{
+    background:#FAFCFD;
+    font-style:italic;
+}
+
