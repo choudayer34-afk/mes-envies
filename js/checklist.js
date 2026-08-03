@@ -10,7 +10,7 @@ import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { computeQuantite } from "./periode.js";
 import {
-    addMultipleChecklistItems, getChecklistCategories, createChecklistCategory
+    addMultipleChecklistItems, createChecklistCategory
 } from "./storage.js";
 
 let currentChecklistEnvieId = null;
