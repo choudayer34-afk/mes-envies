@@ -405,13 +405,7 @@ function removeEnvie(id) {
 
 
 
-function closeFiche() {
 
-    document
-        .getElementById("ficheOverlay")
-        .classList.add("hidden");
-
-}
 
 
 function renderEnvies() {
