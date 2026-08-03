@@ -30,7 +30,8 @@ from "./js/location.js";
 import {
     openEnvie,
     closeFiche,
-    CATEGORIES
+    CATEGORIES,
+    getCurrentEnvieId
 } from "./js/envie.js";
 
 import {
@@ -54,7 +55,7 @@ const APP = {
 let currentEditId = null;
 let currentCategorie = "general";
 let currentDeleteId = null;
-let currentEnvieId = null;
+
 let currentUrlEnvieId = null;
 let currentChecklistEnvieId = null;
 
@@ -645,7 +646,8 @@ function initUrlModal(){
         .getElementById("addUrlButton")
         .addEventListener("click",()=>{
 
-            currentUrlEnvieId=currentEnvieId;
+            currentUrlEnvieId = getCurrentEnvieId();
+
 
             document
                 .getElementById("urlInput")
@@ -704,7 +706,8 @@ function initChecklistModal(){
         .getElementById("addChecklistButton")
         .addEventListener("click",()=>{
 
-            currentChecklistEnvieId=currentEnvieId;
+            currentChecklistEnvieId = getCurrentEnvieId();
+
 
             document
                 .getElementById("checklistInput")
