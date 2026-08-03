@@ -1,6 +1,7 @@
-import { addChecklistItem, toggleChecklistItem, deleteChecklistItem } from "./storage.js";
+import { addChecklistItem, toggleChecklistItem, deleteChecklistItem, getChecklistTemplates, getEnvies } from "./storage.js";
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
+import { computeQuantite } from "./periode.js";
 
 let currentChecklistEnvieId = null;
 
@@ -14,10 +15,12 @@ export function renderChecklist(envie) {
         const row = document.createElement("div");
         row.className = "checklistRow";
 
+        const prefix = item.quantite > 1 ? `${item.quantite}× ` : "";
+
         row.innerHTML = `
             <label class="checkLabel">
                 <input type="checkbox" ${item.checked ? "checked" : ""}>
-                <span>${item.texte}</span>
+                <span>${prefix}${item.texte}</span>
             </label>
             <button class="deleteChecklistButton">🗑️</button>
         `;
@@ -56,6 +59,14 @@ export function initChecklistModal() {
 
     document.getElementById("saveChecklist").addEventListener("click", saveChecklistItem);
 
+    document.getElementById("useTemplateButton").addEventListener("click", () => {
+        openTemplatePicker();
+    });
+
+    document.getElementById("closeTemplatePicker").addEventListener("click", () => {
+        document.getElementById("templatePickerModal").classList.add("hidden");
+    });
+
 }
 
 function saveChecklistItem() {
@@ -73,5 +84,67 @@ function saveChecklistItem() {
     openEnvie(currentChecklistEnvieId);
 
     showToast("✓ Élément ajouté");
+
+}
+
+function openTemplatePicker() {
+
+    const container = document.getElementById("templatePickerList");
+    const templates = getChecklistTemplates();
+
+    container.innerHTML = "";
+
+    if (templates.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun modèle disponible. Crée-en un dans ⚙️ Paramètres.</div>`;
+    }
+
+    templates.forEach(template => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">
+                🧳 ${template.nom}
+                <small>(${template.items.length} élément${template.items.length > 1 ? "s" : ""})</small>
+            </div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton">Utiliser</button>
+            </div>
+        `;
+
+        row.querySelector(".editButton").addEventListener("click", () => {
+            applyTemplate(template.id);
+        });
+
+        container.appendChild(row);
+
+    });
+
+    document.getElementById("templatePickerModal").classList.remove("hidden");
+
+}
+
+function applyTemplate(templateId) {
+
+    const envieId = getCurrentEnvieId();
+    const envie = getEnvies().find(e => e.id === envieId);
+    const template = getChecklistTemplates().find(t => t.id === templateId);
+
+    if (!envie || !template)
+        return;
+
+    template.items.forEach(item => {
+
+        const quantite = computeQuantite(item, envie);
+        addChecklistItem(envieId, item.texte, quantite);
+
+    });
+
+    document.getElementById("templatePickerModal").classList.add("hidden");
+
+    openEnvie(envieId);
+
+    showToast(`✓ Modèle "${template.nom}" appliqué`);
 
 }
