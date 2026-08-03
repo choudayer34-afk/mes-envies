@@ -197,6 +197,7 @@ export function addChecklistItem(envieId, texte, quantite = 1){
 }
 
 
+
 export function toggleChecklistItem(envieId,itemId){
 
     const envies=getEnvies();
