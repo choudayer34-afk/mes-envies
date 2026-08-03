@@ -862,3 +862,12 @@ button {
     box-sizing:border-box;
 }
 
+.checklistButtonsRow{
+    display:flex;
+    gap:10px;
+    margin-top:14px;
+}
+
+.checklistButtonsRow .secondaryButton{
+    flex:1;
+}
