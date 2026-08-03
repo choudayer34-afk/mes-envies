@@ -2,6 +2,7 @@ import { deleteEnvie, updateEnvie, createEnvie } from "./storage.js";
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
 import { getSelectedLieu, resetSelectedLieu } from "./location.js";
+import { getSelectedPeriode, resetSelectedPeriode } from "./periode.js";
 
 let currentEditId = null;
 let currentCategorie = "general";
@@ -75,14 +76,16 @@ function saveCurrentEnvie() {
 
     } else {
 
-        createEnvie({
+               createEnvie({
             titre,
             categorie: currentCategorie,
             lieu: getSelectedLieu(),
-            date: null
+            date: getSelectedPeriode()
         });
 
         resetSelectedLieu();
+        resetSelectedPeriode();
+
         showToast("✓ Envie ajoutée");
 
     }
@@ -126,42 +129,4 @@ export function removeEnvie(id) {
 
 /* ---------- Date (placeholder, logique complète en Sprint XII) ---------- */
 
-export function initDateModal() {
 
-    document.getElementById("chooseDate").addEventListener("click", () => {
-        document.getElementById("dateModal").classList.remove("hidden");
-    });
-
-    document.getElementById("cancelDate").addEventListener("click", () => {
-        document.getElementById("dateModal").classList.add("hidden");
-    });
-
-}
-
-export function initDatePicker() {
-
-    const button = document.getElementById("chooseDate");
-    const input = document.getElementById("envieDate");
-    const label = document.getElementById("dateLabel");
-
-    button.addEventListener("click", () => {
-        input.showPicker?.();
-        input.click();
-    });
-
-    input.addEventListener("change", () => {
-
-        if (!input.value)
-            return;
-
-        const date = new Date(input.value);
-
-        label.textContent = date.toLocaleDateString("fr-FR", {
-            day: "numeric",
-            month: "long",
-            year: "numeric"
-        });
-
-    });
-
-}
