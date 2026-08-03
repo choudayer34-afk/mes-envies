@@ -69,6 +69,9 @@ export function createEnvie({
 
         date: date || null,
         personnes,
+                jourGroupId: null,
+        ordre: Date.now(),
+
         voyageId: null,
         archived: false,
         statut: "inbox",
@@ -93,6 +96,58 @@ export function toggleFavorite(id) {
         return;
 
     patchEnvie(id, { favorite: !envie.favorite });
+
+}
+
+export function updateEnvieOrdre(id, ordre) {
+    patchEnvie(id, { ordre });
+}
+
+export function groupEnvieWith(sourceId, targetId) {
+
+    if (sourceId === targetId)
+        return;
+
+    const target = enviesCache.find(e => e.id === targetId);
+
+    if (!target)
+        return;
+
+    if (target.date?.start) {
+
+        patchEnvie(sourceId, {
+            date: target.date,
+            jourGroupId: null,
+            ordre: (target.ordre || 0) - 0.5
+        });
+
+    } else {
+
+        let groupId = target.jourGroupId;
+
+        if (!groupId) {
+            groupId = crypto.randomUUID();
+            patchEnvie(targetId, { jourGroupId: groupId });
+        }
+
+        patchEnvie(sourceId, {
+            jourGroupId: groupId,
+            date: null,
+            ordre: (target.ordre || 0) - 0.5
+        });
+
+    }
+
+}
+
+export function reorderEnvieNear(sourceId, targetId) {
+
+    const target = enviesCache.find(e => e.id === targetId);
+
+    if (!target)
+        return;
+
+    patchEnvie(sourceId, { ordre: (target.ordre || 0) - 0.5 });
 
 }
 
