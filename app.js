@@ -9,6 +9,7 @@
 
 "use strict";
 
+import { initFoyerDataSync } from "./js/storage.js";
 
 import { renderEnvies } from "./js/ui.js";
 import {
@@ -56,6 +57,7 @@ function init() {
         renderEnvies();
     });
 
+    initFoyerDataSync(() => {});
 
     renderEnvies();
 
