@@ -154,21 +154,6 @@ window.onerror = function(message, source, lineno) {
 
     </button>
 
-<div class="homeIconRow">
-    <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
-        📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
-    </button>
-    <button id="btnCarte" class="iconButtonRow" title="Voir la carte" aria-label="Voir la carte">
-        🗺️
-    </button>
-    <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
-        📆
-    </button>
-</div>
-
-
-
-
     <section class="card">
 
         <h2>
@@ -183,17 +168,30 @@ window.onerror = function(message, source, lineno) {
 
     </section>
 
-<section id="ajourdhuiSection" class="inboxSection hidden">
-    <h2 class="sectionTitle">🔆 Aujourd'hui</h2>
-    <div id="ajourdhuiContainer"></div>
-</section>
+    <div class="homeIconRow">
+        <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
+            📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
+        </button>
+        <button id="btnCarte" class="iconButtonRow" title="Voir la carte" aria-label="Voir la carte">
+            🗺️
+        </button>
+        <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
+            📆
+        </button>
+    </div>
 
-<section id="continuerSection" class="inboxSection hidden">
-    <h2 class="sectionTitle">▶️ Continuer</h2>
-    <div id="continuerContainer"></div>
-</section>
+    <section id="ajourdhuiSection" class="inboxSection hidden">
+        <h2 class="sectionTitle">🔆 Aujourd'hui</h2>
+        <div id="ajourdhuiContainer"></div>
+    </section>
+
+    <section id="continuerSection" class="inboxSection hidden">
+        <h2 class="sectionTitle">▶️ Continuer</h2>
+        <div id="continuerContainer"></div>
+    </section>
 
 </main>
+
 
 <div id="modalOverlay" class="modal-overlay hidden">
 
