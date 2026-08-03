@@ -1,9 +1,7 @@
-import { getEnvies, toggleFavorite } from "./storage.js";
+import { getEnvies, toggleFavorite, updateEnvieRealise } from "./storage.js";
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
-import { getCategorieById, isContainer, openEnvie } from "./envie.js";
-
-
+import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
 
 function isUntriaged(envie) {
 
@@ -20,10 +18,8 @@ function isUntriaged(envie) {
 }
 
 export function renderEnvies() {
-
     renderHomeSections();
     renderInboxList();
-
 }
 
 function renderInboxList() {
@@ -45,18 +41,8 @@ function renderInboxList() {
     container.innerHTML = "";
 
     if (envies.length === 0) {
-
-        container.innerHTML = `
-            <div class="emptyState">
-              Aucune envie pour le moment 🌱
-              <br><br>
-              Ajoutez votre première idée.
-              <br><br>
-              Elle apparaîtra ici automatiquement.
-            </div>`;
-
+        container.innerHTML = `<div class="emptyState">Aucune envie pour le moment 🌱<br><br>Ajoutez votre première idée.</div>`;
         return;
-
     }
 
     envies.forEach(envie => {
@@ -75,22 +61,18 @@ function renderHomeSections() {
     );
 
     const continuerItems = envies.filter(e => {
-
         if (!isContainer(e.categorie))
             return false;
-
         const { statut } = computeContainerStatus(e);
         return statut === "en_cours";
-
     });
 
-    renderSection("ajourdhuiSection", "ajourdhuiContainer", ajourdhuiItems);
-    renderSection("continuerSection", "continuerContainer", continuerItems);
+    renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
+    renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ Continuer", continuerItems, createEnvieCard);
 
 }
 
-
-function renderSection(sectionId, containerId, items) {
+function renderCollapsibleSection(sectionId, containerId, label, items, rowFactory) {
 
     const section = document.getElementById(sectionId);
     const container = document.getElementById(containerId);
@@ -104,11 +86,79 @@ function renderSection(sectionId, containerId, items) {
     }
 
     section.classList.remove("hidden");
-    container.innerHTML = "";
+
+    let header = section.querySelector(".homeSectionHeader");
+
+    if (!header) {
+
+        header = document.createElement("button");
+        header.type = "button";
+        header.className = "homeSectionHeader";
+
+        const content = document.createElement("div");
+        content.id = containerId;
+        content.className = "homeSectionContent";
+
+        section.innerHTML = "";
+        section.appendChild(header);
+        section.appendChild(content);
+
+        header.addEventListener("click", () => {
+
+            content.classList.toggle("hidden");
+
+            const icon = header.querySelector(".accordionIcon");
+            icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
+
+        });
+
+    }
+
+    const freshContainer = document.getElementById(containerId);
+
+    header.innerHTML = `<span>${label} (${items.length})</span><span class="accordionIcon">▾</span>`;
+
+    freshContainer.innerHTML = "";
 
     items.forEach(envie => {
-        container.appendChild(createEnvieCard(envie));
+        freshContainer.appendChild(rowFactory(envie));
     });
+
+}
+
+function createCompactRow(envie) {
+
+    const row = document.createElement("div");
+    row.className = "checklistRow";
+
+    row.innerHTML = `
+        <label class="checkLabel">
+            <input type="checkbox" ${envie.realise ? "checked" : ""}>
+            <span>${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
+        </label>
+        <button class="editAgendaButton" title="Modifier">✏️</button>
+    `;
+
+    row.querySelector("input").addEventListener("change", () => {
+
+        const nouvelEtat = !envie.realise;
+
+        updateEnvieRealise(envie.id, nouvelEtat);
+
+        if (nouvelEtat) {
+            openEnvie(envie.id);
+            openEvaluationAccordion();
+        }
+
+    });
+
+    row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        event.preventDefault();
+        openEnvie(envie.id);
+    });
+
+    return row;
 
 }
 
@@ -146,21 +196,19 @@ function createEnvieCard(envie) {
                 ${envie.titre}
             </div>
         </div>
-               <div class="envieCategory">
+        <div class="envieCategory">
             ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
-
         ${statutHtml}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
         </div>`;
 
-      card.querySelector(".editButton").addEventListener("click", (event) => {
+    card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
         openEnvie(envie.id);
     });
-
 
     card.querySelector(".deleteButton").addEventListener("click", (event) => {
         event.stopPropagation();
