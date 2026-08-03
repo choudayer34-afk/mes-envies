@@ -681,5 +681,15 @@ export function removePersonneFromChecklistItem(envieId, itemId, personneId) {
 
 }
 
+export function removeFromJourGroup(envieId) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie || !envie.jourGroupId)
+        return;
+
+    patchEnvie(envieId, { jourGroupId: null });
+
+}
 
 
