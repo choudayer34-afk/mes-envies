@@ -7,23 +7,23 @@ import { renderPeriode } from "./periode.js";
 
 import { renderVoyageSection } from "./voyage.js";
 import { renderEvaluation } from "./evaluation.js";
-
+import { getEnvieCategories, isContainerCategory } from "./storage.js";
 let currentEnvieId = null;
 
 export function getCurrentEnvieId() {
     return currentEnvieId;
 }
 
-export const CATEGORIES = {
-    general: { emoji: "💡", label: "Idée" },
-    voyage: { emoji: "✈️", label: "Voyage" },
-        projet: { emoji: "🛠️", label: "Projet" },
-    maison: { emoji: "🏠", label: "Maison" },
-    jardin: { emoji: "🌿", label: "Jardin" },
-    courses: { emoji: "🛒", label: "Courses" },
-    evenement: { emoji: "📅", label: "Sortie" }
-    
-};
+
+
+export function getCategorieById(id) {
+    return getEnvieCategories().find(c => c.id === id);
+}
+
+export function isContainer(categorieId) {
+    return isContainerCategory(categorieId);
+}
+
 
 export function openEnvie(id) {
 
@@ -81,16 +81,16 @@ function renderCategorieSelector(envie) {
 
     container.innerHTML = "";
 
-    Object.entries(CATEGORIES).forEach(([key, data]) => {
+    getEnvieCategories().forEach(cat => {
 
         const chip = document.createElement("button");
         chip.type = "button";
-        chip.className = "categorieChip" + (key === envie.categorie ? " active" : "");
-        chip.textContent = `${data.emoji} ${data.label}`;
+        chip.className = "categorieChip" + (cat.id === envie.categorie ? " active" : "");
+        chip.textContent = `${cat.emoji} ${cat.label}`;
 
         chip.addEventListener("click", () => {
-            updateEnvieCategorie(envie.id, key);
-            renderCategorieSelector({ ...envie, categorie: key });
+            updateEnvieCategorie(envie.id, cat.id);
+            renderCategorieSelector({ ...envie, categorie: cat.id });
         });
 
         container.appendChild(chip);
@@ -98,6 +98,7 @@ function renderCategorieSelector(envie) {
     });
 
 }
+
 
 export function closeFiche() {
     document.getElementById("ficheOverlay").classList.add("hidden");
