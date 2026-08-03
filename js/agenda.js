@@ -125,11 +125,23 @@ function createAgendaRow(envie) {
     });
 
        row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
+
+        console.log("Crayon cliqué, envie=" + JSON.stringify({ id: envie?.id, titre: envie?.titre }));
+
         event.stopPropagation();
         event.preventDefault();
-        closeAgenda();
-        openEnvie(envie.id);
+
+        try {
+            closeAgenda();
+            console.log("closeAgenda OK");
+            openEnvie(envie.id);
+            console.log("openEnvie OK");
+        } catch (err) {
+            console.error("ERREUR dans le handler crayon: " + err.message);
+        }
+
     });
+
 
 
     return row;
