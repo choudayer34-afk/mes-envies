@@ -4,6 +4,7 @@ import {
     getChecklistLibrary, getPersonnes, createPersonne,
     updateChecklistItemAssignment
 } from "./storage.js";
+import { removePersonneFromChecklistItem } from "./storage.js";
 
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
@@ -150,7 +151,7 @@ function createChecklistRow(item, envie, personneContext = null) {
             </span>
         </label>
         <button class="assignItemButton" title="Attribuer">👤</button>
-        <button class="deleteChecklistButton">🗑️</button>
+        <button class="deleteChecklistButton" title="${personneContext ? "Retirer pour cette personne" : "Supprimer"}">🗑️</button>
     `;
 
     row.querySelector("input").addEventListener("change", () => {
@@ -170,24 +171,34 @@ function createChecklistRow(item, envie, personneContext = null) {
         openAssignModal(envie.id, item);
     });
 
-       row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
+    row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
 
         event.stopPropagation();
 
-        if (!window.confirm(`Supprimer "${item.texte}" ?`))
-            return;
+        if (personneContext) {
 
-        deleteChecklistItem(envie.id, item.id);
+            if (!window.confirm(`Retirer "${item.texte}" de la liste de cette personne ?`))
+                return;
 
-        row.remove();
+            removePersonneFromChecklistItem(envie.id, item.id, personneContext);
+            row.remove();
+
+        } else {
+
+            if (!window.confirm(`Supprimer "${item.texte}" ?`))
+                return;
+
+            deleteChecklistItem(envie.id, item.id);
+            row.remove();
+
+        }
 
     });
-
-
 
     return row;
 
 }
+
 
 
 function formatAssignLabel(assignedTo) {
