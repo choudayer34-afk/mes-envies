@@ -79,9 +79,10 @@ function renderByPersonne(items, envie, checklist) {
 
         checklist.appendChild(header);
 
-        concernes.forEach(item => {
-            checklist.appendChild(createChecklistRow(item, envie));
+               concernes.forEach(item => {
+            checklist.appendChild(createChecklistRow(item, envie, personne.id));
         });
+
 
     });
 
