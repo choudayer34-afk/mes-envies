@@ -54,7 +54,51 @@ export function initLocation() {
         });
     }
 
+    initClearButton(
+        document.getElementById("clearEnvieLieu"),
+        document.getElementById("envieLieu"),
+        document.getElementById("creationlieuSuggestions"),
+        () => { resetSelectedLieu(); }
+    );
+
+    initClearButton(
+        document.getElementById("clearFicheLieu"),
+        document.getElementById("ficheLieu"),
+        document.getElementById("fichelieuSuggestions"),
+        () => { updateEnvieLieu(getCurrentEnvieId(), emptyLieu()); }
+    );
+
 }
+
+function emptyLieu() {
+    return { nom: "", adresse: "", latitude: null, longitude: null };
+}
+
+function initClearButton(button, input, suggestionsBox, onClear) {
+
+    if (!button || !input)
+        return;
+
+    button.addEventListener("click", () => {
+
+        input.value = "";
+
+        if (suggestionsBox)
+            suggestionsBox.innerHTML = "";
+
+        const precisionLabel = input.parentElement.querySelector(".lieuPrecision");
+
+        if (precisionLabel)
+            precisionLabel.remove();
+
+        onClear();
+
+        input.focus();
+
+    });
+
+}
+
 
 function setupAutocomplete(input, suggestionsBox, onSelect) {
 
