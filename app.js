@@ -33,6 +33,7 @@ import { initUrlModal } from "./js/urls.js";
 import { initLocation } from "./js/location.js";
 import { closeFiche, initAccordions } from "./js/envie.js";
 import { initAdmin } from "./js/admin.js";
+import { initFicheDelete } from "./js/envie.js";
 
 const APP = {
     name: "EnVie",
@@ -58,6 +59,7 @@ function init() {
             initCarte();
     initFicheTitre();
     initAgenda();
+    initFicheDelete();
 
     initEnviesSync(() => {
         renderEnvies();
