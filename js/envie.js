@@ -32,7 +32,7 @@ export function openEnvie(id) {
 
     const envie = getEnvies().find(e => e.id === id);
 
-    console.log("openEnvie appelé avec id=" + id + ", trouvé=" + !!envie);
+   
 
     if (!envie)
         return;
