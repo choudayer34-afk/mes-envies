@@ -1,7 +1,8 @@
-/* js/urls.js */
-
 import { addUrl as addUrlStorage, removeUrl as removeUrlStorage } from "./storage.js";
-import { openEnvie } from "./envie.js";
+import { openEnvie, getCurrentEnvieId } from "./envie.js";
+import { showToast } from "./toast.js";
+
+let currentUrlEnvieId = null;
 
 export function renderUrls(envie) {
 
@@ -18,11 +19,11 @@ export function renderUrls(envie) {
             <button class="deleteUrlButton">🗑️</button>
         `;
 
-        div.querySelector(".deleteUrlButton")
-            .addEventListener("click", (event) => {
-                event.stopPropagation();
-                deleteUrl(envie.id, link.id);
-            });
+        div.querySelector(".deleteUrlButton").addEventListener("click", (event) => {
+            event.stopPropagation();
+            removeUrlStorage(envie.id, link.id);
+            openEnvie(envie.id);
+        });
 
         urlList.appendChild(div);
 
@@ -30,12 +31,39 @@ export function renderUrls(envie) {
 
 }
 
-export function addUrl(envieId, url) {
-    addUrlStorage(envieId, url);
-    openEnvie(envieId);
+export function initUrlModal() {
+
+    document.getElementById("addUrlButton").addEventListener("click", () => {
+
+        currentUrlEnvieId = getCurrentEnvieId();
+
+        document.getElementById("urlInput").value = "";
+        document.getElementById("urlModal").classList.remove("hidden");
+
+    });
+
+    document.getElementById("cancelUrl").addEventListener("click", () => {
+        document.getElementById("urlModal").classList.add("hidden");
+    });
+
+    document.getElementById("saveUrl").addEventListener("click", saveCurrentUrl);
+
 }
 
-export function deleteUrl(envieId, urlId) {
-    removeUrlStorage(envieId, urlId);
-    openEnvie(envieId);
+function saveCurrentUrl() {
+
+    const input = document.getElementById("urlInput");
+    const url = input.value.trim();
+
+    if (!url)
+        return;
+
+    addUrlStorage(currentUrlEnvieId, url);
+
+    document.getElementById("urlModal").classList.add("hidden");
+
+    openEnvie(currentUrlEnvieId);
+
+    showToast("✓ Lien ajouté");
+
 }
