@@ -1,6 +1,8 @@
 import { getEnvies, updateEnvieRealise } from "./storage.js";
 import { groupAndSort } from "./grouping.js";
 import { CATEGORIES, openEnvie } from "./envie.js";
+import { groupForAgenda } from "./grouping.js";
+
 
 export function initAgenda() {
     document.getElementById("btnAgenda").addEventListener("click", openAgenda);
@@ -21,25 +23,60 @@ function renderAgenda() {
     const container = document.getElementById("agendaContent");
     container.innerHTML = "";
 
-    const { groups, todo } = groupAndSort(getEnvies());
+    const { datedGroups, adhocGroups, todo } = groupForAgenda(getEnvies());
 
-    groups.forEach(group => {
+    if (datedGroups.length === 0 && adhocGroups.length === 0 && todo.length === 0) {
+        container.innerHTML = `<div class="emptyState">Rien à planifier pour l'instant.</div>`;
+        return;
+    }
 
-        const header = document.createElement("div");
-        header.className = "checklistCategorieHeader";
-        header.textContent = group.label;
-        container.appendChild(header);
+    if (datedGroups.length > 0) {
 
-        group.items.forEach(envie => {
-            container.appendChild(createAgendaRow(envie));
+        datedGroups.forEach(group => {
+
+            const header = document.createElement("div");
+            header.className = "checklistCategorieHeader";
+            header.textContent = group.label;
+            container.appendChild(header);
+
+            group.items.forEach(envie => {
+                container.appendChild(createAgendaRow(envie));
+            });
+
         });
 
-    });
+    } else {
 
-    const todoHeader = document.createElement("div");
-    todoHeader.className = "checklistCategorieHeader";
-    todoHeader.textContent = "📋 Todo (sans date)";
-    container.appendChild(todoHeader);
+        container.innerHTML += `<div class="emptyState">Aucun élément daté non terminé.</div>`;
+
+    }
+
+    if (adhocGroups.length > 0) {
+
+        const sectionHeader = document.createElement("div");
+        sectionHeader.className = "agendaSectionTitle";
+        sectionHeader.textContent = "🗂️ Jours à planifier";
+        container.appendChild(sectionHeader);
+
+        adhocGroups.forEach(group => {
+
+            const header = document.createElement("div");
+            header.className = "checklistCategorieHeader";
+            header.textContent = group.label;
+            container.appendChild(header);
+
+            group.items.forEach(envie => {
+                container.appendChild(createAgendaRow(envie));
+            });
+
+        });
+
+    }
+
+    const todoSectionHeader = document.createElement("div");
+    todoSectionHeader.className = "agendaSectionTitle";
+    todoSectionHeader.textContent = "📋 Todo (sans date)";
+    container.appendChild(todoSectionHeader);
 
     if (todo.length === 0) {
         container.innerHTML += `<div class="emptyState">Rien à trier.</div>`;
@@ -50,6 +87,7 @@ function renderAgenda() {
     });
 
 }
+
 
 function createAgendaRow(envie) {
 
