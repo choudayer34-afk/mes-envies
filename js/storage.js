@@ -29,7 +29,7 @@ export function createEnvie({
     titre,
     categorie = "general",
     lieu = {},
-    date = null
+    date
 }) {
 
     const envies = getEnvies();
@@ -232,5 +232,20 @@ export function deleteChecklistItem(envieId,itemId){
         STORAGE_KEY,
         JSON.stringify(envies)
     );
+
+}
+
+export function updateEnvieDate(id, date) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.date = date;
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
 
 }
