@@ -1,4 +1,4 @@
-import { addChecklistItem, toggleChecklistItem, deleteChecklistItem, getChecklistTemplates, getEnvies } from "./storage.js";
+import { addChecklistItem, toggleChecklistItem, deleteChecklistItem, getChecklistTemplates, getEnvies, getChecklistCategories } from "./storage.js";
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { computeQuantite } from "./periode.js";
@@ -10,35 +10,90 @@ export function renderChecklist(envie) {
     const checklist = document.getElementById("checklistContainer");
     checklist.innerHTML = "";
 
-    (envie.checklist || []).forEach(item => {
+    const categories = getChecklistCategories();
+    const items = envie.checklist || [];
 
-        const row = document.createElement("div");
-        row.className = "checklistRow";
+    groupByCategorie(items, categories).forEach(group => {
 
-        const prefix = item.quantite > 1 ? `${item.quantite}× ` : "";
+        if (group.categorie !== undefined) {
 
-        row.innerHTML = `
-            <label class="checkLabel">
-                <input type="checkbox" ${item.checked ? "checked" : ""}>
-                <span>${prefix}${item.texte}</span>
-            </label>
-            <button class="deleteChecklistButton">🗑️</button>
-        `;
+            const header = document.createElement("div");
+            header.className = "checklistCategorieHeader";
+            header.textContent = group.categorie
+                ? `${group.categorie.emoji} ${group.categorie.nom}`
+                : "Sans catégorie";
 
-        row.querySelector("input").addEventListener("change", () => {
-            toggleChecklistItem(envie.id, item.id);
-            openEnvie(envie.id);
+            checklist.appendChild(header);
+
+        }
+
+        group.items.forEach(item => {
+            checklist.appendChild(createChecklistRow(item, envie));
         });
-
-        row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
-            event.stopPropagation();
-            deleteChecklistItem(envie.id, item.id);
-            openEnvie(envie.id);
-        });
-
-        checklist.appendChild(row);
 
     });
+
+}
+
+function createChecklistRow(item, envie) {
+
+    const row = document.createElement("div");
+    row.className = "checklistRow";
+
+    const prefix = item.quantite > 1 ? `${item.quantite}× ` : "";
+
+    row.innerHTML = `
+        <label class="checkLabel">
+            <input type="checkbox" ${item.checked ? "checked" : ""}>
+            <span>${prefix}${item.texte}</span>
+        </label>
+        <button class="deleteChecklistButton">🗑️</button>
+    `;
+
+    row.querySelector("input").addEventListener("change", () => {
+        toggleChecklistItem(envie.id, item.id);
+        openEnvie(envie.id);
+    });
+
+    row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        deleteChecklistItem(envie.id, item.id);
+        openEnvie(envie.id);
+    });
+
+    return row;
+
+}
+
+export function groupByCategorie(items, categories) {
+
+    const groupsWithCategorie = categories
+        .map(categorie => ({
+            categorie,
+            items: items.filter(i => i.categorieId === categorie.id)
+        }))
+        .filter(group => group.items.length > 0);
+
+    const sansCategorie = items.filter(
+        i => !categories.some(c => c.id === i.categorieId)
+    );
+
+    const hasMultipleGroups =
+        groupsWithCategorie.length > 0 && sansCategorie.length > 0
+        || groupsWithCategorie.length > 1;
+
+    if (sansCategorie.length > 0) {
+        groupsWithCategorie.push({
+            categorie: hasMultipleGroups ? null : undefined,
+            items: sansCategorie
+        });
+    }
+
+    if (!hasMultipleGroups) {
+        groupsWithCategorie.forEach(g => { if (g.categorie === null) g.categorie = undefined; });
+    }
+
+    return groupsWithCategorie;
 
 }
 
@@ -137,7 +192,7 @@ function applyTemplate(templateId) {
     template.items.forEach(item => {
 
         const quantite = computeQuantite(item, envie);
-        addChecklistItem(envieId, item.texte, quantite);
+        addChecklistItem(envieId, item.texte, quantite, item.categorieId);
 
     });
 
