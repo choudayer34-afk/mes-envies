@@ -1,3 +1,6 @@
+import { groupAndSort, getGroupKey } from "./grouping.js";
+import { makeRowDraggable } from "./dragdrop.js";
+import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
 
 import { openEnvie, CATEGORIES } from "./envie.js";
 import { renderEnvies } from "./ui.js";
@@ -30,7 +33,9 @@ function renderVoyageContenu(envie, container) {
         container.innerHTML = `<div class="emptyState">Ce voyage ne contient aucune envie pour l'instant.</div>`;
     }
 
-    sortAndGroupByDate(enfants).forEach(group => {
+    const { groups, todo } = groupAndSort(enfants);
+
+    groups.forEach(group => {
 
         const header = document.createElement("div");
         header.className = "checklistCategorieHeader";
@@ -43,14 +48,19 @@ function renderVoyageContenu(envie, container) {
 
     });
 
-    const addButton = document.createElement("button");
-    addButton.className = "secondaryButton";
-    addButton.textContent = "➕ Ajouter une envie existante";
-    addButton.style.marginTop = "14px";
+    if (todo.length > 0) {
 
-    addButton.addEventListener("click", () => {
-        openEnviePicker(envie.id);
-    });
+        const header = document.createElement("div");
+        header.className = "checklistCategorieHeader";
+        header.textContent = "Sans date";
+        container.appendChild(header);
+
+        todo.forEach(enfant => {
+            container.appendChild(createVoyageItemRow(enfant, envie));
+        });
+
+    }
+
     const mapButton = document.createElement("button");
     mapButton.className = "secondaryButton";
     mapButton.textContent = "🗺️ Voir sur la carte";
@@ -62,9 +72,75 @@ function renderVoyageContenu(envie, container) {
 
     container.appendChild(mapButton);
 
+    const addButton = document.createElement("button");
+    addButton.className = "secondaryButton";
+    addButton.textContent = "➕ Ajouter une envie existante";
+    addButton.style.marginTop = "10px";
+
+    addButton.addEventListener("click", () => {
+        openEnviePicker(envie.id);
+    });
+
     container.appendChild(addButton);
 
 }
+
+function createVoyageItemRow(enfant, voyageEnvie) {
+
+    const row = document.createElement("div");
+    row.className = "templateRow" + (enfant.realise ? " realise" : "");
+    row.dataset.dragId = enfant.id;
+
+    row.innerHTML = `
+        <span class="dragHandle">⠿</span>
+        <div class="templateRowNom">
+            ${CATEGORIES[enfant.categorie]?.emoji || "💡"} ${enfant.titre}
+        </div>
+        <div class="templateRowActions">
+            <button class="actionButton realiseButton">${enfant.realise ? "↩️ Annuler" : "✓ Réalisé"}</button>
+            <button class="actionButton editButton">Ouvrir</button>
+            <button class="actionButton deleteButton">Retirer</button>
+        </div>
+    `;
+
+    row.querySelector(".realiseButton").addEventListener("click", () => {
+        updateEnvieRealise(enfant.id, !enfant.realise);
+        renderVoyageSection(voyageEnvie);
+    });
+
+    row.querySelector(".editButton").addEventListener("click", () => {
+        openEnvie(enfant.id);
+    });
+
+    row.querySelector(".deleteButton").addEventListener("click", () => {
+        updateEnvieVoyage(enfant.id, null);
+        renderVoyageSection(voyageEnvie);
+        renderEnvies();
+        showToast("✓ Retiré du voyage");
+    });
+
+    makeRowDraggable(row, enfant.id, (targetId) => {
+
+        const allEnfants = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
+        const target = allEnfants.find(e => e.id === targetId);
+
+        if (!target)
+            return;
+
+        if (getGroupKey(enfant) === getGroupKey(target)) {
+            reorderEnvieNear(enfant.id, targetId);
+        } else {
+            groupEnvieWith(enfant.id, targetId);
+        }
+
+        renderVoyageSection(voyageEnvie);
+
+    });
+
+    return row;
+
+}
+
 
 function createVoyageItemRow(enfant, voyageEnvie) {
 
