@@ -2,7 +2,8 @@ import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
-import { getCategorieById, isContainer } from "./envie.js";
+import { getCategorieById, isContainer, openEnvie } from "./envie.js";
+
 
 
 import { renderEnvies } from "./ui.js";
@@ -144,7 +145,7 @@ function createVoyageItemRow(enfant, voyageEnvie) {
     row.innerHTML = `
         <span class="dragHandle">⠿</span>
         <div class="templateRowNom">
-            ${CATEGORIES[enfant.categorie]?.emoji || "💡"} ${enfant.titre}
+                        ${getCategorieById(enfant.categorie)?.emoji || "💡"} ${enfant.titre}
         </div>
         <div class="templateRowActions">
             <button class="actionButton realiseButton" title="${enfant.realise ? "Annuler" : "Réalisé"}">${enfant.realise ? "↩️" : "✅"}</button>
@@ -273,7 +274,7 @@ function openEnviePicker(voyageId) {
 
         row.innerHTML = `
             <div class="templateRowNom">
-                ${CATEGORIES[candidat.categorie]?.emoji || "💡"} ${candidat.titre}
+                              ${getCategorieById(candidat.categorie)?.emoji || "💡"} ${candidat.titre}
             </div>
             <div class="templateRowActions">
                 <button class="actionButton editButton">Ajouter</button>
