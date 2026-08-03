@@ -492,6 +492,34 @@ main{
 /* ==========================================================
    Localisation
    ========================================================== */
+.lieuInputWrapper{
+    position:relative;
+}
+
+.lieuInputWrapper input{
+    padding-right:44px;
+}
+
+.lieuClearButton{
+    position:absolute;
+    right:8px;
+    top:50%;
+    transform:translateY(-50%);
+    border:none;
+    background:none;
+    font-size:16px;
+    color:var(--color-text-light);
+    cursor:pointer;
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    transition:.2s;
+}
+
+.lieuClearButton:hover{
+    background:#EEF4F6;
+    color:var(--color-text);
+}
 
 .locationButton{
     width:100%;
