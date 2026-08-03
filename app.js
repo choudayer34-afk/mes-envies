@@ -22,6 +22,7 @@ import { initChecklistModal } from "./js/checklist.js";
 import { initUrlModal } from "./js/urls.js";
 import { initLocation } from "./js/location.js";
 import { closeFiche, initAccordions } from "./js/envie.js";
+import { initAdmin } from "./js/admin.js";
 
 const APP = {
     name: "EnVie",
@@ -39,6 +40,7 @@ function init() {
     initMainButton();
     initLocation();
     registerServiceWorker();
+    initAdmin();
 
     renderEnvies();
 
