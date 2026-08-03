@@ -409,16 +409,19 @@ main{
    Catégories
    ========================================================== */
 
-.categorieSelector{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-    margin-top:10px;
+.categorieSelector.fiche{
+    display:flex;
+    flex-wrap:wrap;
+    grid-template-columns:none;
 }
 
-.categorieSelector::-webkit-scrollbar{
-    display:none;
+.categorieSelector.fiche .categorieChip{
+    width:auto;
+    height:40px;
+    padding:0 16px;
+    font-size:14px;
 }
+
 
 .categorieChip{
     display:flex;
