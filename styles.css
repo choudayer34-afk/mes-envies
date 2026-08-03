@@ -903,3 +903,29 @@ button {
     flex-wrap:wrap;
 }
 
+.mapModal{
+    width:min(96vw,900px);
+    height:85dvh;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+}
+
+.mapContainer{
+    flex:1;
+    border-radius:20px;
+    overflow:hidden;
+    margin-top:10px;
+}
+
+.mapPopupButton{
+    margin-top:6px;
+    border:none;
+    background:var(--color-primary);
+    color:white;
+    padding:6px 12px;
+    border-radius:10px;
+    font-size:13px;
+    cursor:pointer;
+}
+
