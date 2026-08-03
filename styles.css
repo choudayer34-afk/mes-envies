@@ -730,3 +730,30 @@ button {
 .modal select {
     font-size:16px;
 }
+
+.customPeriodePanel{
+    margin-top:20px;
+}
+
+.periodeTypeToggle{
+    display:flex;
+    gap:10px;
+    margin-bottom:16px;
+}
+
+.periodeTypeChip{
+    flex:1;
+    height:44px;
+    border:none;
+    border-radius:14px;
+    background:#EEF4F6;
+    color:#4B5B66;
+    font-size:14px;
+    font-weight:600;
+    transition:.2s;
+}
+
+.periodeTypeChip.active{
+    background:#6FAFC4;
+    color:white;
+}
