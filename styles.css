@@ -1032,4 +1032,43 @@ button {
 .modal select {
     font-size:16px;
 }
+
+.accordion{
+
+    margin:20px 0;
+
+}
+
+.accordionHeader{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#EAF7F6;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+}
+
+.accordionContent{
+
+    padding:12px 0;
+
+}
+
 }
