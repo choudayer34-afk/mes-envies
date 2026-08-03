@@ -1,4 +1,4 @@
-export async function searchLocation(query){
+export function searchLocation(query){
 
     if(query.length < 3)
         return [];
@@ -20,9 +20,7 @@ export function initLocation(){
 
 }
 
-export function searchLocation(){
 
-}
 
 export function useCurrentLocation(){
 
