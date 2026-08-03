@@ -309,7 +309,7 @@ export function deleteTemplate(id) {
     saveTemplates(getChecklistTemplates().filter(t => t.id !== id));
 }
 
-export function addTemplateItem(templateId, texte, type = "fixe") {
+export function addTemplateItem(templateId, texte, type = "fixe", categorieId = null) {
 
     const templates = getChecklistTemplates();
     const template = templates.find(t => t.id === templateId);
@@ -320,12 +320,14 @@ export function addTemplateItem(templateId, texte, type = "fixe") {
     template.items.push({
         id: crypto.randomUUID(),
         texte,
-        type
+        type,
+        categorieId
     });
 
     saveTemplates(templates);
 
 }
+
 
 export function deleteTemplateItem(templateId, itemId) {
 
