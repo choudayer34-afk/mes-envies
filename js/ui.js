@@ -1,5 +1,5 @@
 import { getEnvies, toggleFavorite } from "./storage.js";
-import { CATEGORIES, openEnvie } from "./envie.js";
+
 import { editEnvie, removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer } from "./envie.js";
