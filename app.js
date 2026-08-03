@@ -75,6 +75,13 @@ function init() {
 
     document.getElementById("closeFiche")
         .addEventListener("click", closeFiche);
+    document.getElementById("btnInbox").addEventListener("click", () => {
+        document.getElementById("inboxModal").classList.remove("hidden");
+    });
+
+    document.getElementById("closeInbox").addEventListener("click", () => {
+        document.getElementById("inboxModal").classList.add("hidden");
+    });
 
     log("Application prête.");
 
