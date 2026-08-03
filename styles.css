@@ -1202,16 +1202,25 @@ button {
 }
 
 .editAgendaButton{
+    position:relative;
+    z-index:5;
+    flex-shrink:0;
     border:none;
     background:none;
-    font-size:18px;
+    font-size:20px;
     cursor:pointer;
-    opacity:.55;
+    opacity:.7;
     transition:.2s;
-    padding:0 4px;
+    padding:8px;
 }
 
 .editAgendaButton:hover{
     opacity:1;
 }
+
+.checklistRow .checkLabel{
+    min-width:0;
+}
+
+
 
