@@ -34,8 +34,11 @@ export function openEnvie(id) {
 
     document.getElementById("ficheDescription").value = envie.description || "";
 
+ renderPeriode(envie);
     renderChecklist(envie);
     renderUrls(envie);
+       
+
 
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
 
