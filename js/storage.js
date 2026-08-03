@@ -644,6 +644,42 @@ export async function migrateLocalDataToFoyer(foyerId) {
 
 
 
+export function removePersonneFromChecklistItem(envieId, itemId, personneId) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const item = envie.checklist.find(i => i.id === itemId);
+
+    if (!item)
+        return;
+
+    const nouvelAssignedTo = (item.assignedTo || []).filter(id => id !== personneId);
+
+    if (nouvelAssignedTo.length === 0) {
+
+        patchEnvie(envieId, {
+            checklist: envie.checklist.filter(i => i.id !== itemId)
+        });
+
+        return;
+
+    }
+
+    const nouveauCheckedBy = { ...item.checkedBy };
+    delete nouveauCheckedBy[personneId];
+
+    const checklist = envie.checklist.map(i =>
+        i.id === itemId
+            ? { ...i, assignedTo: nouvelAssignedTo, checkedBy: nouveauCheckedBy, checked: nouvelAssignedTo.every(id => nouveauCheckedBy[id]) }
+            : i
+    );
+
+    patchEnvie(envieId, { checklist });
+
+}
 
 
 
