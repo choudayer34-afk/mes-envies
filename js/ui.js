@@ -146,7 +146,8 @@ function createCompactRow(envie) {
         updateEnvieRealise(envie.id, nouvelEtat);
 
         if (nouvelEtat) {
-            openEnvie(envie.id);
+            openEnvie(envie.id, null);
+
             openEvaluationAccordion();
         }
 
@@ -160,7 +161,8 @@ function createCompactRow(envie) {
         event.preventDefault();
 
         try {
-            openEnvie(envie.id);
+            openEnvie(envie.id, null);
+
             console.log("openEnvie OK (accueil)");
         } catch (err) {
             console.error("ERREUR dans le handler crayon accueil: " + err.message);
@@ -179,7 +181,8 @@ function createEnvieCard(envie) {
     card.className = "envie-card";
 
     card.addEventListener("click", () => {
-        openEnvie(envie.id);
+        openEnvie(envie.id, null);
+
     });
 
     let statutHtml = "";
@@ -218,7 +221,8 @@ function createEnvieCard(envie) {
 
     card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
-        openEnvie(envie.id);
+       openEnvie(envie.id, null);
+
     });
 
     card.querySelector(".deleteButton").addEventListener("click", (event) => {
