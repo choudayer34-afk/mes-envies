@@ -886,3 +886,20 @@ button {
     margin-top:0;
 }
 
+.realiseButton{
+    background:#22c55e;
+    color:white;
+}
+
+.templateRow.realise{
+    opacity:.6;
+}
+
+.templateRow.realise .templateRowNom{
+    text-decoration:line-through;
+}
+
+.templateRowActions{
+    flex-wrap:wrap;
+}
+
