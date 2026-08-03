@@ -12,6 +12,12 @@ import {
     deleteChecklistCategory
 } from "./storage.js";
 import { groupByCategorie } from "./checklist.js";
+import {
+    getChecklistTemplates, getTemplate, createTemplate, renameTemplate, deleteTemplate,
+    addTemplateItem, deleteTemplateItem, getChecklistCategories, createChecklistCategory,
+    renameChecklistCategory, deleteChecklistCategory, getPersonnes, createPersonne,
+    renamePersonne, deletePersonne
+} from "./storage.js";
 
 let currentTemplateId = null;
 let currentItemType = "fixe";
@@ -22,7 +28,7 @@ export function initAdmin() {
     document.getElementById("btnSettings").addEventListener("click", openAdmin);
     document.getElementById("closeAdmin").addEventListener("click", closeAdmin);
 
-    document.querySelectorAll("#adminMenu .categorieChip").forEach(chip => {
+        document.querySelectorAll("#adminMenu .categorieChip").forEach(chip => {
 
         chip.addEventListener("click", () => {
 
@@ -39,8 +45,14 @@ export function initAdmin() {
             document.getElementById("adminChecklistCategories")
                 .classList.toggle("hidden", target !== "categories");
 
+            document.getElementById("adminPersonnesFoyer")
+                .classList.toggle("hidden", target !== "personnes");
+
             if (target === "categories")
                 renderCategoriesList();
+
+            if (target === "personnes")
+                renderPersonnesList();
 
         });
 
@@ -113,7 +125,19 @@ export function initAdmin() {
         renderItemCategorieOptions();
 
     });
-    
+        document.getElementById("addPersonneButton").addEventListener("click", () => {
+
+        const nom = prompt("Nom de la personne :");
+
+        if (!nom || !nom.trim())
+            return;
+
+        createPersonne(nom.trim());
+
+        renderPersonnesList();
+
+    });
+
         document.getElementById("addTemplateItemButton").addEventListener("click", () => {
 
         const input = document.getElementById("templateItemInput");
@@ -372,3 +396,57 @@ function renderCategoriesList() {
     });
 
 }
+
+function renderPersonnesList() {
+
+    const container = document.getElementById("personnesList");
+    const personnes = getPersonnes();
+
+    container.innerHTML = "";
+
+    if (personnes.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucune personne pour l'instant.</div>`;
+        return;
+    }
+
+    personnes.forEach(personne => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">👤 ${personne.nom}</div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton">Modifier</button>
+                <button class="actionButton deleteButton">Supprimer</button>
+            </div>
+        `;
+
+        row.querySelector(".editButton").addEventListener("click", () => {
+
+            const nom = prompt("Nom de la personne :", personne.nom);
+
+            if (!nom || !nom.trim())
+                return;
+
+            renamePersonne(personne.id, nom.trim());
+            renderPersonnesList();
+
+        });
+
+        row.querySelector(".deleteButton").addEventListener("click", () => {
+
+            if (!window.confirm(`Supprimer "${personne.nom}" ?`))
+                return;
+
+            deletePersonne(personne.id);
+            renderPersonnesList();
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+}
+
