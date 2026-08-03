@@ -13,10 +13,11 @@ import { renderEnvies } from "./js/ui.js";
 import {
     initModal,
     initDeleteModal,
-    initDateModal,
-    initDatePicker,
     openModal
 } from "./js/modal.js";
+import { initDateModal } from "./js/periode.js";
+
+
 import { initChecklistModal } from "./js/checklist.js";
 import { initUrlModal } from "./js/urls.js";
 import { initLocation } from "./js/location.js";
@@ -44,7 +45,7 @@ function init() {
     initModal();
     initDeleteModal();
     initDateModal();
-    initDatePicker();
+    
     initUrlModal();
     initChecklistModal();
     initAccordions();
