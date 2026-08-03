@@ -56,9 +56,6 @@ function renderHomeSections() {
     const envies = getEnvies();
     const today = new Date().toISOString().slice(0, 10);
 
-    console.log("Aujourd'hui (calculé): " + today);
-    console.log("Toutes les envies dates: " + JSON.stringify(envies.map(e => ({ titre: e.titre, date: e.date, categorie: e.categorie }))));
-
     const ajourdhuiItems = envies.filter(e =>
         !isContainer(e.categorie) && e.date?.start === today
     );
