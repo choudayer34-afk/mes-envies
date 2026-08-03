@@ -3,6 +3,7 @@ import { groupAndSort } from "./grouping.js";
 
 import { groupForAgenda } from "./grouping.js";
 import { CATEGORIES, openEnvie, openEvaluationAccordion } from "./envie.js";
+import { getCategorieById, isContainer } from "./envie.js";
 
 
 export function initAgenda() {
