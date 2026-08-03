@@ -211,3 +211,8 @@ function hideAuthScreens() {
     document.getElementById("foyerScreen").classList.add("hidden");
     document.getElementById("appRoot").classList.remove("hidden");
 }
+
+export function showFoyerCode() {
+    alert(`Code de votre foyer : ${currentFoyerId}`);
+}
+
