@@ -987,3 +987,23 @@ button {
     font-style:italic;
 }
 
+.evaluationRow{
+    margin-bottom:18px;
+}
+
+.starsRow{
+    display:flex;
+    gap:4px;
+    margin-top:6px;
+}
+
+.starButton{
+    border:none;
+    background:none;
+    font-size:28px;
+    line-height:1;
+    cursor:pointer;
+    color:#F5A623;
+    padding:0;
+}
+
