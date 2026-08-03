@@ -4,9 +4,7 @@ import { editEnvie, removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer } from "./envie.js";
 
-function isContainer(categorie) {
-    return categorie === "voyage" || categorie === "projet";
-}
+
 
 function isUntriaged(envie) {
 
