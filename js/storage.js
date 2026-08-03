@@ -1,44 +1,53 @@
-const STORAGE_KEY = "envie_envies";
+import { db } from "./firebase.js";
+import { getFoyerId } from "./auth.js";
+import {
+    collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, addDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+let enviesCache = [];
+let onChangeCallback = null;
 
+export function initEnviesSync(onChange) {
 
-export function getEnvies() {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    onChangeCallback = onChange;
+
+    const foyerId = getFoyerId();
+
+    const enviesRef = collection(db, "foyers", foyerId, "envies");
+
+    onSnapshot(enviesRef, (snapshot) => {
+
+        enviesCache = snapshot.docs
+            .map(d => ({ id: d.id, ...d.data() }))
+            .sort((a, b) => b.createdAt - a.createdAt);
+
+        if (onChangeCallback)
+            onChangeCallback();
+
+    });
+
 }
 
-export function toggleFavorite(id) {
+export function getEnvies() {
+    return enviesCache;
+}
 
-    const envies = getEnvies();
-
-    const envie = envies.find(e => e.id === id);
-
-    if (!envie) return;
-
-    envie.favorite = !envie.favorite;
-
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(envies)
-    );
-
+function envieRef(id) {
+    return doc(db, "foyers", getFoyerId(), "envies", id);
 }
 
 export function createEnvie({
     titre,
     categorie = "general",
     lieu = {},
-            date,
-        personnes = 1
-
+    date,
+    personnes = 1
 }) {
 
-    const envies = getEnvies();
+    const id = crypto.randomUUID();
 
-    envies.unshift({
+    setDoc(envieRef(id), {
 
-        id: crypto.randomUUID(),
         titre,
         categorie,
         favorite: false,
@@ -58,277 +67,214 @@ export function createEnvie({
             longitude: lieu.longitude ?? null
         },
 
-        date,
+        date: date || null,
+        personnes,
         voyageId: null,
         archived: false,
         statut: "inbox",
         createdAt: Date.now(),
         updatedAt: Date.now()
 
-    });
+    }).catch(console.error);
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+}
 
+function patchEnvie(id, fields) {
+
+    updateDoc(envieRef(id), { ...fields, updatedAt: Date.now() }).catch(console.error);
+
+}
+
+export function toggleFavorite(id) {
+
+    const envie = enviesCache.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    patchEnvie(id, { favorite: !envie.favorite });
+
+}
+
+export function deleteEnvie(id) {
+    deleteDoc(envieRef(id)).catch(console.error);
+}
+
+export function updateEnvie(id, titre) {
+    patchEnvie(id, { titre });
 }
 
 export function updateEnvieLieu(id, lieu) {
 
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === id);
-
-    if (!envie)
-        return;
-
-    envie.lieu = {
-        nom: lieu.nom || "",
-        adresse: lieu.adresse || "",
-        ville: lieu.ville || "",
-        pays: lieu.pays || "",
-        latitude: lieu.latitude ?? null,
-        longitude: lieu.longitude ?? null
-    };
-
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+    patchEnvie(id, {
+        lieu: {
+            nom: lieu.nom || "",
+            adresse: lieu.adresse || "",
+            ville: lieu.ville || "",
+            pays: lieu.pays || "",
+            latitude: lieu.latitude ?? null,
+            longitude: lieu.longitude ?? null
+        }
+    });
 
 }
 
-
-
-export function deleteEnvie(id) {
-    const envies = getEnvies().filter(envie => envie.id !== id);
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+export function updateEnvieDate(id, date) {
+    patchEnvie(id, { date });
 }
 
-export function updateEnvie(id, titre) {
-    const envies = getEnvies();
+export function updateEnvieCategorie(id, categorie) {
+    patchEnvie(id, { categorie });
+}
 
-    const envie = envies.find(item => item.id === id);
+export function updateEnviePersonnes(id, personnes) {
+    patchEnvie(id, { personnes: Math.max(1, personnes) });
+}
 
-    if (!envie) return;
+export function updateEnvieVoyage(id, voyageId) {
+    patchEnvie(id, { voyageId });
+}
 
-    envie.titre = titre;
-    envie.updatedAt = Date.now();
+export function updateEnvieRealise(id, realise) {
+    patchEnvie(id, { realise });
+}
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+export function updateEnvieEvaluation(id, critere, valeur) {
+
+    const envie = enviesCache.find(e => e.id === id);
+    const evaluation = envie?.evaluation || { note: 0, enfants: 0, difficulte: 0 };
+
+    evaluation[critere] = valeur;
+
+    patchEnvie(id, { evaluation });
+
 }
 
 export function addUrl(id, url) {
 
-    const envies = getEnvies();
-
-    const envie = envies.find(e => e.id === id);
+    const envie = enviesCache.find(e => e.id === id);
 
     if (!envie)
         return;
 
-    envie.urls ??= [];
+    const urls = [...(envie.urls || []), { id: crypto.randomUUID(), url, createdAt: Date.now() }];
 
-    envie.urls.push({
-
-        id: crypto.randomUUID(),
-
-        url,
-
-        createdAt: Date.now()
-
-    });
-
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(envies)
-    );
+    patchEnvie(id, { urls });
 
 }
 
 export function removeUrl(envieId, urlId) {
 
-    const envies = getEnvies();
-
-    const envie = envies.find(e => e.id === envieId);
+    const envie = enviesCache.find(e => e.id === envieId);
 
     if (!envie)
         return;
 
-    envie.urls =
-        envie.urls.filter(u => u.id !== urlId);
-
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(envies)
-    );
+    patchEnvie(envieId, { urls: envie.urls.filter(u => u.id !== urlId) });
 
 }
 
+export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null, assignedTo = []) {
 
+    const envie = enviesCache.find(e => e.id === envieId);
 
+    if (!envie)
+        return;
 
-export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null, assignedTo = []){
-
-    const envies = getEnvies();
-
-    const envie = envies.find(e => e.id === envieId);
-
-    if(!envie) return;
-
-    envie.checklist ??= [];
-
-    envie.checklist.push({
-
+    const checklist = [...(envie.checklist || []), {
         id: crypto.randomUUID(),
-
         texte,
-
         quantite,
-
         categorieId,
-
         assignedTo,
+        checked: false
+    }];
 
-        checked:false
-
-    });
-
-    envie.updatedAt = Date.now();
+    patchEnvie(envieId, { checklist });
 
     rememberChecklistItem(texte, categorieId);
 
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(envies)
-    );
-
 }
 
-export function updateChecklistItemAssignment(envieId, itemId, assignedTo) {
+export function toggleChecklistItem(envieId, itemId) {
 
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === envieId);
+    const envie = enviesCache.find(e => e.id === envieId);
 
     if (!envie)
         return;
 
-    const item = envie.checklist.find(i => i.id === itemId);
+    const checklist = envie.checklist.map(item => {
 
-    if (!item)
-        return;
+        if (item.id !== itemId)
+            return item;
 
-    item.assignedTo = assignedTo;
-    envie.updatedAt = Date.now();
+        const checked = !item.checked;
+        const checkedBy = { ...item.checkedBy };
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+        if (item.assignedTo?.length > 1) {
+            item.assignedTo.forEach(pid => { checkedBy[pid] = checked; });
+        }
 
-}
+        return { ...item, checked, checkedBy };
 
+    });
 
-export function toggleChecklistItem(envieId,itemId){
-
-    const envies=getEnvies();
-
-    const envie=envies.find(e=>e.id===envieId);
-
-    if(!envie) return;
-
-    const item=envie.checklist.find(i=>i.id===itemId);
-
-    if(!item) return;
-
-    item.checked=!item.checked;
-
-    if (item.assignedTo && item.assignedTo.length > 1) {
-        item.checkedBy = item.checkedBy || {};
-        item.assignedTo.forEach(id => { item.checkedBy[id] = item.checked; });
-    }
-
-    envie.updatedAt=Date.now();
-
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(envies)
-    );
+    patchEnvie(envieId, { checklist });
 
 }
 
 export function toggleChecklistItemForPersonne(envieId, itemId, personneId) {
 
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === envieId);
+    const envie = enviesCache.find(e => e.id === envieId);
 
     if (!envie)
         return;
 
-    const item = envie.checklist.find(i => i.id === itemId);
+    const checklist = envie.checklist.map(item => {
 
-    if (!item)
-        return;
+        if (item.id !== itemId)
+            return item;
 
-    item.checkedBy = item.checkedBy || {};
-    item.checkedBy[personneId] = !item.checkedBy[personneId];
+        const checkedBy = { ...item.checkedBy, [personneId]: !item.checkedBy?.[personneId] };
+        const checked = item.assignedTo.every(id => checkedBy[id]);
 
-    item.checked = item.assignedTo.every(id => item.checkedBy[id]);
+        return { ...item, checkedBy, checked };
 
-    envie.updatedAt = Date.now();
+    });
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+    patchEnvie(envieId, { checklist });
 
 }
 
+export function deleteChecklistItem(envieId, itemId) {
 
-export function deleteChecklistItem(envieId,itemId){
+    const envie = enviesCache.find(e => e.id === envieId);
 
-    const envies=getEnvies();
+    if (!envie)
+        return;
 
-    const envie=envies.find(e=>e.id===envieId);
+    patchEnvie(envieId, { checklist: envie.checklist.filter(i => i.id !== itemId) });
 
-    if(!envie) return;
+}
 
-    envie.checklist=
-        envie.checklist.filter(i=>i.id!==itemId);
+export function updateChecklistItemAssignment(envieId, itemId, assignedTo) {
 
-    envie.updatedAt=Date.now();
+    const envie = enviesCache.find(e => e.id === envieId);
 
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(envies)
+    if (!envie)
+        return;
+
+    const checklist = envie.checklist.map(item =>
+        item.id === itemId ? { ...item, assignedTo, checkedBy: {} } : item
     );
 
-}
-
-export function updateEnvieDate(id, date) {
-
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === id);
-
-    if (!envie)
-        return;
-
-    envie.date = date;
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+    patchEnvie(envieId, { checklist });
 
 }
 
-export function updateEnvieCategorie(id, categorie) {
 
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === id);
 
-    if (!envie)
-        return;
 
-    envie.categorie = categorie;
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
-
-}
 
 const TEMPLATES_KEY = "envie_checklist_templates";
 
@@ -394,20 +340,6 @@ export function addTemplateItem(templateId, texte, type = "fixe", categorieId = 
 
 }
 
-export function updateEnviePersonnes(id, personnes) {
-
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === id);
-
-    if (!envie)
-        return;
-
-    envie.personnes = Math.max(1, personnes);
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
-
-}
 
 
 
@@ -466,35 +398,7 @@ export function deleteChecklistCategory(id) {
     saveChecklistCategories(getChecklistCategories().filter(c => c.id !== id));
 }
 
-export function updateEnvieVoyage(id, voyageId) {
 
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === id);
-
-    if (!envie)
-        return;
-
-    envie.voyageId = voyageId;
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
-
-}
-
-export function updateEnvieRealise(id, realise) {
-
-    const envies = getEnvies();
-    const envie = envies.find(e => e.id === id);
-
-    if (!envie)
-        return;
-
-    envie.realise = realise;
-    envie.updatedAt = Date.now();
-
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
-
-}
 
 const CHECKLIST_LIBRARY_KEY = "envie_checklist_library";
 
