@@ -31,6 +31,24 @@ export function initEnviesSync(onChange) {
 export function getEnvies() {
     return enviesCache;
 }
+export function propagateDateToGroup(envieId, date) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie || !envie.jourGroupId)
+        return;
+
+    const groupId = envie.jourGroupId;
+
+    enviesCache
+        .filter(e => e.jourGroupId === groupId && e.id !== envieId)
+        .forEach(e => {
+            patchEnvie(e.id, { date, jourGroupId: null });
+        });
+
+    patchEnvie(envieId, { jourGroupId: null });
+
+}
 
 function envieRef(id) {
     return doc(db, "foyers", getFoyerId(), "envies", id);
