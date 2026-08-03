@@ -72,3 +72,11 @@ export function openEnvie(id) {
         .classList.remove("hidden");
 
 }
+
+export function closeFiche() {
+
+    document
+        .getElementById("ficheOverlay")
+        .classList.add("hidden");
+
+}
