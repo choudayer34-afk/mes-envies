@@ -167,7 +167,9 @@ export function removeUrl(envieId, urlId) {
 }
 
 
-export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null){
+
+
+export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null, assignedTo = []){
 
     const envies = getEnvies();
 
@@ -187,6 +189,8 @@ export function addChecklistItem(envieId, texte, quantite = 1, categorieId = nul
 
         categorieId,
 
+        assignedTo,
+
         checked:false
 
     });
@@ -202,6 +206,25 @@ export function addChecklistItem(envieId, texte, quantite = 1, categorieId = nul
 
 }
 
+export function updateChecklistItemAssignment(envieId, itemId, assignedTo) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const item = envie.checklist.find(i => i.id === itemId);
+
+    if (!item)
+        return;
+
+    item.assignedTo = assignedTo;
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
 
 
 export function toggleChecklistItem(envieId,itemId){
@@ -475,6 +498,53 @@ function rememberChecklistItem(texte, categorieId = null) {
 
     saveChecklistLibrary(library.slice(0, 200));
 
+}
+
+const PERSONNES_KEY = "envie_personnes_foyer";
+
+export function getPersonnes() {
+    return JSON.parse(localStorage.getItem(PERSONNES_KEY)) || [];
+}
+
+function savePersonnes(personnes) {
+    localStorage.setItem(PERSONNES_KEY, JSON.stringify(personnes));
+}
+
+export function createPersonne(nom) {
+
+    const personnes = getPersonnes();
+
+    const existing = personnes.find(
+        p => p.nom.toLowerCase() === nom.toLowerCase()
+    );
+
+    if (existing)
+        return existing;
+
+    const personne = { id: crypto.randomUUID(), nom };
+
+    personnes.push(personne);
+    savePersonnes(personnes);
+
+    return personne;
+
+}
+
+export function renamePersonne(id, nom) {
+
+    const personnes = getPersonnes();
+    const personne = personnes.find(p => p.id === id);
+
+    if (!personne)
+        return;
+
+    personne.nom = nom;
+    savePersonnes(personnes);
+
+}
+
+export function deletePersonne(id) {
+    savePersonnes(getPersonnes().filter(p => p.id !== id));
 }
 
 
