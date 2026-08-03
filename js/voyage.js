@@ -182,9 +182,10 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         renderVoyageSection(voyageEnvie);
     });
 
-    row.querySelector(".editButton").addEventListener("click", () => {
-        openEnvie(enfant.id);
+        row.querySelector(".editButton").addEventListener("click", () => {
+        openEnvie(enfant.id, voyageEnvie.id);
     });
+
 
     row.querySelector(".deleteButton").addEventListener("click", () => {
         updateEnvieVoyage(enfant.id, null);
@@ -237,7 +238,8 @@ function renderRattachement(envie, container) {
 
         removeButton.addEventListener("click", () => {
             updateEnvieVoyage(envie.id, null);
-            openEnvie(envie.id);
+            openEnvie(envie.id, null);
+
             renderEnvies();
             showToast("✓ Retiré du voyage");
         });
@@ -310,7 +312,7 @@ function openEnviePicker(voyageId) {
 
             document.getElementById("enviePickerModal").classList.add("hidden");
 
-            openEnvie(voyageId);
+            openEnvie(voyageId, null);
             renderEnvies();
 
             showToast("✓ Envie ajoutée au voyage");
