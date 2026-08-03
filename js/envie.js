@@ -37,6 +37,7 @@ export function openEnvie(id) {
         return;
 
 
+
        document.getElementById("ficheTitreInput").value = envie.titre;
 
 
