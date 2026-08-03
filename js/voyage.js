@@ -4,7 +4,7 @@ import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer } from "./envie.js";
 
-import { openEnvie, CATEGORIES } from "./envie.js";
+
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
 import { getEnvies, updateEnvieVoyage, updateEnvieRealise } from "./storage.js";
