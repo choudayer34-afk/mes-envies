@@ -1,5 +1,6 @@
 import { renderLieuActions } from "./location.js";
 import { getEnvies, updateEnvieCategorie, updateEnvie } from "./storage.js";
+import { closeAllOverlaysExcept } from "./modal-utils.js";
 
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
@@ -57,7 +58,9 @@ export function openEnvie(id) {
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
     renderLieuActions(envie);
 
+        closeAllOverlaysExcept("ficheOverlay");
     document.getElementById("ficheOverlay").classList.remove("hidden");
+
 
 }
 
