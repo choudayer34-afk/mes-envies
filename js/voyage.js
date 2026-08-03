@@ -3,6 +3,7 @@ import { openEnvie, CATEGORIES } from "./envie.js";
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
 import { getEnvies, updateEnvieVoyage, updateEnvieRealise } from "./storage.js";
+import { openMap } from "./carte.js";
 
 export function renderVoyageSection(envie) {
 
@@ -50,6 +51,16 @@ function renderVoyageContenu(envie, container) {
     addButton.addEventListener("click", () => {
         openEnviePicker(envie.id);
     });
+    const mapButton = document.createElement("button");
+    mapButton.className = "secondaryButton";
+    mapButton.textContent = "🗺️ Voir sur la carte";
+    mapButton.style.marginTop = "14px";
+
+    mapButton.addEventListener("click", () => {
+        openMap(envie.id);
+    });
+
+    container.appendChild(mapButton);
 
     container.appendChild(addButton);
 
