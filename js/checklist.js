@@ -2,6 +2,7 @@ import { addChecklistItem, toggleChecklistItem, deleteChecklistItem, getChecklis
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { computeQuantite } from "./periode.js";
+import { getChecklistLibrary } from "./storage.js";
 
 let currentChecklistEnvieId = null;
 
@@ -99,14 +100,18 @@ export function groupByCategorie(items, categories) {
 
 export function initChecklistModal() {
 
-    document.getElementById("addChecklistButton").addEventListener("click", () => {
+      document.getElementById("addChecklistButton").addEventListener("click", () => {
 
         currentChecklistEnvieId = getCurrentEnvieId();
 
         document.getElementById("checklistInput").value = "";
+        document.getElementById("checklistSuggestions").innerHTML = "";
         document.getElementById("checklistModal").classList.remove("hidden");
 
     });
+
+    setupChecklistAutocomplete();
+
 
     document.getElementById("cancelChecklist").addEventListener("click", () => {
         document.getElementById("checklistModal").classList.add("hidden");
@@ -203,3 +208,44 @@ function applyTemplate(templateId) {
     showToast(`✓ Modèle "${template.nom}" appliqué`);
 
 }
+
+function setupChecklistAutocomplete() {
+
+    const input = document.getElementById("checklistInput");
+    const suggestionsBox = document.getElementById("checklistSuggestions");
+
+    if (!input || !suggestionsBox)
+        return;
+
+    input.addEventListener("input", () => {
+
+        const query = input.value.trim().toLowerCase();
+
+        suggestionsBox.innerHTML = "";
+
+        if (!query)
+            return;
+
+        const matches = getChecklistLibrary()
+            .filter(item => item.texte.toLowerCase().includes(query))
+            .slice(0, 6);
+
+        matches.forEach(item => {
+
+            const div = document.createElement("div");
+            div.className = "lieuItem";
+            div.textContent = item.texte;
+
+            div.addEventListener("click", () => {
+                input.value = item.texte;
+                suggestionsBox.innerHTML = "";
+            });
+
+            suggestionsBox.appendChild(div);
+
+        });
+
+    });
+
+}
+
