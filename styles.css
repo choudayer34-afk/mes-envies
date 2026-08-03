@@ -1181,3 +1181,17 @@ button {
     color:var(--color-text-light);
     margin-top:4px;
 }
+
+.agendaSectionTitle{
+    font-size:18px;
+    font-weight:700;
+    margin-top:28px;
+    margin-bottom:10px;
+    padding-top:16px;
+    border-top:2px solid var(--color-border);
+}
+
+.agendaSectionTitle:first-of-type{
+    border-top:none;
+    padding-top:0;
+}
