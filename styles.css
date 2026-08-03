@@ -1195,3 +1195,18 @@ button {
     border-top:none;
     padding-top:0;
 }
+
+.editAgendaButton{
+    border:none;
+    background:none;
+    font-size:18px;
+    cursor:pointer;
+    opacity:.55;
+    transition:.2s;
+    padding:0 4px;
+}
+
+.editAgendaButton:hover{
+    opacity:1;
+}
+
