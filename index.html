@@ -752,8 +752,14 @@ window.toggleDebug = function() {
         <div id="templateItemsList"></div>
 
         <div class="field">
-            <input id="templateItemInput" type="text" placeholder="Nouvel élément...">
-        </div>
+    <textarea
+        id="templateItemInput"
+        placeholder="Un élément par ligne..."
+        rows="3"
+        style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:16px;box-sizing:border-box;resize:vertical;"
+    ></textarea>
+</div>
+
 
         <div class="itemTypeToggle">
             <button type="button" class="itemTypeChip active" data-type="fixe">Fixe</button>
