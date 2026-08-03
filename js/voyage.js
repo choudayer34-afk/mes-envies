@@ -1,6 +1,7 @@
 import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
+import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 
 import { openEnvie, CATEGORIES } from "./envie.js";
 import { renderEnvies } from "./ui.js";
@@ -17,7 +18,7 @@ export function renderVoyageSection(envie) {
 
     container.innerHTML = "";
 
-    if (envie.categorie === "voyage") {
+    if (isContainer(envie.categorie)) {
         renderVoyageContenu(envie, container);
     } else {
         renderRattachement(envie, container);
@@ -25,12 +26,62 @@ export function renderVoyageSection(envie) {
 
 }
 
+function isContainer(categorie) {
+    return categorie === "voyage" || categorie === "projet";
+}
+
+
+
 function renderVoyageContenu(envie, container) {
 
     const enfants = getEnvies().filter(e => e.voyageId === envie.id);
 
+    const { statut, pourcentage } = computeContainerStatus(envie);
+
+    const statutBox = document.createElement("div");
+    statutBox.className = "containerStatutBox";
+    statutBox.innerHTML = `
+        <div class="containerStatutLabel">${formatStatutLabel(statut)}</div>
+        <div class="progressBarTrack">
+            <div class="progressBarFill" style="width:${pourcentage}%"></div>
+        </div>
+        <div class="containerStatutPct">${pourcentage}%</div>
+    `;
+    container.appendChild(statutBox);
+
+    const today = new Date().toISOString().slice(0, 10);
+    const ajourdhuiItems = enfants.filter(e => e.date?.start === today);
+
+    if (ajourdhuiItems.length > 0) {
+
+        const ajourdhuiHeader = document.createElement("button");
+        ajourdhuiHeader.type = "button";
+        ajourdhuiHeader.className = "accordionHeader";
+        ajourdhuiHeader.innerHTML = `<span>🔆 Aujourd'hui</span><span class="accordionIcon">▾</span>`;
+
+        const ajourdhuiContent = document.createElement("div");
+        ajourdhuiContent.className = "accordionContent";
+
+        ajourdhuiItems.forEach(item => {
+            ajourdhuiContent.appendChild(createVoyageItemRow(item, envie));
+        });
+
+        ajourdhuiHeader.addEventListener("click", () => {
+
+            ajourdhuiContent.classList.toggle("hidden");
+
+            const icon = ajourdhuiHeader.querySelector(".accordionIcon");
+            icon.textContent = ajourdhuiContent.classList.contains("hidden") ? "▸" : "▾";
+
+        });
+
+        container.appendChild(ajourdhuiHeader);
+        container.appendChild(ajourdhuiContent);
+
+    }
+
     if (enfants.length === 0) {
-        container.innerHTML = `<div class="emptyState">Ce voyage ne contient aucune envie pour l'instant.</div>`;
+        container.innerHTML += `<div class="emptyState">Ce ${envie.categorie === "projet" ? "projet" : "voyage"} ne contient aucune envie pour l'instant.</div>`;
     }
 
     const { groups, todo } = groupAndSort(enfants);
@@ -148,7 +199,8 @@ function createVoyageItemRow(enfant, voyageEnvie) {
 
 function renderRattachement(envie, container) {
 
-    const voyages = getEnvies().filter(e => e.categorie === "voyage" && e.id !== envie.id);
+      const voyages = getEnvies().filter(e => isContainer(e.categorie) && e.id !== envie.id);
+
     const voyageActuel = voyages.find(v => v.id === envie.voyageId);
 
     if (voyageActuel) {
@@ -204,9 +256,10 @@ function openEnviePicker(voyageId) {
 
     const container = document.getElementById("enviePickerList");
 
-    const candidats = getEnvies().filter(e =>
-        !e.voyageId && e.categorie !== "voyage" && e.id !== voyageId
+       const candidats = getEnvies().filter(e =>
+        !e.voyageId && !isContainer(e.categorie) && e.id !== voyageId
     );
+
 
     container.innerHTML = "";
 
