@@ -2,6 +2,7 @@ import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
+import { getCategorieById, isContainer } from "./envie.js";
 
 import { openEnvie, CATEGORIES } from "./envie.js";
 import { renderEnvies } from "./ui.js";
