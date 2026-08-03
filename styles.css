@@ -1291,4 +1291,12 @@ button {
     font-size:16px;
     cursor:pointer;
 }
+.checklistSousCategorieHeader{
+    font-size:12px;
+    font-weight:600;
+    color:var(--color-text-light);
+    margin-top:10px;
+    margin-bottom:4px;
+    padding-left:8px;
+}
 
