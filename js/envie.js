@@ -1,9 +1,10 @@
 import { renderLieuActions } from "./location.js";
+import { getEnvies, updateEnvieCategorie, updateEnvie } from "./storage.js";
 
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
 import { renderPeriode } from "./periode.js";
-import { getEnvies, updateEnvieCategorie } from "./storage.js";
+
 import { renderVoyageSection } from "./voyage.js";
 import { renderEvaluation } from "./evaluation.js";
 
@@ -31,7 +32,8 @@ export function openEnvie(id) {
     if (!envie)
         return;
 
-    document.getElementById("ficheTitre").textContent = envie.titre;
+       document.getElementById("ficheTitreInput").value = envie.titre;
+
 
       renderCategorieSelector(envie);
 
@@ -50,6 +52,21 @@ export function openEnvie(id) {
     renderLieuActions(envie);
 
     document.getElementById("ficheOverlay").classList.remove("hidden");
+
+}
+
+export function initFicheTitre() {
+
+    document.getElementById("ficheTitreInput").addEventListener("change", (event) => {
+
+        const titre = event.target.value.trim();
+
+        if (!titre)
+            return;
+
+        updateEnvie(getCurrentEnvieId(), titre);
+
+    });
 
 }
 
