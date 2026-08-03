@@ -249,3 +249,19 @@ export function updateEnvieDate(id, date) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
 
 }
+
+export function updateEnvieCategorie(id, categorie) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.categorie = categorie;
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
+
