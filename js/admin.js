@@ -93,21 +93,7 @@ export function initAdmin() {
         currentItemCategorieId = event.target.value || null;
     });
 
-    document.getElementById("addTemplateItemButton").addEventListener("click", () => {
-
-        const input = document.getElementById("templateItemInput");
-        const texte = input.value.trim();
-
-        if (!texte || !currentTemplateId)
-            return;
-
-        addTemplateItem(currentTemplateId, texte, currentItemType, currentItemCategorieId);
-
-        input.value = "";
-
-        renderTemplateItems();
-
-    });
+    
 
     /* ---------- Catégories de checklist ---------- */
 
