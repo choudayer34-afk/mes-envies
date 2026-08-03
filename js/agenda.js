@@ -23,7 +23,8 @@ export function initAgenda() {
 
             if (envieId) {
                 closeAgenda();
-                openEnvie(envieId);
+                openEnvie(envie.id, null);
+
             }
 
             return;
@@ -54,7 +55,8 @@ export function initAgenda() {
 
         if (nouvelEtat) {
             closeAgenda();
-            openEnvie(envieId);
+            openEnvie(envie.id, null);
+
             openEvaluationAccordion();
         } else {
             renderAgenda();
