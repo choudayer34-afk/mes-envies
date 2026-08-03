@@ -407,3 +407,18 @@ export function deleteChecklistCategory(id) {
     saveChecklistCategories(getChecklistCategories().filter(c => c.id !== id));
 }
 
+export function updateEnvieVoyage(id, voyageId) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.voyageId = voyageId;
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
+
