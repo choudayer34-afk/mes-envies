@@ -152,11 +152,22 @@ function createCompactRow(envie) {
 
     });
 
-    row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
+        row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
+
+        console.log("Crayon (accueil) cliqué, envie=" + JSON.stringify({ id: envie?.id, titre: envie?.titre }));
+
         event.stopPropagation();
         event.preventDefault();
-        openEnvie(envie.id);
+
+        try {
+            openEnvie(envie.id);
+            console.log("openEnvie OK (accueil)");
+        } catch (err) {
+            console.error("ERREUR dans le handler crayon accueil: " + err.message);
+        }
+
     });
+
 
     return row;
 
