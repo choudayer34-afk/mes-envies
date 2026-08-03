@@ -143,10 +143,7 @@ function createChecklistRow(item, envie, personneContext = null) {
 
     const assignLabel = formatAssignLabel(item.assignedTo);
 
-    const usePersonneCheckbox = personneContext && item.assignedTo && item.assignedTo.length > 1;
-    const isChecked = usePersonneCheckbox
-        ? !!(item.checkedBy && item.checkedBy[personneContext])
-        : item.checked;
+  
 
     row.innerHTML = `
         <label class="checkLabel">
