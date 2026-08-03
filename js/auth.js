@@ -151,6 +151,11 @@ function initFoyerScreen() {
             errorEl.textContent = `Erreur écriture user : ${error.code}`;
             return;
         }
+        try {
+            await migrateLocalDataToFoyer(foyerId);
+        } catch (error) {
+            console.error("Migration échouée:", error);
+        }
 
         currentFoyerId = foyerId;
 
