@@ -1268,3 +1268,25 @@ button {
     opacity:1;
 }
 
+.dateButtonRow{
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.dateButtonRow .dateButton{
+    flex:1;
+}
+
+.dateClearButton{
+    flex-shrink:0;
+    width:44px;
+    height:50px;
+    border:none;
+    border-radius:14px;
+    background:#F5F8F9;
+    color:#56707E;
+    font-size:16px;
+    cursor:pointer;
+}
+
