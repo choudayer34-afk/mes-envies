@@ -63,3 +63,48 @@ export function formatDateLabel(date) {
 }
 
 
+export function groupForAgenda(envies) {
+
+    const dated = envies.filter(e => e.date?.start && !e.realise);
+    const adhocSource = envies.filter(e => e.jourGroupId);
+    const todo = envies.filter(e => !e.date?.start && !e.jourGroupId);
+
+    const datedMap = {};
+
+    dated.forEach(envie => {
+
+        const key = getGroupKey(envie);
+
+        datedMap[key] ??= { key, date: envie.date, items: [] };
+        datedMap[key].items.push(envie);
+
+    });
+
+    const datedGroups = Object.values(datedMap)
+        .sort((a, b) => new Date(a.date.start) - new Date(b.date.start));
+
+    datedGroups.forEach(g => {
+        g.items.sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+        g.label = formatDateLabel(g.date);
+    });
+
+    const adhocMap = {};
+
+    adhocSource.forEach(envie => {
+        adhocMap[envie.jourGroupId] ??= { key: envie.jourGroupId, items: [] };
+        adhocMap[envie.jourGroupId].items.push(envie);
+    });
+
+    const adhocGroups = Object.values(adhocMap);
+
+    adhocGroups.forEach((g, i) => {
+        g.items.sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+        g.label = `🗂️ Jour ${i + 1}`;
+    });
+
+    todo.sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+
+    return { datedGroups, adhocGroups, todo };
+
+}
+
