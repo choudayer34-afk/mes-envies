@@ -252,7 +252,7 @@ function renderPersonneSelector(container, selected, onChange) {
 
 export function initChecklistModal() {
 
-    document.getElementById("addChecklistButton").addEventListener("click", () => {
+        document.getElementById("addChecklistButton").addEventListener("click", () => {
 
         currentChecklistEnvieId = getCurrentEnvieId();
         currentAssignedTo = [];
@@ -260,22 +260,12 @@ export function initChecklistModal() {
         document.getElementById("checklistInput").value = "";
         document.getElementById("checklistSuggestions").innerHTML = "";
 
-        renderPersonneSelector(
-            document.getElementById("checklistPersonnesSelector"),
-            currentAssignedTo,
-            (next) => {
-                currentAssignedTo = next;
-                renderPersonneSelector(
-                    document.getElementById("checklistPersonnesSelector"),
-                    currentAssignedTo,
-                    arguments[0] ?? (() => {})
-                );
-            }
-        );
+        refreshCreationSelector();
 
         document.getElementById("checklistModal").classList.remove("hidden");
 
     });
+
 
     document.getElementById("cancelChecklist").addEventListener("click", () => {
         document.getElementById("checklistModal").classList.add("hidden");
