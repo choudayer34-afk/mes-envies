@@ -270,3 +270,19 @@ function renderPersonnesSelector(envie) {
     });
 
 }
+
+export function computeQuantite(item, envie) {
+
+    const personnes = (envie.personnesIds || []).length || 1;
+    const jours = getDureeJours(envie.date);
+
+    if (item.type === "parPersonne")
+        return item.quantite * personnes;
+
+    if (item.type === "parJour")
+        return item.quantite * jours;
+
+    return item.quantite;
+
+}
+
