@@ -1,4 +1,5 @@
-import { deleteEnvie, updateEnvie, createEnvie } from "./storage.js";
+import { deleteEnvie, updateEnvie, createEnvie, getEnvies } from "./storage.js";
+
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
 import { getSelectedLieu, resetSelectedLieu } from "./location.js";
