@@ -392,9 +392,14 @@ window.onerror = function(message, source, lineno, colno) {
         <span class="accordionIcon">▾</span>
     </button>
 
-  <div
+<div
     id="checklistSection"
     class="accordionContent hidden">
+
+    <div class="itemTypeToggle" id="checklistViewToggle">
+        <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
+        <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
+    </div>
 
     <div id="checklistContainer"></div>
 
@@ -415,6 +420,7 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+
 
 
 </div>
@@ -537,10 +543,12 @@ window.onerror = function(message, source, lineno, colno) {
 
         <div class="fieldTitle">Éléments administrables</div>
 
-      <div id="adminMenu" class="categorieSelector fiche">
+   <div id="adminMenu" class="categorieSelector fiche">
     <button class="categorieChip active" type="button" data-target="templates">🧳 Modèles de checklist</button>
     <button class="categorieChip" type="button" data-target="categories">🏷️ Catégories de checklist</button>
+    <button class="categorieChip" type="button" data-target="personnes">👤 Personnes du foyer</button>
 </div>
+
 
 <div id="adminChecklistTemplates" class="adminSection">
 
@@ -558,6 +566,15 @@ window.onerror = function(message, source, lineno, colno) {
 
     <button id="addChecklistCategorieButton" class="secondaryButton">
         ➕ Nouvelle catégorie
+    </button>
+
+</div>
+<div id="adminPersonnesFoyer" class="adminSection hidden">
+
+    <div id="personnesList"></div>
+
+    <button id="addPersonneButton" class="secondaryButton">
+        ➕ Nouvelle personne
     </button>
 
 </div>
@@ -616,6 +633,8 @@ window.onerror = function(message, source, lineno, colno) {
     autocomplete="off">
 
 <div id="checklistSuggestions" class="lieuSuggestions"></div>
+<label class="fieldTitle">Pour qui ?</label>
+<div id="checklistPersonnesSelector" class="categorieSelector fiche"></div>
 
 
         <div class="modal-actions">
@@ -633,6 +652,24 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+
+<div id="assignModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <h2>👤 Attribuer à</h2>
+
+        <div id="assignPersonnesSelector" class="categorieSelector fiche"></div>
+
+        <div class="modal-actions">
+            <button id="cancelAssign" class="secondaryButton">Annuler</button>
+            <button id="validateAssign" class="primaryButton">Valider</button>
+        </div>
+
+    </div>
+
+</div>
+
 <div id="templatePickerModal" class="modal-overlay hidden">
 
     <div class="modal">
