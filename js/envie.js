@@ -1,6 +1,7 @@
 import { getEnvies } from "./storage.js";
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
+import { renderPeriode } from "./periode.js";
 
 let currentEnvieId = null;
 
