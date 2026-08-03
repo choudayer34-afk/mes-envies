@@ -79,7 +79,8 @@ function renderMarkers(voyageId) {
             if (button) {
                 button.addEventListener("click", () => {
                     closeMap();
-                    openEnvie(envie.id);
+                   openEnvie(envie.id, null);
+
                 });
             }
 
