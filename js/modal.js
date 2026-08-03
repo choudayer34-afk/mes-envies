@@ -12,23 +12,11 @@ let currentDeleteId = null;
 /* ---------- Modale création / édition ---------- */
 
 export function initModal() {
-renderCreationCategorieSelector();
+
     document.getElementById("cancelModal")
         .addEventListener("click", closeModal);
 
-    document.querySelectorAll(".categorieChip").forEach(chip => {
-
-        chip.addEventListener("click", () => {
-
-            document.querySelectorAll(".categorieChip")
-                .forEach(c => c.classList.remove("active"));
-
-            chip.classList.add("active");
-            currentCategorie = chip.dataset.categorie;
-
-        });
-
-    });
+    renderCreationCategorieSelector();
 
     document.getElementById("saveEnvie")
         .addEventListener("click", saveCurrentEnvie);
@@ -93,6 +81,7 @@ export function closeModal() {
 }
 
 export function editEnvie(envie) {
+    renderCreationCategorieSelector();
     openModal("✏️ Modifier l'envie", envie.titre, envie.id);
 }
 
