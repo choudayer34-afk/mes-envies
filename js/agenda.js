@@ -1,7 +1,8 @@
 import { getEnvies, updateEnvieRealise } from "./storage.js";
 import { groupAndSort } from "./grouping.js";
-import { CATEGORIES, openEnvie } from "./envie.js";
+
 import { groupForAgenda } from "./grouping.js";
+import { CATEGORIES, openEnvie, openEvaluationAccordion } from "./envie.js";
 
 
 export function initAgenda() {
@@ -107,9 +108,25 @@ function createAgendaRow(envie) {
     });
 
     checkbox.addEventListener("change", () => {
-        updateEnvieRealise(envie.id, !envie.realise);
-        renderAgenda();
+
+        const nouvelEtat = !envie.realise;
+
+        updateEnvieRealise(envie.id, nouvelEtat);
+
+        if (nouvelEtat) {
+
+            closeAgenda();
+            openEnvie(envie.id);
+            openEvaluationAccordion();
+
+        } else {
+
+            renderAgenda();
+
+        }
+
     });
+
 
     row.addEventListener("click", () => {
         closeAgenda();
