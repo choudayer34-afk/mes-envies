@@ -79,11 +79,8 @@ function renderHomeSections() {
 function renderCollapsibleSection(sectionId, containerId, label, items, rowFactory) {
 
     const section = document.getElementById(sectionId);
-    const container = document.getElementById(containerId);
 
-    console.log(sectionId + " -> section trouvée=" + !!section + ", items=" + items.length);
-
-    if (!section || !container)
+    if (!section)
         return;
 
     if (items.length === 0) {
@@ -93,18 +90,16 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
 
     section.classList.remove("hidden");
 
-    console.log(sectionId + " -> classe hidden retirée, classList=" + section.className);
-
-
     let header = section.querySelector(".homeSectionHeader");
+    let content = document.getElementById(containerId);
 
-    if (!header) {
+    if (!header || !content) {
 
         header = document.createElement("button");
         header.type = "button";
         header.className = "homeSectionHeader";
 
-        const content = document.createElement("div");
+        content = document.createElement("div");
         content.id = containerId;
         content.className = "homeSectionContent";
 
@@ -123,17 +118,16 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
 
     }
 
-    const freshContainer = document.getElementById(containerId);
-
     header.innerHTML = `<span>${label} (${items.length})</span><span class="accordionIcon">▾</span>`;
 
-    freshContainer.innerHTML = "";
+    content.innerHTML = "";
 
     items.forEach(envie => {
-        freshContainer.appendChild(rowFactory(envie));
+        content.appendChild(rowFactory(envie));
     });
 
 }
+
 
 function createCompactRow(envie) {
 
