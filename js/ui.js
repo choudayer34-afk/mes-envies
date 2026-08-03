@@ -81,6 +81,8 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
     const section = document.getElementById(sectionId);
     const container = document.getElementById(containerId);
 
+    console.log(sectionId + " -> section trouvée=" + !!section + ", items=" + items.length);
+
     if (!section || !container)
         return;
 
@@ -90,6 +92,9 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
     }
 
     section.classList.remove("hidden");
+
+    console.log(sectionId + " -> classe hidden retirée, classList=" + section.className);
+
 
     let header = section.querySelector(".homeSectionHeader");
 
