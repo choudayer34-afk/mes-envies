@@ -1,3 +1,7 @@
+import {
+    getEnvieCategories, createEnvieCategory, updateEnvieCategoryDef,
+    deleteEnvieCategoryDef, moveEnvieCategory
+} from "./storage.js";
 
 
 import { groupByCategorie } from "./checklist.js";
