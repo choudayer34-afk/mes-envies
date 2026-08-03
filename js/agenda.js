@@ -63,7 +63,7 @@ export function initAgenda() {
     });
 
 }
-}
+
 
 function openAgenda() {
     renderAgenda();
