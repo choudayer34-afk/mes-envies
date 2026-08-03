@@ -1,6 +1,7 @@
 import { renderLieuActions } from "./location.js";
 import { getEnvies, updateEnvieCategorie, updateEnvie } from "./storage.js";
 import { closeAllOverlaysExcept } from "./modal-utils.js";
+import { removeEnvie } from "./modal.js";
 
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
@@ -156,6 +157,22 @@ export function openEvaluationAccordion() {
     setTimeout(() => {
         section.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 150);
+
+}
+
+export function initFicheDelete() {
+
+    document.getElementById("deleteFromFicheButton").addEventListener("click", () => {
+
+        const envie = getEnvies().find(e => e.id === currentEnvieId);
+
+        if (!envie)
+            return;
+
+        closeFiche();
+        removeEnvie(envie.id);
+
+    });
 
 }
 
