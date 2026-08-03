@@ -10,13 +10,13 @@ export function renderEnvies() {
     if (!container)
         return;
 
-       const envies = getEnvies().filter(e => !e.voyageId);
+    const envies = getEnvies().filter(e => !e.voyageId);
 
+    const badge = document.getElementById("inboxBadge");
 
-    const inboxTitle = document.getElementById("inboxTitle");
-
-    if (inboxTitle) {
-        inboxTitle.textContent = `📥 À trier (${envies.length})`;
+    if (badge) {
+        badge.textContent = envies.length;
+        badge.classList.toggle("hidden", envies.length === 0);
     }
 
     container.innerHTML = "";
@@ -41,6 +41,7 @@ export function renderEnvies() {
     });
 
 }
+
 
 function createEnvieCard(envie) {
 
