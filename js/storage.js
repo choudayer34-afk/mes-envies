@@ -696,4 +696,50 @@ export function removeFromJourGroup(envieId) {
 
 }
 
+export function addMultipleChecklistItems(envieId, textes, categorieId = null, assignedTo = []) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return [];
+
+    const newItems = textes.map(texte => ({
+        id: crypto.randomUUID(),
+        texte,
+        quantite: 1,
+        categorieId,
+        assignedTo,
+        parPersonne: false,
+        checked: false,
+        checkedBy: {}
+    }));
+
+    patchEnvie(envieId, { checklist: [...(envie.checklist || []), ...newItems] });
+
+    newItems.forEach(item => rememberChecklistItem(item.texte, categorieId));
+
+    return newItems;
+
+}
+
+export function addMultipleTemplateItems(templateId, textes, categorieId = null, type = "fixe", quantite = 1) {
+
+    const template = templatesCache.find(t => t.id === templateId);
+
+    if (!template)
+        return;
+
+    const newItems = textes.map(texte => ({
+        id: crypto.randomUUID(),
+        texte,
+        type,
+        categorieId,
+        quantite
+    }));
+
+    updateDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", templateId), {
+        items: [...(template.items || []), ...newItems]
+    }).catch(console.error);
+
+}
 
