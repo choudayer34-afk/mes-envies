@@ -1,6 +1,6 @@
-import { updateEnvieDate } from "./storage.js";
-import { getCurrentEnvieId } from "./envie.js";
 import { updateEnvieDate, updateEnviePersonnes } from "./storage.js";
+import { getCurrentEnvieId } from "./envie.js";
+
 
 let selectedPeriode = null;
 let currentType = "single";
@@ -15,9 +15,7 @@ export function resetSelectedPeriode() {
     updateLabel(document.getElementById("dateLabel"), null);
 }
 
-export function renderPeriode(envie) {
-    updateLabel(document.getElementById("fichePeriodeLabel"), envie.date);
-}
+
 
 export function formatPeriode(periode) {
 
