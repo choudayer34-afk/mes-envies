@@ -71,7 +71,7 @@ function renderHomeSections() {
     const today = new Date().toISOString().slice(0, 10);
 
     const ajourdhuiItems = envies.filter(e =>
-        !e.voyageId && !isContainer(e.categorie) && e.date?.start === today
+        !isContainer(e.categorie) && e.date?.start === today
     );
 
     const continuerItems = envies.filter(e => {
@@ -88,6 +88,7 @@ function renderHomeSections() {
     renderSection("continuerSection", "continuerContainer", continuerItems);
 
 }
+
 
 function renderSection(sectionId, containerId, items) {
 
