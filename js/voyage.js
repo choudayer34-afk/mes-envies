@@ -27,9 +27,7 @@ export function renderVoyageSection(envie) {
 
 }
 
-function isContainer(categorie) {
-    return categorie === "voyage" || categorie === "projet";
-}
+
 
 
 
