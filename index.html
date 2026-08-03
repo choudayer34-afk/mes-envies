@@ -299,6 +299,24 @@ window.onerror = function(message, source, lineno, colno) {
     </div>
 
 </div>
+<div class="accordion">
+
+    <button
+        class="accordionHeader"
+        data-target="voyageSection">
+        <span>🧳 Voyage</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div
+        id="voyageSection"
+        class="accordionContent hidden">
+
+        <div id="ficheVoyageContent"></div>
+
+    </div>
+
+</div>
 
 <div class="accordion">
 
@@ -614,6 +632,19 @@ window.onerror = function(message, source, lineno, colno) {
         <h2>📋 Choisir un modèle</h2>
 
         <div id="templatePickerList"></div>
+
+    </div>
+
+</div>
+<div id="enviePickerModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeEnviePicker" class="backButton">← Retour</button>
+
+        <h2>➕ Ajouter au voyage</h2>
+
+        <div id="enviePickerList"></div>
 
     </div>
 
