@@ -9,7 +9,8 @@ export function renderEnvies() {
     if (!container)
         return;
 
-    const envies = getEnvies();
+       const envies = getEnvies().filter(e => !e.voyageId);
+
 
     const inboxTitle = document.getElementById("inboxTitle");
 
