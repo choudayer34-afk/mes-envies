@@ -1,6 +1,7 @@
 
 import { getCurrentEnvieId } from "./envie.js";
 import { updateEnvieDate, updateEnviePersonnes, propagateDateToGroup } from "./storage.js";
+import { updateEnviePersonnesIds, getPersonnes } from "./storage.js";
 
 
 let selectedPeriode = null;
@@ -242,11 +243,41 @@ export function computeQuantite(item, envie) {
 export function renderPeriode(envie) {
 
     updateLabel(document.getElementById("fichePeriodeLabel"), envie.date);
+    renderPersonnesSelector(envie);
 
-    const personnesInput = document.getElementById("fichePersonnes");
+}
 
-    if (personnesInput) {
-        personnesInput.value = envie.personnes || 1;
-    }
+function renderPersonnesSelector(envie) {
+
+    const container = document.getElementById("fichePersonnesSelector");
+
+    if (!container)
+        return;
+
+    const selected = envie.personnesIds || [];
+
+    container.innerHTML = "";
+
+    getPersonnes().forEach(personne => {
+
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "categorieChip" + (selected.includes(personne.id) ? " active" : "");
+        chip.textContent = personne.nom;
+
+        chip.addEventListener("click", () => {
+
+            const next = selected.includes(personne.id)
+                ? selected.filter(id => id !== personne.id)
+                : [...selected, personne.id];
+
+            updateEnviePersonnesIds(envie.id, next);
+            renderPersonnesSelector({ ...envie, personnesIds: next });
+
+        });
+
+        container.appendChild(chip);
+
+    });
 
 }
