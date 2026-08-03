@@ -17,6 +17,7 @@ import {
 } from "./js/modal.js";
 import { initDateModal } from "./js/periode.js";
 
+import { initVoyage } from "./js/voyage.js";
 
 import { initChecklistModal } from "./js/checklist.js";
 import { initUrlModal } from "./js/urls.js";
@@ -41,6 +42,8 @@ function init() {
     initLocation();
     registerServiceWorker();
     initAdmin();
+        initVoyage();
+
 
     renderEnvies();
 
