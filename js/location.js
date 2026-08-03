@@ -125,7 +125,7 @@ function setupAutocomplete(input, suggestionsBox, onSelect) {
             results.forEach(result => {
 
                 const item = document.createElement("div");
-                item.className = "lieuSuggestionItem";
+                item.className = "lieuItem";
                 item.textContent = result.display_name;
 
                 item.addEventListener("click", () => {
@@ -147,11 +147,60 @@ function setupAutocomplete(input, suggestionsBox, onSelect) {
 
             });
 
+            suggestionsBox.appendChild(
+                createManualEntry(query, input, suggestionsBox, onSelect)
+            );
+
         }, 400);
 
     });
 
 }
+
+function createManualEntry(query, input, suggestionsBox, onSelect) {
+
+    const coords = parseCoordinates(query);
+
+    const item = document.createElement("div");
+    item.className = "lieuItem lieuManualItem";
+
+    item.innerHTML = coords
+        ? `<div class="lieuNom">📍 Utiliser ces coordonnées GPS</div><div class="lieuAdresse">${coords.latitude}, ${coords.longitude}</div>`
+        : `<div class="lieuNom">✏️ Utiliser « ${query} » tel quel</div><div class="lieuAdresse">Sans coordonnées GPS</div>`;
+
+    item.addEventListener("click", () => {
+
+        const place = coords
+            ? { nom: query, adresse: query, latitude: coords.latitude, longitude: coords.longitude }
+            : { nom: query, adresse: query, latitude: null, longitude: null };
+
+        input.value = place.nom;
+        suggestionsBox.innerHTML = "";
+        onSelect(place);
+
+    });
+
+    return item;
+
+}
+
+function parseCoordinates(text) {
+
+    const match = text.match(/^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
+
+    if (!match)
+        return null;
+
+    const latitude = parseFloat(match[1]);
+    const longitude = parseFloat(match[2]);
+
+    if (Math.abs(latitude) > 90 || Math.abs(longitude) > 180)
+        return null;
+
+    return { latitude, longitude };
+
+}
+
 
 export function useCurrentLocation(input, onSelect, button = null) {
 
