@@ -27,6 +27,15 @@ import { searchPlaces }
 import { searchLocation }
 from "./js/location.js";
 
+import {
+    openEnvie,
+    closeFiche
+} from "./js/envie.js";
+
+import {
+    initLocation
+} from "./js/location.js";
+
 "use strict";
 
 
