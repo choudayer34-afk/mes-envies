@@ -22,7 +22,22 @@ export function initAdmin() {
     document.getElementById("btnSettings").addEventListener("click", openAdmin);
     document.getElementById("closeAdmin").addEventListener("click", closeAdmin);
     
-        
+            document.getElementById("addEnvieCategorieButton").addEventListener("click", () => {
+
+        const label = prompt("Nom de la catégorie :");
+
+        if (!label || !label.trim())
+            return;
+
+        const emoji = prompt("Emoji :", "🏷️") || "🏷️";
+        const conteneur = window.confirm("Cette catégorie regroupe-t-elle d'autres envies (comme Voyage/Projet) ? OK = oui, Annuler = non.");
+
+        createEnvieCategory(label.trim(), emoji.trim(), conteneur);
+
+        renderEnvieCategoriesList();
+
+    });
+
 
     document.getElementById("showFoyerCodeButton").addEventListener("click", showFoyerCode);
 
@@ -45,6 +60,12 @@ export function initAdmin() {
 
             document.getElementById("adminPersonnesFoyer")
                 .classList.toggle("hidden", target !== "personnes");
+
+            document.getElementById("adminEnvieCategories")
+                .classList.toggle("hidden", target !== "envieCategories");
+
+            if (target === "envieCategories")
+                renderEnvieCategoriesList();
 
             if (target === "categories")
                 renderCategoriesList();
@@ -439,6 +460,74 @@ function renderPersonnesList() {
 
             deletePersonne(personne.id);
             renderPersonnesList();
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+}
+function renderEnvieCategoriesList() {
+
+    const container = document.getElementById("envieCategoriesList");
+    const categories = getEnvieCategories();
+
+    container.innerHTML = "";
+
+    categories.forEach((cat, index) => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">
+                ${cat.emoji} ${cat.label}
+                <small>${cat.conteneur ? "🧳 Conteneur" : ""}</small>
+            </div>
+            <div class="templateRowActions">
+                <button class="actionButton" title="Monter">⬆️</button>
+                <button class="actionButton" title="Descendre">⬇️</button>
+                <button class="actionButton editButton" title="Modifier">✏️</button>
+                <button class="actionButton deleteButton" title="Supprimer">🗑️</button>
+            </div>
+        `;
+
+        const [upBtn, downBtn, editBtn, deleteBtn] = row.querySelectorAll("button");
+
+        upBtn.disabled = index === 0;
+        downBtn.disabled = index === categories.length - 1;
+
+        upBtn.addEventListener("click", () => {
+            moveEnvieCategory(cat.id, -1);
+            renderEnvieCategoriesList();
+        });
+
+        downBtn.addEventListener("click", () => {
+            moveEnvieCategory(cat.id, 1);
+            renderEnvieCategoriesList();
+        });
+
+        editBtn.addEventListener("click", () => {
+
+            const label = prompt("Nom :", cat.label);
+            if (!label || !label.trim()) return;
+
+            const emoji = prompt("Emoji :", cat.emoji) || cat.emoji;
+            const conteneur = window.confirm("Conteneur ? OK = oui, Annuler = non.");
+
+            updateEnvieCategoryDef(cat.id, { label: label.trim(), emoji: emoji.trim(), conteneur });
+            renderEnvieCategoriesList();
+
+        });
+
+        deleteBtn.addEventListener("click", () => {
+
+            if (!window.confirm(`Supprimer "${cat.label}" ? Les envies existantes garderont cette catégorie mais elle ne sera plus modifiable via ce nom.`))
+                return;
+
+            deleteEnvieCategoryDef(cat.id);
+            renderEnvieCategoriesList();
 
         });
 
