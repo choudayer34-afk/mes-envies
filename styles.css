@@ -226,7 +226,9 @@ main{
 #checklistModal,
 #assignModal,
 #urlModal,
-#dateModal{
+#dateModal,
+#templatePickerModal,
+#enviePickerModal{
     z-index:2100;
 }
 
