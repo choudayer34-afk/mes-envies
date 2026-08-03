@@ -160,18 +160,7 @@ export function initDateModal() {
 
     });
     
-        const personnesInput = document.getElementById("fichePersonnes");
-
-    if (personnesInput) {
-
-        personnesInput.addEventListener("change", () => {
-
-            const value = parseInt(personnesInput.value, 10) || 1;
-            updateEnviePersonnes(getCurrentEnvieId(), value);
-
-        });
-
-    }
+     
 
 
 }
