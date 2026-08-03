@@ -4,6 +4,7 @@ import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 
+import { removeFromJourGroup } from "./storage.js";
 
 
 import { renderEnvies } from "./ui.js";
@@ -142,18 +143,29 @@ function createVoyageItemRow(enfant, voyageEnvie) {
     row.className = "templateRow" + (enfant.realise ? " realise" : "");
     row.dataset.dragId = enfant.id;
 
+    const isInAdhocGroup = !!enfant.jourGroupId;
+
     row.innerHTML = `
         <span class="dragHandle">⠿</span>
         <div class="templateRowNom">
-                        ${getCategorieById(enfant.categorie)?.emoji || "💡"} ${enfant.titre}
+            ${getCategorieById(enfant.categorie)?.emoji || "💡"} ${enfant.titre}
         </div>
         <div class="templateRowActions">
+            ${isInAdhocGroup ? `<button class="actionButton ungroupButton" title="Retirer du groupe">🔓</button>` : ""}
             <button class="actionButton realiseButton" title="${enfant.realise ? "Annuler" : "Réalisé"}">${enfant.realise ? "↩️" : "✅"}</button>
             <button class="actionButton editButton" title="Ouvrir">👁️</button>
             <button class="actionButton deleteButton" title="Retirer">✕</button>
         </div>
     `;
 
+    if (isInAdhocGroup) {
+
+        row.querySelector(".ungroupButton").addEventListener("click", () => {
+            removeFromJourGroup(enfant.id);
+            renderVoyageSection(voyageEnvie);
+        });
+
+    }
 
     row.querySelector(".realiseButton").addEventListener("click", () => {
         updateEnvieRealise(enfant.id, !enfant.realise);
@@ -171,7 +183,7 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         showToast("✓ Retiré du voyage");
     });
 
-        makeRowDraggable(row, enfant.id, (targetId) => {
+    makeRowDraggable(row, enfant.id, (targetId) => {
 
         const allEnfants = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
         const target = allEnfants.find(e => e.id === targetId);
@@ -192,10 +204,10 @@ function createVoyageItemRow(enfant, voyageEnvie) {
 
     });
 
-
     return row;
 
 }
+
 
 function renderRattachement(envie, container) {
 
