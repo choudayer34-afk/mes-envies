@@ -156,10 +156,11 @@ function createEnvieCard(envie) {
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
         </div>`;
 
-    card.querySelector(".editButton").addEventListener("click", (event) => {
+      card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
-        editEnvie(envie);
+        openEnvie(envie.id);
     });
+
 
     card.querySelector(".deleteButton").addEventListener("click", (event) => {
         event.stopPropagation();
