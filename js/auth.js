@@ -30,12 +30,15 @@ export function initAuth(onReady) {
 
     initFoyerScreen();
 
-    onAuthStateChanged(auth, async (user) => {
+       onAuthStateChanged(auth, async (user) => {
+
+        console.log("Auth state:", user ? user.email : "déconnecté");
 
         if (!user) {
             showLoginScreen();
             return;
         }
+
 
         currentFoyerId = await resolveFoyer(user.uid);
 
