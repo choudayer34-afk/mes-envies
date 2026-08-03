@@ -372,7 +372,7 @@ export function initChecklistModal() {
 
     });
 
-    setupChecklistAutocomplete();
+    
 
 }
 
@@ -487,45 +487,7 @@ function saveChecklistItem() {
 
 
 
-function setupChecklistAutocomplete() {
 
-    const input = document.getElementById("checklistInput");
-    const suggestionsBox = document.getElementById("checklistSuggestions");
-
-    if (!input || !suggestionsBox)
-        return;
-
-    input.addEventListener("input", () => {
-
-        const query = input.value.trim().toLowerCase();
-
-        suggestionsBox.innerHTML = "";
-
-        if (!query)
-            return;
-
-        const matches = getChecklistLibrary()
-            .filter(item => item.texte.toLowerCase().includes(query))
-            .slice(0, 6);
-
-        matches.forEach(item => {
-
-            const div = document.createElement("div");
-            div.className = "lieuItem";
-            div.textContent = item.texte;
-
-            div.addEventListener("click", () => {
-                input.value = item.texte;
-                suggestionsBox.innerHTML = "";
-            });
-
-            suggestionsBox.appendChild(div);
-
-        });
-
-    });
-
-}
 
 /* ---------- Modale attribution (édition) ---------- */
 
