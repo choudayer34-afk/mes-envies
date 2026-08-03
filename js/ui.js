@@ -1,6 +1,7 @@
 import { getEnvies, toggleFavorite } from "./storage.js";
 import { CATEGORIES, openEnvie } from "./envie.js";
 import { editEnvie, removeEnvie } from "./modal.js";
+import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 
 export function renderEnvies() {
 
@@ -50,7 +51,24 @@ function createEnvieCard(envie) {
         openEnvie(envie.id);
     });
 
-       card.innerHTML = `
+    const isContainer = envie.categorie === "voyage" || envie.categorie === "projet";
+
+    let statutHtml = "";
+
+    if (isContainer) {
+
+        const { statut, pourcentage } = computeContainerStatus(envie);
+
+        statutHtml = `
+            <div class="progressBarTrack" style="margin-top:8px;">
+                <div class="progressBarFill" style="width:${pourcentage}%"></div>
+            </div>
+            <div class="containerStatutPct">${formatStatutLabel(statut)} · ${pourcentage}%</div>
+        `;
+
+    }
+
+    card.innerHTML = `
         <div class="envieHeader">
             <button class="favoriteButton" data-id="${envie.id}">
                 ${envie.favorite ? "⭐" : "☆"}
@@ -63,12 +81,12 @@ function createEnvieCard(envie) {
         <div class="envieCategory">
             ${CATEGORIES[envie.categorie]?.label || "Général"}
         </div>
+        ${statutHtml}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
         </div>`;
-
-
+    
     card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
         editEnvie(envie);
