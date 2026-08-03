@@ -4,6 +4,7 @@ import {
 } from "./storage.js";
 
 import { renderCreationCategorieSelector } from "./modal.js";
+import { addMultipleTemplateItems } from "./storage.js";
 
 import { groupByCategorie } from "./checklist.js";
 import {
