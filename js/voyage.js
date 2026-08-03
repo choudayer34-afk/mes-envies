@@ -119,7 +119,7 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         showToast("✓ Retiré du voyage");
     });
 
-    makeRowDraggable(row, enfant.id, (targetId) => {
+        makeRowDraggable(row, enfant.id, (targetId) => {
 
         const allEnfants = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
         const target = allEnfants.find(e => e.id === targetId);
@@ -127,7 +127,10 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         if (!target)
             return;
 
-        if (getGroupKey(enfant) === getGroupKey(target)) {
+        const keyA = getGroupKey(enfant);
+        const keyB = getGroupKey(target);
+
+        if (keyA && keyA === keyB) {
             reorderEnvieNear(enfant.id, targetId);
         } else {
             groupEnvieWith(enfant.id, targetId);
@@ -136,6 +139,7 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         renderVoyageSection(voyageEnvie);
 
     });
+
 
     return row;
 
