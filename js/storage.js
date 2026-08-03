@@ -189,6 +189,7 @@ export function addChecklistItem(envieId, texte, quantite = 1){
     });
 
     envie.updatedAt = Date.now();
+    rememberChecklistItem(texte, categorieId);
 
     localStorage.setItem(
         STORAGE_KEY,
@@ -435,6 +436,40 @@ export function updateEnvieRealise(id, realise) {
     envie.updatedAt = Date.now();
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
+
+const CHECKLIST_LIBRARY_KEY = "envie_checklist_library";
+
+export function getChecklistLibrary() {
+    return JSON.parse(localStorage.getItem(CHECKLIST_LIBRARY_KEY)) || [];
+}
+
+function saveChecklistLibrary(items) {
+    localStorage.setItem(CHECKLIST_LIBRARY_KEY, JSON.stringify(items));
+}
+
+function rememberChecklistItem(texte, categorieId = null) {
+
+    const library = getChecklistLibrary();
+
+    const existing = library.find(
+        i => i.texte.toLowerCase() === texte.toLowerCase()
+    );
+
+    if (existing) {
+        existing.categorieId = categorieId ?? existing.categorieId;
+        existing.updatedAt = Date.now();
+    } else {
+        library.unshift({
+            id: crypto.randomUUID(),
+            texte,
+            categorieId,
+            updatedAt: Date.now()
+        });
+    }
+
+    saveChecklistLibrary(library.slice(0, 200));
 
 }
 
