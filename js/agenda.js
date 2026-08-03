@@ -88,7 +88,6 @@ function renderAgenda() {
 
 }
 
-
 function createAgendaRow(envie) {
 
     const row = document.createElement("div");
@@ -101,12 +100,18 @@ function createAgendaRow(envie) {
         </label>
     `;
 
-    row.querySelector("input").addEventListener("change", () => {
+    const checkbox = row.querySelector("input");
+
+    checkbox.addEventListener("click", (event) => {
+        event.stopPropagation();
+    });
+
+    checkbox.addEventListener("change", () => {
         updateEnvieRealise(envie.id, !envie.realise);
         renderAgenda();
     });
 
-    row.querySelector("label span").addEventListener("click", () => {
+    row.addEventListener("click", () => {
         closeAgenda();
         openEnvie(envie.id);
     });
@@ -114,3 +119,4 @@ function createAgendaRow(envie) {
     return row;
 
 }
+
