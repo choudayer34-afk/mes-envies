@@ -1,5 +1,6 @@
 import { updateEnvieDate } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
+import { updateEnvieDate, updateEnviePersonnes } from "./storage.js";
 
 let selectedPeriode = null;
 let currentType = "single";
@@ -148,6 +149,20 @@ export function initDateModal() {
         closeDateModal();
 
     });
+    
+        const personnesInput = document.getElementById("fichePersonnes");
+
+    if (personnesInput) {
+
+        personnesInput.addEventListener("change", () => {
+
+            const value = parseInt(personnesInput.value, 10) || 1;
+            updateEnviePersonnes(getCurrentEnvieId(), value);
+
+        });
+
+    }
+
 
 }
 
@@ -174,6 +189,53 @@ function applyPeriode(periode) {
     } else {
         updateEnvieDate(getCurrentEnvieId(), periode);
         updateLabel(document.getElementById("fichePeriodeLabel"), periode);
+    }
+
+}
+
+export function getDureeJours(periode) {
+
+    if (!periode || !periode.type)
+        return 1;
+
+    if (periode.type === "range" && periode.start && periode.end) {
+
+        const start = new Date(periode.start);
+        const end = new Date(periode.end);
+
+        const diff = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+        return Math.max(1, diff);
+
+    }
+
+    return 1;
+
+}
+
+export function computeQuantite(item, envie) {
+
+    const personnes = envie.personnes || 1;
+    const jours = getDureeJours(envie.date);
+
+    if (item.type === "parPersonne")
+        return item.quantite * personnes;
+
+    if (item.type === "parJour")
+        return item.quantite * jours;
+
+    return item.quantite;
+
+}
+
+export function renderPeriode(envie) {
+
+    updateLabel(document.getElementById("fichePeriodeLabel"), envie.date);
+
+    const personnesInput = document.getElementById("fichePersonnes");
+
+    if (personnesInput) {
+        personnesInput.value = envie.personnes || 1;
     }
 
 }
