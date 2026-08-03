@@ -166,7 +166,8 @@ export function removeUrl(envieId, urlId) {
 
 }
 
-export function addChecklistItem(envieId, texte, quantite = 1){
+
+export function addChecklistItem(envieId, texte, quantite = 1, categorieId = null){
 
     const envies = getEnvies();
 
@@ -184,11 +185,14 @@ export function addChecklistItem(envieId, texte, quantite = 1){
 
         quantite,
 
+        categorieId,
+
         checked:false
 
     });
 
     envie.updatedAt = Date.now();
+
     rememberChecklistItem(texte, categorieId);
 
     localStorage.setItem(
