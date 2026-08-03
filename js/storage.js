@@ -26,15 +26,10 @@ export function toggleFavorite(id) {
 }
 
 export function createEnvie({
-
     titre,
-
     categorie = "general",
-
     lieu = {},
-
     date = null
-
 }) {
 
     const envies = getEnvies();
@@ -42,59 +37,60 @@ export function createEnvie({
     envies.unshift({
 
         id: crypto.randomUUID(),
-
         titre,
-
         categorie,
-
         favorite: false,
-
         description: "",
-
         photos: [],
-        
         checklist: [],
-        
         urls: [],
-
         tags: [],
 
         lieu: {
+            nom: lieu.nom || "",
+            adresse: lieu.adresse || "",
+            ville: lieu.ville || "",
+            pays: lieu.pays || "",
+            latitude: lieu.latitude ?? null,
+            longitude: lieu.longitude ?? null
+        },
 
-    nom: "",
-
-    adresse: "",
-
-    ville: "",
-
-    pays: "",
-
-    latitude: null,
-
-    longitude: null
-
-},
-
-        date: null,
-
+        date,
         voyageId: null,
-
         archived: false,
-
         statut: "inbox",
-
         createdAt: Date.now(),
-
         updatedAt: Date.now()
 
     });
 
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(envies)
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
 
 }
+
+export function updateEnvieLieu(id, lieu) {
+
+    const envies = getEnvies();
+    const envie = envies.find(e => e.id === id);
+
+    if (!envie)
+        return;
+
+    envie.lieu = {
+        nom: lieu.nom || "",
+        adresse: lieu.adresse || "",
+        ville: lieu.ville || "",
+        pays: lieu.pays || "",
+        latitude: lieu.latitude ?? null,
+        longitude: lieu.longitude ?? null
+    };
+
+    envie.updatedAt = Date.now();
+
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(envies));
+
+}
+
 
 
 export function deleteEnvie(id) {
