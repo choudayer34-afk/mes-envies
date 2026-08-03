@@ -4,6 +4,7 @@ import { showToast } from "./toast.js";
 import { getSelectedLieu, resetSelectedLieu } from "./location.js";
 import { getSelectedPeriode, resetSelectedPeriode } from "./periode.js";
 import { getEnvieCategories } from "./storage.js";
+import { openEnvie } from "./envie.js";
 
 let currentEditId = null;
 let currentCategorie = "general";
@@ -20,6 +21,39 @@ export function initModal() {
 
     document.getElementById("saveEnvie")
         .addEventListener("click", saveCurrentEnvie);
+        
+            document.getElementById("advancedModeButton").addEventListener("click", async () => {
+
+        const input = document.getElementById("envieInput");
+        const titre = input.value.trim();
+
+        if (!titre)
+            return;
+
+        createEnvie({
+            titre,
+            categorie: currentCategorie,
+            lieu: getSelectedLieu(),
+            date: getSelectedPeriode()
+        });
+
+        resetSelectedLieu();
+        resetSelectedPeriode();
+
+        closeModal();
+
+        setTimeout(() => {
+
+            const nouvelle = getEnvies()[0];
+
+            if (nouvelle) {
+                openEnvie(nouvelle.id);
+            }
+
+        }, 400);
+
+    });
+
 
 }
 export function renderCreationCategorieSelector() {
