@@ -364,15 +364,31 @@ function saveChecklistItem() {
     if (!texte)
         return;
 
-    addChecklistItem(currentChecklistEnvieId, texte, 1, null, currentAssignedTo);
+    const id = crypto.randomUUID();
+
+    addChecklistItem(currentChecklistEnvieId, texte, 1, null, [], id);
 
     document.getElementById("checklistModal").classList.add("hidden");
 
-    openEnvie(currentChecklistEnvieId);
+    const envie = getEnvies().find(e => e.id === currentChecklistEnvieId);
+
+    if (envie) {
+
+        const optimisticEnvie = {
+            ...envie,
+            checklist: [...(envie.checklist || []), {
+                id, texte, quantite: 1, categorieId: null, assignedTo: [], checked: false
+            }]
+        };
+
+        renderChecklist(optimisticEnvie);
+
+    }
 
     showToast("✓ Élément ajouté");
 
 }
+
 
 function setupChecklistAutocomplete() {
 
