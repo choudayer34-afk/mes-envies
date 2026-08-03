@@ -3,6 +3,7 @@ import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
 import { getSelectedLieu, resetSelectedLieu } from "./location.js";
 import { getSelectedPeriode, resetSelectedPeriode } from "./periode.js";
+import { getEnvieCategories } from "./storage.js";
 
 let currentEditId = null;
 let currentCategorie = "general";
@@ -11,7 +12,7 @@ let currentDeleteId = null;
 /* ---------- Modale création / édition ---------- */
 
 export function initModal() {
-
+renderCreationCategorieSelector();
     document.getElementById("cancelModal")
         .addEventListener("click", closeModal);
 
@@ -31,6 +32,40 @@ export function initModal() {
 
     document.getElementById("saveEnvie")
         .addEventListener("click", saveCurrentEnvie);
+
+}
+function renderCreationCategorieSelector() {
+
+    const container = document.getElementById("categorieSelector");
+    const categories = getEnvieCategories();
+
+    container.innerHTML = "";
+
+    categories.forEach((cat, index) => {
+
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "categorieChip" + (index === 0 ? " active" : "");
+        chip.textContent = `${cat.emoji} ${cat.label}`;
+        chip.dataset.categorieId = cat.id;
+
+        chip.addEventListener("click", () => {
+
+            document.querySelectorAll("#categorieSelector .categorieChip")
+                .forEach(c => c.classList.remove("active"));
+
+            chip.classList.add("active");
+            currentCategorie = cat.id;
+
+        });
+
+        container.appendChild(chip);
+
+    });
+
+    if (categories.length > 0) {
+        currentCategorie = categories[0].id;
+    }
 
 }
 
