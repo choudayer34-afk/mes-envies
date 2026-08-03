@@ -8,6 +8,7 @@
 */
 
 "use strict";
+import { initAgenda } from "./js/agenda.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -54,6 +55,7 @@ function init() {
         initVoyage();
             initCarte();
     initFicheTitre();
+    initAgenda();
 
     initEnviesSync(() => {
         renderEnvies();
