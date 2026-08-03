@@ -8,7 +8,7 @@
 */
 
 "use strict";
-import { initAuth } from "./js/auth.js";
+
 
 import { renderEnvies } from "./js/ui.js";
 import {
@@ -34,7 +34,10 @@ const APP = {
     debug: true
 };
 
-document.addEventListener("DOMContentLoaded", init);
+document.addEventListener("DOMContentLoaded", () => {
+    initAuth(init);
+});
+
 
 function init() {
 
