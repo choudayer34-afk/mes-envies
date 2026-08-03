@@ -1,5 +1,5 @@
 import { getEnvies } from "./storage.js";
-import { CATEGORIES, openEnvie } from "./envie.js";
+import { openEnvie } from "./envie.js";
 
 let map = null;
 let markersLayer = null;
