@@ -490,6 +490,89 @@ export function deletePersonne(id) {
     deleteDoc(doc(db, "foyers", getFoyerId(), "personnes", id)).catch(console.error);
 }
 
+let envieCategoriesCache = [];
+
+const DEFAULT_ENVIE_CATEGORIES = [
+    { label: "Idée", emoji: "💡", conteneur: false, ordre: 0 },
+    { label: "Voyage", emoji: "✈️", conteneur: true, ordre: 1 },
+    { label: "Projet", emoji: "🛠️", conteneur: true, ordre: 2 },
+    { label: "Maison", emoji: "🏠", conteneur: false, ordre: 3 },
+    { label: "Jardin", emoji: "🌿", conteneur: false, ordre: 4 },
+    { label: "Courses", emoji: "🛒", conteneur: false, ordre: 5 },
+    { label: "Sortie", emoji: "📅", conteneur: false, ordre: 6 }
+];
+
+export function getEnvieCategories() {
+    return [...envieCategoriesCache].sort((a, b) => a.ordre - b.ordre);
+}
+
+export function initEnvieCategoriesSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(collection(db, "foyers", foyerId, "envieCategories"), async (snap) => {
+
+        if (snap.empty && envieCategoriesCache.length === 0) {
+
+            for (const cat of DEFAULT_ENVIE_CATEGORIES) {
+                await setDoc(doc(collection(db, "foyers", foyerId, "envieCategories")), cat);
+            }
+
+            return;
+
+        }
+
+        envieCategoriesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        onChange();
+
+    });
+
+}
+
+export function createEnvieCategory(label, emoji = "🏷️", conteneur = false) {
+
+    const foyerId = getFoyerId();
+    const maxOrdre = Math.max(-1, ...envieCategoriesCache.map(c => c.ordre || 0));
+
+    return setDoc(doc(collection(db, "foyers", foyerId, "envieCategories")), {
+        label, emoji, conteneur, ordre: maxOrdre + 1
+    }).catch(console.error);
+
+}
+
+export function updateEnvieCategoryDef(id, fields) {
+    updateDoc(doc(db, "foyers", getFoyerId(), "envieCategories", id), fields).catch(console.error);
+}
+
+export function deleteEnvieCategoryDef(id) {
+    deleteDoc(doc(db, "foyers", getFoyerId(), "envieCategories", id)).catch(console.error);
+}
+
+export function moveEnvieCategory(id, direction) {
+
+    const sorted = getEnvieCategories();
+    const index = sorted.findIndex(c => c.id === id);
+    const swapIndex = index + direction;
+
+    if (index === -1 || swapIndex < 0 || swapIndex >= sorted.length)
+        return;
+
+    const a = sorted[index];
+    const b = sorted[swapIndex];
+
+    updateEnvieCategoryDef(a.id, { ordre: b.ordre });
+    updateEnvieCategoryDef(b.id, { ordre: a.ordre });
+
+}
+
+export function isContainerCategory(categorieId) {
+
+    const cat = envieCategoriesCache.find(c => c.id === categorieId);
+    return cat?.conteneur || false;
+
+}
+
 /* ---------- Bibliothèque d'éléments de checklist ---------- */
 
 export function getChecklistLibrary() {
