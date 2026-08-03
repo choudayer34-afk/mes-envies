@@ -3,6 +3,54 @@
 <head>
     <meta charset="UTF-8">
 
+<script>
+window.debugLogs = [];
+
+function renderDebug() {
+    let box = document.getElementById("debugBox");
+    if (!box) {
+        box = document.createElement("div");
+        box.id = "debugBox";
+        box.style = "position:fixed;left:0;right:0;bottom:0;max-height:35vh;background:#111;color:#0f0;padding:12px;font-family:monospace;font-size:11px;white-space:pre-wrap;z-index:99999;overflow:auto;border-top:2px solid #0f0;";
+
+        const closeBtn = document.createElement("button");
+        closeBtn.textContent = "✕ Fermer";
+        closeBtn.style = "position:sticky;top:0;float:right;background:#0f0;color:#111;border:none;padding:4px 10px;border-radius:6px;font-weight:bold;";
+        closeBtn.onclick = () => box.remove();
+
+        document.body.appendChild(box);
+        box.appendChild(closeBtn);
+    }
+
+    let content = box.querySelector("#debugContent");
+    if (!content) {
+        content = document.createElement("div");
+        content.id = "debugContent";
+        box.appendChild(content);
+    }
+
+    content.textContent = window.debugLogs.join("\n\n");
+}
+
+const originalLog = console.log;
+console.log = function(...args) {
+    window.debugLogs.push("LOG: " + args.map(a => JSON.stringify(a)).join(" "));
+    renderDebug();
+    originalLog.apply(console, args);
+};
+
+const originalError = console.error;
+console.error = function(...args) {
+    window.debugLogs.push("CONSOLE.ERROR: " + args.map(a => String(a)).join(" "));
+    renderDebug();
+    originalError.apply(console, args);
+};
+
+window.onerror = function(message, source, lineno) {
+    window.debugLogs.push("ERREUR JS: " + message + "\n" + source + ":" + lineno);
+    renderDebug();
+};
+</script>
 
 
     <meta name="viewport"
