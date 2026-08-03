@@ -1,8 +1,7 @@
 import { getEnvies, toggleFavorite } from "./storage.js";
-
 import { editEnvie, removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
-import { getCategorieById, isContainer } from "./envie.js";
+import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 
 
 
@@ -146,9 +145,10 @@ function createEnvieCard(envie) {
                 ${envie.titre}
             </div>
         </div>
-        <div class="envieCategory">
-            ${CATEGORIES[envie.categorie]?.label || "Général"}
+               <div class="envieCategory">
+            ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
+
         ${statutHtml}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
