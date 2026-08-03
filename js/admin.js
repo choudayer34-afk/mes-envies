@@ -1,3 +1,5 @@
+import { migrateLocalDataToFoyer } from "./storage.js";
+import { getFoyerId } from "./auth.js";
 
 import { groupByCategorie } from "./checklist.js";
 import {
@@ -16,6 +18,25 @@ export function initAdmin() {
 
     document.getElementById("btnSettings").addEventListener("click", openAdmin);
     document.getElementById("closeAdmin").addEventListener("click", closeAdmin);
+    
+        document.getElementById("migrateNowButton").addEventListener("click", async () => {
+
+        if (!window.confirm("Migrer tes données locales (modèles, catégories, personnes) vers ce foyer ? À faire une seule fois."))
+            return;
+
+        try {
+
+            await migrateLocalDataToFoyer(getFoyerId());
+            alert("✓ Migration terminée !");
+
+        } catch (error) {
+            console.error(error);
+            alert("Erreur pendant la migration : " + error.message);
+        }
+
+    });
+
+
     document.getElementById("showFoyerCodeButton").addEventListener("click", showFoyerCode);
 
         document.querySelectorAll("#adminMenu .categorieChip").forEach(chip => {
