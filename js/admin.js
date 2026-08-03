@@ -1,16 +1,4 @@
-import {
-    getChecklistTemplates,
-    getTemplate,
-    createTemplate,
-    renameTemplate,
-    deleteTemplate,
-    addTemplateItem,
-    deleteTemplateItem,
-    getChecklistCategories,
-    createChecklistCategory,
-    renameChecklistCategory,
-    deleteChecklistCategory
-} from "./storage.js";
+
 import { groupByCategorie } from "./checklist.js";
 import {
     getChecklistTemplates, getTemplate, createTemplate, renameTemplate, deleteTemplate,
