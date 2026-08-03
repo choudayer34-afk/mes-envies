@@ -1254,4 +1254,17 @@ button {
     margin-bottom:20px;
 }
 
+.deleteFicheButton{
+    float:right;
+    border:none;
+    background:none;
+    font-size:20px;
+    cursor:pointer;
+    opacity:.6;
+    transition:.2s;
+}
+
+.deleteFicheButton:hover{
+    opacity:1;
+}
 
