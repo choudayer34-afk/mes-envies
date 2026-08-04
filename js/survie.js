@@ -10,7 +10,11 @@ const CATEGORIES_SURVIE = [
     { id: "signaler", emoji: "🆘", label: "Signaler sa position" },
     { id: "meteo", emoji: "🌦️", label: "Lire le ciel" },
     { id: "mental", emoji: "🧠", label: "Mental & solitude" },
-    { id: "secours", emoji: "🩹", label: "Premiers secours" }
+    { id: "secours", emoji: "🩹", label: "Premiers secours" },
+        { id: "deplacement", emoji: "🧗", label: "Déplacement & obstacles" },
+    { id: "danger", emoji: "🐍", label: "Animaux & dangers" },
+    { id: "preparation", emoji: "🎒", label: "Préparation" },
+
 ];
 
 const FICHES_SURVIE = [
@@ -19,12 +23,16 @@ const FICHES_SURVIE = [
         id: "methode-stop", categorieId: "priorites", emoji: "🛑", titre: "Méthode S.T.O.P.",
         illustration: "priorites-immediates.png",
         sections: [
-            { titre: "La règle des 3 — à retenir avant tout", points: [
-                "3 secondes : c'est le temps qu'il faut s'accorder pour évaluer un danger immédiat avant de faire le moindre geste — ne jamais agir dans la panique.",
-                "3 heures : durée au-delà de laquelle l'absence d'abri devient critique par grand froid, pluie battante ou vent fort — l'abri passe avant l'eau et la nourriture dans ces conditions.",
-                "3 jours : durée maximale raisonnable sans eau avant que les fonctions vitales ne soient sérieusement affectées — chercher de l'eau devient alors la priorité numéro 1.",
-                "3 semaines : durée avant que le manque de nourriture devienne vraiment critique — c'est la priorité la moins urgente des quatre dans la plupart des situations."
+                        { titre: "La règle des 3 — à retenir avant tout", points: [
+                "3 secondes : c'est le temps que dure une inattention qui peut suffire à provoquer un accident — rester vigilant en permanence sur un terrain incertain.",
+                "3 minutes : durée maximale sans respirer avant que le cerveau ne soit sérieusement affecté — l'urgence absolue en cas d'étouffement ou de noyade.",
+                "3 heures : durée critique sans abri par grand froid, pluie battante ou vent fort — l'abri devient alors la priorité numéro 1.",
+                "3 jours : durée maximale raisonnable sans eau avant que les fonctions vitales ne soient sérieusement affectées.",
+                "3 semaines : durée avant que le manque de nourriture devienne vraiment critique physiquement.",
+                "3 mois : durée au-delà de laquelle l'absence de contact social et d'hygiène de base commence à peser lourdement sur le moral et la santé.",
+                "3 ans : durée au-delà de laquelle l'absence d'un objectif ou d'un projet clair peut éroder durablement la motivation et le sens donné à la situation (repère de moral à long terme, pas une donnée physiologique)."
             ]},
+
             { titre: "Les 4 étapes concrètes de la méthode S.T.O.P.", points: [
                 "1. S — S'arrêter physiquement : cesser immédiatement de marcher ou d'agir, poser son sac, s'asseoir si possible.",
                 "2. T — Réfléchir (Think) : se demander à voix haute quelle heure il est, depuis quand on est dans cette situation, et quelles ressources on a sur soi.",
@@ -319,7 +327,140 @@ const FICHES_SURVIE = [
                 "Consulter les ressources officielles de la Croix-Rouge française pour suivre une vraie formation aux gestes qui sauvent, seule façon d'être réellement préparé face à une urgence médicale."
             ]}
         ]
+    },
+        {
+        id: "se-rafraichir", categorieId: "protection", emoji: "🌬️", titre: "Se rafraîchir sans matériel",
+        illustration: "se-rafraichir.png",
+        sections: [
+            { titre: "Cibler les points de refroidissement du corps", points: [
+                "1. Mouiller en priorité poignets, nuque, tempes et intérieur des coudes — ce sont les zones où le sang circule proche de la peau et se refroidit le plus efficacement.",
+                "2. Si l'eau est limitée, quelques gouttes sur ces zones suffisent, pas besoin de s'immerger entièrement.",
+                "3. Répéter l'opération toutes les 20 à 30 minutes en cas de forte chaleur plutôt qu'une seule fois abondamment."
+            ]},
+            { titre: "Créer un courant d'air", points: [
+                "1. Fabriquer un éventail avec une large feuille, un morceau de tissu ou de carton.",
+                "2. Agiter en mouvements lents et amples plutôt que rapides et brefs — un mouvement lent déplace plus d'air avec moins d'effort et de transpiration supplémentaire.",
+                "3. Se placer si possible dans un courant d'air naturel (entrée de grotte, sous un arbre isolé) plutôt qu'en zone fermée."
+            ]},
+            { titre: "Utiliser l'évaporation", points: [
+                "1. Mouiller un vêtement léger (t-shirt, foulard) et le laisser sécher sur la peau plutôt que de l'essorer immédiatement.",
+                "2. L'évaporation de l'eau sur le tissu absorbe la chaleur du corps et procure une sensation de fraîcheur prolongée.",
+                "3. Éviter de mouiller un vêtement épais qui sécherait trop lentement et garderait l'humidité contre la peau."
+            ]}
+        ]
+    },
+
+    {
+        id: "proteger-insectes", categorieId: "protection", emoji: "🦟", titre: "Se protéger des insectes",
+        illustration: "insectes.png",
+        sections: [
+            { titre: "Répulsifs naturels improvisés", points: [
+                "1. Froisser et frotter sur la peau des feuilles aromatiques reconnues localement (menthe sauvage, lavande) si on sait les identifier avec certitude.",
+                "2. Faire fumer légèrement un feu avec du bois vert humide : la fumée dense éloigne une grande partie des insectes volants.",
+                "3. Éviter les zones d'eau stagnante à proximité immédiate du campement, principal lieu de reproduction des moustiques."
+            ]},
+            { titre: "Comportements à adopter", points: [
+                "1. Couvrir bras et jambes au crépuscule et à l'aube, moments de plus forte activité des moustiques.",
+                "2. Éviter les vêtements de couleur sombre qui attirent davantage certains insectes que les couleurs claires.",
+                "3. Vérifier chaussures et literie improvisée avant utilisation, en particulier dans les climats chauds."
+            ]},
+            { titre: "En cas de piqûre", points: [
+                "1. Ne pas grattouiller pour éviter le risque d'infection secondaire.",
+                "2. Appliquer du froid si disponible (eau fraîche, argile humide) pour réduire la démangeaison et l'inflammation.",
+                "3. Surveiller l'apparition de rougeur qui s'étend largement ou de fièvre, signes pouvant nécessiter un avis médical."
+            ]}
+        ]
+    },
+
+    {
+        id: "securiser-nuit", categorieId: "abri", emoji: "🌙", titre: "S'organiser pour la nuit",
+        illustration: "nuit.png",
+        sections: [
+            { titre: "Avant la tombée de la nuit", points: [
+                "1. Terminer la construction ou le renforcement de l'abri au moins 1 heure avant le coucher du soleil — la luminosité baisse plus vite que prévu.",
+                "2. Rassembler suffisamment de bois pour tenir le feu toute la nuit si possible, la nuit est le moment où le froid et le sentiment d'isolement sont les plus marqués.",
+                "3. Repérer et écarter tout élément tranchant, instable ou glissant à proximité immédiate de la zone de couchage."
+            ]},
+            { titre: "Organisation en groupe", points: [
+                "1. Si plusieurs personnes sont présentes, organiser des tours de veille par relais de 1 à 2 heures plutôt que de laisser tout le monde dormir en même temps.",
+                "2. Désigner clairement qui surveille le feu et qui se repose, pour éviter les malentendus pendant la nuit.",
+                "3. Se placer en cercle autour du feu si le groupe est petit, pour partager la chaleur et faciliter la surveillance mutuelle."
+            ]},
+            { titre: "Précautions face aux animaux nocturnes", points: [
+                "1. Ne jamais garder de nourriture à proximité immédiate de la zone de couchage — la suspendre ou l'éloigner à quelques mètres si possible.",
+                "2. Garder le feu visible et actif, la plupart des animaux évitent naturellement les flammes et la lumière.",
+                "3. Éviter de dormir à même le sol dans une zone de passage évident (sentier d'animaux, berge de rivière)."
+            ]}
+        ]
+    },
+
+    {
+        id: "traverser-obstacle", categorieId: "deplacement", emoji: "🧗", titre: "Traverser un obstacle naturel",
+        illustration: "obstacle.png",
+        sections: [
+            { titre: "Traverser un cours d'eau", points: [
+                "1. Chercher un point de traversée large et peu profond plutôt qu'un point étroit souvent plus profond et plus rapide.",
+                "2. Détacher la sangle ventrale d'un sac à dos avant d'entrer dans l'eau, pour pouvoir s'en libérer rapidement en cas de chute.",
+                "3. Utiliser un bâton solide comme troisième point d'appui, placé légèrement en amont du courant pour ne pas être déséquilibré.",
+                "4. Avancer de côté, jamais de face contre le courant, en gardant toujours deux points d'appui stables avant de déplacer le troisième."
+            ]},
+            { titre: "Évaluer un terrain instable", points: [
+                "1. Tester chaque appui avec le bâton ou le pied avant d'y transférer tout le poids du corps.",
+                "2. Se méfier particulièrement des zones de mousse épaisse, de terre sombre et humide, ou de végétation anormalement verte isolée — signes possibles de terrain meuble ou marécageux.",
+                "3. Contourner largement plutôt que de tenter de franchir rapidement une zone dont la stabilité est incertaine."
+            ]},
+            { titre: "Marcher en pente", points: [
+                "1. À la montée, placer le pied entièrement à plat plutôt que sur la pointe pour économiser l'effort et améliorer l'adhérence.",
+                "2. À la descente, plier légèrement les genoux et raccourcir le pas pour garder le contrôle et réduire le risque de glissade.",
+                "3. Utiliser un bâton en appui du côté de la pente pour stabiliser chaque pas."
+            ]}
+        ]
+    },
+
+    {
+        id: "animaux-dangereux", categorieId: "danger", emoji: "🐍", titre: "Face à un animal potentiellement dangereux",
+        illustration: "animal.png",
+        sections: [
+            { titre: "Comportement général à adopter", points: [
+                "1. Ne jamais courir directement en tournant le dos à un animal qui semble menaçant, sauf indication contraire spécifique à l'espèce locale connue.",
+                "2. Reculer lentement, en gardant l'animal dans son champ de vision, sans geste brusque ni cri soudain.",
+                "3. Laisser toujours à l'animal un chemin de fuite dégagé plutôt que de le sentir piégé, ce qui augmente le risque d'attaque défensive."
+            ]},
+            { titre: "Face à un serpent", points: [
+                "1. S'arrêter immédiatement dès qu'un serpent est repéré, sans mouvement brusque.",
+                "2. Reculer lentement de plusieurs mètres avant de contourner largement.",
+                "3. Ne jamais tenter de le manipuler ou de l'identifier de près, même s'il semble immobile ou mort."
+            ]},
+            { titre: "En cas de morsure ou piqûre grave — avant les secours", points: [
+                "1. Rester aussi calme et immobile que possible pour limiter la circulation du venin dans le corps.",
+                "2. Ne pas inciser, aspirer ou appliquer un garrot sur la plaie — ces gestes anciens sont aujourd'hui déconseillés et peuvent aggraver la situation.",
+                "3. Immobiliser le membre concerné en le maintenant si possible sous le niveau du cœur.",
+                "4. Chercher un secours médical au plus vite — ce type de situation dépasse largement le cadre des premiers gestes simples et nécessite une prise en charge professionnelle rapide."
+            ]}
+        ]
+    },
+
+    {
+        id: "kit-survie-minimal", categorieId: "preparation", emoji: "🎒", titre: "Kit de survie minimal",
+        illustration: "kit.png",
+        sections: [
+            { titre: "Les objets qui changent tout", points: [
+                "1. Un couteau fixe ou pliant solide — l'outil le plus polyvalent pour couper, tailler, préparer un abri ou du bois.",
+                "2. Un briquet ou des allumettes étanches, dans un contenant fermé hermétiquement — bien plus fiable que la friction en conditions humides.",
+                "3. Un sifflet — un signal sonore porte bien plus loin et demande bien moins d'énergie qu'un cri, utile pour signaler sa position.",
+                "4. Une couverture de survie légère et compacte — protège efficacement contre le froid et peut aussi servir de signal visuel réfléchissant.",
+                "5. Une petite trousse de premiers secours basique — pansements, compresses, bandage.",
+                "6. Une lampe frontale ou de poche avec piles de rechange — libère les mains, essentiel après la tombée de la nuit.",
+                "7. Une gourde ou poche à eau pliable, même vide au départ — permet de transporter l'eau trouvée sur place."
+            ]},
+            { titre: "Où le garder", points: [
+                "1. Toujours sur soi (poche, ceinture) plutôt que seulement dans un sac qui peut être perdu ou laissé de côté.",
+                "2. Vérifier régulièrement l'état des piles et la date de péremption des éléments concernés (pansements, pastilles de purification).",
+                "3. Adapter le contenu au contexte du déplacement prévu (forêt, montagne, littoral) plutôt qu'un kit unique universel."
+            ]}
+        ]
     }
+
 
 ];
 
