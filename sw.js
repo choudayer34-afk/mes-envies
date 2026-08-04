@@ -1,8 +1,6 @@
-const CACHE_VERSION = "envie-v3";
-
+const CACHE_VERSION = "envie-v5";
 
 const APP_SHELL = [
-    "/",
     "/index.html",
     "/styles.css",
     "/app.js",
@@ -35,8 +33,24 @@ self.addEventListener("install", (event) => {
 
     event.waitUntil(
 
-        caches.open(CACHE_VERSION).then((cache) => {
-            return cache.addAll(APP_SHELL);
+        caches.open(CACHE_VERSION).then(async (cache) => {
+
+            for (const url of APP_SHELL) {
+
+                try {
+
+                    const response = await fetch(url, { redirect: "follow" });
+
+                    if (response.ok && !response.redirected) {
+                        await cache.put(url, response);
+                    }
+
+                } catch (err) {
+                    console.error("Cache install failed for", url, err);
+                }
+
+            }
+
         })
 
     );
@@ -74,24 +88,29 @@ self.addEventListener("fetch", (event) => {
 
         event.respondWith(
 
-            fetch(event.request)
-                .then((response) => {
+            caches.match("/index.html").then((cached) => {
 
-                    const clone = response.clone();
+                if (cached) {
 
-                    caches.open(CACHE_VERSION).then((cache) => {
-                        cache.put(event.request, clone);
-                    });
+                    fetch(event.request).then((response) => {
 
-                    return response;
+                        if (response.ok && !response.redirected) {
+                            caches.open(CACHE_VERSION).then((cache) => {
+                                cache.put("/index.html", response.clone());
+                            });
+                        }
 
-                })
-                .catch(() => {
+                    }).catch(() => {});
 
-                    return caches.match("/index.html")
-                        .then((cached) => cached || caches.match("/"));
+                    return cached;
 
-                })
+                }
+
+                return fetch(event.request).catch(() => {
+                    return new Response("Hors ligne et rien en cache.", { status: 503 });
+                });
+
+            })
 
         );
 
@@ -104,11 +123,15 @@ self.addEventListener("fetch", (event) => {
         fetch(event.request)
             .then((response) => {
 
-                const clone = response.clone();
+                if (response.ok && !response.redirected) {
 
-                caches.open(CACHE_VERSION).then((cache) => {
-                    cache.put(event.request, clone);
-                });
+                    const clone = response.clone();
+
+                    caches.open(CACHE_VERSION).then((cache) => {
+                        cache.put(event.request, clone);
+                    });
+
+                }
 
                 return response;
 
