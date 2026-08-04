@@ -5,6 +5,7 @@ import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
 
+import { isLogementCategory } from "./envie.js";
 
 
 import { buildPromptVoyage } from "./promptgen.js";
@@ -51,6 +52,20 @@ function renderVoyageContenu(envie, container) {
         <div class="containerStatutPct">${pourcentage}%</div>
     `;
     container.appendChild(statutBox);
+    const logements = enfants.filter(e => isLogementCategory(e.categorie));
+
+    if (logements.length > 0) {
+
+        const header = document.createElement("div");
+        header.className = "checklistCategorieHeader";
+        header.textContent = "🏨 Logements";
+        container.appendChild(header);
+
+        logements.forEach(logement => {
+            container.appendChild(createLogementRow(logement, envie));
+        });
+
+    }
 
     const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today);
@@ -87,7 +102,8 @@ function renderVoyageContenu(envie, container) {
         container.innerHTML += `<div class="emptyState">Ce ${envie.categorie === "projet" ? "projet" : "voyage"} ne contient aucune envie pour l'instant.</div>`;
     }
 
-       const enfantsRestants = enfants.filter(e => e.date?.start !== today);
+        const enfantsRestants = enfants.filter(e => e.date?.start !== today && !isLogementCategory(e.categorie));
+
     const { groups, todo } = groupAndSort(enfantsRestants);
 
 
@@ -357,5 +373,66 @@ export function initVoyage() {
     document.getElementById("closeEnviePicker").addEventListener("click", () => {
         document.getElementById("enviePickerModal").classList.add("hidden");
     });
+
+}
+function createLogementRow(logement, voyageEnvie) {
+
+    const row = document.createElement("div");
+    row.className = "templateRow" + (logement.realise ? " realise" : "");
+
+    const nuits = calculerNuits(logement.date);
+    const periodeLabel = formatLogementPeriode(logement.date);
+
+    row.innerHTML = `
+        <div class="templateRowNom">
+            🏨 ${logement.titre}
+            <small>${periodeLabel}${nuits ? ` · ${nuits} nuit${nuits > 1 ? "s" : ""}` : ""}</small>
+        </div>
+        <div class="templateRowActions">
+            <button class="actionButton editButton" title="Ouvrir">👁️</button>
+            <button class="actionButton deleteButton" title="Retirer">✕</button>
+        </div>
+    `;
+
+    row.querySelector(".editButton").addEventListener("click", () => {
+        openEnvie(logement.id, voyageEnvie.id);
+    });
+
+    row.querySelector(".deleteButton").addEventListener("click", () => {
+        updateEnvieVoyage(logement.id, null);
+        renderVoyageSection(voyageEnvie);
+        renderEnvies();
+        showToast("✓ Retiré du voyage");
+    });
+
+    return row;
+
+}
+
+function calculerNuits(date) {
+
+    if (!date?.start || !date?.end)
+        return 0;
+
+    const start = new Date(date.start);
+    const end = new Date(date.end);
+
+    return Math.max(0, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+
+}
+
+function formatLogementPeriode(date) {
+
+    if (!date?.start)
+        return "Dates à définir";
+
+    const formatDate = (iso) =>
+        new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+
+    if (date.end) {
+        return `Du ${formatDate(date.start)} au ${formatDate(date.end)}`;
+    }
+
+    return formatDate(date.start);
 
 }
