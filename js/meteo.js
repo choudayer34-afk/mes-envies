@@ -56,3 +56,20 @@ export function renderMeteoWidget(container, jours) {
     });
 
 }
+
+export async function reverseGeocodeLieu(latitude, longitude) {
+
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`;
+
+    const response = await fetch(url, { headers: { "Accept": "application/json" } });
+    const data = await response.json();
+
+    return data.address?.city
+        || data.address?.town
+        || data.address?.village
+        || data.address?.municipality
+        || data.display_name?.split(",")[0]
+        || "Position actuelle";
+
+}
+
