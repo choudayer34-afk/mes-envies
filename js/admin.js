@@ -159,7 +159,7 @@ export function initAdmin() {
 
     });
 
-      document.getElementById("addTemplateItemButton").addEventListener("click", () => {
+         document.getElementById("addTemplateItemButton").addEventListener("click", () => {
 
         const input = document.getElementById("templateItemInput");
         const lignes = input.value.split("\n").map(l => l.trim()).filter(Boolean);
@@ -175,11 +175,83 @@ export function initAdmin() {
         input.value = "";
         quantiteInput.value = 1;
 
-        setTimeout(renderTemplateItems, 300);
+        const template = getTemplate(currentTemplateId);
+
+        if (template) {
+
+            const optimisticItems = lignes.map(texte => ({
+                id: crypto.randomUUID(),
+                texte,
+                type: currentItemType,
+                categorieId: currentItemCategorieId,
+                quantite
+            }));
+
+            renderTemplateItemsFromList([...(template.items || []), ...optimisticItems]);
+
+        }
 
     });
 
 
+
+
+}
+function renderTemplateItemsFromList(items) {
+
+    const container = document.getElementById("templateItemsList");
+    const categories = getChecklistCategories();
+
+    const typeLabel = {
+        fixe: item => item.quantite > 1 ? `${item.quantite}×` : "",
+        parPersonne: item => `${item.quantite}× 👤 par personne`,
+        parJour: item => `${item.quantite}× 📅 par jour`
+    };
+
+    container.innerHTML = "";
+
+    if (items.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun élément pour l'instant.</div>`;
+        return;
+    }
+
+    groupByCategorie(items, categories).forEach(group => {
+
+        if (group.categorie !== undefined) {
+
+            const header = document.createElement("div");
+            header.className = "checklistCategorieHeader";
+            header.textContent = group.categorie
+                ? `${group.categorie.emoji} ${group.categorie.nom}`
+                : "Sans catégorie";
+
+            container.appendChild(header);
+
+        }
+
+        group.items.forEach(item => {
+
+            const row = document.createElement("div");
+            row.className = "checklistRow";
+
+            row.innerHTML = `
+                <span class="checkLabel">
+                    ${item.texte}
+                    <small>${typeLabel[item.type](item)}</small>
+                </span>
+                <button class="deleteChecklistButton">🗑️</button>
+            `;
+
+            row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
+                deleteTemplateItem(currentTemplateId, item.id);
+                renderTemplateItems();
+            });
+
+            container.appendChild(row);
+
+        });
+
+    });
 
 }
 
