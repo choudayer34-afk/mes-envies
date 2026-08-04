@@ -227,9 +227,13 @@ window.toggleDebug = function() {
     <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
         📆
     </button>
-    <button id="btnJeux" class="iconButtonRow" title="Jeux pour enfants" aria-label="Jeux pour enfants">
-        🎲
-    </button>
+<button id="btnJeux" class="iconButtonRow" title="Jeux pour enfants" aria-label="Jeux pour enfants">
+    🎲
+</button>
+<button id="btnJeuxFile" class="iconButtonRow" title="Jeux file d'attente" aria-label="Jeux file d'attente">
+    ⏳
+</button>
+
 </div>
 
 <div id="homeMeteoLieu" class="meteoLieuLabel"></div>
@@ -1028,7 +1032,8 @@ window.toggleDebug = function() {
 
         <button id="closeJeux" class="backButton">← Retour</button>
 
-        <h2>🎲 Jeux avec les enfants</h2>
+       <h2 id="jeuxModalTitle">🎲 Jeux avec les enfants</h2>
+
 
         <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">
             30 jeux simples, pour une sortie ou à la maison, sans grand-chose.
