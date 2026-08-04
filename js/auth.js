@@ -1,4 +1,4 @@
- import { auth, db } from "./firebase.js";
+
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -9,6 +9,7 @@ import {
     doc, getDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { migrateLocalDataToFoyer } from "./storage.js";
+import { auth, db, authReady } from "./firebase.js";
 
 let currentFoyerId = null;
 let onReadyCallback = null;
@@ -31,7 +32,10 @@ export function initAuth(onReady) {
 
     initFoyerScreen();
 
-       onAuthStateChanged(auth, async (user) => {
+           authReady.then(() => {
+
+        onAuthStateChanged(auth, async (user) => {
+
 
         console.log("Auth state:", user ? user.email : "déconnecté");
 
@@ -53,7 +57,7 @@ export function initAuth(onReady) {
         onReadyCallback();
 
     });
-
+});
 }
 
 function toggleAuthMode() {
