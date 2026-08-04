@@ -147,32 +147,4 @@ function log(message) {
 
 }
 
-export function initHomeMeteo() {
-
-    if (!("geolocation" in navigator))
-        return;
-
-    navigator.geolocation.getCurrentPosition(
-
-        async (position) => {
-
-            try {
-
-                const jours = await fetchMeteo3Jours(position.coords.latitude, position.coords.longitude);
-                renderMeteoWidget(document.getElementById("homeMeteoWidget"), jours);
-
-            } catch (err) {
-                console.error("Erreur météo: " + err.message);
-            }
-
-        },
-
-        () => {
-            const widget = document.getElementById("homeMeteoWidget");
-            if (widget) widget.innerHTML = `<div class="emptyState" style="padding:10px;font-size:13px;">Position non disponible</div>`;
-        }
-
-    );
-
-}
 
