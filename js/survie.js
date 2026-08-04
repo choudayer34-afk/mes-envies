@@ -14,6 +14,7 @@ const CATEGORIES_SURVIE = [
         { id: "deplacement", emoji: "🧗", label: "Déplacement & obstacles" },
     { id: "danger", emoji: "🐍", label: "Animaux & dangers" },
     { id: "preparation", emoji: "🎒", label: "Préparation" },
+        { id: "materiel", emoji: "🔋", label: "Matériel & astuces" }
 
 ];
 
@@ -41,7 +42,243 @@ const FICHES_SURVIE = [
             ]}
         ]
     },
+        {
+        id: "deshydratation-signes", categorieId: "eau", emoji: "🧴", titre: "Repérer et éviter la déshydratation",
+        illustration: "deshydratation.png",
+        sections: [
+            { titre: "Signes précoces à surveiller", points: [
+                "1. Urine plus foncée et moins abondante que d'habitude — souvent le signe le plus fiable et le plus précoce.",
+                "2. Bouche et lèvres sèches, sensation de soif qui apparaît (elle indique déjà un début de déshydratation, pas juste une envie).",
+                "3. Fatigue inhabituelle, léger mal de tête, difficulté à se concentrer."
+            ]},
+            { titre: "Signes graves nécessitant une action immédiate", points: [
+                "1. Vertiges au lever, confusion, absence d'urine depuis plusieurs heures.",
+                "2. Peau qui reste pincée sans revenir immédiatement en place (test du pli cutané).",
+                "3. Rythme cardiaque accéléré au repos, sensation de faiblesse importante."
+            ]},
+            { titre: "Prévenir plutôt que réagir", points: [
+                "1. Boire par petites quantités régulières tout au long de la journée, plutôt que de grandes quantités espacées.",
+                "2. Réduire l'effort physique aux heures les plus chaudes plutôt que de compenser uniquement par plus d'eau.",
+                "3. Dès les premiers signes précoces repérés, arrêter l'activité et chercher de l'ombre en priorité avant même de chercher de l'eau si aucune n'est immédiatement disponible."
+            ]}
+        ]
+    },
 
+    {
+        id: "economiser-telephone", categorieId: "materiel", emoji: "🔋", titre: "Économiser la batterie de son téléphone",
+        illustration: "telephone.png",
+        sections: [
+            { titre: "Réglages à activer immédiatement", points: [
+                "1. Activer le mode avion dès que le réseau n'est plus nécessaire en continu — la recherche constante de réseau est l'une des plus grosses consommations de batterie.",
+                "2. Réduire la luminosité de l'écran au minimum lisible.",
+                "3. Fermer toutes les applications en arrière-plan et désactiver les données mobiles/Wi-Fi si non utilisées."
+            ]},
+            { titre: "Stratégie d'utilisation", points: [
+                "1. N'allumer le téléphone et sortir du mode avion qu'à intervalles fixes (par exemple toutes les 2 heures) pour vérifier le réseau, plutôt que de le laisser cherché en continu.",
+                "2. Envoyer un SMS de position dès qu'un peu de réseau est capté, même faible — un SMS passe souvent avec moins de réseau qu'un appel.",
+                "3. Garder le téléphone au chaud contre le corps par temps froid — le froid réduit fortement l'autonomie réelle de la batterie."
+            ]},
+            { titre: "Si une batterie externe est disponible", points: [
+                "Ne recharger que jusqu'à environ 80% si l'attente est encore longue, et garder le reste de charge de la batterie externe en réserve pour un second cycle plutôt que de tout utiliser en une fois."
+            ]}
+        ]
+    },
+
+    {
+        id: "soin-pieds-marche", categorieId: "deplacement", emoji: "🧦", titre: "Prendre soin de ses pieds en marche prolongée",
+        illustration: "pieds.png",
+        sections: [
+            { titre: "Prévenir les ampoules", points: [
+                "1. Dès la sensation d'un point chaud ou d'une friction (avant même la douleur d'ampoule formée), s'arrêter immédiatement pour vérifier.",
+                "2. Couvrir la zone frottée avec un pansement, un morceau de tissu ou une bande adhésive avant qu'elle ne devienne une véritable ampoule.",
+                "3. Changer de chaussettes si elles sont mouillées ou trop fines pour la marche prévue."
+            ]},
+            { titre: "Gestion des pieds mouillés", points: [
+                "1. Retirer chaussures et chaussettes à chaque pause si possible, pour laisser sécher et respirer les pieds à l'air.",
+                "2. Essuyer soigneusement entre les orteils, zone particulièrement sensible à l'humidité prolongée.",
+                "3. Alterner deux paires de chaussettes si disponibles, en laissant sécher la paire mouillée pendant que l'autre est portée."
+            ]},
+            { titre: "Si une ampoule s'est déjà formée", points: [
+                "1. Ne pas percer une ampoule intacte — la peau qui la recouvre protège contre l'infection.",
+                "2. Protéger avec un pansement adapté en évitant toute pression supplémentaire au même endroit.",
+                "3. Si elle se perce accidentellement, nettoyer avec de l'eau propre et couvrir immédiatement."
+            ]}
+        ]
+    },
+
+    {
+        id: "que-faire-perdu", categorieId: "orientation", emoji: "🗺️", titre: "Que faire si on est perdu",
+        illustration: "perdu.png",
+        sections: [
+            { titre: "La première décision", points: [
+                "1. S'arrêter immédiatement dès qu'on réalise ne plus savoir où on se trouve — continuer à avancer au hasard aggrave presque toujours la situation.",
+                "2. Appliquer la méthode S.T.O.P. (voir fiche dédiée) avant toute autre action.",
+                "3. Dans la grande majorité des cas, rester sur place ou à proximité immédiate augmente les chances d'être retrouvé plus vite que de continuer à se déplacer."
+            ]},
+            { titre: "Si on décide de rester sur place", points: [
+                "1. Choisir un endroit visible et dégagé si possible, plutôt qu'une position cachée par la végétation dense.",
+                "2. Mettre en place des signaux de détresse (voir fiche dédiée) dès que possible.",
+                "3. S'installer confortablement en pensant abri, eau et feu plutôt que de rester debout à attendre passivement."
+            ]},
+            { titre: "Si on décide de se déplacer malgré tout", points: [
+                "1. Marquer clairement son passage à intervalles réguliers (pierres empilées, marques sur les arbres, tissus noués) pour permettre de revenir sur ses pas si besoin.",
+                "2. Chercher un point haut dégagé pour observer les environs et repérer un repère connu (route, cours d'eau, ligne électrique) plutôt que d'avancer sans visibilité.",
+                "3. Suivre un cours d'eau vers l'aval mène généralement vers une zone habitée à terme, une règle simple utile en dernier recours."
+            ]}
+        ]
+    },
+
+    {
+        id: "chaleur-vs-hypothermie", categorieId: "secours", emoji: "🌡️", titre: "Coup de chaleur ou hypothermie : réagir",
+        illustration: "temperature.png",
+        sections: [
+            { titre: "Reconnaître un coup de chaleur", points: [
+                "Signes : peau chaude et rouge, parfois sèche malgré la chaleur, confusion, maux de tête intenses, pouls rapide.",
+                "C'est une urgence : le corps ne parvient plus à réguler sa température normalement."
+            ]},
+            { titre: "Réagir face à un coup de chaleur", points: [
+                "1. Déplacer immédiatement la personne à l'ombre ou dans un endroit plus frais.",
+                "2. Retirer les vêtements superflus et refroidir activement le corps (eau fraîche sur la peau, éventail) en priorité sur nuque, poignets et aisselles.",
+                "3. Faire boire par petites gorgées si la personne est consciente et capable d'avaler.",
+                "4. Chercher un secours médical rapidement — un coup de chaleur peut évoluer gravement en peu de temps."
+            ]},
+            { titre: "Reconnaître une hypothermie", points: [
+                "Signes : tremblements incontrôlés (qui peuvent disparaître dans les formes les plus graves, signe d'alerte majeur), confusion, difficulté à parler, perte de coordination."
+            ]},
+            { titre: "Réagir face à une hypothermie", points: [
+                "1. Mettre la personne à l'abri du vent et de l'humidité immédiatement.",
+                "2. Retirer les vêtements mouillés et remplacer par des vêtements secs si disponibles.",
+                "3. Réchauffer progressivement avec des couvertures, un contact corporel, ou près d'un feu — jamais de réchauffement brutal (eau très chaude, feu trop proche).",
+                "4. Donner des boissons chaudes sucrées seulement si la personne est bien consciente, jamais d'alcool.",
+                "5. Chercher un secours médical dès que possible, en particulier si les tremblements ont cessé alors que le corps reste froid — signe de gravité."
+            ]}
+        ]
+    },
+
+    {
+        id: "proteger-orage", categorieId: "protection", emoji: "⚡", titre: "Se protéger en cas d'orage",
+        illustration: "orage.png",
+        sections: [
+            { titre: "Ce qu'il ne faut jamais faire", points: [
+                "Ne jamais s'abriter sous un arbre isolé en pleine zone dégagée — c'est l'un des endroits les plus dangereux en cas d'orage.",
+                "Éviter de rester en hauteur (sommet, crête) ou en contact avec de grandes surfaces métalliques."
+            ]},
+            { titre: "Comportement à adopter", points: [
+                "1. Chercher un abri fermé et solide si disponible (bâtiment, véhicule).",
+                "2. Sans abri disponible, privilégier une zone basse et dégagée plutôt qu'un point haut ou un arbre isolé.",
+                "3. Si en groupe, s'écarter les uns des autres de plusieurs mètres plutôt que de rester regroupés au même endroit.",
+                "4. En dernier recours dans un terrain très exposé, s'accroupir au sol, pieds joints, sans poser les mains à plat au sol, pour minimiser la surface de contact."
+            ]}
+        ]
+    },
+
+    {
+        id: "zones-a-eviter-abri", categorieId: "abri", emoji: "🐜", titre: "Zones à éviter pour un abri",
+        illustration: "zones-eviter.png",
+        sections: [
+            { titre: "Signes à repérer avant de s'installer", points: [
+                "1. Fourmilières ou nids visibles au sol ou dans les arbres proches — s'installer à bonne distance.",
+                "2. Traces de coulées de boue ou de débris déposés en hauteur sur les troncs, signe de crues ou glissements de terrain déjà survenus à cet endroit.",
+                "3. Terrain en creux ou fond de vallée étroite, susceptible de se remplir d'eau rapidement en cas de pluie soudaine.",
+                "4. Arbres morts ou branches visiblement fragiles au-dessus de l'emplacement envisagé (risque de chute)."
+            ]},
+            { titre: "Bon réflexe avant de construire", points: [
+                "Prendre 5 minutes pour observer l'ensemble du terrain environnant avant de commencer toute construction — un mauvais choix d'emplacement coûte bien plus de temps à corriger après coup qu'à éviter en amont."
+            ]}
+        ]
+    },
+
+    {
+        id: "occuper-enfant-attente", categorieId: "mental", emoji: "👨‍👩‍👧", titre: "Garder un enfant calme en attente prolongée",
+        illustration: "enfant-attente.png",
+        sections: [
+            { titre: "Priorités avec un enfant", points: [
+                "1. Garder soi-même un ton calme et rassurant — les enfants perçoivent immédiatement le stress d'un adulte et l'amplifient.",
+                "2. Expliquer simplement la situation sans dramatiser, en donnant un cadre temporel rassurant même approximatif ('on attend encore un peu, puis on continue').",
+                "3. Occuper l'attention avec une activité simple plutôt que de laisser l'enfant se concentrer sur l'attente elle-même."
+            ]},
+            { titre: "Activités simples sans matériel", points: [
+                "Voir le module Jeux de l'application, en particulier les jeux de la catégorie 'File d'attente' — observation, mots, imagination, sans mouvement ni matériel nécessaire."
+            ]},
+            { titre: "Signes à surveiller chez l'enfant", points: [
+                "1. Fatigue excessive, pleurs inhabituels ou apathie soudaine, qui peuvent indiquer un besoin physique (eau, nourriture, repos) plutôt qu'un simple ennui.",
+                "2. Vérifier régulièrement l'hydratation et l'état général, les enfants se déshydratent plus vite que les adultes."
+            ]}
+        ]
+    }
+,
+    {
+        id: "eteindre-feu", categorieId: "feu", emoji: "🧯", titre: "Éteindre un feu correctement",
+        illustration: "eteindre-feu.png",
+        sections: [
+            { titre: "Pourquoi c'est aussi important qu'allumer", points: [
+                "Un feu mal éteint peut couver sous les cendres pendant plusieurs heures voire jours et repartir avec le vent — c'est une cause fréquente de feux de forêt accidentels.",
+                "Ne jamais quitter un campement en laissant un feu simplement 'diminué' — il doit être totalement éteint, sans exception."
+            ]},
+            { titre: "Étapes complètes", points: [
+                "1. Arrêter d'alimenter le feu au moins 20 minutes avant l'extinction prévue, pour laisser les grosses bûches se consumer un maximum.",
+                "2. Arroser abondamment avec de l'eau, en versant progressivement sur l'ensemble du foyer plutôt qu'au même endroit.",
+                "3. Remuer les cendres et braises avec un bâton pour exposer les points chauds encore actifs à l'intérieur du tas.",
+                "4. Arroser une seconde fois après ce remuage — les braises internes sont souvent encore actives même quand la surface semble éteinte.",
+                "5. Répéter arrosage et remuage jusqu'à ce qu'aucune vapeur ni sifflement ne se produise plus au contact de l'eau.",
+                "6. Vérifier avec précaution (dos de la main approché sans toucher) qu'aucune chaleur ne se dégage plus du foyer avant de quitter les lieux."
+            ]},
+            { titre: "Sans eau disponible", points: [
+                "1. Étaler les braises et cendres en une couche la plus fine possible avec un bâton, pour accélérer le refroidissement par contact avec l'air.",
+                "2. Recouvrir progressivement de terre ou de sable, en tassant fermement à chaque couche, jusqu'à étouffer complètement toute trace de chaleur.",
+                "3. Attendre plusieurs minutes puis vérifier à nouveau qu'aucune chaleur ne remonte à la surface de la terre ajoutée."
+            ]}
+        ]
+    },
+
+    {
+        id: "savoir-pecher", categorieId: "nourriture", emoji: "🐟", titre: "Techniques de pêche de survie",
+        illustration: "pecher.png",
+        sections: [
+            { titre: "Repérer les bons endroits", points: [
+                "Privilégier les zones calmes proches de la végétation aquatique, sous les rochers immergés, ou à la jonction entre courant rapide et eau calme — les poissons s'y regroupent souvent pour se nourrir ou se protéger.",
+                "Observer la surface de l'eau tôt le matin ou en fin de journée : les remous ou petits cercles indiquent une activité de poissons proche de la surface."
+            ]},
+            { titre: "Pêche à la ligne simple", points: [
+                "1. Utiliser une ligne et un hameçon improvisés (voir fiche dédiée) avec un appât adapté : vers, insectes, petits morceaux de nourriture.",
+                "2. Lancer près de la végétation ou d'un obstacle immergé plutôt qu'en plein milieu d'un cours d'eau dégagé.",
+                "3. Rester immobile et silencieux après le lancer — le mouvement et le bruit font fuir les poissons bien avant qu'on les voie."
+            ]},
+            { titre: "Pêche à la main (pour poissons immobiles ou en eau peu profonde)", points: [
+                "1. Repérer un poisson immobile sous un rocher ou dans une petite mare peu profonde, typiquement au crépuscule.",
+                "2. Approcher très lentement la main dans l'eau, sans créer de vague ni d'ombre soudaine au-dessus du poisson.",
+                "3. Refermer la main d'un geste rapide et décidé une fois positionnée juste au-dessus du poisson, en le coinçant contre le fond ou la roche plutôt que de tenter de l'attraper en pleine eau."
+            ]},
+            { titre: "Pêche au harpon improvisé", points: [
+                "1. Tailler l'extrémité d'un bâton solide en plusieurs pointes fines (3 à 4), façon fourche, à l'aide d'un couteau.",
+                "2. Se positionner immobile au bord de l'eau, harpon prêt, en visant un poisson repéré à faible profondeur.",
+                "3. Viser légèrement en dessous de la position apparente du poisson — la réfraction de la lumière dans l'eau fait paraître le poisson plus haut qu'il ne l'est réellement.",
+                "4. Frapper d'un geste rapide et vertical plutôt que de pousser lentement, pour ne pas laisser le temps au poisson de fuir."
+            ]}
+        ]
+    },
+
+    {
+        id: "chasser-petit-gibier", categorieId: "nourriture", emoji: "🏹", titre: "Principes de chasse au petit gibier",
+        illustration: "chasser.png",
+        sections: [
+            { titre: "Cadre et prudence", points: [
+                "La chasse est strictement réglementée dans la plupart des pays et territoires, y compris en situation de survie déclarée — à envisager uniquement en dernier recours et si aucune autre source de nourriture n'est disponible.",
+                "Se concentrer sur les techniques passives (pièges surveillés, voir fiche dédiée) plutôt que la poursuite active, généralement plus économe en énergie et plus réaliste sans matériel adapté."
+            ]},
+            { titre: "Observer avant d'agir", points: [
+                "1. Repérer les traces (empreintes, crottes, chemins dans la végétation basse) pour identifier les zones de passage régulier du petit gibier.",
+                "2. Observer les habitudes : la plupart des petits animaux sont plus actifs à l'aube et au crépuscule, périodes les plus propices à l'observation.",
+                "3. Privilégier une approche silencieuse et immobile plutôt qu'une poursuite bruyante, qui fait fuir le gibier avant tout contact possible."
+            ]},
+            { titre: "Lancer de bâton ou pierre (dernier recours à courte distance)", points: [
+                "1. Choisir un projectile de la taille et du poids adaptés pour être lancé avec précision (bâton droit d'environ 40-50 cm, ou pierre ronde tenant bien en main).",
+                "2. Attendre que l'animal soit immobile et à faible distance avant de tenter le lancer, plutôt que de viser en mouvement.",
+                "3. Viser le corps plutôt que la tête pour maximiser les chances de toucher efficacement.",
+                "Cette méthode reste peu fiable sans entraînement — les techniques passives (pièges) restent généralement plus efficaces en situation réelle."
+            ]}
+        ]
+    },
     {
         id: "construire-abri", categorieId: "abri", emoji: "🏠", titre: "Construire un abri simple",
         illustration: "abri.png",
