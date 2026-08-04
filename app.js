@@ -13,6 +13,7 @@ import { initEnvieCategoriesSync } from "./js/storage.js";
 import { initHomeMeteo } from "./js/ui.js";
 import { initPromptModal } from "./js/envie.js";
 import { initPhotos } from "./js/photos.js";
+import { initJeux } from "./js/jeux.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -62,6 +63,7 @@ function init() {
             initCarte();
                 initPromptModal();
     initPhotos();
+    initJeux();
 
     initFicheTitre();
     initAgenda();
