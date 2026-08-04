@@ -5,6 +5,7 @@ import {
     updateChecklistItemAssignment
 } from "./storage.js";
 import { removePersonneFromChecklistItem } from "./storage.js";
+import { setChecklistItems } from "./storage.js";
 
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
