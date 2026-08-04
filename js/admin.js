@@ -65,6 +65,8 @@ export function initAdmin() {
 
             document.getElementById("adminEnvieCategories")
                 .classList.toggle("hidden", target !== "envieCategories");
+            document.getElementById("adminExternalTools")
+                .classList.toggle("hidden", target !== "external");
 
             if (target === "envieCategories")
                 renderEnvieCategoriesList();
