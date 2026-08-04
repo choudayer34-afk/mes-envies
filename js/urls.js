@@ -1,6 +1,7 @@
-import { addUrl as addUrlStorage, removeUrl as removeUrlStorage } from "./storage.js";
+
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
+import { addUrl as addUrlStorage, removeUrl as removeUrlStorage, getEnvies } from "./storage.js";
 
 let currentUrlEnvieId = null;
 
@@ -58,11 +59,24 @@ function saveCurrentUrl() {
     if (!url)
         return;
 
+    const id = crypto.randomUUID();
+
     addUrlStorage(currentUrlEnvieId, url);
 
     document.getElementById("urlModal").classList.add("hidden");
 
-    openEnvie(currentUrlEnvieId);
+    const envie = getEnvies().find(e => e.id === currentUrlEnvieId);
+
+    if (envie) {
+
+        const optimisticEnvie = {
+            ...envie,
+            urls: [...(envie.urls || []), { id, url, createdAt: Date.now() }]
+        };
+
+        renderUrls(optimisticEnvie);
+
+    }
 
     showToast("✓ Lien ajouté");
 
