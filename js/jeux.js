@@ -162,3 +162,57 @@ function renderJeux() {
     });
 
 }
+
+function tirerJeuAleatoire() {
+
+    const pool = JEUX.filter(jeu => {
+        return filtreMateriel === "tous" || (filtreMateriel === "sans" && jeu.materiel.toLowerCase().startsWith("aucun"));
+    });
+
+    if (pool.length === 0)
+        return;
+
+    const jeu = pool[Math.floor(Math.random() * pool.length)];
+
+    document.getElementById("jeuxSearchInput").value = "";
+    searchQuery = "";
+
+    const container = document.getElementById("jeuxList");
+    container.innerHTML = "";
+
+    const card = document.createElement("div");
+    card.className = "jeuCard jeuCardHighlight";
+
+    card.innerHTML = `
+        <div class="jeuNom">🎲 ${jeu.nom}</div>
+        <div class="jeuDesc">${jeu.description}</div>
+        <div class="jeuMeta">
+            <span>👥 ${jeu.joueurs}</span>
+            <span>🎈 ${jeu.age}</span>
+            <span>🧰 ${jeu.materiel}</span>
+        </div>
+    `;
+
+    container.appendChild(card);
+
+    const relanceButton = document.createElement("button");
+    relanceButton.className = "secondaryButton";
+    relanceButton.textContent = "🎲 Un autre !";
+    relanceButton.style.width = "100%";
+    relanceButton.style.marginTop = "10px";
+
+    relanceButton.addEventListener("click", tirerJeuAleatoire);
+
+    container.appendChild(relanceButton);
+
+    const retourButton = document.createElement("button");
+    retourButton.className = "secondaryButton";
+    retourButton.textContent = "← Voir la liste complète";
+    retourButton.style.width = "100%";
+    retourButton.style.marginTop = "8px";
+
+    retourButton.addEventListener("click", renderJeux);
+
+    container.appendChild(retourButton);
+
+}
