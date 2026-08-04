@@ -2,7 +2,8 @@ import { getEnvies, toggleFavorite, updateEnvieRealise } from "./storage.js";
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
-import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
+
+import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
 function isUntriaged(envie) {
 
@@ -250,20 +251,40 @@ export function initHomeMeteo() {
 
         async (position) => {
 
+            const { latitude, longitude } = position.coords;
+
             try {
 
-                const jours = await fetchMeteo3Jours(position.coords.latitude, position.coords.longitude);
+                const jours = await fetchMeteo3Jours(latitude, longitude);
                 renderMeteoWidget(document.getElementById("homeMeteoWidget"), jours);
 
             } catch (err) {
                 console.error("Erreur météo: " + err.message);
             }
 
+            try {
+
+                const lieu = await reverseGeocodeLieu(latitude, longitude);
+                const label = document.getElementById("homeMeteoLieu");
+
+                if (label) {
+                    label.textContent = `📍 ${lieu}`;
+                }
+
+            } catch (err) {
+                console.error("Erreur géocodage: " + err.message);
+            }
+
         },
 
         () => {
+
             const widget = document.getElementById("homeMeteoWidget");
             if (widget) widget.innerHTML = `<div class="emptyState" style="padding:10px;font-size:13px;">Position non disponible</div>`;
+
+            const label = document.getElementById("homeMeteoLieu");
+            if (label) label.textContent = "";
+
         }
 
     );
