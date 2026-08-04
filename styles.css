@@ -228,7 +228,7 @@ main{
 #urlModal,
 #dateModal,
 #templatePickerModal,
-#mapModal
+#mapModal,
 #enviePickerModal{
     z-index:2100;
 }
