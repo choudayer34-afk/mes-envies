@@ -35,11 +35,12 @@ export function initAuth(onReady) {
 
         console.log("Auth state:", user ? user.email : "déconnecté");
 
+        document.getElementById("loadingScreen")?.classList.add("hidden");
+
         if (!user) {
             showLoginScreen();
             return;
         }
-
 
         currentFoyerId = await resolveFoyer(user.uid);
 
@@ -210,12 +211,14 @@ function showFoyerScreen() {
     document.getElementById("authScreen").classList.add("hidden");
     document.getElementById("foyerScreen").classList.remove("hidden");
     document.getElementById("appRoot").classList.add("hidden");
+     document.getElementById("loadingScreen")?.classList.add("hidden");
 }
 
 function hideAuthScreens() {
     document.getElementById("authScreen").classList.add("hidden");
     document.getElementById("foyerScreen").classList.add("hidden");
     document.getElementById("appRoot").classList.remove("hidden");
+    
 }
 
 export function showFoyerCode() {
