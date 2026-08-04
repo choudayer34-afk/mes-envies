@@ -10,6 +10,7 @@
 "use strict";
 import { initAgenda } from "./js/agenda.js";
 import { initEnvieCategoriesSync } from "./js/storage.js";
+import { initHomeMeteo } from "./js/ui.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
