@@ -43,6 +43,70 @@ const FICHES_SURVIE = [
         ]
     },
         {
+        id: "gestion-stress", categorieId: "mental", emoji: "😰", titre: "Gérer un pic de stress aigu",
+        illustration: "gestion-stress.png",
+        sections: [
+            { titre: "Reconnaître un pic de stress", points: [
+                "Signes : cœur qui s'accélère brutalement, respiration courte et rapide, mains qui tremblent, pensées qui s'emballent ou se figent complètement.",
+                "Ce n'est pas un signe de faiblesse — c'est une réaction physiologique normale face à une situation perçue comme menaçante."
+            ]},
+            { titre: "Technique immédiate — ancrage 5-4-3-2-1", points: [
+                "1. Nommer mentalement ou à voix haute 5 choses que l'on voit autour de soi.",
+                "2. Nommer 4 choses que l'on peut toucher et sentir sous les mains ou les pieds.",
+                "3. Nommer 3 sons que l'on entend distinctement dans l'environnement.",
+                "4. Nommer 2 odeurs perceptibles, même faibles.",
+                "5. Nommer 1 chose que l'on pourrait goûter si on le voulait.",
+                "Cette technique ramène l'attention sur le présent concret et interrompt l'escalade du stress en quelques minutes."
+            ]},
+            { titre: "Après le pic immédiat", points: [
+                "1. S'accorder 5 minutes complètes sans exiger de soi une décision importante — attendre que le corps se stabilise avant d'agir.",
+                "2. Boire un peu d'eau si disponible, le geste simple de boire aide à ramener le calme.",
+                "3. Reprendre ensuite la méthode S.T.O.P. pour la suite des décisions à prendre."
+            ]}
+        ]
+    },
+
+    {
+        id: "gestion-colere", categorieId: "mental", emoji: "😠", titre: "Gérer un accès de colère ou de frustration",
+        illustration: "gestion-colere.png",
+        sections: [
+            { titre: "Pourquoi la colère apparaît en situation difficile", points: [
+                "La fatigue, la faim, la douleur et l'incertitude abaissent fortement le seuil de tolérance à la frustration — une colère intense en survie n'est souvent pas liée uniquement à ce qui vient de se passer, mais à l'accumulation de ces facteurs."
+            ]},
+            { titre: "Dans l'instant", points: [
+                "1. S'éloigner physiquement de la source immédiate de frustration si possible, même de quelques pas seulement.",
+                "2. Serrer les poings fermement pendant 5 secondes puis relâcher complètement — cette tension-décontraction volontaire aide à évacuer une partie de la charge physique de la colère.",
+                "3. Éviter de prendre une décision ou de dire quelque chose d'important dans les premières minutes suivant un accès de colère."
+            ]},
+            { titre: "En groupe", points: [
+                "1. Si la colère est dirigée vers une autre personne du groupe, exprimer ce que l'on ressent avec des phrases commençant par 'je' plutôt que des accusations directes ('je suis épuisé et à bout' plutôt que 'tu ne fais jamais rien').",
+                "2. Se rappeler que le groupe entier subit probablement la même fatigue et la même pression, même si elle s'exprime différemment selon les personnes.",
+                "3. Convenir ensemble d'une courte pause collective si les tensions montent, plutôt que de continuer sous pression."
+            ]}
+        ]
+    },
+
+    {
+        id: "gestion-pression", categorieId: "mental", emoji: "🎯", titre: "Gérer la pression d'une décision importante",
+        illustration: "gestion-pression.png",
+        sections: [
+            { titre: "Pourquoi la pression fausse le jugement", points: [
+                "Sous forte pression, le cerveau a tendance à privilégier une action rapide plutôt qu'une action réfléchie, même quand la situation ne l'exige pas réellement — beaucoup d'erreurs viennent de cette précipitation plutôt que d'un manque de compétence."
+            ]},
+            { titre: "Avant de décider", points: [
+                "1. Se demander explicitement : 'Ai-je vraiment besoin de décider dans la seconde, ou puis-je m'accorder quelques minutes de réflexion ?' — la plupart des décisions en survie supportent un court délai.",
+                "2. Lister mentalement ou à voix haute 2 à 3 options possibles plutôt que de se fixer immédiatement sur la première idée venue.",
+                "3. Se concentrer sur la prochaine action concrète à faire, pas sur l'ensemble de la situation à résoudre d'un coup — cela réduit la sensation d'être submergé."
+            ]},
+            { titre: "En groupe sous pression", points: [
+                "1. Désigner clairement une seule personne responsable de trancher en cas de désaccord, pour éviter les décisions bloquées par une discussion sans fin.",
+                "2. Accepter qu'une décision raisonnable prise rapidement vaut souvent mieux qu'une décision parfaite jamais prise.",
+                "3. Une fois la décision actée, s'y engager collectivement plutôt que de continuer à la remettre en question pendant son exécution."
+            ]}
+        ]
+    }
+,
+        {
         id: "deshydratation-signes", categorieId: "eau", emoji: "🧴", titre: "Repérer et éviter la déshydratation",
         illustration: "deshydratation.png",
         sections: [
