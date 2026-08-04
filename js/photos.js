@@ -1,11 +1,9 @@
-import { storage } from "./firebase.js";
-import { getFoyerId } from "./auth.js";
-import {
-    ref, uploadBytes, getDownloadURL, deleteObject
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 import { getEnvies, updateEnviePhotos } from "./storage.js";
-import { getCurrentEnvieId, openEnvie } from "./envie.js";
+import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
+
+const CLOUD_NAME = "wz4fkcbs";
+const UPLOAD_PRESET = "Envies";
 
 export function initPhotos() {
 
@@ -35,15 +33,13 @@ export function initPhotos() {
 
             try {
 
-                const compressed = await compressImage(file);
-                const path = `foyers/${getFoyerId()}/envies/${envieId}/${crypto.randomUUID()}.jpg`;
-                const storageRef = ref(storage, path);
+                const result = await uploadToCloudinary(file);
 
-                await uploadBytes(storageRef, compressed);
-
-                const url = await getDownloadURL(storageRef);
-
-                nouvellesPhotos.push({ id: crypto.randomUUID(), url, path });
+                nouvellesPhotos.push({
+                    id: crypto.randomUUID(),
+                    url: result.secure_url,
+                    publicId: result.public_id
+                });
 
             } catch (err) {
                 console.error("Erreur upload photo: " + err.message);
@@ -69,42 +65,22 @@ export function initPhotos() {
 
 }
 
-function compressImage(file) {
+async function uploadToCloudinary(file) {
 
-    return new Promise((resolve, reject) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
 
-        const img = new Image();
-        const reader = new FileReader();
+    const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        { method: "POST", body: formData }
+    );
 
-        reader.onload = (e) => { img.src = e.target.result; };
-        reader.onerror = reject;
+    if (!response.ok) {
+        throw new Error("Échec de l'upload Cloudinary");
+    }
 
-        img.onload = () => {
-
-            const maxDim = 1600;
-            let { width, height } = img;
-
-            if (width > height && width > maxDim) {
-                height = Math.round(height * (maxDim / width));
-                width = maxDim;
-            } else if (height > maxDim) {
-                width = Math.round(width * (maxDim / height));
-                height = maxDim;
-            }
-
-            const canvas = document.createElement("canvas");
-            canvas.width = width;
-            canvas.height = height;
-
-            canvas.getContext("2d").drawImage(img, 0, 0, width, height);
-
-            canvas.toBlob(blob => resolve(blob), "image/jpeg", 0.8);
-
-        };
-
-        reader.readAsDataURL(file);
-
-    });
+    return response.json();
 
 }
 
@@ -122,23 +98,19 @@ export function renderPhotosGrid(envie) {
         const item = document.createElement("div");
         item.className = "photoItem";
 
+        const thumbUrl = photo.url.replace("/upload/", "/upload/w_400,h_400,c_fill,q_auto/");
+
         item.innerHTML = `
-            <img src="${photo.url}" loading="lazy">
+            <img src="${thumbUrl}" loading="lazy">
             <button class="photoDeleteButton" title="Supprimer">✕</button>
         `;
 
-        item.querySelector(".photoDeleteButton").addEventListener("click", async (event) => {
+        item.querySelector(".photoDeleteButton").addEventListener("click", (event) => {
 
             event.stopPropagation();
 
             if (!window.confirm("Supprimer cette photo ?"))
                 return;
-
-            try {
-                await deleteObject(ref(storage, photo.path));
-            } catch (err) {
-                console.error("Erreur suppression storage: " + err.message);
-            }
 
             const envieActuelle = getEnvies().find(e => e.id === envie.id);
             const nouvellesPhotos = (envieActuelle?.photos || []).filter(p => p.id !== photo.id);
