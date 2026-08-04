@@ -160,34 +160,38 @@ export function closeFiche() {
 
 }
 
-
 export function initAccordions() {
 
-    document.querySelectorAll(".accordionHeader").forEach(button => {
+    const ficheOverlay = document.getElementById("ficheOverlay");
 
-        const icon = button.querySelector(".accordionIcon");
-        const section = document.getElementById(button.dataset.target);
+    if (!ficheOverlay)
+        return;
+
+    ficheOverlay.addEventListener("click", (event) => {
+
+        const header = event.target.closest(".accordionHeader");
+
+        if (!header)
+            return;
+
+        const section = document.getElementById(header.dataset.target);
 
         if (!section)
             return;
+
+        section.classList.toggle("hidden");
+
+        const icon = header.querySelector(".accordionIcon");
 
         if (icon) {
             icon.textContent = section.classList.contains("hidden") ? "▸" : "▾";
         }
 
-        button.addEventListener("click", () => {
-
-            section.classList.toggle("hidden");
-
-            if (icon) {
-                icon.textContent = section.classList.contains("hidden") ? "▸" : "▾";
-            }
-
-        });
-
     });
 
 }
+
+
 export function openEvaluationAccordion() {
 
     const section = document.getElementById("evaluationSection");
