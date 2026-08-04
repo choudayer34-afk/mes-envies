@@ -108,30 +108,13 @@ function renderVoyageContenu(envie, container) {
 
 
     groups.forEach(group => {
-
-        const header = document.createElement("div");
-        header.className = "checklistCategorieHeader";
-        header.textContent = group.label;
-        container.appendChild(header);
-
-        group.items.forEach(enfant => {
-            container.appendChild(createVoyageItemRow(enfant, envie));
-        });
-
+        appendCollapsibleGroup(container, group.label, group.items, envie);
     });
 
     if (todo.length > 0) {
-
-        const header = document.createElement("div");
-        header.className = "checklistCategorieHeader";
-        header.textContent = "Sans date";
-        container.appendChild(header);
-
-        todo.forEach(enfant => {
-            container.appendChild(createVoyageItemRow(enfant, envie));
-        });
-
+        appendCollapsibleGroup(container, "Sans date", todo, envie);
     }
+}
     const promptButton = document.createElement("button");
     promptButton.className = "secondaryButton";
     promptButton.textContent = "🔎 Quoi faire autour (1h15)";
@@ -434,5 +417,39 @@ function formatLogementPeriode(date) {
     }
 
     return formatDate(date.start);
+
+}
+
+function appendCollapsibleGroup(container, label, items, voyageEnvie) {
+
+    const done = items.filter(i => i.realise).length;
+    const total = items.length;
+
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "accordionHeader groupCollapseHeader";
+    header.innerHTML = `
+        <span>${label} <small class="groupProgress">(${done}/${total})</small></span>
+        <span class="accordionIcon">▸</span>
+    `;
+
+    const content = document.createElement("div");
+    content.className = "accordionContent hidden";
+
+    items.forEach(item => {
+        content.appendChild(createVoyageItemRow(item, voyageEnvie));
+    });
+
+    header.addEventListener("click", () => {
+
+        content.classList.toggle("hidden");
+
+        const icon = header.querySelector(".accordionIcon");
+        icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
+
+    });
+
+    container.appendChild(header);
+    container.appendChild(content);
 
 }
