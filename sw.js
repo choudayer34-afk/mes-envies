@@ -1,4 +1,5 @@
- const CACHE_VERSION = "envie-v1";
+const CACHE_VERSION = "envie-v2";
+
 
 const APP_SHELL = [
     "/",
@@ -22,7 +23,12 @@ const APP_SHELL = [
     "/js/evaluation.js",
     "/js/grouping.js",
     "/js/dragdrop.js",
-    "/js/agenda.js"
+    "/js/agenda.js",
+    "/js/meteo.js",
+    "/js/photos.js",
+    "/js/promptgen.js",
+    "/js/jeux.js",
+    "/js/progress.js"
 ];
 
 self.addEventListener("install", (event) => {
