@@ -22,11 +22,14 @@ caches.keys().then(keys => {
     });
 });
 
-caches.open("envie-v5").then(cache => {
-    cache.keys().then(reqs => {
-        reqs.forEach(req => console.log("Clé cache: " + req.url));
-    });
-});
+caches.open("envie-v5")
+    .then(cache => cache.keys())
+    .then(reqs => {
+        console.log("Nombre de clés: " + reqs.length);
+        reqs.forEach(req => console.log("Clé: " + req.url));
+    })
+    .catch(err => console.error("Erreur diagnostic cache: " + err.message));
+
 
 "use strict";
 import { initAgenda } from "./js/agenda.js";
