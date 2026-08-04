@@ -1419,3 +1419,14 @@ button {
     font-size:12px;
     cursor:pointer;
 }
+.groupCollapseHeader{
+    background:#F5F8F9;
+    margin-bottom:8px;
+}
+
+.groupProgress{
+    color:var(--color-text-light);
+    font-weight:500;
+    font-size:13px;
+}
+
