@@ -459,7 +459,95 @@ const FICHES_SURVIE = [
                 "3. Adapter le contenu au contexte du déplacement prévu (forêt, montagne, littoral) plutôt qu'un kit unique universel."
             ]}
         ]
+    },
+        {
+        id: "abri-complexe", categorieId: "abri", emoji: "⛺", titre: "Abri complexe (tipi / abri en A)",
+        illustration: "abri-complexe.png",
+        sections: [
+            { titre: "Le tipi — étapes", points: [
+                "1. Rassembler 8 à 10 perches longues et droites, toutes de longueur similaire (environ 2,5 m).",
+                "2. Lier 3 de ces perches ensemble à leur sommet avec une corde ou une liane, puis les écarter au sol pour former un tripode stable.",
+                "3. Ajouter les autres perches tout autour, appuyées contre le point de liaison central, réparties régulièrement pour former un cône complet.",
+                "4. Recouvrir progressivement de branches feuillues, d'écorce ou de bâches, en partant du bas et en superposant chaque couche vers le haut comme des tuiles.",
+                "5. Laisser une petite ouverture au sommet si un feu doit être fait à l'intérieur, pour l'évacuation de la fumée."
+            ]},
+            { titre: "L'abri en A (double pente) — étapes", points: [
+                "1. Trouver ou planter deux supports verticaux (arbres proches ou piquets) à environ 2 mètres l'un de l'autre.",
+                "2. Fixer une perche horizontale entre les deux supports, à hauteur d'épaule, formant la poutre faîtière.",
+                "3. Appuyer des perches plus fines en diagonale de chaque côté de cette poutre, formant un A vu de face, jusqu'au sol.",
+                "4. Recouvrir chaque pan avec des branches puis des feuilles superposées, en partant du bas vers le haut sur chaque face.",
+                "Avantage sur l'appentis simple : les deux pans fermés protègent des deux côtés à la fois et retiennent mieux la chaleur en espace clos."
+            ]}
+        ]
+    },
+
+    {
+        id: "traverser-riviere-groupe", categorieId: "deplacement", emoji: "🎒", titre: "Traverser une rivière en groupe avec sacs à dos",
+        illustration: "riviere-groupe.png",
+        sections: [
+            { titre: "Préparer la traversée", points: [
+                "1. Choisir le membre le plus stable et expérimenté du groupe pour passer en premier sans charge, afin de repérer le meilleur passage.",
+                "2. Détacher systématiquement la sangle ventrale de chaque sac à dos avant d'entrer dans l'eau — en cas de chute, un sac accroché peut entraîner sous l'eau.",
+                "3. Regrouper les objets les plus lourds ou fragiles en un minimum de sacs si possible, plutôt que de répartir le risque sur tout le monde en même temps."
+            ]},
+            { titre: "Technique de la ligne humaine", points: [
+                "1. Se placer en ligne, chacun tenant fermement l'épaule ou la sangle de sac de la personne devant, formant une chaîne solidaire face au courant.",
+                "2. La personne la plus forte et stable se place en tête, face au courant, pour fendre le flux et protéger les suivants.",
+                "3. Avancer ensemble, un pas à la fois, en gardant toujours au moins 2 appuis au sol par personne avant de bouger le troisième.",
+                "4. Communiquer verbalement à chaque pas plutôt que d'avancer en silence, pour rester synchronisé."
+            ]},
+            { titre: "Alternative avec corde tendue", points: [
+                "1. Si une corde est disponible, la tendre d'une rive à l'autre en l'attachant fermement aux deux extrémités avant que quiconque n'entre dans l'eau.",
+                "2. Chaque personne traverse en se tenant à cette corde avec les deux mains, en restant du côté aval de la corde (jamais amont) pour ne pas être plaquée contre elle par le courant.",
+                "3. Faire traverser les sacs séparément si possible, attachés à la corde par une sangle, plutôt que portés sur le dos pendant la traversée la plus délicate."
+            ]}
+        ]
+    },
+
+    {
+        id: "brancard-improvise", categorieId: "secours", emoji: "🩹", titre: "Fabriquer un brancard improvisé",
+        illustration: "brancard.png",
+        sections: [
+            { titre: "Rappel avant tout déplacement d'une personne blessée", points: [
+                "Ne déplacer une personne blessée que si rester sur place représente un danger plus grand (feu, effondrement, montée des eaux).",
+                "En cas de suspicion de blessure au dos ou au cou, éviter tout déplacement sauf urgence vitale absolue — un mauvais mouvement peut aggraver gravement une lésion de la colonne."
+            ]},
+            { titre: "Construction du brancard", points: [
+                "1. Trouver 2 perches solides et droites, plus longues que la personne à transporter d'au moins 30 cm de chaque côté.",
+                "2. Enfiler 2 à 3 t-shirts (ou vestes) sur les deux perches en les faisant passer par les manches, comme on enfilerait un vêtement sur deux bâtons parallèles.",
+                "3. Fermer les t-shirts (zip ou boutons) une fois enfilés sur les perches pour qu'ils ne glissent pas, formant une surface de toile tendue entre les deux perches.",
+                "4. Vérifier la solidité en appuyant fermement sur la toile avant d'y installer la personne blessée.",
+                "5. Si possible, ajouter un vêtement supplémentaire plié sous la tête ou les zones les plus sensibles pour plus de confort."
+            ]},
+            { titre: "Porter le brancard", points: [
+                "1. Se positionner à deux porteurs minimum, un à chaque extrémité, en tenant fermement les deux perches.",
+                "2. Se relever ensemble en pliant les jambes plutôt que le dos, en restant synchronisés.",
+                "3. Avancer au pas, en gardant le brancard aussi horizontal que possible, avec la tête légèrement plus haute que les pieds si la personne est consciente et sans traumatisme identifié au dos."
+            ]}
+        ]
+    },
+
+    {
+        id: "double-bache-fraicheur", categorieId: "protection", emoji: "⛺", titre: "Créer une lame d'air fraîche avec deux bâches",
+        illustration: "double-bache.png",
+        sections: [
+            { titre: "Principe", points: [
+                "Une seule bâche tendue au soleil chauffe rapidement l'air juste en dessous, comme une petite serre.",
+                "Deux bâches superposées avec un espace d'air entre elles créent un effet isolant similaire à un double vitrage : l'air emprisonné entre les deux couches limite la transmission de la chaleur vers l'espace habité en dessous."
+            ]},
+            { titre: "Construction — étapes", points: [
+                "1. Tendre une première bâche en hauteur, inclinée face au soleil, comme un toit d'ombre classique.",
+                "2. Tendre une seconde bâche parallèlement à la première, à environ 20-30 cm d'écart en dessous, en utilisant des bâtons ou pierres comme entretoises pour maintenir cet espace constant.",
+                "3. Vérifier que l'air peut légèrement circuler sur les côtés entre les deux bâches, sans créer un espace totalement fermé qui empêcherait l'évacuation de la chaleur accumulée.",
+                "4. S'installer dans l'espace ombragé sous la seconde bâche (la plus basse), qui reste sensiblement plus fraîche que sous une bâche unique exposée directement au soleil."
+            ]},
+            { titre: "Optimisation si matériel disponible", points: [
+                "1. Choisir si possible une bâche extérieure de couleur claire ou réfléchissante pour renvoyer davantage de rayonnement solaire.",
+                "2. Orienter l'ensemble pour laisser circuler un vent naturel latéral entre les deux couches, renforçant l'évacuation de la chaleur emprisonnée."
+            ]}
+        ]
     }
+
 
 
 ];
