@@ -511,6 +511,30 @@ window.toggleDebug = function() {
             </div>
 
         </div>
+<div class="accordion">
+
+    <button
+        class="accordionHeader"
+        data-target="photosSection">
+        <span>📷 Photos</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div
+        id="photosSection"
+        class="accordionContent hidden">
+
+        <div id="photosGrid" class="photosGrid"></div>
+
+        <input type="file" id="photoInput" accept="image/*" multiple capture="environment" hidden>
+
+        <button id="addPhotoButton" class="secondaryButton" style="margin-top:10px;">
+            📷 Ajouter des photos
+        </button>
+
+    </div>
+
+</div>
 
         <div class="accordion">
 
