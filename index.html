@@ -880,6 +880,30 @@ window.toggleDebug = function() {
     </div>
 
 </div>
+
+<div id="promptModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closePromptModal" class="backButton">← Retour</button>
+
+        <h2>🔎 Prompt généré</h2>
+
+        <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">
+            Copie ce texte dans ton IA préférée, ou envoie-le directement à ChatGPT.
+        </p>
+
+        <textarea id="promptModalContent" rows="14" style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:14px;box-sizing:border-box;font-family:monospace;"></textarea>
+
+        <div class="modal-actions">
+            <button id="copyPromptButton" class="secondaryButton">📋 Copier</button>
+            <button id="sendChatGptButton" class="primaryButton">💬 Envoyer à ChatGPT</button>
+        </div>
+
+    </div>
+
+</div>
+
 <div id="inboxModal" class="modal-overlay hidden">
 
     <div class="modal">
