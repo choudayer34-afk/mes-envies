@@ -230,6 +230,10 @@ window.toggleDebug = function() {
 <button id="btnJeux" class="iconButtonRow" title="Jeux pour enfants" aria-label="Jeux pour enfants">
     🎲
 </button>
+<button id="btnSurvie" class="iconButtonRow" title="Survie & autonomie" aria-label="Survie & autonomie">
+    🌲
+</button>
+
 
 
 </div>
@@ -1057,6 +1061,22 @@ window.toggleDebug = function() {
 
 
         <div id="jeuxList"></div>
+
+    </div>
+
+</div>
+<div id="survieModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <div class="survieHeader">
+            <button id="survieBackButton" class="backButton hidden">← Retour</button>
+            <button id="closeSurvie" class="backButton" style="margin-left:auto;">✕ Fermer</button>
+        </div>
+
+        <h2 id="survieModalTitle">🌲 Survie & autonomie</h2>
+
+        <div id="survieContent"></div>
 
     </div>
 
