@@ -210,17 +210,21 @@ window.toggleDebug = function() {
 
     </section>
 
-    <div class="homeIconRow">
-        <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
-            📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
-        </button>
-        <button id="btnCarte" class="iconButtonRow" title="Voir la carte" aria-label="Voir la carte">
-            🗺️
-        </button>
-        <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
-            📆
-        </button>
-    </div>
+  <div class="homeIconRow">
+    <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
+        📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
+    </button>
+    <button id="btnCarte" class="iconButtonRow" title="Voir la carte" aria-label="Voir la carte">
+        🗺️
+    </button>
+    <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
+        📆
+    </button>
+    <button id="btnJeux" class="iconButtonRow" title="Jeux pour enfants" aria-label="Jeux pour enfants">
+        🎲
+    </button>
+</div>
+
 <div id="homeMeteoLieu" class="meteoLieuLabel"></div>
 <div id="homeMeteoWidget" class="meteoWidget"></div>
 
@@ -1007,6 +1011,35 @@ window.toggleDebug = function() {
         <h2>📆 Agenda</h2>
 
         <div id="agendaContent"></div>
+
+    </div>
+
+</div>
+<div id="jeuxModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeJeux" class="backButton">← Retour</button>
+
+        <h2>🎲 Jeux avec les enfants</h2>
+
+        <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">
+            30 jeux simples, pour une sortie ou à la maison, sans grand-chose.
+        </p>
+
+        <input
+            id="jeuxSearchInput"
+            type="text"
+            placeholder="Rechercher un jeu..."
+            autocomplete="off"
+            style="width:100%;height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--color-border);font-size:15px;box-sizing:border-box;margin-bottom:12px;">
+
+        <div class="categorieSelector fiche" style="margin-bottom:16px;">
+            <button class="jeuxFiltreChip categorieChip active" type="button" data-filtre="tous">Tous</button>
+            <button class="jeuxFiltreChip categorieChip" type="button" data-filtre="sans">Sans matériel</button>
+        </div>
+
+        <div id="jeuxList"></div>
 
     </div>
 
