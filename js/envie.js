@@ -5,6 +5,7 @@ import { removeEnvie } from "./modal.js";
 import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
 import { buildPromptSortie } from "./promptgen.js";
 import { showToast } from "./toast.js";
+import { renderPhotosGrid } from "./photos.js";
 
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
@@ -64,6 +65,7 @@ export function openEnvie(id, returnTo = null) {
     renderChecklist(envie);
     renderUrls(envie);
        
+    renderPhotosGrid(envie);
 
 
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
