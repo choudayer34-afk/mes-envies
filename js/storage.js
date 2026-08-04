@@ -742,4 +742,7 @@ export function addMultipleTemplateItems(templateId, textes, categorieId = null,
     }).catch(console.error);
 
 }
+export function setChecklistItems(envieId, checklist) {
+    patchEnvie(envieId, { checklist });
+}
 
