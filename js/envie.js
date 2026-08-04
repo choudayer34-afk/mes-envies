@@ -280,4 +280,9 @@ export function initPromptModal() {
 
 }
 
+export function isLogementCategory(categorieId) {
+    const cat = getCategorieById(categorieId);
+    return cat?.label?.toLowerCase().includes("logement") || false;
+}
+
 
