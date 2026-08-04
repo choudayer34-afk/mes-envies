@@ -7,6 +7,7 @@ import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
 
 
 
+import { buildPromptVoyage } from "./promptgen.js";
 
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
@@ -115,6 +116,17 @@ function renderVoyageContenu(envie, container) {
         });
 
     }
+    const promptButton = document.createElement("button");
+    promptButton.className = "secondaryButton";
+    promptButton.textContent = "🔎 Quoi faire autour (1h15)";
+    promptButton.style.marginTop = "14px";
+
+    promptButton.addEventListener("click", () => {
+        document.getElementById("promptModalContent").value = buildPromptVoyage(envie);
+        document.getElementById("promptModal").classList.remove("hidden");
+    });
+
+    container.appendChild(promptButton);
 
     const mapButton = document.createElement("button");
     mapButton.className = "secondaryButton";
