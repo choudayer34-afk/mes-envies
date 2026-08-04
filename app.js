@@ -46,8 +46,10 @@ const APP = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
+    registerServiceWorker();
     initAuth(init);
 });
+
 
 
 function init() {
@@ -57,7 +59,7 @@ function init() {
     updateTitle();
     initMainButton();
     initLocation();
-    registerServiceWorker();
+    
     initAdmin();
         initVoyage();
             initCarte();
