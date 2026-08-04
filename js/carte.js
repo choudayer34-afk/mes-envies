@@ -13,6 +13,37 @@ export function initCarte() {
     document.getElementById("closeCarte").addEventListener("click", closeMap);
 
 }
+export function openMapSingleLieu(lieu) {
+
+    if (!lieu?.latitude || !lieu?.longitude)
+        return;
+
+    document.getElementById("mapModal").classList.remove("hidden");
+
+    requestAnimationFrame(() => {
+
+        if (!map) {
+            initLeafletMap();
+        }
+
+        markersLayer.clearLayers();
+
+        const legend = document.getElementById("mapLegend");
+        if (legend) legend.classList.add("hidden");
+
+        const marker = L.marker([lieu.latitude, lieu.longitude], {
+            icon: createColoredIcon("#6FAFC4", "📍")
+        }).addTo(markersLayer);
+
+        marker.bindPopup(`<strong>${lieu.nom || "Lieu"}</strong>`).openPopup();
+
+        map.setView([lieu.latitude, lieu.longitude], 14);
+
+        setTimeout(() => map.invalidateSize(), 100);
+
+    });
+
+}
 
 export function openMap(voyageId = null) {
 
