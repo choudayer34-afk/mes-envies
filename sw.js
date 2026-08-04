@@ -41,9 +41,15 @@ self.addEventListener("install", (event) => {
 
                     const response = await fetch(url, { redirect: "follow" });
 
-                    if (response.ok && !response.redirected) {
-                        await cache.put(url, response);
+                    if (!response.ok) {
+                        continue;
                     }
+
+                    const toStore = response.redirected
+                        ? await cleanResponse(response)
+                        : response;
+
+                    await cache.put(url, toStore);
 
                 } catch (err) {
                     console.error("Cache install failed for", url, err);
@@ -59,87 +65,15 @@ self.addEventListener("install", (event) => {
 
 });
 
-self.addEventListener("activate", (event) => {
+async function cleanResponse(response) {
 
-    event.waitUntil(
+    const body = await response.arrayBuffer();
 
-        caches.keys().then((keys) => {
-            return Promise.all(
-                keys.filter((key) => key !== CACHE_VERSION)
-                    .map((key) => caches.delete(key))
-            );
-        })
+    return new Response(body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: response.headers
+    });
 
-    );
+}
 
-    self.clients.claim();
-
-});
-
-self.addEventListener("fetch", (event) => {
-
-    const url = new URL(event.request.url);
-
-    if (url.origin !== self.location.origin) {
-        return;
-    }
-
-    if (event.request.mode === "navigate") {
-
-        event.respondWith(
-
-            caches.match("/index.html").then((cached) => {
-
-                if (cached) {
-
-                    fetch(event.request).then((response) => {
-
-                        if (response.ok && !response.redirected) {
-                            caches.open(CACHE_VERSION).then((cache) => {
-                                cache.put("/index.html", response.clone());
-                            });
-                        }
-
-                    }).catch(() => {});
-
-                    return cached;
-
-                }
-
-                return fetch(event.request).catch(() => {
-                    return new Response("Hors ligne et rien en cache.", { status: 503 });
-                });
-
-            })
-
-        );
-
-        return;
-
-    }
-
-    event.respondWith(
-
-        fetch(event.request)
-            .then((response) => {
-
-                if (response.ok && !response.redirected) {
-
-                    const clone = response.clone();
-
-                    caches.open(CACHE_VERSION).then((cache) => {
-                        cache.put(event.request, clone);
-                    });
-
-                }
-
-                return response;
-
-            })
-            .catch(() => {
-                return caches.match(event.request);
-            })
-
-    );
-
-});
