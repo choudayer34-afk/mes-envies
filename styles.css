@@ -1334,4 +1334,39 @@ button {
 .mapModal{
     position:relative;
 }
+.meteoWidget{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+}
+
+.meteoJour{
+    flex:1;
+    background:var(--color-card);
+    border:1px solid var(--color-border);
+    border-radius:16px;
+    padding:12px 8px;
+    text-align:center;
+}
+
+.meteoLabel{
+    font-size:12px;
+    color:var(--color-text-light);
+    text-transform:capitalize;
+}
+
+.meteoEmoji{
+    font-size:28px;
+    margin:6px 0;
+}
+
+.meteoTemp{
+    font-size:14px;
+    font-weight:600;
+}
+
+.meteoTempMin{
+    color:var(--color-text-light);
+    font-weight:400;
+}
 
