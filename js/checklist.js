@@ -544,7 +544,7 @@ function openTemplatePicker() {
                 <small>(${template.items.length} élément${template.items.length > 1 ? "s" : ""})</small>
             </div>
             <div class="templateRowActions">
-                <button class="actionButton editButton">Utiliser</button>
+                <button class="actionButton editButton">✅</button>
             </div>
         `;
 
