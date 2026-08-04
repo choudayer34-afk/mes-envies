@@ -1030,24 +1030,26 @@ window.toggleDebug = function() {
 
         <button id="closeJeux" class="backButton">← Retour</button>
 
-       <h2 id="jeuxModalTitle">🎲 Jeux avec les enfants</h2>
+<h2>🎲 Jeux avec les enfants</h2>
 
+<p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">
+    Des jeux simples pour toutes les situations.
+</p>
 
-        <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">
-            30 jeux simples, pour une sortie ou à la maison, sans grand-chose.
-        </p>
+<input
+    id="jeuxSearchInput"
+    type="text"
+    placeholder="Rechercher un jeu..."
+    autocomplete="off"
+    style="width:100%;height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--color-border);font-size:15px;box-sizing:border-box;margin-bottom:12px;">
 
-        <input
-            id="jeuxSearchInput"
-            type="text"
-            placeholder="Rechercher un jeu..."
-            autocomplete="off"
-            style="width:100%;height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--color-border);font-size:15px;box-sizing:border-box;margin-bottom:12px;">
-
-        <div class="categorieSelector fiche" style="margin-bottom:12px;">
+<div class="categorieSelector fiche" style="margin-bottom:12px;">
     <button class="jeuxFiltreChip categorieChip active" type="button" data-filtre="tous">Tous</button>
     <button class="jeuxFiltreChip categorieChip" type="button" data-filtre="sans">Sans matériel</button>
+    <button class="jeuxFiltreChip categorieChip" type="button" data-filtre="file">⏳ File d'attente</button>
 </div>
+
+
 
 <button id="jeuxRandomButton" class="primaryButton" style="width:100%;margin-bottom:16px;">
     🎲 J'ai une idée aléatoire !
