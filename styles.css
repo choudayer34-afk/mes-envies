@@ -1429,4 +1429,31 @@ button {
     font-weight:500;
     font-size:13px;
 }
+.jeuCard{
+    background:var(--color-card);
+    border:1px solid var(--color-border);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:10px;
+}
+
+.jeuNom{
+    font-weight:700;
+    margin-bottom:4px;
+}
+
+.jeuDesc{
+    font-size:13px;
+    color:var(--color-text);
+    line-height:1.5;
+    margin-bottom:8px;
+}
+
+.jeuMeta{
+    display:flex;
+    gap:12px;
+    font-size:12px;
+    color:var(--color-text-light);
+    flex-wrap:wrap;
+}
 
