@@ -2,6 +2,7 @@ import { getEnvies, toggleFavorite, updateEnvieRealise } from "./storage.js";
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
+import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
 
 function isUntriaged(envie) {
 
