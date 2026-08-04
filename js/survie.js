@@ -17,7 +17,7 @@ const FICHES_SURVIE = [
 
     {
         id: "methode-stop", categorieId: "priorites", emoji: "🛑", titre: "Méthode S.T.O.P.",
-        illustration: "priorites-immediates.png",
+        illustration: "F985D7C2-AEC0-45C9-BE08-12DA2AB20971.png",
         sections: [
             { titre: "La règle des 3", points: [
                 "3 secondes pour évaluer un danger immédiat avant d'agir.",
