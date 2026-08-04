@@ -305,7 +305,124 @@ const FICHES_SURVIE = [
             ]}
         ]
     },
+    {
+        id: "feu-longue-duree", categorieId: "feu", emoji: "🔥", titre: "Un feu qui dure toute la nuit",
+        illustration: "feu-longue-duree.png",
+        sections: [
+            { titre: "La technique du feu en étoile", points: [
+                "1. Une fois le feu bien établi, disposer 4 à 6 grosses bûches en étoile autour du foyer central, chaque extrémité pointant vers le centre en contact avec les braises.",
+                "2. À mesure que chaque bûche se consume à son extrémité, la repousser légèrement vers le centre plutôt que d'ajouter du bois neuf en permanence.",
+                "3. Cette disposition permet une combustion lente et régulière, nécessitant seulement un ajustement toutes les 2 à 3 heures plutôt qu'une surveillance constante."
+            ]},
+            { titre: "La technique de la bûche témoin", points: [
+                "1. Choisir une bûche particulièrement épaisse et humide, difficile à enflammer complètement.",
+                "2. La placer au centre du foyer une fois les flammes bien établies autour — elle se consume très lentement en conservant des braises actives longtemps.",
+                "3. Le matin, il suffit généralement de raviver les braises restantes avec du petit bois sec plutôt que de rallumer un feu depuis zéro."
+            ]},
+            { titre: "Précaution essentielle", points: [
+                "Même avec ces techniques, ne jamais s'endormir en laissant un feu totalement sans surveillance dans un environnement à risque (vent fort, végétation sèche proche) — désigner toujours quelqu'un en veille si le groupe le permet."
+            ]}
+        ]
+    },
 
+    {
+        id: "corde-descente-pente", categorieId: "deplacement", emoji: "🧗", titre: "Descendre une pente raide avec une corde",
+        illustration: "corde-pente.png",
+        sections: [
+            { titre: "Principe : s'assurer, pas grimper en rappel technique", points: [
+                "Cette méthode sert uniquement à se stabiliser sur une pente raide mais praticable, pas à descendre une paroi verticale — dans ce cas, seule une vraie technique d'escalade avec matériel adapté est sécuritaire."
+            ]},
+            { titre: "Étapes", points: [
+                "1. Attacher fermement une extrémité de la corde à un point d'ancrage solide en haut de la pente (tronc d'arbre robuste, rocher massif).",
+                "2. Vérifier la solidité de l'ancrage en tirant fermement sur la corde avant de s'y confier.",
+                "3. Descendre face à la pente, en tenant la corde à deux mains devant soi, en gardant toujours une légère tension.",
+                "4. Progresser pas à pas, en testant chaque appui au sol avant d'y transférer le poids, sans jamais lâcher complètement la corde.",
+                "5. Ne jamais enrouler la corde autour du poignet ou du corps sans technique adaptée — en cas de chute, cela peut causer une blessure grave plutôt que d'aider."
+            ]}
+        ]
+    },
+
+    {
+        id: "matelas-isolant", categorieId: "abri", emoji: "🛏️", titre: "Fabriquer un matelas isolant naturel",
+        illustration: "matelas.png",
+        sections: [
+            { titre: "Pourquoi c'est essentiel", points: [
+                "Le sol absorbe la chaleur du corps beaucoup plus vite que l'air ambiant — un bon matelas isolant est souvent plus important qu'une couverture par-dessus."
+            ]},
+            { titre: "Étapes de construction", points: [
+                "1. Rassembler une grande quantité de matériaux secs et gonflants : feuilles mortes, fougères, herbes hautes, mousse.",
+                "2. Délimiter au sol un rectangle légèrement plus grand que le corps allongé.",
+                "3. Empiler ces matériaux en une couche d'au moins 20 cm d'épaisseur avant compression — l'épaisseur diminue significativement une fois qu'on s'allonge dessus.",
+                "4. Tasser légèrement le centre en gardant les bords un peu plus hauts, pour un meilleur maintien du corps.",
+                "5. Ajouter une couche supplémentaire tous les jours si possible, les matériaux naturels se tassant rapidement avec l'usage."
+            ]}
+        ]
+    },
+
+    {
+        id: "hameçon-fortune", categorieId: "nourriture", emoji: "🎣", titre: "Fabriquer une ligne de pêche de fortune",
+        illustration: "hameçon.png",
+        sections: [
+            { titre: "Fabriquer un hameçon improvisé", points: [
+                "1. Trouver un objet fin et rigide pouvant être plié : épingle, petit os solide, épine robuste, morceau de fil de fer.",
+                "2. Plier l'extrémité en forme de crochet net, avec une pointe suffisamment acérée pour accrocher.",
+                "3. Aiguiser la pointe si possible en la frottant contre une pierre rugueuse."
+            ]},
+            { titre: "Fabriquer la ligne", points: [
+                "1. Utiliser un fil solide disponible : lacet fin déroulé, fil de couture, ou fibres végétales tressées ensemble (écorce souple, racines fines).",
+                "2. Tresser plusieurs brins fins ensemble pour renforcer la résistance si le matériau de base est fragile.",
+                "3. Attacher fermement une extrémité à l'hameçon avec plusieurs tours serrés."
+            ]},
+            { titre: "Amorcer et pêcher", points: [
+                "1. Utiliser un appât simple : ver, insecte, petit morceau de nourriture disponible.",
+                "2. Lancer la ligne dans une zone calme proche de la végétation aquatique, souvent plus poissonneuse que le milieu d'un cours d'eau.",
+                "3. Rester patient et immobile — le mouvement et le bruit près de l'eau font fuir les poissons."
+            ]}
+        ]
+    },
+
+    {
+        id: "transport-eau-sans-contenant", categorieId: "eau", emoji: "🧺", titre: "Transporter de l'eau sans contenant",
+        illustration: "transport-eau.png",
+        sections: [
+            { titre: "Avec de larges feuilles", points: [
+                "1. Choisir une grande feuille non toxique et suffisamment rigide (feuille de bananier, grande feuille de bardane).",
+                "2. La rouler en forme de cornet, en repliant la pointe basse pour fermer l'extrémité.",
+                "3. Maintenir la forme avec une fine tige végétale ou un brin d'herbe noué autour.",
+                "Limite : cette méthode convient pour un transport court et rapide, pas pour un stockage prolongé."
+            ]},
+            { titre: "Avec de l'écorce", points: [
+                "1. Prélever un morceau d'écorce souple et sans fissure sur un arbre mort ou une branche tombée (éviter de blesser un arbre vivant).",
+                "2. La plier délicatement en forme de coupe ou de auge, en repliant les bords vers le haut.",
+                "3. Maintenir les plis avec des épines végétales utilisées comme attaches temporaires, façon agrafe naturelle."
+            ]},
+            { titre: "Alternative avec un sac plastique", points: [
+                "Si un sac plastique est disponible (même un simple emballage), il constitue souvent la solution la plus fiable et étanche, à privilégier avant toute solution végétale plus fragile."
+            ]}
+        ]
+    },
+
+    {
+        id: "piege-simple-ethique", categorieId: "nourriture", emoji: "🐛", titre: "Principe d'un piège simple",
+        illustration: "piege.png",
+        sections: [
+            { titre: "Cadre et prudence", points: [
+                "La pose de pièges pour capturer du gibier est réglementée dans de nombreux pays et territoires, même en situation de survie — à n'envisager qu'en dernier recours et en connaissance des règles locales si elles peuvent être respectées.",
+                "Un piège abandonné ou mal surveillé peut blesser un animal sans le capturer, ce qui pose un vrai problème éthique — ne poser un piège que si on peut le surveiller régulièrement."
+            ]},
+            { titre: "Principe général du collet simple", points: [
+                "1. Repérer un passage évident et récent d'animaux (trace au sol, sentier étroit dans la végétation).",
+                "2. Former une boucle coulissante avec un fil ou une fine corde, positionnée à hauteur adaptée à la taille de l'animal ciblé.",
+                "3. Fixer solidement l'autre extrémité du fil à un point fixe robuste (racine, tronc).",
+                "4. Camoufler légèrement le dispositif avec des éléments naturels environnants, sans obstruer le passage principal."
+            ]},
+            { titre: "Après la pose", points: [
+                "Vérifier le piège au moins deux fois par jour, matin et soir, pour ne jamais laisser un animal capturé souffrir inutilement.",
+                "Démonter systématiquement le dispositif dès qu'il n'est plus utile ou avant de quitter durablement la zone."
+            ]}
+        ]
+    }
+,
     {
         id: "premiers-gestes", categorieId: "secours", emoji: "🩹", titre: "Premiers gestes simples",
         illustration: "premiers-secours.png",
