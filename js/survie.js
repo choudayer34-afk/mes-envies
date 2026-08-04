@@ -36,7 +36,7 @@ const FICHES_SURVIE = [
 
     {
         id: "construire-abri", categorieId: "abri", emoji: "🏠", titre: "Construire un abri simple",
-        illustration: "abri.png",
+        illustration: "C21B8912-EC1A-4798-9A9C-02F3B5DBFE0C.png",
         sections: [
             { titre: "Choisir l'emplacement", points: [
                 "Terrain légèrement en pente pour l'écoulement de l'eau.",
@@ -54,7 +54,7 @@ const FICHES_SURVIE = [
 
     {
         id: "trouver-purifier-eau", categorieId: "eau", emoji: "💧", titre: "Trouver et purifier l'eau",
-        illustration: "eau.png",
+        illustration: "EB73ECA5-80AF-4938-BAA6-D8188E39440D.png",
         sections: [
             { titre: "Où chercher", points: [
                 "Cours d'eau qui coule plutôt qu'une eau stagnante.",
@@ -72,7 +72,7 @@ const FICHES_SURVIE = [
 
     {
         id: "allumer-feu", categorieId: "feu", emoji: "🔥", titre: "Allumer et entretenir un feu",
-        illustration: "feu.png",
+        illustration: "BF568D8A-0459-4900-92E4-B38BA8C435AC.png",
         sections: [
             { titre: "Préparer avant d'allumer", points: [
                 "Rassembler 3 tailles de bois : brindilles fines, branches moyennes, bûches.",
@@ -89,7 +89,7 @@ const FICHES_SURVIE = [
 
     {
         id: "proteger-soleil-froid", categorieId: "protection", emoji: "☀️", titre: "Se protéger du soleil et du froid",
-        illustration: "protection.png",
+        illustration: "1077301E-9A9B-490E-BA81-D38CF9C27B91.png",
         sections: [
             { titre: "Contre le soleil", points: [
                 "Créer de l'ombre avec un tissu tendu entre deux points fixes.",
