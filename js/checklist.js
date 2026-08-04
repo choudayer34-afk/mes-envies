@@ -565,31 +565,47 @@ function applyTemplate(templateId) {
     if (!envie || !template)
         return;
 
-        template.items.forEach(item => {
+    const nouveauxItems = template.items.map(item => {
 
         if (item.type === "parPersonne") {
 
-            const personnesIds = envie.personnesIds || [];
-
-            addChecklistItem(envieId, item.texte, item.quantite, item.categorieId, personnesIds, null, true);
-
-        } else {
-
-            const quantite = computeQuantite(item, envie);
-            addChecklistItem(envieId, item.texte, quantite, item.categorieId, []);
+            return {
+                id: crypto.randomUUID(),
+                texte: item.texte,
+                quantite: item.quantite,
+                categorieId: item.categorieId,
+                assignedTo: envie.personnesIds || [],
+                parPersonne: true,
+                checked: false,
+                checkedBy: {}
+            };
 
         }
 
+        return {
+            id: crypto.randomUUID(),
+            texte: item.texte,
+            quantite: computeQuantite(item, envie),
+            categorieId: item.categorieId,
+            assignedTo: [],
+            parPersonne: false,
+            checked: false,
+            checkedBy: {}
+        };
+
     });
 
+    setChecklistItems(envieId, [...(envie.checklist || []), ...nouveauxItems]);
 
     document.getElementById("templatePickerModal").classList.add("hidden");
 
-    openEnvie(envieId);
+    const optimisticEnvie = { ...envie, checklist: [...(envie.checklist || []), ...nouveauxItems] };
+    renderChecklist(optimisticEnvie);
 
     showToast(`✓ Modèle "${template.nom}" appliqué`);
 
 }
+
 
 function formatProgressBadge(item) {
 
