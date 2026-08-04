@@ -88,6 +88,7 @@ export function initJeux() {
 
     document.getElementById("btnJeux").addEventListener("click", openJeux);
     document.getElementById("closeJeux").addEventListener("click", closeJeux);
+    document.getElementById("jeuxRandomButton").addEventListener("click", tirerJeuAleatoire);
 
     document.getElementById("jeuxSearchInput").addEventListener("input", (event) => {
         searchQuery = event.target.value.toLowerCase().trim();
