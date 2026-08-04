@@ -42,6 +42,7 @@ import { initJeux } from "./js/jeux.js";
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
 import { renderCreationCategorieSelector } from "./js/modal.js";
+import { initSurvie } from "./js/survie.js";
 
 import { renderEnvies } from "./js/ui.js";
 import {
@@ -83,7 +84,8 @@ function init() {
     updateTitle();
     initMainButton();
     initLocation();
-    
+        initSurvie();
+
     initAdmin();
         initVoyage();
             initCarte();
