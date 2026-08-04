@@ -2,6 +2,9 @@
 
 import { updateEnvieLieu } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
+import { openMapSingleLieu } from "./carte.js";
+import { getEnvies } from "./storage.js";
+
 
 let selectedLieu = { nom: "", adresse: "", latitude: null, longitude: null };
 let debounceTimer = null;
@@ -66,6 +69,21 @@ export function initLocation() {
         });
     }
 
+    const btnVoirSurCarte = document.getElementById("btnVoirLieuCarte");
+
+    if (btnVoirSurCarte) {
+
+        btnVoirSurCarte.addEventListener("click", () => {
+
+            const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+            if (envie?.lieu?.latitude && envie?.lieu?.longitude) {
+                openMapSingleLieu(envie.lieu);
+            }
+
+        });
+
+    }
 
     initClearButton(
         document.getElementById("clearEnvieLieu"),
