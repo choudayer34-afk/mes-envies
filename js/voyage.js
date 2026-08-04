@@ -86,7 +86,9 @@ function renderVoyageContenu(envie, container) {
         container.innerHTML += `<div class="emptyState">Ce ${envie.categorie === "projet" ? "projet" : "voyage"} ne contient aucune envie pour l'instant.</div>`;
     }
 
-    const { groups, todo } = groupAndSort(enfants);
+       const enfantsRestants = enfants.filter(e => e.date?.start !== today);
+    const { groups, todo } = groupAndSort(enfantsRestants);
+
 
     groups.forEach(group => {
 
