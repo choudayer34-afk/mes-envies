@@ -22,6 +22,11 @@ caches.keys().then(keys => {
     });
 });
 
+caches.open("envie-v5").then(cache => {
+    cache.keys().then(reqs => {
+        reqs.forEach(req => console.log("Clé cache: " + req.url));
+    });
+});
 
 "use strict";
 import { initAgenda } from "./js/agenda.js";
