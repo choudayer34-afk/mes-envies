@@ -3,6 +3,8 @@ import { getEnvies, updateEnvieCategorie, updateEnvie } from "./storage.js";
 import { closeAllOverlaysExcept } from "./modal-utils.js";
 import { removeEnvie } from "./modal.js";
 import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
+import { buildPromptSortie } from "./promptgen.js";
+import { showToast } from "./toast.js";
 
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
@@ -66,6 +68,7 @@ export function openEnvie(id, returnTo = null) {
 
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
     renderLieuActions(envie);
+    renderPromptButton(envie);
         renderFicheMeteo(envie);
 
 
@@ -215,6 +218,63 @@ export function initFicheDelete() {
 
         closeFiche();
         removeEnvie(envie.id);
+
+    });
+
+}
+function renderPromptButton(envie) {
+
+    const container = document.getElementById("ficheLieuActions");
+
+    if (!container || !envie.lieu?.nom)
+        return;
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "secondaryButton lieuActionButton";
+    button.textContent = "🔎 Quoi faire autour";
+    button.style.marginTop = "8px";
+    button.style.width = "100%";
+
+    button.addEventListener("click", () => {
+        openPromptModal(buildPromptSortie(envie));
+    });
+
+    container.appendChild(button);
+
+}
+
+function openPromptModal(texte) {
+
+    document.getElementById("promptModalContent").value = texte;
+    document.getElementById("promptModal").classList.remove("hidden");
+
+}
+export function initPromptModal() {
+
+    document.getElementById("closePromptModal").addEventListener("click", () => {
+        document.getElementById("promptModal").classList.add("hidden");
+    });
+
+    document.getElementById("copyPromptButton").addEventListener("click", async () => {
+
+        const texte = document.getElementById("promptModalContent").value;
+
+        try {
+            await navigator.clipboard.writeText(texte);
+            showToast("✓ Prompt copié");
+        } catch {
+            showToast("Impossible de copier");
+        }
+
+    });
+
+    document.getElementById("sendChatGptButton").addEventListener("click", () => {
+
+        const texte = document.getElementById("promptModalContent").value;
+        const url = `https://chatgpt.com/?q=${encodeURIComponent(texte)}`;
+
+        window.open(url, "_blank");
 
     });
 
