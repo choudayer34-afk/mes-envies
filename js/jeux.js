@@ -80,7 +80,7 @@ const JEUX = [
     { nom: "Chamboule-tout maison", description: "Empiler des boîtes/gobelets et les renverser en lançant une balle.", joueurs: "1+", age: "4+", materiel: "Boîtes, une balle" },
     { nom: "Chaise musicale", description: "Tourner autour de chaises (une de moins que de joueurs) et s'asseoir dès l'arrêt de la musique.", joueurs: "3+", age: "4+", materiel: "Des chaises" }
 ];
-let modeActuel = "normal";
+
 
 const JEUX_FILE_ATTENTE = [
     { nom: "20 questions", description: "Un joueur pense à un objet/personnage, les autres posent 20 questions fermées max pour deviner.", joueurs: "2+", age: "6+", materiel: "Aucun" },
@@ -168,8 +168,6 @@ export function initJeux() {
 
     document.getElementById("btnJeux").addEventListener("click", openJeux);
     document.getElementById("closeJeux").addEventListener("click", closeJeux);
-    document.getElementById("jeuxRandomButton").addEventListener("click", tirerJeuAleatoire);
-    document.getElementById("btnJeuxFile").addEventListener("click", openJeuxFileAttente);
 
     document.getElementById("jeuxSearchInput").addEventListener("input", (event) => {
         searchQuery = event.target.value.toLowerCase().trim();
@@ -193,43 +191,54 @@ export function initJeux() {
 
     });
 
-}
+    document.getElementById("jeuxRandomButton").addEventListener("click", tirerJeuAleatoire);
 
-export function openJeuxFileAttente() {
-    modeActuel = "file";
-    renderJeux();
-    document.getElementById("jeuxModal").classList.remove("hidden");
 }
 
 function openJeux() {
-    modeActuel = "normal";
     renderJeux();
     document.getElementById("jeuxModal").classList.remove("hidden");
 }
-
 
 function closeJeux() {
     document.getElementById("jeuxModal").classList.add("hidden");
 }
 
+function getListeCombinee() {
+    return [...JEUX, ...JEUX_FILE_ATTENTE];
+}
+
+function correspondFiltre(jeu, isFileAttente) {
+
+    if (filtreMateriel === "tous")
+        return true;
+
+    if (filtreMateriel === "sans")
+        return jeu.materiel.toLowerCase().startsWith("aucun");
+
+    if (filtreMateriel === "file")
+        return isFileAttente;
+
+    return true;
+
+}
+
 function renderJeux() {
 
-    const titre = document.getElementById("jeuxModalTitle");
-    if (titre) {
-        titre.textContent = modeActuel === "file" ? "⏳ Jeux en file d'attente" : "🎲 Jeux avec les enfants";
-    }
-
     const container = document.getElementById("jeuxList");
-    
     container.innerHTML = "";
 
-     const filtered = getListeActuelle().filter(jeu => {
+    const jeuxAvecOrigine = [
+        ...JEUX.map(j => ({ ...j, isFileAttente: false })),
+        ...JEUX_FILE_ATTENTE.map(j => ({ ...j, isFileAttente: true }))
+    ];
 
+    const filtered = jeuxAvecOrigine.filter(jeu => {
 
         const matchSearch = !searchQuery || jeu.nom.toLowerCase().includes(searchQuery) || jeu.description.toLowerCase().includes(searchQuery);
-        const matchMateriel = filtreMateriel === "tous" || (filtreMateriel === "sans" && jeu.materiel.toLowerCase().startsWith("aucun"));
+        const matchFiltre = correspondFiltre(jeu, jeu.isFileAttente);
 
-        return matchSearch && matchMateriel;
+        return matchSearch && matchFiltre;
 
     });
 
@@ -239,35 +248,38 @@ function renderJeux() {
     }
 
     filtered.forEach(jeu => {
-
-        const card = document.createElement("div");
-        card.className = "jeuCard";
-
-        card.innerHTML = `
-            <div class="jeuNom">🎲 ${jeu.nom}</div>
-            <div class="jeuDesc">${jeu.description}</div>
-            <div class="jeuMeta">
-                <span>👥 ${jeu.joueurs}</span>
-                <span>🎈 ${jeu.age}</span>
-                <span>🧰 ${jeu.materiel}</span>
-            </div>
-        `;
-
-        container.appendChild(card);
-
+        container.appendChild(createJeuCard(jeu));
     });
 
 }
-function getListeActuelle() {
-    return modeActuel === "file" ? JEUX_FILE_ATTENTE : JEUX;
+
+function createJeuCard(jeu) {
+
+    const card = document.createElement("div");
+    card.className = "jeuCard";
+
+    card.innerHTML = `
+        <div class="jeuNom">${jeu.isFileAttente ? "⏳" : "🎲"} ${jeu.nom}</div>
+        <div class="jeuDesc">${jeu.description}</div>
+        <div class="jeuMeta">
+            <span>👥 ${jeu.joueurs}</span>
+            <span>🎈 ${jeu.age}</span>
+            <span>🧰 ${jeu.materiel}</span>
+        </div>
+    `;
+
+    return card;
+
 }
 
 function tirerJeuAleatoire() {
 
-       const pool = getListeActuelle().filter(jeu => {
+    const jeuxAvecOrigine = [
+        ...JEUX.map(j => ({ ...j, isFileAttente: false })),
+        ...JEUX_FILE_ATTENTE.map(j => ({ ...j, isFileAttente: true }))
+    ];
 
-        return filtreMateriel === "tous" || (filtreMateriel === "sans" && jeu.materiel.toLowerCase().startsWith("aucun"));
-    });
+    const pool = jeuxAvecOrigine.filter(jeu => correspondFiltre(jeu, jeu.isFileAttente));
 
     if (pool.length === 0)
         return;
@@ -280,19 +292,8 @@ function tirerJeuAleatoire() {
     const container = document.getElementById("jeuxList");
     container.innerHTML = "";
 
-    const card = document.createElement("div");
-    card.className = "jeuCard jeuCardHighlight";
-
-    card.innerHTML = `
-        <div class="jeuNom">🎲 ${jeu.nom}</div>
-        <div class="jeuDesc">${jeu.description}</div>
-        <div class="jeuMeta">
-            <span>👥 ${jeu.joueurs}</span>
-            <span>🎈 ${jeu.age}</span>
-            <span>🧰 ${jeu.materiel}</span>
-        </div>
-    `;
-
+    const card = createJeuCard(jeu);
+    card.classList.add("jeuCardHighlight");
     container.appendChild(card);
 
     const relanceButton = document.createElement("button");
@@ -316,3 +317,4 @@ function tirerJeuAleatoire() {
     container.appendChild(retourButton);
 
 }
+
