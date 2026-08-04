@@ -180,9 +180,20 @@ function createVoyageItemRow(enfant, voyageEnvie) {
     }
 
     row.querySelector(".realiseButton").addEventListener("click", () => {
-        updateEnvieRealise(enfant.id, !enfant.realise);
-        renderVoyageSection(voyageEnvie);
+
+        const nouvelEtat = !enfant.realise;
+
+        updateEnvieRealise(enfant.id, nouvelEtat);
+        enfant.realise = nouvelEtat;
+
+        const button = row.querySelector(".realiseButton");
+        button.textContent = nouvelEtat ? "↩️" : "✅";
+        button.title = nouvelEtat ? "Annuler" : "Réalisé";
+
+        row.classList.toggle("realise", nouvelEtat);
+
     });
+
 
         row.querySelector(".editButton").addEventListener("click", () => {
         openEnvie(enfant.id, voyageEnvie.id);
