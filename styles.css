@@ -1371,3 +1371,9 @@ button {
     font-weight:400;
 }
 
+.meteoLieuLabel{
+    font-size:13px;
+    color:var(--color-text-light);
+    font-weight:600;
+    margin-bottom:8px;
+}
