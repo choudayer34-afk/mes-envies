@@ -114,7 +114,7 @@ function renderVoyageContenu(envie, container) {
     if (todo.length > 0) {
         appendCollapsibleGroup(container, "Sans date", todo, envie);
     }
-}
+
     const promptButton = document.createElement("button");
     promptButton.className = "secondaryButton";
     promptButton.textContent = "🔎 Quoi faire autour (1h15)";
