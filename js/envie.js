@@ -2,6 +2,7 @@ import { renderLieuActions } from "./location.js";
 import { getEnvies, updateEnvieCategorie, updateEnvie } from "./storage.js";
 import { closeAllOverlaysExcept } from "./modal-utils.js";
 import { removeEnvie } from "./modal.js";
+import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
 
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
@@ -65,10 +66,34 @@ export function openEnvie(id, returnTo = null) {
 
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
     renderLieuActions(envie);
+        renderFicheMeteo(envie);
+
 
         closeAllOverlaysExcept("ficheOverlay");
     document.getElementById("ficheOverlay").classList.remove("hidden");
 
+
+}
+async function renderFicheMeteo(envie) {
+
+    const container = document.getElementById("ficheMeteoWidget");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    if (!envie.lieu?.latitude || !envie.lieu?.longitude)
+        return;
+
+    try {
+
+        const jours = await fetchMeteo3Jours(envie.lieu.latitude, envie.lieu.longitude);
+        renderMeteoWidget(container, jours);
+
+    } catch (err) {
+        console.error("Erreur météo fiche: " + err.message);
+    }
 
 }
 
