@@ -1,4 +1,4 @@
-const CACHE_VERSION = "envie-v2";
+const CACHE_VERSION = "envie-v3";
 
 
 const APP_SHELL = [
@@ -68,6 +68,35 @@ self.addEventListener("fetch", (event) => {
 
     if (url.origin !== self.location.origin) {
         return;
+    }
+
+    if (event.request.mode === "navigate") {
+
+        event.respondWith(
+
+            fetch(event.request)
+                .then((response) => {
+
+                    const clone = response.clone();
+
+                    caches.open(CACHE_VERSION).then((cache) => {
+                        cache.put(event.request, clone);
+                    });
+
+                    return response;
+
+                })
+                .catch(() => {
+
+                    return caches.match("/index.html")
+                        .then((cached) => cached || caches.match("/"));
+
+                })
+
+        );
+
+        return;
+
     }
 
     event.respondWith(
