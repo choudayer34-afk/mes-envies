@@ -6,6 +6,22 @@
  Sprint XI - Refactoring
 ==========================================================
 */
+navigator.serviceWorker.getRegistrations().then(regs => {
+    console.log("SW registrations: " + regs.length);
+    regs.forEach(r => console.log("SW scope: " + r.scope + " active=" + !!r.active));
+});
+
+caches.keys().then(keys => {
+    console.log("Cache keys: " + JSON.stringify(keys));
+    keys.forEach(key => {
+        caches.open(key).then(cache => {
+            cache.keys().then(reqs => {
+                console.log(`Cache "${key}" contient ${reqs.length} entrées`);
+            });
+        });
+    });
+});
+
 
 "use strict";
 import { initAgenda } from "./js/agenda.js";
