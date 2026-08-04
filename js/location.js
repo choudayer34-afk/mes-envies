@@ -217,7 +217,9 @@ function createManualEntry(query, input, suggestionsBox, onSelect) {
 
 function parseCoordinates(text) {
 
-    const match = text.match(/^\s*(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
+    const cleaned = text.trim().replace(/^\(|\)$/g, "").trim();
+
+    const match = cleaned.match(/^(-?\d{1,3}(?:\.\d+)?)\s*,\s*(-?\d{1,3}(?:\.\d+)?)$/);
 
     if (!match)
         return null;
@@ -231,6 +233,7 @@ function parseCoordinates(text) {
     return { latitude, longitude };
 
 }
+
 
 
 export function useCurrentLocation(input, onSelect, button = null) {
