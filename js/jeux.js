@@ -78,7 +78,33 @@ const JEUX = [
     { nom: "Loup-garou simplifié", description: "Version courte et sans carte : un « loup » désigné en secret doit deviner qui l'accuse.", joueurs: "5+", age: "7+", materiel: "Aucun" },
     { nom: "Balle assise", description: "Toucher les adversaires avec une balle roulée au sol pour les éliminer.", joueurs: "4+", age: "5+", materiel: "Une balle" },
     { nom: "Chamboule-tout maison", description: "Empiler des boîtes/gobelets et les renverser en lançant une balle.", joueurs: "1+", age: "4+", materiel: "Boîtes, une balle" },
-    { nom: "Chaise musicale", description: "Tourner autour de chaises (une de moins que de joueurs) et s'asseoir dès l'arrêt de la musique.", joueurs: "3+", age: "4+", materiel: "Des chaises" }
+    { nom: "Chaise musicale", description: "Tourner autour de chaises (une de moins que de joueurs) et s'asseoir dès l'arrêt de la musique.", joueurs: "3+", age: "4+", materiel: "Des chaises" },
+        { nom: "Le tir à la corde", description: "Deux équipes tirent chacune sur une corde pour faire franchir une ligne à l'adversaire.", joueurs: "4+", age: "6+", materiel: "Une corde" },
+    { nom: "Le parcours de billes", description: "Créer un circuit avec des tubes ou obstacles pour faire rouler une bille jusqu'à l'arrivée.", joueurs: "1+", age: "5+", materiel: "Billes, tubes/obstacles" },
+    { nom: "Le lancer de sac de riz", description: "Viser des cibles tracées au sol en lançant des petits sacs lestés.", joueurs: "1+", age: "4+", materiel: "Sacs lestés ou balles" },
+    { nom: "Le jeu du bâton musical", description: "Faire tourner un bâton en musique, celui qui l'a en main quand elle s'arrête doit chanter.", joueurs: "3+", age: "5+", materiel: "Un bâton, musique" },
+    { nom: "Le twister maison", description: "Tracer des ronds colorés au sol et suivre des consignes de mains/pieds sur chaque couleur.", joueurs: "2+", age: "5+", materiel: "Craie ou tapis" },
+    { nom: "Le jeu du palet", description: "Faire glisser un objet plat le plus près possible d'une cible tracée au sol.", joueurs: "1+", age: "5+", materiel: "Un palet ou caillou plat" },
+    { nom: "La pétanque improvisée", description: "Lancer des boules ou cailloux le plus près possible d'un petit objet cible.", joueurs: "2+", age: "6+", materiel: "Boules ou cailloux" },
+    { nom: "Le jeu du bowling nature", description: "Aligner des bouteilles ou pommes de pin et les renverser avec une balle.", joueurs: "1+", age: "4+", materiel: "Quilles improvisées, balle" },
+    { nom: "Le relais des ballons", description: "Transporter un ballon entre les genoux d'un point à un autre sans le faire tomber.", joueurs: "2+", age: "5+", materiel: "Un ballon" },
+    { nom: "Le jeu de la marelle chiffrée", description: "Marelle classique où il faut annoncer le résultat d'un petit calcul avant de sauter dans la case.", joueurs: "1+", age: "6+", materiel: "Craie" },
+    { nom: "Le cerceau musical", description: "Version du jeu des chaises avec des cerceaux posés au sol au lieu de chaises.", joueurs: "3+", age: "4+", materiel: "Cerceaux, musique" },
+    { nom: "Le jeu du fil d'Ariane", description: "Suivre un fil ou une ficelle tendue entre les arbres pour retrouver un trésor caché au bout.", joueurs: "1+", age: "4+", materiel: "Ficelle, un petit trésor" },
+    { nom: "La pêche à la ligne maison", description: "Attraper des objets avec un aimant au bout d'une ficelle, façon pêche miraculeuse.", joueurs: "1+", age: "4+", materiel: "Ficelle, aimant, objets métalliques" },
+    { nom: "Le jeu du chamboule-lettres", description: "Empiler des lettres en carton et les renverser en visant une lettre précise.", joueurs: "1+", age: "5+", materiel: "Lettres en carton, balle" },
+    { nom: "Le relais à cloche-pied chronométré", description: "Course à cloche-pied contre le temps, à améliorer à chaque tentative.", joueurs: "1+", age: "4+", materiel: "Aucun" },
+    { nom: "Le jeu du drapeau couleur", description: "Un meneur montre un drapeau de couleur, chaque couleur correspond à une action à exécuter.", joueurs: "3+", age: "4+", materiel: "Papiers colorés" },
+    { nom: "La course de brouettes", description: "Un joueur marche sur les mains tenu par les jambes par un partenaire.", joueurs: "2+", age: "7+", materiel: "Aucun" },
+    { nom: "Le jeu du élastique", description: "Sauter par-dessus un élastique tenu par deux joueurs, en augmentant la hauteur.", joueurs: "3+", age: "5+", materiel: "Un long élastique ou corde" },
+    { nom: "Le concours de ricochets sur cible", description: "Lancer des cailloux plats pour toucher une cible précise posée sur l'eau ou au sol.", joueurs: "1+", age: "6+", materiel: "Cailloux plats" },
+    { nom: "Le jeu du parachute", description: "Faire s'envoler puis atterrir un petit objet lesté attaché à un mouchoir en tissu.", joueurs: "1+", age: "4+", materiel: "Mouchoir, ficelle, petit poids" },
+    { nom: "Le memory géant nature", description: "Retourner des objets naturels cachés sous des feuilles pour retrouver les paires.", joueurs: "1+", age: "4+", materiel: "Éléments naturels" },
+    { nom: "Le jeu du chronomètre humain", description: "Estimer une minute exacte sans montre ; celui qui s'en approche le plus gagne.", joueurs: "2+", age: "6+", materiel: "Un chronomètre (arbitre)" },
+    { nom: "Le jeu des étoiles filantes", description: "La nuit, compter le plus d'étoiles filantes possible et faire un vœu à chaque fois.", joueurs: "1+", age: "3+", materiel: "Aucun" },
+    { nom: "Le concours de constructions en bois", description: "Construire la structure la plus originale avec des brindilles ramassées.", joueurs: "1+", age: "3+", materiel: "Brindilles" },
+    { nom: "La course de crabes", description: "Se déplacer sur les mains et pieds, ventre vers le ciel, jusqu'à la ligne d'arrivée.", joueurs: "1+", age: "5+", materiel: "Aucun" }
+
 ];
 
 
@@ -157,7 +183,33 @@ const JEUX_FILE_ATTENTE = [
     { nom: "Le jeu du roi/reine d'un jour", description: "Décrire ce qu'on ferait si on était roi ou reine du parc pour une journée.", joueurs: "1+", age: "4+", materiel: "Aucun" },
     { nom: "Le jeu des expressions inventées", description: "Créer une nouvelle expression rigolote et l'expliquer aux autres.", joueurs: "1+", age: "6+", materiel: "Aucun" },
     { nom: "Le jeu du plus proche souvenir d'enfance", description: "Partager un souvenir d'enfance qui ressemble à ce qu'on vit maintenant.", joueurs: "2+", age: "8+", materiel: "Aucun" },
-    { nom: "Le jeu de la dernière lettre", description: "Le mot suivant doit commencer par la dernière lettre du mot précédent, sur un thème donné.", joueurs: "2+", age: "6+", materiel: "Aucun" }
+    { nom: "Le jeu de la dernière lettre", description: "Le mot suivant doit commencer par la dernière lettre du mot précédent, sur un thème donné.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+        { nom: "Le jeu du top 3", description: "Chacun donne son top 3 personnel d'un thème (attractions, glaces, personnages...).", joueurs: "2+", age: "4+", materiel: "Aucun" },
+    { nom: "Le jeu des probabilités météo", description: "Deviner s'il fera beau, nuageux ou pluvieux dans l'heure qui suit.", joueurs: "1+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du nombre premier", description: "Compter à voix haute en sautant tous les nombres premiers.", joueurs: "1+", age: "9+", materiel: "Aucun" },
+    { nom: "Le jeu de la dernière chanson entendue", description: "Chacun doit fredonner la dernière chanson qu'il a entendue dans sa tête.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du calcul du budget glace", description: "Calculer combien coûteraient des glaces pour toute la famille à un prix donné.", joueurs: "1+", age: "8+", materiel: "Aucun" },
+    { nom: "Le jeu des private jokes inventées", description: "Créer un mot secret de famille pour la journée et l'utiliser dans une phrase rigolote.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du sondage éclair", description: "Poser une question à toute la famille (« mer ou montagne ? ») et compter les réponses.", joueurs: "2+", age: "4+", materiel: "Aucun" },
+    { nom: "Le jeu du karaoké mental", description: "Chanter en tête une chanson et essayer de deviner celle que l'autre chante dans sa tête, via mimiques.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu du nombre de pas", description: "Estimer combien de pas il reste jusqu'à l'entrée de l'attraction, puis vérifier en comptant.", joueurs: "1+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du plus jeune souvenir", description: "Raconter son plus ancien souvenir d'enfance dont on se rappelle.", joueurs: "2+", age: "7+", materiel: "Aucun" },
+    { nom: "Le jeu du signe astro imaginaire", description: "Inventer un signe astrologique fictif et décrire son caractère.", joueurs: "1+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu du serment solennel", description: "Faire une promesse rigolote et solennelle pour le reste de la journée.", joueurs: "1+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu de la carte postale imaginaire", description: "Décrire ce qu'on écrirait sur une carte postale envoyée à un ami depuis ici.", joueurs: "1+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu du présentateur météo", description: "Présenter la météo du jour comme un vrai présentateur télé, avec emphase.", joueurs: "1+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du sourire contagieux", description: "Essayer de faire sourire l'autre sans le toucher ni parler, juste par mimiques.", joueurs: "2", age: "3+", materiel: "Aucun" },
+    { nom: "Le jeu du classement des attractions", description: "Classer ensemble toutes les attractions déjà faites, de la préférée à la moins aimée.", joueurs: "2+", age: "4+", materiel: "Aucun" },
+    { nom: "Le jeu du calcul de vitesse", description: "Estimer à quelle vitesse va un attraction en fonction de sa durée et distance ressentie.", joueurs: "1+", age: "9+", materiel: "Aucun" },
+    { nom: "Le jeu du nom de famille royal", description: "Inventer un nom de famille royal rigolo à partir du vrai nom de famille.", joueurs: "1+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu de la légende inventée", description: "Inventer une légende expliquant pourquoi cette attraction existe.", joueurs: "1+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu du sosie de dessin animé", description: "Trouver à quel personnage de dessin animé chaque membre de la famille ressemble le plus.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du chiffre fétiche", description: "Chacun choisit un chiffre fétiche et explique pourquoi, à tour de rôle.", joueurs: "2+", age: "4+", materiel: "Aucun" },
+    { nom: "Le jeu de la conversation inversée", description: "Répondre à toutes les questions par l'inverse de ce qu'on pense vraiment, pour rire.", joueurs: "2+", age: "7+", materiel: "Aucun" },
+    { nom: "Le jeu du générique inventé", description: "Inventer les paroles d'un générique pour une attraction qui n'en a pas.", joueurs: "1+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu de la B.A. du jour", description: "Chacun raconte une petite bonne action qu'il a faite ou pourrait faire aujourd'hui.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du sondage impossible", description: "Deviner combien de personnes dans la file portent des lunettes, un chapeau, etc.", joueurs: "1+", age: "5+", materiel: "Aucun" }
+
 
 ];
 
