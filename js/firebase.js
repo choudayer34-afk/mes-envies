@@ -18,4 +18,5 @@ export const db = initializeFirestore(app, {
     localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
 });
 
-setPersistence(auth, browserLocalPersistence);
+export const authReady = setPersistence(auth, browserLocalPersistence);
+
