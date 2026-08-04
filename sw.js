@@ -1,4 +1,5 @@
-const CACHE_VERSION = "envie-v5";
+const CACHE_VERSION = "envie-v6";
+
 
 const APP_SHELL = [
     "/index.html",
