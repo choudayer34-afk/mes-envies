@@ -746,3 +746,6 @@ export function setChecklistItems(envieId, checklist) {
     patchEnvie(envieId, { checklist });
 }
 
+export function updateEnviePhotos(id, photos) {
+    patchEnvie(id, { photos });
+}
