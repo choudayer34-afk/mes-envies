@@ -454,20 +454,26 @@ window.toggleDebug = function() {
                 id="lieuSection"
                 class="accordionContent hidden">
 
-                <div class="lieuInputWrapper">
-                    <input
-                        id="ficheLieu"
-                        type="text"
-                        placeholder="Ajouter un lieu..."
-                        autocomplete="off">
-                    <button
-                        type="button"
-                        id="clearFicheLieu"
-                        class="lieuClearButton"
-                        aria-label="Effacer le lieu">
-                        ✕
-                    </button>
-                </div>
+             <div class="lieuInputRow">
+    <div class="lieuInputWrapper">
+        <input
+            id="ficheLieu"
+            type="text"
+            placeholder="Ajouter un lieu..."
+            autocomplete="off">
+        <button
+            type="button"
+            id="clearFicheLieu"
+            class="lieuClearButton"
+            aria-label="Effacer le lieu">
+            ✕
+        </button>
+    </div>
+    <button type="button" id="btnVoirLieuCarte" class="dateClearButton" title="Voir sur la carte" aria-label="Voir sur la carte">
+        🗺️
+    </button>
+</div>
+
 
                 <div
                     id="fichelieuSuggestions"
