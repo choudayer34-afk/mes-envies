@@ -80,6 +80,40 @@ const JEUX = [
     { nom: "Chamboule-tout maison", description: "Empiler des boîtes/gobelets et les renverser en lançant une balle.", joueurs: "1+", age: "4+", materiel: "Boîtes, une balle" },
     { nom: "Chaise musicale", description: "Tourner autour de chaises (une de moins que de joueurs) et s'asseoir dès l'arrêt de la musique.", joueurs: "3+", age: "4+", materiel: "Des chaises" }
 ];
+let modeActuel = "normal";
+
+const JEUX_FILE_ATTENTE = [
+    { nom: "20 questions", description: "Un joueur pense à un objet/personnage, les autres posent 20 questions fermées max pour deviner.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Le comptage silencieux", description: "Compter à tour de rôle sans se concerter ; si deux personnes disent un nombre en même temps, on repart de zéro.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Catégories rapides", description: "Donner un thème (fruits, pays...) et énumérer chacun un mot à tour de rôle sans répéter.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu de l'alphabet", description: "Trouver un mot sur un thème donné en suivant l'ordre de l'alphabet, lettre après lettre.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Ni oui ni non", description: "Répondre à des questions sans jamais dire « oui » ni « non » pendant tout le temps d'attente.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Le mot mystère", description: "Un joueur pense à un mot, donne sa première lettre, les autres proposent jusqu'à trouver.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Pierre-papier-ciseaux en série", description: "Enchaîner des manches rapides, le premier à 5 victoires gagne.", joueurs: "2", age: "4+", materiel: "Aucun" },
+    { nom: "Le jeu des différences", description: "Observer deux personnes autour de vous puis fermer les yeux et citer une différence entre elles.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Le compte est bon (mini)", description: "Donner 3 petits nombres, trouver une opération qui donne un résultat cible.", joueurs: "1+", age: "8+", materiel: "Aucun" },
+    { nom: "Le jeu du prénom", description: "Trouver un adjectif sympa commençant par chaque lettre de son prénom.", joueurs: "1+", age: "5+", materiel: "Aucun" },
+    { nom: "Les gestes secrets", description: "Un joueur invente une suite de 3 gestes, les autres doivent la reproduire de mémoire.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu des sons", description: "Fermer les yeux et lister tous les sons qu'on entend autour de la file.", joueurs: "1+", age: "4+", materiel: "Aucun" },
+    { nom: "La chanson à trous", description: "Chanter une chanson connue en s'arrêtant sur un mot que les autres doivent compléter.", joueurs: "2+", age: "4+", materiel: "Aucun" },
+    { nom: "Le jeu du miroir immobile", description: "Un joueur fait une pose, l'autre doit la copier exactement sans bouger ensuite.", joueurs: "2", age: "4+", materiel: "Aucun" },
+    { nom: "Qui suis-je ?", description: "Un joueur pense à un personnage Disney, les autres posent des questions oui/non pour deviner.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu des rimes", description: "Trouver le plus de mots possible qui riment avec un mot donné.", joueurs: "1+", age: "5+", materiel: "Aucun" },
+    { nom: "Compter les couleurs", description: "Repérer et compter combien de fois une couleur donnée apparaît autour de vous.", joueurs: "1+", age: "3+", materiel: "Aucun" },
+    { nom: "Le jeu des initiales", description: "Trouver un prénom et un métier qui commencent par la même lettre.", joueurs: "1+", age: "6+", materiel: "Aucun" },
+    { nom: "L'histoire à deux voix", description: "Inventer une histoire en alternant une phrase chacun, sans se concerter à l'avance.", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "Le jeu du portrait", description: "Décrire une personne dans la file sans la nommer, les autres doivent deviner qui c'est.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Le calcul mental éclair", description: "Se donner des petits calculs à résoudre le plus vite possible.", joueurs: "1+", age: "7+", materiel: "Aucun" },
+    { nom: "Le jeu du acronyme", description: "Choisir 3 lettres au hasard et inventer une phrase où chaque mot commence par ces lettres.", joueurs: "1+", age: "7+", materiel: "Aucun" },
+    { nom: "Ni cette ni cette", description: "Le meneur pointe un objet, les autres doivent le décrire sans utiliser certains mots interdits.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu des expressions", description: "Trouver le plus d'expressions possible contenant un mot donné (ex. « chat »).", joueurs: "1+", age: "8+", materiel: "Aucun" },
+    { nom: "Le compte à rebours créatif", description: "Trouver un mot pour chaque chiffre en comptant à rebours depuis 10.", joueurs: "1+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu des towers", description: "Observer une attraction ou un décor et compter des détails précis (fenêtres, drapeaux...).", joueurs: "1+", age: "4+", materiel: "Aucun" },
+    { nom: "Le vrai ou faux", description: "Chacun affirme 3 choses sur soi, une est fausse, les autres doivent deviner laquelle.", joueurs: "2+", age: "6+", materiel: "Aucun" },
+    { nom: "Le jeu du superlatif", description: "Désigner ensemble « le plus » de quelque chose observé autour (le plus grand chapeau, la couleur la plus vue...).", joueurs: "2+", age: "5+", materiel: "Aucun" },
+    { nom: "La suite de Fibonacci simplifiée", description: "Continuer une suite de nombres où chaque terme est la somme des deux précédents.", joueurs: "1+", age: "9+", materiel: "Aucun" },
+    { nom: "Le jeu du silence chronométré", description: "Rester silencieux le plus longtemps possible ; celui qui parle en premier doit faire un petit gage.", joueurs: "2+", age: "4+", materiel: "Aucun" }
+];
 
 let searchQuery = "";
 let filtreMateriel = "tous";
@@ -89,6 +123,7 @@ export function initJeux() {
     document.getElementById("btnJeux").addEventListener("click", openJeux);
     document.getElementById("closeJeux").addEventListener("click", closeJeux);
     document.getElementById("jeuxRandomButton").addEventListener("click", tirerJeuAleatoire);
+    document.getElementById("btnJeuxFile").addEventListener("click", openJeuxFileAttente);
 
     document.getElementById("jeuxSearchInput").addEventListener("input", (event) => {
         searchQuery = event.target.value.toLowerCase().trim();
@@ -114,10 +149,18 @@ export function initJeux() {
 
 }
 
-function openJeux() {
+export function openJeuxFileAttente() {
+    modeActuel = "file";
     renderJeux();
     document.getElementById("jeuxModal").classList.remove("hidden");
 }
+
+function openJeux() {
+    modeActuel = "normal";
+    renderJeux();
+    document.getElementById("jeuxModal").classList.remove("hidden");
+}
+
 
 function closeJeux() {
     document.getElementById("jeuxModal").classList.add("hidden");
@@ -125,10 +168,17 @@ function closeJeux() {
 
 function renderJeux() {
 
+    const titre = document.getElementById("jeuxModalTitle");
+    if (titre) {
+        titre.textContent = modeActuel === "file" ? "⏳ Jeux en file d'attente" : "🎲 Jeux avec les enfants";
+    }
+
     const container = document.getElementById("jeuxList");
+    
     container.innerHTML = "";
 
-    const filtered = JEUX.filter(jeu => {
+     const filtered = getListeActuelle().filter(jeu => {
+
 
         const matchSearch = !searchQuery || jeu.nom.toLowerCase().includes(searchQuery) || jeu.description.toLowerCase().includes(searchQuery);
         const matchMateriel = filtreMateriel === "tous" || (filtreMateriel === "sans" && jeu.materiel.toLowerCase().startsWith("aucun"));
@@ -162,10 +212,14 @@ function renderJeux() {
     });
 
 }
+function getListeActuelle() {
+    return modeActuel === "file" ? JEUX_FILE_ATTENTE : JEUX;
+}
 
 function tirerJeuAleatoire() {
 
-    const pool = JEUX.filter(jeu => {
+       const pool = getListeActuelle().filter(jeu => {
+
         return filtreMateriel === "tous" || (filtreMateriel === "sans" && jeu.materiel.toLowerCase().startsWith("aucun"));
     });
 
