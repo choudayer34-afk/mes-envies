@@ -174,17 +174,20 @@ function createChecklistRow(item, envie, personneContext = null) {
         <button class="deleteChecklistButton" title="${personneContext ? "Retirer pour cette personne" : "Supprimer"}">🗑️</button>
     `;
 
-    row.querySelector("input").addEventListener("change", () => {
+      row.querySelector("input").addEventListener("change", (event) => {
+
+        const nouvelEtatVisuel = event.target.checked;
 
         if (usePersonneCheckbox) {
             toggleChecklistItemForPersonne(envie.id, item.id, personneContext);
+            item.checkedBy = { ...item.checkedBy, [personneContext]: nouvelEtatVisuel };
         } else {
             toggleChecklistItem(envie.id, item.id);
+            item.checked = nouvelEtatVisuel;
         }
 
-        openEnvie(envie.id);
-
     });
+
 
     row.querySelector(".assignItemButton").addEventListener("click", (event) => {
         event.stopPropagation();
