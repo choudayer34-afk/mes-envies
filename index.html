@@ -718,6 +718,8 @@ window.toggleDebug = function() {
             <button class="categorieChip" type="button" data-target="categories">🏷️ Catégories de checklist</button>
             <button class="categorieChip" type="button" data-target="personnes">👤 Personnes du foyer</button>
         <button class="categorieChip" type="button" data-target="envieCategories">🎯 Catégories d'envie</button>
+        <button class="categorieChip" type="button" data-target="external">🔗 Outils externes</button>
+
 
         </div>
 
@@ -757,6 +759,51 @@ window.toggleDebug = function() {
     <button id="addEnvieCategorieButton" class="secondaryButton">
         ➕ Nouvelle catégorie
     </button>
+
+</div>
+<div id="adminExternalTools" class="adminSection hidden">
+
+    <div class="templateRow">
+        <div class="templateRowNom">🔥 Firebase Console</div>
+        <div class="templateRowActions">
+            <a href="https://console.firebase.google.com/project/mes-envies-21527/overview" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+        </div>
+    </div>
+
+    <div class="templateRow">
+        <div class="templateRowNom">☁️ Cloudflare Pages</div>
+        <div class="templateRowActions">
+            <a href="https://dash.cloudflare.com" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+        </div>
+    </div>
+
+    <div class="templateRow">
+        <div class="templateRowNom">🖼️ Cloudinary</div>
+        <div class="templateRowActions">
+            <a href="https://console.cloudinary.com/console/c-wz4fkcbs/media_explorer" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+        </div>
+    </div>
+
+    <div class="templateRow">
+        <div class="templateRowNom">🐙 Dépôt GitHub</div>
+        <div class="templateRowActions">
+            <a href="https://github.com/choudayer34-afk/mes-envies" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+        </div>
+    </div>
+
+    <div class="templateRow">
+        <div class="templateRowNom">🗺️ Nominatim / OpenStreetMap</div>
+        <div class="templateRowActions">
+            <a href="https://www.openstreetmap.org" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+        </div>
+    </div>
+
+    <div class="templateRow">
+        <div class="templateRowNom">🌤️ Open-Meteo</div>
+        <div class="templateRowActions">
+            <a href="https://open-meteo.com" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+        </div>
+    </div>
 
 </div>
 
