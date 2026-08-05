@@ -22,13 +22,21 @@ export function renderEnvies() {
 
     const auMoinsUneEnvie = getEnvies().length > 0;
 
-    document.getElementById("headerAccueilVide").classList.toggle("hidden", auMoinsUneEnvie);
-    document.getElementById("headerAccueilActif").classList.toggle("hidden", !auMoinsUneEnvie);
+    console.log("renderEnvies: nb envies=" + getEnvies().length + " auMoinsUneEnvie=" + auMoinsUneEnvie);
+
+    const elVide = document.getElementById("headerAccueilVide");
+    const elActif = document.getElementById("headerAccueilActif");
+
+    console.log("headerAccueilVide trouvé=" + !!elVide + " headerAccueilActif trouvé=" + !!elActif);
+
+    elVide?.classList.toggle("hidden", auMoinsUneEnvie);
+    elActif?.classList.toggle("hidden", !auMoinsUneEnvie);
 
     renderHomeSections();
     renderInboxList();
 
 }
+
 
 
 function renderInboxList() {
