@@ -1668,3 +1668,7 @@ button {
 .categorieSelectorWrapper{
     display:block;
 }
+
+#creationCategorieGrid{
+    display:grid !important;
+}
