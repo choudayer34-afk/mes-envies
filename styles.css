@@ -235,6 +235,7 @@ main{
 #photoDescriptionModal,
  #photoViewerModal,
  #plusModal,
+#catalogueModal,
 #enviePickerModal{
     z-index:2100;
 }
