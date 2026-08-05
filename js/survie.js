@@ -4,6 +4,7 @@ import {
 } from "./storage.js";
 
 
+
 const CATEGORIES_SURVIE = [
     { id: "priorites", emoji: "🚨", label: "Priorités immédiates" },
     { id: "abri", emoji: "🏠", label: "Abri" },
@@ -1208,3 +1209,120 @@ function renderSurvie() {
     }
 
     }
+    
+let ficheActuelleEstCustom = false;
+let sectionsEnEdition = [];
+let ficheEnEdition = null;
+
+function openFicheEditor(fiche) {
+
+    ficheEnEdition = fiche;
+    sectionsEnEdition = fiche ? fiche.sections.map(s => ({ ...s })) : [{ titre: "", points: [], illustration: "" }];
+
+    document.getElementById("ficheEditorTitre").value = fiche ? fiche.titre.replace(/^\S+\s/, "") : "";
+    document.getElementById("ficheEditorEmoji").value = fiche ? fiche.emoji : "🩹";
+    document.getElementById("ficheEditorResume").value = fiche?.resume ? fiche.resume.join("\n") : "";
+    document.getElementById("ficheEditorIllustration").value = fiche?.illustrations?.join(", ") || fiche?.illustration || "";
+
+    renderSectionsEditor();
+
+    document.getElementById("ficheEditorModal").classList.remove("hidden");
+
+}
+
+function renderSectionsEditor() {
+
+    const container = document.getElementById("ficheEditorSections");
+    container.innerHTML = "";
+
+    sectionsEnEdition.forEach((section, index) => {
+
+        const card = document.createElement("div");
+        card.className = "templateRow";
+
+        card.innerHTML = `
+            <div class="templateRowActions" style="justify-content:space-between;width:100%;margin-bottom:8px;">
+                <strong>Section ${index + 1}</strong>
+                <button class="actionButton deleteButton" data-remove="${index}">✕</button>
+            </div>
+            <label class="fieldTitle">Titre de la section</label>
+            <input type="text" class="sectionTitreInput" data-idx="${index}" value="${section.titre || ""}" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
+            <label class="fieldTitle">Contenu (une ligne par point)</label>
+            <textarea class="sectionPointsInput" data-idx="${index}" rows="4" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">${(section.points || []).join("\n")}</textarea>
+            <label class="fieldTitle">Illustration (nom de fichier ou URL, facultatif)</label>
+            <input type="text" class="sectionIllustrationInput" data-idx="${index}" value="${section.illustration || ""}" placeholder="ex : mon-image.png" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+        `;
+
+        card.querySelector("[data-remove]").addEventListener("click", () => {
+            sectionsEnEdition.splice(index, 1);
+            renderSectionsEditor();
+        });
+
+        container.appendChild(card);
+
+    });
+
+}
+
+function collectSectionsFromEditor() {
+
+    const container = document.getElementById("ficheEditorSections");
+    const titres = container.querySelectorAll(".sectionTitreInput");
+    const pointsInputs = container.querySelectorAll(".sectionPointsInput");
+    const illustrations = container.querySelectorAll(".sectionIllustrationInput");
+
+    return Array.from(titres).map((input, i) => ({
+        titre: input.value.trim(),
+        points: pointsInputs[i].value.split("\n").map(l => l.trim()).filter(Boolean),
+        illustration: illustrations[i].value.trim()
+    })).filter(s => s.titre || s.points.length > 0);
+
+}
+
+export function initSurvieEditor() {
+
+    document.getElementById("addFicheSectionButton").addEventListener("click", () => {
+        sectionsEnEdition.push({ titre: "", points: [], illustration: "" });
+        renderSectionsEditor();
+    });
+
+    document.getElementById("cancelFicheEditor").addEventListener("click", () => {
+        document.getElementById("ficheEditorModal").classList.add("hidden");
+    });
+
+    document.getElementById("saveFicheEditor").addEventListener("click", () => {
+
+        const titreInput = document.getElementById("ficheEditorTitre").value.trim();
+        const emoji = document.getElementById("ficheEditorEmoji").value.trim() || "🩹";
+        const resumeRaw = document.getElementById("ficheEditorResume").value.trim();
+        const illustrationsRaw = document.getElementById("ficheEditorIllustration").value.trim();
+        const sections = collectSectionsFromEditor();
+
+        if (!titreInput || sections.length === 0) {
+            alert("Merci de renseigner au moins un titre et une section.");
+            return;
+        }
+
+        const fiche = {
+            titre: titreInput,
+            emoji,
+            categorieId: categorieActuelle,
+            resume: resumeRaw ? resumeRaw.split("\n").map(l => l.trim()).filter(Boolean) : [],
+            illustrations: illustrationsRaw ? illustrationsRaw.split(",").map(s => s.trim()).filter(Boolean) : [],
+            sections
+        };
+
+        if (ficheEnEdition) {
+            updateFicheSurvieCustom(ficheEnEdition.id, fiche);
+        } else {
+            createFicheSurvieCustom(fiche);
+        }
+
+        document.getElementById("ficheEditorModal").classList.add("hidden");
+
+        vueActuelle = "fiches";
+        renderSurvie();
+
+    });
+
+}
