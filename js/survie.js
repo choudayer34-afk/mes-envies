@@ -1,3 +1,9 @@
+import {
+    getFichesSurvieCustom, createFicheSurvieCustom,
+    updateFicheSurvieCustom, deleteFicheSurvieCustom
+} from "./storage.js";
+
+
 const CATEGORIES_SURVIE = [
     { id: "priorites", emoji: "🚨", label: "Priorités immédiates" },
     { id: "abri", emoji: "🏠", label: "Abri" },
@@ -1043,20 +1049,64 @@ function renderSurvie() {
         const cat = CATEGORIES_SURVIE.find(c => c.id === categorieActuelle);
         titleEl.textContent = `${cat.emoji} ${cat.label}`;
 
-        const fiches = FICHES_SURVIE.filter(f => f.categorieId === categorieActuelle);
+        const fichesBase = FICHES_SURVIE.filter(f => f.categorieId === categorieActuelle);
+        const fichesPerso = getFichesSurvieCustom().filter(f => f.categorieId === categorieActuelle);
 
-        fiches.forEach(fiche => {
+        const addButton = document.createElement("button");
+        addButton.className = "secondaryButton";
+        addButton.textContent = "➕ Ajouter une fiche";
+        addButton.style.width = "100%";
+        addButton.style.marginBottom = "14px";
 
-            const row = document.createElement("button");
-            row.type = "button";
+        addButton.addEventListener("click", () => {
+            openFicheEditor(null);
+        });
+
+        container.appendChild(addButton);
+
+        [...fichesBase, ...fichesPerso].forEach(fiche => {
+
+            const isCustom = !!fichesPerso.find(f => f.id === fiche.id);
+
+            const row = document.createElement("div");
             row.className = "survieFicheRow";
-            row.innerHTML = `<span>${fiche.emoji} ${fiche.titre}</span><span>›</span>`;
+            row.style.display = "flex";
+            row.style.justifyContent = "space-between";
+            row.style.alignItems = "center";
 
-            row.addEventListener("click", () => {
+            row.innerHTML = `
+                <span style="flex:1;cursor:pointer;">${fiche.emoji} ${fiche.titre}</span>
+                ${isCustom ? `<button class="assignItemButton" title="Modifier">✏️</button><button class="assignItemButton" title="Supprimer">✕</button>` : `<span>›</span>`}
+            `;
+
+            row.querySelector("span").addEventListener("click", () => {
                 ficheActuelle = fiche.id;
+                ficheActuelleEstCustom = isCustom;
                 vueActuelle = "fiche";
                 renderSurvie();
             });
+
+            if (isCustom) {
+
+                const [editBtn, deleteBtn] = row.querySelectorAll(".assignItemButton");
+
+                editBtn.addEventListener("click", (event) => {
+                    event.stopPropagation();
+                    openFicheEditor(fiche);
+                });
+
+                deleteBtn.addEventListener("click", (event) => {
+
+                    event.stopPropagation();
+
+                    if (!window.confirm(`Supprimer "${fiche.titre}" ?`))
+                        return;
+
+                    deleteFicheSurvieCustom(fiche.id);
+
+                });
+
+            }
 
             container.appendChild(row);
 
@@ -1064,19 +1114,66 @@ function renderSurvie() {
 
     } else if (vueActuelle === "fiche") {
 
-        const fiche = FICHES_SURVIE.find(f => f.id === ficheActuelle);
+        const fichesToutes = [...FICHES_SURVIE, ...getFichesSurvieCustom()];
+        const fiche = fichesToutes.find(f => f.id === ficheActuelle);
+
+        if (!fiche) {
+            vueActuelle = "fiches";
+            renderSurvie();
+            return;
+        }
+
         titleEl.textContent = `${fiche.emoji} ${fiche.titre}`;
 
-        if (fiche.illustration) {
+        if (ficheActuelleEstCustom) {
+
+            const editButton = document.createElement("button");
+            editButton.className = "secondaryButton";
+            editButton.textContent = "✏️ Modifier cette fiche";
+            editButton.style.width = "100%";
+            editButton.style.marginBottom = "14px";
+
+            editButton.addEventListener("click", () => {
+                openFicheEditor(fiche);
+            });
+
+            container.appendChild(editButton);
+
+        }
+
+        if (fiche.resume && fiche.resume.length > 0) {
+
+            const resumeBox = document.createElement("div");
+            resumeBox.className = "containerStatutBox";
+            resumeBox.innerHTML = `<div class="containerStatutLabel">⚡ Résumé express</div>`;
+
+            const ul = document.createElement("ul");
+            ul.className = "survieListe";
+
+            fiche.resume.forEach(point => {
+                const li = document.createElement("li");
+                li.textContent = point;
+                ul.appendChild(li);
+            });
+
+            resumeBox.appendChild(ul);
+            container.appendChild(resumeBox);
+
+        }
+
+        const images = fiche.illustrations || (fiche.illustration ? [fiche.illustration] : []);
+
+        images.forEach(src => {
 
             const img = document.createElement("img");
-            img.src = `illustrations/survie/${fiche.illustration}`;
+            img.src = src.startsWith("http") ? src : `illustrations/survie/${src}`;
             img.className = "survieIllustration";
+            img.style.marginBottom = "12px";
             img.onerror = () => { img.style.display = "none"; };
 
             container.appendChild(img);
 
-        }
+        });
 
         fiche.sections.forEach(section => {
 
@@ -1084,6 +1181,16 @@ function renderSurvie() {
             h3.className = "survieSectionTitre";
             h3.textContent = section.titre;
             container.appendChild(h3);
+
+            if (section.illustration) {
+
+                const imgSection = document.createElement("img");
+                imgSection.src = section.illustration.startsWith("http") ? section.illustration : `illustrations/survie/${section.illustration}`;
+                imgSection.className = "survieIllustration";
+                imgSection.onerror = () => { imgSection.style.display = "none"; };
+                container.appendChild(imgSection);
+
+            }
 
             const ul = document.createElement("ul");
             ul.className = "survieListe";
@@ -1099,4 +1206,5 @@ function renderSurvie() {
         });
 
     }
+
     }
