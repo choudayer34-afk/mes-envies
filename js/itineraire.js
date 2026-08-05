@@ -9,6 +9,25 @@ export function buildLienWazePremiereEtape({ itineraire, depart, arrivee }) {
 
 }
 
+export function buildLienGoogleMapsApp({ itineraire, depart, arrivee }) {
+
+    const points = [];
+
+    if (depart) points.push(depart);
+    points.push(...itineraire);
+    if (arrivee) points.push(arrivee);
+
+    if (points.length === 0)
+        return null;
+
+    const destination = points[points.length - 1].lieu;
+    const waypoints = points.slice(0, -1).map(i => `${i.lieu.latitude},${i.lieu.longitude}`).join("+to:");
+
+    const daddr = waypoints ? `${waypoints}+to:${destination.latitude},${destination.longitude}` : `${destination.latitude},${destination.longitude}`;
+
+    return `comgooglemaps://?daddr=${daddr}&directionsmode=driving`;
+
+}
 
 function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 
