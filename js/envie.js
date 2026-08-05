@@ -73,7 +73,7 @@ export function openEnvie(id, returnTo = null) {
     renderPromptButton(envie);
         renderFicheMeteo(envie);
 
-
+gererAccordeonsVides(envie);
         closeAllOverlaysExcept("ficheOverlay");
     document.getElementById("ficheOverlay").classList.remove("hidden");
 
@@ -376,5 +376,5 @@ function gererAccordeonsVides(envie) {
 
 }
 
-    gererAccordeonsVides(envie);
+
 
