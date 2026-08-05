@@ -1,6 +1,8 @@
 import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour } from "./storage.js";
+import { optimiserOrdre, buildLienGoogleMapsMultiEtapes } from "./itineraire.js";
+import { updateEnvieOrdre } from "./storage.js";
 
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { renderEnvies } from "./ui.js";
@@ -256,6 +258,39 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) 
 
     container.appendChild(header);
     container.appendChild(content);
+    
+        const geolocalisesCount = items.filter(i => i.lieu?.latitude && i.lieu?.longitude).length;
+
+    if (geolocalisesCount >= 2) {
+
+        const optimiserButton = document.createElement("button");
+        optimiserButton.className = "secondaryButton";
+        optimiserButton.textContent = "🗺️ Optimiser le trajet du jour";
+        optimiserButton.style.width = "100%";
+        optimiserButton.style.marginTop = "10px";
+
+        optimiserButton.addEventListener("click", () => {
+
+            const ordonnes = optimiserOrdre(items);
+
+            ordonnes.forEach((item, index) => {
+                updateEnvieOrdre(item.id, Date.now() + index);
+            });
+
+            const lien = buildLienGoogleMapsMultiEtapes(ordonnes);
+
+            if (lien) {
+                window.open(lien, "_blank");
+            }
+
+            renderVoyageSection(voyageEnvie);
+
+        });
+
+        content.appendChild(optimiserButton);
+
+    }
+
 
 }
 
