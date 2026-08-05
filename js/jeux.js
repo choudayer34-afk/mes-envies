@@ -246,7 +246,7 @@ export function initJeux() {
 }
 
 
-function openJeux() {
+export function openJeux() {
     renderJeux();
     document.getElementById("jeuxModal").classList.remove("hidden");
 }
