@@ -236,7 +236,7 @@ main{
 #photoDescriptionModal,
  #photoViewerModal,
  #plusModal,
-
+#dupliquerPickerModal,
 #enviePickerModal{
     z-index:2100;
 }
