@@ -1,22 +1,38 @@
-import { updateEnviePhotos } from "./storage.js";
-import { getCurrentEnvieId } from "./envie.js";
+import { updateEnviePhotos, updatePhotoDescription, getEnvies, updateEnviePhotoCouverture } from "./storage.js";
+import { getCurrentEnvieId, openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
-import { updateEnviePhotoCouverture, getEnvies } from "./storage.js";
-import { openEnvie } from "./envie.js";
-import { updatePhotoDescription } from "./storage.js";
-
 
 const CLOUD_NAME = "wz4fkcbs";
 const UPLOAD_PRESET = "Envies";
 
 export function initPhotos() {
 
-    const input = document.getElementById("photoInput");
+    const ficheOverlay = document.getElementById("ficheOverlay");
 
-    if (!input)
+    if (!ficheOverlay || ficheOverlay.dataset.photosInit === "true")
         return;
 
-    input.addEventListener("change", async (event) => {
+    ficheOverlay.dataset.photosInit = "true";
+
+    ficheOverlay.addEventListener("click", (event) => {
+
+        const btn = event.target.closest("#addPhotoButton");
+
+        if (!btn)
+            return;
+
+        const input = document.getElementById("photoInput");
+
+        if (input) {
+            input.click();
+        }
+
+    });
+
+    ficheOverlay.addEventListener("change", async (event) => {
+
+        if (event.target.id !== "photoInput")
+            return;
 
         const files = Array.from(event.target.files || []);
 
@@ -59,12 +75,8 @@ export function initPhotos() {
 
         showToast(`✓ ${nouvellesPhotos.length} photo${nouvellesPhotos.length > 1 ? "s" : ""} ajoutée${nouvellesPhotos.length > 1 ? "s" : ""}`);
 
-        input.value = "";
+        event.target.value = "";
 
-    });
-
-    document.getElementById("addPhotoButton")?.addEventListener("click", () => {
-        input.click();
     });
 
 }
@@ -92,9 +104,7 @@ export async function uploadToCloudinary(file, customName = null) {
 
 }
 
-
-
-    export function renderPhotosGrid(envie) {
+export function renderPhotosGrid(envie) {
 
     const container = document.getElementById("photosGrid");
 
@@ -183,7 +193,6 @@ export function initPhotoDescription() {
 
 }
 
-
 export function initPhotoCouverture() {
 
     const ficheOverlay = document.getElementById("ficheOverlay");
@@ -242,7 +251,3 @@ export function initPhotoCouverture() {
     });
 
 }
-
-
-
-
