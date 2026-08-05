@@ -37,6 +37,7 @@ Règles de contenu impératives :
 - Le champ "illustration" de chaque section doit rester une chaîne vide "" — les images seront ajoutées séparément après génération.
 - Le champ "rapport" doit refléter exactement le nombre de fiches générées et la liste des categorieId utilisés.
 - Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut, valide, prêt à être parsé.
+- Utiliser exclusivement des guillemets droits standards (") pour tout le JSON, jamais de guillemets typographiques ou courbes.
 
 Sujet des fiches à générer : [DÉCRIS ICI LE SUJET SOUHAITÉ]`;
 
