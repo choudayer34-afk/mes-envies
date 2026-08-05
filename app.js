@@ -43,6 +43,7 @@ import { initSurvieEditor } from "./js/survie.js";
 import { initSurvieImport } from "./js/survie-import.js";
 import { initPhotoDescription } from "./js/photos.js";
 import { initPhotoViewer } from "./js/photos.js";
+import { initPlus } from "./js/plus.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -100,11 +101,11 @@ function init() {
     initPhotos();
     initJeux();
     initPhotoDescription();
-
+initPlus();
     initFicheTitre();
     initAgenda();
     initFicheDelete();
-initHomeMeteo();
+
     initEnviesSync(() => {
         renderEnvies();
     });
