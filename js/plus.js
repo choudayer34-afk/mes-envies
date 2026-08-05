@@ -15,7 +15,7 @@ export function initPlus() {
         initHomeMeteo();
     });
 
-    document.getElementById("plusBtnJeux").addEventListener("click", () => {
+        document.getElementById("plusBtnJeux").addEventListener("click", () => {
         document.getElementById("plusModal").classList.add("hidden");
         document.getElementById("btnJeux")?.click();
     });
@@ -24,5 +24,6 @@ export function initPlus() {
         document.getElementById("plusModal").classList.add("hidden");
         document.getElementById("btnSurvie")?.click();
     });
+
 
 }
