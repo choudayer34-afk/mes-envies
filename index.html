@@ -1069,10 +1069,12 @@ window.toggleDebug = function() {
 
     <div class="modal">
 
-        <div class="survieHeader">
-            <button id="survieBackButton" class="backButton hidden">← Retour</button>
-            <button id="closeSurvie" class="backButton" style="margin-left:auto;">✕ Fermer</button>
-        </div>
+       <div class="survieHeader">
+    <button id="survieBackButton" class="backButton hidden">← Retour</button>
+    <button id="btnSurvieImport" class="backButton">📥 Importer</button>
+    <button id="closeSurvie" class="backButton" style="margin-left:auto;">✕ Fermer</button>
+</div>
+
 
         <h2 id="survieModalTitle">🌲 Survie & autonomie</h2>
 
@@ -1112,6 +1114,50 @@ window.toggleDebug = function() {
             <button id="cancelFicheEditor" class="secondaryButton">Annuler</button>
             <button id="saveFicheEditor" class="primaryButton">Enregistrer</button>
         </div>
+
+    </div>
+
+</div>
+<div id="survieImportModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeSurvieImport" class="backButton">← Retour</button>
+
+        <h2>📥 Importer des fiches</h2>
+
+        <button id="getPromptButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            📄 Récupérer le prompt universel
+        </button>
+
+        <button id="showUploadButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            📤 Envoyer une image (pour illustration)
+        </button>
+
+        <div id="uploadForm" class="hidden" style="margin-bottom:16px;">
+
+            <label class="fieldTitle">Choisir l'image</label>
+            <input type="file" id="uploadFileInput" accept="image/*" style="width:100%;margin-bottom:10px;">
+
+            <button id="uploadConfirmButton" class="primaryButton" style="width:100%;">
+                Envoyer
+            </button>
+
+            <div id="uploadStatus" style="font-size:12px;color:var(--color-text-light);margin-top:8px;"></div>
+
+        </div>
+
+        <p style="font-size:13px;color:var(--color-text-light);margin-bottom:8px;">
+            Colle ici le JSON généré par le prompt universel, puis tape "Analyser".
+        </p>
+
+        <textarea id="importJsonInput" rows="10" placeholder='{"fiches": [...], "rapport": {...}}' style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:13px;font-family:monospace;box-sizing:border-box;"></textarea>
+
+        <button id="importAnalyserButton" class="primaryButton" style="width:100%;margin-top:10px;">
+            🔍 Analyser
+        </button>
+
+        <div id="importReportContent" style="margin-top:14px;"></div>
 
     </div>
 
