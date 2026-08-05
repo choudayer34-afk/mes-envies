@@ -191,74 +191,63 @@ window.toggleDebug = function() {
 
 <main>
 
-    <button id="btnEnvie" class="mainButton">
+    <div id="headerAccueilVide">
 
-        <span class="emoji">
-            💡
-        </span>
+        <button id="btnEnvie" class="mainButton">
+            <span class="emoji">💡</span>
+            <span>Une envie</span>
+        </button>
 
-        <span>
-            Une envie
-        </span>
+        <section class="card">
+            <h2>Bienvenue 👋</h2>
+            <p>EnVie est votre mémoire familiale. Capturez une idée en quelques secondes, puis enrichissez-la plus tard.</p>
+        </section>
 
-    </button>
+    </div>
 
-    <section class="card">
+    <div id="headerAccueilActif" class="hidden">
 
-        <h2>
-            Bienvenue 👋
-        </h2>
+        <button id="btnEnvieCompact" class="mainButton">
+            <span class="emoji">💡</span>
+            <span>Une envie</span>
+        </button>
 
-        <p>
-            EnVie est votre mémoire familiale.
-            Capturez une idée en quelques secondes,
-            puis enrichissez-la plus tard.
-        </p>
+        <div class="homeIconRow">
+            <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
+                📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
+            </button>
+            <button id="btnCarte" class="iconButtonRow" title="Voir la carte" aria-label="Voir la carte">
+                🗺️
+            </button>
+            <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
+                📆
+            </button>
+            <button id="btnCatalogue" class="iconButtonRow" title="Catalogue d'idées" aria-label="Catalogue d'idées">
+                📚
+            </button>
+            <button id="btnCreerVoyage" class="iconButtonRow" title="Créer un voyage" aria-label="Créer un voyage">
+                🧳
+            </button>
+            <button id="btnRegionFinder" class="iconButtonRow" title="Trouver une région" aria-label="Trouver une région">
+                🧭
+            </button>
+            <button id="btnPlus" class="iconButtonRow" title="Plus" aria-label="Plus">
+                🧰
+            </button>
+        </div>
 
-    </section>
+    </div>
 
-  <div class="homeIconRow">
-    <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
-        📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
-    </button>
-    <button id="btnCarte" class="iconButtonRow" title="Voir la carte" aria-label="Voir la carte">
-        🗺️
-    </button>
-    <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
-        📆
-    </button>
-  <button id="btnCatalogue" class="iconButtonRow" title="Catalogue d'idées" aria-label="Catalogue d'idées">
-    📚
-</button>
+    <section id="ajourdhuiSection" class="inboxSection hidden"></section>
 
-    <button id="btnPlus" class="iconButtonRow" title="Plus" aria-label="Plus">
-        🧰
-    </button>
+    <section id="continuerSection" class="inboxSection hidden"></section>
 
-<button id="btnRegionFinder" class="iconButtonRow" title="Trouver une région" aria-label="Trouver une région">
-    🧭
-</button>
-<button id="btnCreerVoyage" class="iconButtonRow" title="Créer un voyage" aria-label="Créer un voyage">
-    🧳
-</button>
+    <section id="avenirSection" class="inboxSection hidden"></section>
 
-
-</div>
-
-<button id="btnJeuxReel" hidden></button>
-<button id="btnSurvieReel" hidden></button>
-
-
-<section id="ajourdhuiSection" class="inboxSection hidden"></section>
-
-<section id="continuerSection" class="inboxSection hidden"></section>
-
-<section id="avenirSection" class="inboxSection hidden"></section>
-
-<section id="projetSection" class="inboxSection hidden"></section>
-
+    <section id="projetSection" class="inboxSection hidden"></section>
 
 </main>
+
 
 
 <div id="modalOverlay" class="modal-overlay hidden">
