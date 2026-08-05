@@ -895,3 +895,44 @@ export function updatePromptRegion(texte) {
 export function resetPromptRegion() {
     updatePromptRegion(DEFAULT_PROMPT_REGION);
 }
+
+export function creerEnvieDansVoyage(voyageId, data) {
+
+    const id = crypto.randomUUID();
+
+    setDoc(envieRef(id), {
+
+        titre: data.titre,
+        categorie: data.categorieId || "general",
+        favorite: false,
+        realise: false,
+        description: data.description || "",
+        photos: [],
+        checklist: [],
+        urls: [],
+        tags: [],
+
+        lieu: {
+            nom: data.lieu?.nom || "",
+            adresse: data.lieu?.adresse || "",
+            ville: "",
+            pays: "",
+            latitude: data.lieu?.latitude ?? null,
+            longitude: data.lieu?.longitude ?? null
+        },
+
+        date: null,
+        personnesIds: [],
+        jourGroupId: null,
+        ordre: Date.now(),
+        voyageId: voyageId,
+        archived: false,
+        statut: "inbox",
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+
+    }).catch(console.error);
+
+    return id;
+
+}
