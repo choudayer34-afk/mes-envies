@@ -240,6 +240,7 @@ main{
 #regionFinderModal,
  #voyageImportModal,
  #partageModal,
+#optimiserModal,
 #enviePickerModal{
     z-index:2100;
 }
