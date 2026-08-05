@@ -1699,3 +1699,24 @@ button {
     text-transform:uppercase;
     opacity:.9;
 }
+
+.ficheAjoutRubriquesRow{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:16px;
+}
+
+.ajoutRubriqueButton{
+    border:1px dashed var(--color-border);
+    background:none;
+    color:var(--color-text-light);
+    border-radius:14px;
+    padding:8px 14px;
+    font-size:13px;
+    font-weight:600;
+}
+
+.ajoutRubriqueButton:active{
+    background:#F5F8F9;
+}
