@@ -13,6 +13,12 @@ export function initCarte() {
     document.getElementById("closeCarte").addEventListener("click", closeMap);
 
 }
+let retourVersCatalogue = false;
+
+export function setRetourCarteVersCatalogue(value) {
+    retourVersCatalogue = value;
+}
+
 export function openMapSingleLieu(lieu) {
 
     if (!lieu?.latitude || !lieu?.longitude)
@@ -47,6 +53,8 @@ export function openMapSingleLieu(lieu) {
 
 export function openMap(voyageId = null, enviesPreFiltrees = null) {
 
+    retourVersCatalogue = !!enviesPreFiltrees;
+
     document.getElementById("mapModal").classList.remove("hidden");
 
     requestAnimationFrame(() => {
@@ -62,6 +70,25 @@ export function openMap(voyageId = null, enviesPreFiltrees = null) {
     });
 
 }
+
+function closeMap() {
+
+    document.getElementById("mapModal").classList.add("hidden");
+
+    if (retourVersCatalogue) {
+
+        retourVersCatalogue = false;
+
+        const catalogueModal = document.getElementById("catalogueModal");
+
+        if (catalogueModal) {
+            catalogueModal.classList.remove("hidden");
+        }
+
+    }
+
+}
+
 
 function closeMap() {
     document.getElementById("mapModal").classList.add("hidden");
