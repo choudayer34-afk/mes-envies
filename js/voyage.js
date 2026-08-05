@@ -6,7 +6,7 @@ import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
 import { initPhotoCouverture } from "./photos.js";
 import { renderCarnetVoyage } from "./carnet.js";
-import { computeContainerStatus } from "./progress.js";
+
 
 import { isLogementCategory } from "./envie.js";
 
