@@ -5,8 +5,7 @@ import { isLogementCategory } from "./envie.js";
 
 export function renderCarnetVoyage(envie, container) {
 
-  const enfants = getEnvies().filter(e => e.voyageId === envie.id && (e.realise || isLogementCategory(e.categorie)));
-
+    const enfants = getEnvies().filter(e => e.voyageId === envie.id && (e.realise || isLogementCategory(e.categorie)));
 
     if (enfants.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune activité réalisée n'a encore été enregistrée pour ce voyage.</div>`;
@@ -25,22 +24,27 @@ export function renderCarnetVoyage(envie, container) {
             return;
         }
 
-        groupes[key] ??= { label: e.date?.start ? formatDateLabel(e.date) : "🗂 Jour à planifier", items: [] };
+        groupes[key] ??= { label: e.date?.start ? formatDateLabel(e.date) : "🗂️ Jour à planifier", items: [] };
         groupes[key].items.push(e);
 
     });
 
     const groupesTries = Object.values(groupes).sort((a, b) => a.label.localeCompare(b.label));
 
+    Object.keys(groupes).forEach((key, index) => {
+        groupes[key].key = key;
+    });
+
     groupesTries.forEach(groupe => {
-        container.appendChild(createCarnetJourBlock(groupe.label, groupe.items));
+        container.appendChild(createCarnetJourBlock(groupe.label, groupe.items, envie, groupe.key));
     });
 
     if (sansDate.length > 0) {
-        container.appendChild(createCarnetJourBlock("Autres souvenirs", sansDate));
+        container.appendChild(createCarnetJourBlock("Autres souvenirs", sansDate, envie, "todo"));
     }
 
 }
+
 
 function createCarnetJourBlock(label, items) {
 
