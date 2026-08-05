@@ -231,6 +231,7 @@ main{
 #mapModal,
 #promptModal,
 #ficheEditorModal,
+#survieImportModal,
 #enviePickerModal{
     z-index:2100;
 }
