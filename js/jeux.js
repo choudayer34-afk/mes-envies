@@ -218,7 +218,7 @@ let filtreMateriel = "tous";
 
 export function initJeux() {
 
-        document.getElementById("btnJeuxReel").addEventListener("click", openJeux);
+        document.getElementById("btnJeux")?.addEventListener("click", openJeux);
 
     document.getElementById("closeJeux").addEventListener("click", closeJeux);
 
