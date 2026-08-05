@@ -65,7 +65,8 @@ export function initPhotos() {
 
 }
 
-async function uploadToCloudinary(file) {
+export async function uploadToCloudinary(file) {
+
 
     const formData = new FormData();
     formData.append("file", file);
