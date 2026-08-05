@@ -1,7 +1,7 @@
 
-import { initializeApp } from "../vendor/firebase/firebase-app.js";
-import { getAuth, setPersistence, browserLocalPersistence } from "../vendor/firebase/firebase-auth.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "../vendor/firebase/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyB42HSFoWRH_KfMrcWy3U7kdTjFPJbarJU",
