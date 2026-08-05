@@ -4,6 +4,7 @@ import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
+import { initPhotoCouverture } from "./photos.js";
 
 import { isLogementCategory } from "./envie.js";
 
@@ -41,6 +42,21 @@ function renderVoyageContenu(envie, container) {
     const enfants = getEnvies().filter(e => e.voyageId === envie.id);
 
     const { statut, pourcentage } = computeContainerStatus(envie);
+    const couvertureRow = document.createElement("div");
+    couvertureRow.className = "voyageCouvertureRow";
+
+    if (envie.photoCouverture) {
+        couvertureRow.style.backgroundImage = `url(${envie.photoCouverture})`;
+    }
+
+    couvertureRow.innerHTML = `
+        <button id="addPhotoCouvertureButton" class="secondaryButton" style="position:relative;z-index:2;">
+            📷 ${envie.photoCouverture ? "Changer la photo" : "Ajouter une photo de couverture"}
+        </button>
+        <input type="file" id="photoCouvertureInput" accept="image/*" hidden>
+    `;
+
+    container.appendChild(couvertureRow);
 
     const statutBox = document.createElement("div");
     statutBox.className = "containerStatutBox";
@@ -148,6 +164,7 @@ function renderVoyageContenu(envie, container) {
     });
 
     container.appendChild(addButton);
+    initPhotoCouverture();
 
 }
 
