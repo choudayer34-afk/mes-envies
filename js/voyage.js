@@ -259,7 +259,7 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) 
     container.appendChild(header);
     container.appendChild(content);
     
-        const geolocalisesCount = items.filter(i => i.lieu?.latitude && i.lieu?.longitude).length;
+            const geolocalisesCount = items.filter(i => i.lieu?.latitude && i.lieu?.longitude).length;
 
     if (geolocalisesCount >= 2) {
 
@@ -270,26 +270,13 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) 
         optimiserButton.style.marginTop = "10px";
 
         optimiserButton.addEventListener("click", () => {
-
-            const ordonnes = optimiserOrdre(items);
-
-            ordonnes.forEach((item, index) => {
-                updateEnvieOrdre(item.id, Date.now() + index);
-            });
-
-            const lien = buildLienGoogleMapsMultiEtapes(ordonnes);
-
-            if (lien) {
-                window.open(lien, "_blank");
-            }
-
-            renderVoyageSection(voyageEnvie);
-
+            openOptimiserModal(items, voyageEnvie);
         });
 
         content.appendChild(optimiserButton);
 
     }
+
 
 
 }
@@ -638,6 +625,85 @@ function ouvrirPartageModal(envie) {
     modal.classList.remove("hidden");
 
 }
+
+function openOptimiserModal(items, voyageEnvie) {
+
+    const geolocalises = items.filter(i => i.lieu?.latitude && i.lieu?.longitude);
+
+    const modal = document.getElementById("optimiserModal");
+    const content = document.getElementById("optimiserModalContent");
+
+    let departId = null;
+    let arriveeId = null;
+
+    function renderChoix() {
+
+        content.innerHTML = `
+            <label class="fieldTitle">Point de départ (facultatif)</label>
+            <select id="optimiserDepart" class="categorieSelect" style="margin-bottom:14px;">
+                <option value="">Aucun (calcul libre)</option>
+                ${geolocalises.map(i => `<option value="${i.id}" ${departId === i.id ? "selected" : ""}>${i.titre}</option>`).join("")}
+            </select>
+
+            <label class="fieldTitle">Point d'arrivée (facultatif)</label>
+            <select id="optimiserArrivee" class="categorieSelect" style="margin-bottom:16px;">
+                <option value="">Aucun (calcul libre)</option>
+                ${geolocalises.map(i => `<option value="${i.id}" ${arriveeId === i.id ? "selected" : ""}>${i.titre}</option>`).join("")}
+            </select>
+
+            <button id="lancerOptimisation" class="primaryButton" style="width:100%;">
+                🗺️ Calculer et ouvrir l'itinéraire
+            </button>
+        `;
+
+        content.querySelector("#optimiserDepart").addEventListener("change", (e) => {
+            departId = e.target.value || null;
+        });
+
+        content.querySelector("#optimiserArrivee").addEventListener("change", (e) => {
+            arriveeId = e.target.value || null;
+        });
+
+        content.querySelector("#lancerOptimisation").addEventListener("click", () => {
+
+            const depart = geolocalises.find(i => i.id === departId) || null;
+            const arrivee = geolocalises.find(i => i.id === arriveeId) || null;
+
+            const resultat = optimiserOrdre(items, depart, arrivee);
+
+            let ordreIndex = 0;
+
+            if (resultat.depart) {
+                updateEnvieOrdre(resultat.depart.id, Date.now() + ordreIndex++);
+            }
+
+            resultat.itineraire.forEach(item => {
+                updateEnvieOrdre(item.id, Date.now() + ordreIndex++);
+            });
+
+            if (resultat.arrivee) {
+                updateEnvieOrdre(resultat.arrivee.id, Date.now() + ordreIndex++);
+            }
+
+            const lien = buildLienGoogleMapsMultiEtapes(resultat);
+
+            if (lien) {
+                window.open(lien, "_blank");
+            }
+
+            modal.classList.add("hidden");
+            renderVoyageSection(voyageEnvie);
+
+        });
+
+    }
+
+    renderChoix();
+
+    modal.classList.remove("hidden");
+
+}
+
 
 export function initVoyage() {
 
