@@ -1,42 +1,16 @@
-import { creerEnvieDansVoyage, getEnvieCategories } from "./storage.js";
+
 import { searchLocation } from "./location.js";
 import { showToast } from "./toast.js";
+import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } from "./storage.js";
 
 let voyageIdActuel = null;
 
-const PROMPT_UNIVERSEL_IDEES = `Tu es un assistant de planification de voyage.
-
-Je pars pour : [DESTINATION]
-Dates : [DATES]
-Durée : [DURÉE]
-Personnes : [PERSONNES, ex: 2 adultes, 2 enfants de 5 et 8 ans]
-Ce que je recherche : [TYPE D'ACTIVITÉS SOUHAITÉES]
-
-Génère une liste d'idées concrètes au format JSON strict suivant, sans aucun texte avant ou après :
-
-{
-  "idees": [
-    {
-      "titre": "Nom court de l'activité/lieu",
-      "categorie": "un mot parmi : Idée, Événement, Maison, Jardin, Courses, Sortie, Logement (choisis le plus pertinent)",
-      "lieu": "Nom du lieu et ville, le plus précis possible pour être géolocalisé (ex: 'Cascade de Sillans, Sillans-la-Cascade')",
-      "description": "1 à 2 phrases décrivant l'intérêt de cette idée"
-    }
-  ]
-}
-
-Génère entre 15 et 25 idées variées (activités, randonnées, restaurants, visites, logement si pertinent).
-Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut valide.
-Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.`;
 
 export function initVoyageImport() {
 
     document.getElementById("closeVoyageImport").addEventListener("click", closeVoyageImport);
 
-    document.getElementById("getVoyageImportPromptButton").addEventListener("click", async () => {
-
-        const btn = document.getElementById("getVoyageImportPromptButton");
-        const original = btn.textContent;
+           const original = btn.textContent;
 
         try {
             await navigator.clipboard.writeText(PROMPT_UNIVERSEL_IDEES);
@@ -57,12 +31,45 @@ export function openVoyageImport(voyageId) {
 
     voyageIdActuel = voyageId;
 
+    const voyage = getEnvies().find(e => e.id === voyageId);
+
+    document.getElementById("voyageImportDestination").value = voyage?.lieu?.nom || "";
+    document.getElementById("voyageImportDates").value = "";
+    document.getElementById("voyageImportDuree").value = "";
+    document.getElementById("voyageImportPersonnes").value = "";
+    document.getElementById("voyageImportActivites").value = "";
+
     document.getElementById("voyageImportJsonInput").value = "";
     document.getElementById("voyageImportReport").innerHTML = "";
+
+    document.getElementById("voyageImportFormStep").classList.remove("hidden");
+    document.getElementById("voyageImportJsonStep").classList.add("hidden");
 
     document.getElementById("voyageImportModal").classList.remove("hidden");
 
 }
+
+function genererPromptImport() {
+
+    const destination = document.getElementById("voyageImportDestination").value.trim();
+    const dates = document.getElementById("voyageImportDates").value.trim();
+    const duree = document.getElementById("voyageImportDuree").value.trim();
+    const personnes = document.getElementById("voyageImportPersonnes").value.trim();
+    const activites = document.getElementById("voyageImportActivites").value.trim();
+
+    let texte = getPromptImport();
+
+    texte = texte
+        .replace(/{{destination}}/g, destination || "[à préciser]")
+        .replace(/{{dates}}/g, dates || "[à préciser]")
+        .replace(/{{duree}}/g, duree || "[à préciser]")
+        .replace(/{{personnes}}/g, personnes || "[à préciser]")
+        .replace(/{{activites}}/g, activites || "[à préciser]");
+
+    return texte;
+
+}
+
 
 function closeVoyageImport() {
     document.getElementById("voyageImportModal").classList.add("hidden");
