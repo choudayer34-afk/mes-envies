@@ -41,6 +41,7 @@ import { initJeux } from "./js/jeux.js";
 import { initFichesSurvieCustomSync } from "./js/storage.js";
 import { initSurvieEditor } from "./js/survie.js";
 import { initSurvieImport } from "./js/survie-import.js";
+import { initPhotoDescription } from "./js/photos.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -96,6 +97,7 @@ function init() {
                 initPromptModal();
     initPhotos();
     initJeux();
+    initPhotoDescription();
 
     initFicheTitre();
     initAgenda();
