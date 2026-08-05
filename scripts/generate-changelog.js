@@ -1,9 +1,9 @@
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
+const COMMIT_MESSAGE = process.env.COMMIT_MESSAGE || '';
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
+const FOYER_ID = process.env.FOYER_ID;
 
-const CHANGELOG_PATH = 'data/changelog.json';
-const fullMessage = process.env.COMMIT_MESSAGE || '';
-const lines = fullMessage.split('\n').map(l => l.trim());
-const title = lines[0] || 'Mise à jour';
+const lines = COMMIT_MESSAGE.split('\n').map(l => l.trim());
+const titre = lines[0] || 'Mise à jour';
 const items = lines.slice(1).filter(l => l.length > 0);
 
 if (items.length === 0) {
@@ -11,20 +11,30 @@ if (items.length === 0) {
     process.exit(0);
 }
 
-if (!existsSync('data')) {
-    mkdirSync('data');
-}
+const projectId = "mes-envies-21527";
+const url = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/foyers/${FOYER_ID}/changelog?key=${FIREBASE_API_KEY}`;
 
-const changelog = existsSync(CHANGELOG_PATH) ? JSON.parse(readFileSync(CHANGELOG_PATH, 'utf8')) : [];
-const lastVersion = changelog[0] ? parseFloat(changelog[0].version) : 0.9;
-const newVersion = (lastVersion + 0.1).toFixed(1);
+const now = new Date();
 
-changelog.unshift({
-    version: newVersion,
-    date: new Date().toISOString(),
-    title,
-    items
+const body = {
+    fields: {
+        titre: { stringValue: titre },
+        items: { arrayValue: { values: items.map(i => ({ stringValue: i })) } },
+        date: { integerValue: now.getTime().toString() },
+        version: { stringValue: now.toISOString() }
+    }
+};
+
+const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
 });
 
-writeFileSync(CHANGELOG_PATH, JSON.stringify(changelog, null, 2));
-console.log(`Changelog mis à jour : version ${newVersion}`);
+if (!response.ok) {
+    const errorText = await response.text();
+    console.error("Erreur Firestore:", errorText);
+    process.exit(1);
+}
+
+console.log(`Changelog publié avec la date réelle du déploiement : ${now.toISOString()}`);
