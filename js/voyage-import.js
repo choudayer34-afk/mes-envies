@@ -1,10 +1,8 @@
-
 import { searchLocation } from "./location.js";
 import { showToast } from "./toast.js";
 import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } from "./storage.js";
 
 let voyageIdActuel = null;
-
 
 export function initVoyageImport() {
 
@@ -29,19 +27,6 @@ export function initVoyageImport() {
     });
 
     document.getElementById("closeVoyageImport").addEventListener("click", closeVoyageImport);
-
-           const original = btn.textContent;
-
-        try {
-            await navigator.clipboard.writeText(PROMPT_UNIVERSEL_IDEES);
-            btn.textContent = "✓ Copié dans le presse-papiers";
-        } catch (err) {
-            btn.textContent = "❌ Erreur, réessaie";
-        }
-
-        setTimeout(() => { btn.textContent = original; }, 2500);
-
-    });
 
     document.getElementById("voyageImportAnalyserButton").addEventListener("click", analyserImportVoyage);
 
@@ -89,7 +74,6 @@ function genererPromptImport() {
     return texte;
 
 }
-
 
 function closeVoyageImport() {
     document.getElementById("voyageImportModal").classList.add("hidden");
