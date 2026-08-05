@@ -5,6 +5,21 @@ const params = new URLSearchParams(window.location.search);
 const foyerId = params.get("foyer");
 const envieId = params.get("id");
 
+const JOUR_COLORS = ["#6FAFC4", "#F5A623", "#E85D75", "#7ED6A5", "#9B7EDE", "#F2C94C", "#4F92A8"];
+
+let categoriesCache = [];
+
+async function chargerCategories() {
+
+    const snap = await getDocs(collection(db, "foyers", foyerId, "envieCategories"));
+    categoriesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+}
+
+function getCategorieById(id) {
+    return categoriesCache.find(c => c.id === id);
+}
+
 async function init() {
 
     const container = document.getElementById("partageContent");
@@ -15,6 +30,8 @@ async function init() {
     }
 
     try {
+
+        await chargerCategories();
 
         const snap = await getDoc(doc(db, "foyers", foyerId, "envies", envieId));
 
@@ -56,34 +73,53 @@ function formatDatePeriode(date) {
 
 }
 
+function getGroupKey(envie) {
+
+    if (envie.date?.start) {
+        return envie.date.type === "range"
+            ? `d_${envie.date.start}_${envie.date.end}`
+            : `d_${envie.date.start}`;
+    }
+
+    if (envie.jourGroupId)
+        return `g_${envie.jourGroupId}`;
+
+    return null;
+
+}
+
 function groupParDate(enfants) {
 
-    const avecDate = enfants.filter(e => e.date?.start);
-    const sansDate = enfants.filter(e => !e.date?.start);
+    const avecGroupe = enfants.filter(e => getGroupKey(e));
+    const sansDate = enfants.filter(e => !getGroupKey(e));
 
     const groupes = {};
 
-    avecDate.forEach(e => {
+    avecGroupe.forEach(e => {
 
-        const key = e.date.type === "range" ? `${e.date.start}_${e.date.end}` : e.date.start;
+        const key = getGroupKey(e);
 
-        groupes[key] ??= { label: formatDatePeriode(e.date), items: [] };
+        groupes[key] ??= {
+            key,
+            label: e.date?.start ? formatDatePeriode(e.date) : "🗂️ Jour à planifier",
+            items: []
+        };
+
         groupes[key].items.push(e);
 
     });
 
-    const groupesTries = Object.values(groupes).sort((a, b) =>
-        avecDate.find(e => formatDatePeriode(e.date) === a.label)?.date.start.localeCompare(
-            avecDate.find(e => formatDatePeriode(e.date) === b.label)?.date.start
-        )
-    );
+    const groupesTries = Object.values(groupes).sort((a, b) => {
+
+        const dateA = a.items[0]?.date?.start || "9999";
+        const dateB = b.items[0]?.date?.start || "9999";
+
+        return dateA.localeCompare(dateB);
+
+    });
 
     return { groupesTries, sansDate };
 
-}
-
-function isLogement(envie) {
-    return (envie.categorie || "").toLowerCase().includes("logement");
 }
 
 function renderVoyagePartage(voyage, enfants, container) {
@@ -106,9 +142,17 @@ function renderVoyagePartage(voyage, enfants, container) {
         mapDiv.id = "partageMapContainer";
         mapDiv.style.height = "280px";
         mapDiv.style.borderRadius = "16px";
-        mapDiv.style.marginBottom = "24px";
+        mapDiv.style.marginBottom = "12px";
 
         container.appendChild(mapDiv);
+
+        const legendDiv = document.createElement("div");
+        legendDiv.id = "partageMapLegend";
+        legendDiv.className = "mapLegend";
+        legendDiv.style.position = "static";
+        legendDiv.style.marginBottom = "24px";
+
+        container.appendChild(legendDiv);
 
         setTimeout(() => initPartageMap(voyage, lieuxGeolocalises), 100);
 
@@ -156,6 +200,8 @@ function createCartePartage(envie) {
     const card = document.createElement("div");
     card.className = "carnetActiviteCard";
 
+    const emoji = getCategorieById(envie.categorie)?.emoji || "💡";
+
     let photosHtml = "";
 
     if (envie.photos && envie.photos.length > 0) {
@@ -180,13 +226,28 @@ function createCartePartage(envie) {
     }
 
     card.innerHTML = `
-        <div class="carnetActiviteTitre">${isLogement(envie) ? "🏨" : "💡"} ${envie.titre}</div>
+        <div class="carnetActiviteTitre">${emoji} ${envie.titre}</div>
         ${envie.lieu?.nom ? `<p style="font-size:12px;color:var(--color-text-light);margin-bottom:6px;">📍 ${envie.lieu.nom}</p>` : ""}
         ${envie.description ? `<p class="carnetActiviteDescription">${envie.description}</p>` : ""}
         ${photosHtml}
     `;
 
     return card;
+
+}
+
+function getJourColor(envie, jourColorMap) {
+
+    const key = getGroupKey(envie);
+
+    if (!key)
+        return "#94A3B8";
+
+    if (!jourColorMap.has(key)) {
+        jourColorMap.set(key, JOUR_COLORS[jourColorMap.size % JOUR_COLORS.length]);
+    }
+
+    return jourColorMap.get(key);
 
 }
 
@@ -200,11 +261,12 @@ function initPartageMap(voyage, lieux) {
     }).addTo(map);
 
     const bounds = [];
+    const jourColorMap = new Map();
 
     if (voyage.lieu?.latitude) {
 
         const marker = L.marker([voyage.lieu.latitude, voyage.lieu.longitude], {
-            icon: createPin("#6FAFC4", "🧳")
+            icon: createPin("#4B5B66", "🧳")
         }).addTo(map);
 
         marker.bindPopup(`<strong>🧳 ${voyage.titre}</strong>`);
@@ -215,8 +277,8 @@ function initPartageMap(voyage, lieux) {
 
     lieux.forEach(envie => {
 
-        const emoji = isLogement(envie) ? "🏨" : "📍";
-        const couleur = isLogement(envie) ? "#F5A623" : "#6FAFC4";
+        const emoji = getCategorieById(envie.categorie)?.emoji || "💡";
+        const couleur = getJourColor(envie, jourColorMap);
 
         const marker = L.marker([envie.lieu.latitude, envie.lieu.longitude], {
             icon: createPin(couleur, emoji)
@@ -233,6 +295,50 @@ function initPartageMap(voyage, lieux) {
     } else {
         map.setView([46.6, 2.3], 5);
     }
+
+    renderLegendePartage(lieux, jourColorMap);
+
+}
+
+function renderLegendePartage(lieux, jourColorMap) {
+
+    const legend = document.getElementById("partageMapLegend");
+
+    if (!legend)
+        return;
+
+    legend.innerHTML = "";
+
+    if (jourColorMap.size === 0) {
+        legend.classList.add("hidden");
+        return;
+    }
+
+    legend.classList.remove("hidden");
+
+    const labelsParKey = new Map();
+
+    lieux.forEach(envie => {
+
+        const key = getGroupKey(envie);
+
+        if (!key || labelsParKey.has(key))
+            return;
+
+        const label = envie.date?.start ? formatDatePeriode(envie.date) : "Jour à planifier";
+        labelsParKey.set(key, label);
+
+    });
+
+    jourColorMap.forEach((color, key) => {
+
+        const item = document.createElement("div");
+        item.className = "mapLegendItem";
+        item.innerHTML = `<span class="mapLegendDot" style="background:${color}"></span> ${labelsParKey.get(key) || ""}`;
+
+        legend.appendChild(item);
+
+    });
 
 }
 
