@@ -6,6 +6,7 @@ import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
 import { initPhotoCouverture } from "./photos.js";
 import { renderCarnetVoyage } from "./carnet.js";
+import { openVoyageImport } from "./voyage-import.js";
 
 
 import { isLogementCategory } from "./envie.js";
@@ -142,17 +143,7 @@ function renderVoyageContenu(envie, container) {
         appendCollapsibleGroup(container, "Sans date", todo, envie);
     }
 
-    const promptButton = document.createElement("button");
-    promptButton.className = "secondaryButton";
-    promptButton.textContent = "🔎 Quoi faire autour (1h15)";
-    promptButton.style.marginTop = "14px";
-
-    promptButton.addEventListener("click", () => {
-        document.getElementById("promptModalContent").value = buildPromptVoyage(envie);
-        document.getElementById("promptModal").classList.remove("hidden");
-    });
-
-    container.appendChild(promptButton);
+    
 
     const mapButton = document.createElement("button");
     mapButton.className = "secondaryButton";
@@ -164,6 +155,17 @@ function renderVoyageContenu(envie, container) {
     });
 
     container.appendChild(mapButton);
+
+    const importButton = document.createElement("button");
+    importButton.className = "secondaryButton";
+    importButton.textContent = "📥 Importer des idées via IA";
+    importButton.style.marginTop = "14px";
+
+    importButton.addEventListener("click", () => {
+        openVoyageImport(envie.id);
+    });
+
+    container.appendChild(importButton);
 
     const addButton = document.createElement("button");
     addButton.className = "secondaryButton";
