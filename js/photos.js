@@ -3,6 +3,7 @@ import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { updateEnviePhotoCouverture, getEnvies } from "./storage.js";
 import { openEnvie } from "./envie.js";
+import { updateEnviePhotos, updatePhotoDescription } from "./storage.js";
 
 
 const CLOUD_NAME = "wz4fkcbs";
@@ -93,7 +94,7 @@ export async function uploadToCloudinary(file, customName = null) {
 
 
 
-export function renderPhotosGrid(envie) {
+    export function renderPhotosGrid(envie) {
 
     const container = document.getElementById("photosGrid");
 
@@ -112,7 +113,12 @@ export function renderPhotosGrid(envie) {
         item.innerHTML = `
             <img src="${thumbUrl}" loading="lazy">
             <button class="photoDeleteButton" title="Supprimer">✕</button>
+            ${photo.description ? `<div class="photoDescriptionBadge">📝</div>` : ""}
         `;
+
+        item.querySelector("img").addEventListener("click", () => {
+            openPhotoDescriptionEditor(envie.id, photo);
+        });
 
         item.querySelector(".photoDeleteButton").addEventListener("click", (event) => {
 
@@ -135,6 +141,48 @@ export function renderPhotosGrid(envie) {
     });
 
 }
+
+function openPhotoDescriptionEditor(envieId, photo) {
+
+    const modal = document.getElementById("photoDescriptionModal");
+    const img = document.getElementById("photoDescriptionPreview");
+    const input = document.getElementById("photoDescriptionInput");
+
+    img.src = photo.url;
+    input.value = photo.description || "";
+
+    modal.dataset.envieId = envieId;
+    modal.dataset.photoId = photo.id;
+
+    modal.classList.remove("hidden");
+
+}
+
+export function initPhotoDescription() {
+
+    document.getElementById("closePhotoDescription").addEventListener("click", () => {
+        document.getElementById("photoDescriptionModal").classList.add("hidden");
+    });
+
+    document.getElementById("savePhotoDescription").addEventListener("click", () => {
+
+        const modal = document.getElementById("photoDescriptionModal");
+        const input = document.getElementById("photoDescriptionInput");
+
+        updatePhotoDescription(modal.dataset.envieId, modal.dataset.photoId, input.value.trim());
+
+        modal.classList.add("hidden");
+
+        const envie = getEnvies().find(e => e.id === modal.dataset.envieId);
+
+        if (envie) {
+            renderPhotosGrid(envie);
+        }
+
+    });
+
+}
+
 
 export function initPhotoCouverture() {
 
