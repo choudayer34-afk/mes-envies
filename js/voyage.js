@@ -528,7 +528,7 @@ function ouvrirPartageModal(envie) {
             showToast("✓ Partage désactivé");
         });
 
-    } else {
+      } else {
 
         content.innerHTML = `
             <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Générer un lien public que tu peux envoyer à qui tu veux, sans qu'ils aient besoin de créer un compte.</p>
@@ -538,12 +538,31 @@ function ouvrirPartageModal(envie) {
         content.querySelector("#activerPartage").addEventListener("click", () => {
 
             activerPartagePublic(envie.id);
-            modal.classList.add("hidden");
-            showToast("✓ Voyage partagé, ouvre à nouveau pour récupérer le lien");
+
+            const lienUrl = `${window.location.origin}/partage.html?foyer=${getFoyerId()}&id=${envie.id}`;
+
+            content.innerHTML = `
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ce voyage est maintenant partagé publiquement.</p>
+                <textarea readonly rows="2" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--color-border);font-size:13px;margin-bottom:14px;box-sizing:border-box;">${lienUrl}</textarea>
+                <button id="copierLienPartage" class="secondaryButton" style="width:100%;margin-bottom:10px;">📋 Copier le lien</button>
+                <button id="desactiverPartage" class="secondaryButton" style="width:100%;background:#FEE2E2;color:#DC2626;">🔒 Désactiver le partage</button>
+            `;
+
+            content.querySelector("#copierLienPartage").addEventListener("click", async () => {
+                await navigator.clipboard.writeText(lienUrl);
+                showToast("✓ Lien copié");
+            });
+
+            content.querySelector("#desactiverPartage").addEventListener("click", () => {
+                desactiverPartagePublic(envie.id);
+                modal.classList.add("hidden");
+                showToast("✓ Partage désactivé");
+            });
 
         });
 
     }
+
 
     modal.classList.remove("hidden");
 
