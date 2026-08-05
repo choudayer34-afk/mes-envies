@@ -74,3 +74,32 @@ Trié par score d'intérêt décroissant : Type | Nom | Description courte | Dis
 Réponds de façon concise et directement exploitable, format carnet de route.`;
 
 }
+
+
+import { getPromptRegion } from "./storage.js";
+
+export function buildPromptRegion(criteres) {
+
+    const {
+        typeActivites, duree, budget, avecEnfants, agesEnfants,
+        distanceMax, zoneDepart
+    } = criteres;
+
+    const enfantsLabel = avecEnfants
+        ? `Oui, âges : ${agesEnfants || "non précisés"}`
+        : "Non";
+
+    let texte = getPromptRegion();
+
+    texte = texte
+        .replace(/{{zoneDepart}}/g, zoneDepart || "[à préciser]")
+        .replace(/{{duree}}/g, duree || "[à préciser]")
+        .replace(/{{budget}}/g, budget || "[non précisé]")
+        .replace(/{{typeActivites}}/g, typeActivites || "[à préciser]")
+        .replace(/{{enfants}}/g, enfantsLabel)
+        .replace(/{{distanceMax}}/g, distanceMax || "[non précisé]");
+
+    return texte;
+
+}
+
