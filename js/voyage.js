@@ -1,7 +1,7 @@
 import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour } from "./storage.js";
-import { optimiserOrdre, buildLienGoogleMapsMultiEtapes } from "./itineraire.js";
+
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape } from "./itineraire.js";
