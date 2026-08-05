@@ -1,6 +1,8 @@
 import { getEnvies, updateEnviePhotos } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
+import { updateEnviePhotoCouverture, getEnvies } from "./storage.js";
+import { getCurrentEnvieId } from "./envie.js";
 
 const CLOUD_NAME = "wz4fkcbs";
 const UPLOAD_PRESET = "Envies";
