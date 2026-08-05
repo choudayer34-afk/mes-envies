@@ -227,19 +227,15 @@ window.toggleDebug = function() {
     <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
         📆
     </button>
-<button id="btnJeux" class="iconButtonRow" title="Jeux pour enfants" aria-label="Jeux pour enfants">
-    🎲
-</button>
-<button id="btnSurvie" class="iconButtonRow" title="Survie & autonomie" aria-label="Survie & autonomie">
-    🌲
-</button>
+  
+    <button id="btnPlus" class="iconButtonRow" title="Plus" aria-label="Plus">
+        🧰
+    </button>
 
 
 
 </div>
 
-<div id="homeMeteoLieu" class="meteoLieuLabel"></div>
-<div id="homeMeteoWidget" class="meteoWidget"></div>
 
 
 <section id="ajourdhuiSection" class="inboxSection hidden"></section>
@@ -1068,6 +1064,29 @@ window.toggleDebug = function() {
     </div>
 
 </div>
+<div id="plusModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closePlus" class="backButton">← Retour</button>
+
+        <h2>🧰 Plus</h2>
+
+        <div id="plusMeteoLieu" class="meteoLieuLabel"></div>
+        <div id="plusMeteoWidget" class="meteoWidget"></div>
+
+        <button id="plusBtnJeux" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            🎲 Jeux avec les enfants
+        </button>
+
+        <button id="plusBtnSurvie" class="secondaryButton" style="width:100%;">
+            🌲 Survie & autonomie
+        </button>
+
+    </div>
+
+</div>
+
 <div id="jeuxModal" class="modal-overlay hidden">
 
     <div class="modal">
