@@ -6,29 +6,6 @@
  Sprint XI - Refactoring
 ==========================================================
 */
-navigator.serviceWorker.getRegistrations().then(regs => {
-    console.log("SW registrations: " + regs.length);
-    regs.forEach(r => console.log("SW scope: " + r.scope + " active=" + !!r.active));
-});
-
-caches.keys().then(keys => {
-    console.log("Cache keys: " + JSON.stringify(keys));
-    keys.forEach(key => {
-        caches.open(key).then(cache => {
-            cache.keys().then(reqs => {
-                console.log(`Cache "${key}" contient ${reqs.length} entrées`);
-            });
-        });
-    });
-});
-
-caches.open("envie-v5")
-    .then(cache => cache.keys())
-    .then(reqs => {
-        console.log("Nombre de clés: " + reqs.length);
-        reqs.forEach(req => console.log("Clé: " + req.url));
-    })
-    .catch(err => console.error("Erreur diagnostic cache: " + err.message));
 
 
 "use strict";
