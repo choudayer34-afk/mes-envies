@@ -43,20 +43,30 @@ self.addEventListener('install', (event) => {
         (async () => {
             const cache = await caches.open(CACHE_NAME);
 
-            await Promise.allSettled(
-                APP_SHELL.map(async (url) => {
-                    try {
-                        await cache.add(url);
-                    } catch (err) {
-                        console.warn('[SW] Cache ignoré :', url, err);
+            for (const url of APP_SHELL) {
+
+                try {
+
+                    const response = await fetch(url, { redirect: "manual" });
+
+                    if (response.type === "opaqueredirect" || response.status >= 300 && response.status < 400) {
+                        console.error("[SW] REDIRECTION détectée sur : " + url);
+                        continue;
                     }
-                })
-            );
+
+                    await cache.put(url, response);
+
+                } catch (err) {
+                    console.warn('[SW] Cache ignoré :', url, err);
+                }
+
+            }
 
             await self.skipWaiting();
         })()
     );
 });
+
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(
