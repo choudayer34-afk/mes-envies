@@ -988,3 +988,42 @@ export function updatePromptImport(texte) {
 export function resetPromptImport() {
     updatePromptImport(DEFAULT_PROMPT_IMPORT);
 }
+export function activerPartagePublic(envieId) {
+
+    const token = crypto.randomUUID();
+
+    patchEnvie(envieId, { partagePublic: true, partageToken: token });
+
+    return token;
+
+}
+
+export function desactiverPartagePublic(envieId) {
+    patchEnvie(envieId, { partagePublic: false });
+}
+
+export async function chargerEnviePublique(foyerId, envieId) {
+
+    const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+    const snap = await getDoc(doc(db, "foyers", foyerId, "envies", envieId));
+
+    if (!snap.exists() || !snap.data().partagePublic) {
+        return null;
+    }
+
+    return { id: snap.id, ...snap.data() };
+
+}
+
+export async function chargerEnfantsPublics(foyerId, voyageId) {
+
+    const { getDocs, query, collection: coll, where } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+
+    const q = query(coll(db, "foyers", foyerId, "envies"), where("voyageId", "==", voyageId));
+    const snap = await getDocs(q);
+
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+}
+
