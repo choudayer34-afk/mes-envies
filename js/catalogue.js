@@ -201,26 +201,11 @@ function renderCatalogue() {
 
     const envies = getEnviesFiltrees();
 
-       if (vueActuelle === "carte") {
+    if (vueActuelle === "carte") {
 
         container.innerHTML = `<div class="emptyState">Carte affichée dans une fenêtre séparée. Utilise "← Retour" pour revenir ici.</div>`;
 
         openMap(null, envies);
-
-        return;
-
-    }
-
-
-        const emptyMsg = document.createElement("div");
-        emptyMsg.className = "emptyState";
-        emptyMsg.textContent = "Carte affichée ci-dessous.";
-        container.appendChild(emptyMsg);
-
-        setTimeout(() => {
-            closeCatalogue();
-            openMap();
-        }, 300);
 
         return;
 
@@ -236,6 +221,7 @@ function renderCatalogue() {
     });
 
 }
+
 
 function createCatalogueRow(envie) {
 
