@@ -1002,7 +1002,7 @@ export function initSurvie() {
 
 }
 
-function openSurvie() {
+export function openSurvie() {
     vueActuelle = "categories";
     renderSurvie();
     document.getElementById("survieModal").classList.remove("hidden");
