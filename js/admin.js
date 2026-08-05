@@ -5,6 +5,7 @@ import {
 
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
+import { renderPromptRegionAdmin } from "./region.js";
 
 import { groupByCategorie } from "./checklist.js";
 import {
@@ -56,6 +57,11 @@ export function initAdmin() {
 
             document.getElementById("adminChecklistTemplates")
                 .classList.toggle("hidden", target !== "templates");
+            document.getElementById("adminPromptRegion")
+                .classList.toggle("hidden", target !== "promptRegion");
+
+            if (target === "promptRegion")
+                renderPromptRegionAdmin();
 
             document.getElementById("adminChecklistCategories")
                 .classList.toggle("hidden", target !== "categories");
