@@ -1027,3 +1027,14 @@ export async function chargerEnfantsPublics(foyerId, voyageId) {
 
 }
 
+export function updateNoteJour(voyageId, groupKey, note) {
+
+    const envie = enviesCache.find(e => e.id === voyageId);
+
+    const notesJour = { ...(envie?.notesJour || {}) };
+    notesJour[groupKey] = note;
+
+    patchEnvie(voyageId, { notesJour });
+
+}
+
