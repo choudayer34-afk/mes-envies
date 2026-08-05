@@ -4,6 +4,7 @@ import { getGroupKey } from "./grouping.js";
 
 let map = null;
 let markersLayer = null;
+let retourVersCatalogue = false;
 
 const JOUR_COLORS = ["#6FAFC4", "#F5A623", "#E85D75", "#7ED6A5", "#9B7EDE", "#F2C94C", "#4F92A8"];
 
@@ -13,7 +14,6 @@ export function initCarte() {
     document.getElementById("closeCarte").addEventListener("click", closeMap);
 
 }
-let retourVersCatalogue = false;
 
 export function setRetourCarteVersCatalogue(value) {
     retourVersCatalogue = value;
@@ -89,11 +89,6 @@ function closeMap() {
 
 }
 
-
-function closeMap() {
-    document.getElementById("mapModal").classList.add("hidden");
-}
-
 function initLeafletMap() {
 
     map = L.map("mapContainer");
@@ -159,7 +154,49 @@ function renderMarkers(voyageId, enviesPreFiltrees = null) {
 
     renderLegend(envies, voyageId);
 
-    // ... reste de la fonction inchangé
+    if (envies.length === 0) {
+        map.setView([46.6, 2.3], 5);
+        return;
+    }
+
+    const jourColorMap = new Map();
+    const bounds = [];
+
+    envies.forEach(envie => {
+
+        const color = voyageId ? getJourColor(envie, jourColorMap) : "#6FAFC4";
+        const emoji = getCategorieById(envie.categorie)?.emoji || "💡";
+
+        const marker = L.marker(
+            [envie.lieu.latitude, envie.lieu.longitude],
+            { icon: createColoredIcon(color, emoji) }
+        ).addTo(markersLayer);
+
+        marker.bindPopup(`
+            <strong>${emoji} ${envie.titre}</strong><br>
+            <button class="mapPopupButton" data-id="${envie.id}">Ouvrir</button>
+        `);
+
+        marker.on("popupopen", () => {
+
+            const button = document.querySelector(`.mapPopupButton[data-id="${envie.id}"]`);
+
+            if (button) {
+                button.addEventListener("click", () => {
+                    closeMap();
+                    openEnvie(envie.id, null);
+                });
+            }
+
+        });
+
+        bounds.push([envie.lieu.latitude, envie.lieu.longitude]);
+
+    });
+
+    map.fitBounds(bounds, { padding: [40, 40] });
+
+}
 
 function renderLegend(envies, voyageId) {
 
