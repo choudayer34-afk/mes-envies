@@ -218,11 +218,10 @@ let filtreMateriel = "tous";
 
 export function initJeux() {
 
-        document.getElementById("btnJeux")?.addEventListener("click", openJeux);
+    document.getElementById("btnJeux")?.addEventListener("click", openJeux);
+    document.getElementById("closeJeux")?.addEventListener("click", closeJeux);
 
-    document.getElementById("closeJeux").addEventListener("click", closeJeux);
-
-    document.getElementById("jeuxSearchInput").addEventListener("input", (event) => {
+    document.getElementById("jeuxSearchInput")?.addEventListener("input", (event) => {
         searchQuery = event.target.value.toLowerCase().trim();
         renderJeux();
     });
@@ -233,9 +232,7 @@ export function initJeux() {
 
             filtreMateriel = chip.dataset.filtre;
 
-            document.querySelectorAll(".jeuxFiltreChip")
-                .forEach(c => c.classList.remove("active"));
-
+            document.querySelectorAll(".jeuxFiltreChip").forEach(c => c.classList.remove("active"));
             chip.classList.add("active");
 
             renderJeux();
@@ -244,9 +241,10 @@ export function initJeux() {
 
     });
 
-    document.getElementById("jeuxRandomButton").addEventListener("click", tirerJeuAleatoire);
+    document.getElementById("jeuxRandomButton")?.addEventListener("click", tirerJeuAleatoire);
 
 }
+
 
 function openJeux() {
     renderJeux();
