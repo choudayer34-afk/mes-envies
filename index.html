@@ -227,7 +227,10 @@ window.toggleDebug = function() {
     <button id="btnAgenda" class="iconButtonRow" title="Voir l'agenda" aria-label="Voir l'agenda">
         📆
     </button>
-  
+  <button id="btnCatalogue" class="iconButtonRow" title="Catalogue d'idées" aria-label="Catalogue d'idées">
+    📚
+</button>
+
     <button id="btnPlus" class="iconButtonRow" title="Plus" aria-label="Plus">
         🧰
     </button>
@@ -1084,6 +1087,43 @@ window.toggleDebug = function() {
         <button id="plusBtnSurvie" class="secondaryButton" style="width:100%;">
             🌲 Survie & autonomie
         </button>
+
+    </div>
+
+</div>
+<div id="catalogueModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeCatalogue" class="backButton">← Retour</button>
+
+        <h2>📚 Catalogue d'idées</h2>
+
+        <input
+            id="catalogueSearchInput"
+            type="text"
+            placeholder="Rechercher par nom ou lieu..."
+            autocomplete="off"
+            style="width:100%;height:48px;padding:0 16px;border-radius:14px;border:1px solid var(--color-border);font-size:15px;box-sizing:border-box;margin-bottom:12px;">
+
+        <div id="catalogueCategorieFiltre" class="categorieSelector fiche" style="margin-bottom:12px;"></div>
+
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+
+            <select id="catalogueTriSelect" style="flex:1;height:44px;border-radius:14px;border:1px solid var(--color-border);padding:0 10px;font-size:14px;">
+                <option value="recent">Plus récent</option>
+                <option value="distance">Distance</option>
+                <option value="alphabetique">Alphabétique</option>
+            </select>
+
+            <div class="itemTypeToggle" style="flex:1;">
+                <button type="button" id="catalogueVueToggleListe" class="itemTypeChip active">📋 Liste</button>
+                <button type="button" id="catalogueVueToggleCarte" class="itemTypeChip">🗺️ Carte</button>
+            </div>
+
+        </div>
+
+        <div id="catalogueContent"></div>
 
     </div>
 
