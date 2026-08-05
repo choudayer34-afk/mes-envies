@@ -131,7 +131,8 @@ function renderCategorieSelector(envie) {
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "categorieChip" + (cat.id === envie.categorie ? " active" : "");
-        chip.textContent = `${cat.emoji} ${cat.label}`;
+                chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
+
 
         chip.addEventListener("click", () => {
             updateEnvieCategorie(envie.id, cat.id);
