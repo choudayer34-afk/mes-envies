@@ -58,19 +58,20 @@ export function initModal() {
 
 
 }
-export function renderCreationCategorieSelector() {
-
+export function renderCreationCategorieSelector(categorieIdPreselectionnee = null) {
 
     const container = document.getElementById("categorieSelector");
     const categories = getEnvieCategories();
 
     container.innerHTML = "";
 
-    categories.forEach((cat, index) => {
+    const idActif = categorieIdPreselectionnee || categories[0]?.id;
+
+    categories.forEach((cat) => {
 
         const chip = document.createElement("button");
         chip.type = "button";
-        chip.className = "categorieChip" + (index === 0 ? " active" : "");
+        chip.className = "categorieChip" + (cat.id === idActif ? " active" : "");
         chip.textContent = `${cat.emoji} ${cat.label}`;
         chip.dataset.categorieId = cat.id;
 
@@ -88,11 +89,10 @@ export function renderCreationCategorieSelector() {
 
     });
 
-    if (categories.length > 0) {
-        currentCategorie = categories[0].id;
-    }
+    currentCategorie = idActif;
 
 }
+
 
 export function openModal(title = "💡 Une envie", value = "", editId = null) {
 
