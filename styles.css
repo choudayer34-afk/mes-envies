@@ -1547,3 +1547,28 @@ button {
     margin-bottom:10px;
 }
 
+.voyageCouvertureRow{
+    position:relative;
+    min-height:100px;
+    background-size:cover;
+    background-position:center;
+    border-radius:16px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+}
+
+.envie-card-avec-photo{
+    background-size:cover;
+    background-position:center;
+    color:white;
+}
+
+.envie-card-avec-photo .envieTitle,
+.envie-card-avec-photo .envieCategory,
+.envie-card-avec-photo .containerStatutPct{
+    color:white;
+}
+
