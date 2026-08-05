@@ -2,6 +2,7 @@ import { updateEnviePhotos } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { updateEnviePhotoCouverture, getEnvies } from "./storage.js";
+import { openEnvie } from "./envie.js";
 
 
 const CLOUD_NAME = "wz4fkcbs";
@@ -137,12 +138,32 @@ export function renderPhotosGrid(envie) {
 
 export function initPhotoCouverture() {
 
-    const input = document.getElementById("photoCouvertureInput");
+    const ficheOverlay = document.getElementById("ficheOverlay");
 
-    if (!input)
+    if (!ficheOverlay || ficheOverlay.dataset.couvertureInit === "true")
         return;
 
-    input.addEventListener("change", async (event) => {
+    ficheOverlay.dataset.couvertureInit = "true";
+
+    ficheOverlay.addEventListener("click", (event) => {
+
+        const btn = event.target.closest("#addPhotoCouvertureButton");
+
+        if (!btn)
+            return;
+
+        const input = document.getElementById("photoCouvertureInput");
+
+        if (input) {
+            input.click();
+        }
+
+    });
+
+    ficheOverlay.addEventListener("change", async (event) => {
+
+        if (event.target.id !== "photoCouvertureInput")
+            return;
 
         const file = event.target.files[0];
 
@@ -159,26 +180,21 @@ export function initPhotoCouverture() {
 
             updateEnviePhotoCouverture(envieId, result.secure_url);
 
-            const preview = document.getElementById("photoCouverturePreview");
-
-            if (preview) {
-                preview.style.backgroundImage = `url(${result.secure_url})`;
-                preview.classList.remove("hidden");
-            }
-
             showToast("✓ Photo de couverture mise à jour");
+
+            openEnvie(envieId, null);
 
         } catch (err) {
             console.error("Erreur upload couverture: " + err.message);
+            showToast("❌ Échec de l'envoi");
         }
 
-        input.value = "";
+        event.target.value = "";
 
     });
 
-    document.getElementById("addPhotoCouvertureButton")?.addEventListener("click", () => {
-        input.click();
-    });
+}
+
 
 }
 
