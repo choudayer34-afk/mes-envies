@@ -119,10 +119,12 @@ export function initFicheTitre() {
 
 function renderCategorieSelector(envie) {
 
-    const container = document.getElementById("ficheCategorieSelector");
+ const container = document.getElementById("ficheCategorieSelector");
 
     if (!container)
         return;
+
+    container.className = "categorieSelectorWrapper";
 
     const categorieActuelle = getCategorieById(envie.categorie);
 
