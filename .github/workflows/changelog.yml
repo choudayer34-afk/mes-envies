@@ -4,19 +4,14 @@ on:
   push:
     branches: [main]
 
-permissions:
-  contents: write
-
 jobs:
   changelog:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Générer l'entrée de changelog
+      - name: Publier l'entrée de changelog dans Firestore
         run: node scripts/generate-changelog.js
         env:
           COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
-      - uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "Mise à jour automatique du changelog"
-          file_pattern: data/changelog.json
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FOYER_ID: ${{ secrets.ENVIE_FOYER_ID }}
