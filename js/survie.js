@@ -1237,8 +1237,8 @@ function renderSectionsEditor() {
 
     sectionsEnEdition.forEach((section, index) => {
 
-        const card = document.createElement("div");
-        card.className = "templateRow";
+                const card = document.createElement("div");
+        card.className = "sectionEditorCard";
 
         card.innerHTML = `
             <div class="templateRowActions" style="justify-content:space-between;width:100%;margin-bottom:8px;">
