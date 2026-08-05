@@ -3,7 +3,7 @@ import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { updateEnviePhotoCouverture, getEnvies } from "./storage.js";
 import { openEnvie } from "./envie.js";
-import { updateEnviePhotos, updatePhotoDescription } from "./storage.js";
+import { updatePhotoDescription } from "./storage.js";
 
 
 const CLOUD_NAME = "wz4fkcbs";
