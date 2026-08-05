@@ -72,16 +72,19 @@ function init() {
     updateTitle();
     initMainButton();
     initLocation();
+    console.log("ETAPE 2 - avant initSurvie");
         initSurvie();
     initSurvieImport();
     initPhotoViewer();
+    console.log("ETAPE 3 avant initSurvie");
     initCatalogue();
     initRegionFinder();
+    console.log("ETAPE 4 avant initSurvie");
     initPromptRegionAdmin();
     initPromptRegionSync(() => {});
     document.getElementById("btnCreerVoyage").addEventListener("click", openModalVoyage);
     initVoyageImport();
-
+console.log("ETAPE 5 avant initSurvie");
     initAdmin();
         initVoyage();
             initCarte();
@@ -93,7 +96,7 @@ initPlus();
     initFicheTitre();
     initAgenda();
     initFicheDelete();
-
+console.log("ETAPE 6 avant initSurvie");
     initEnviesSync(() => {
         renderEnvies();
     });
@@ -108,12 +111,13 @@ initPlus();
         }
     });
     initSurvieEditor();
-
+console.log("ETAPE 7 avant initSurvie");
     initFoyerDataSync(() => {});
 initModal();
+console.log("ETAPE 8 - avant initSurvie");
     renderEnvies();
 
-    
+    console.log("ETAPE 9 avant initSurvie");
     initDeleteModal();
     initDateModal();
     
