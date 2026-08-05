@@ -48,6 +48,7 @@ import { initCatalogue } from "./js/catalogue.js";
 import { initRegionFinder, initPromptRegionAdmin } from "./js/region.js";
 import { initPromptRegionSync } from "./js/storage.js";
 import { openModalVoyage } from "./js/modal.js";
+import { initVoyageImport } from "./js/voyage-import.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -102,6 +103,7 @@ function init() {
     initPromptRegionAdmin();
     initPromptRegionSync(() => {});
     document.getElementById("btnCreerVoyage").addEventListener("click", openModalVoyage);
+    initVoyageImport();
 
     initAdmin();
         initVoyage();
