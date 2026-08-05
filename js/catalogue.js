@@ -203,13 +203,14 @@ function renderCatalogue() {
 
     if (vueActuelle === "carte") {
 
-        container.innerHTML = `<div class="emptyState">Carte affichée dans une fenêtre séparée. Utilise "← Retour" pour revenir ici.</div>`;
+        document.getElementById("catalogueModal").classList.add("hidden");
 
         openMap(null, envies);
 
         return;
 
     }
+
 
     if (envies.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune idée trouvée.</div>`;
