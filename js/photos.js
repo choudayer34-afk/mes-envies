@@ -132,3 +132,51 @@ export function renderPhotosGrid(envie) {
     });
 
 }
+
+export function initPhotoCouverture() {
+
+    const input = document.getElementById("photoCouvertureInput");
+
+    if (!input)
+        return;
+
+    input.addEventListener("change", async (event) => {
+
+        const file = event.target.files[0];
+
+        if (!file)
+            return;
+
+        const envieId = getCurrentEnvieId();
+
+        showToast("📤 Envoi en cours...");
+
+        try {
+
+            const result = await uploadToCloudinary(file);
+
+            updateEnviePhotoCouverture(envieId, result.secure_url);
+
+            const preview = document.getElementById("photoCouverturePreview");
+
+            if (preview) {
+                preview.style.backgroundImage = `url(${result.secure_url})`;
+                preview.classList.remove("hidden");
+            }
+
+            showToast("✓ Photo de couverture mise à jour");
+
+        } catch (err) {
+            console.error("Erreur upload couverture: " + err.message);
+        }
+
+        input.value = "";
+
+    });
+
+    document.getElementById("addPhotoCouvertureButton")?.addEventListener("click", () => {
+        input.click();
+    });
+
+}
+
