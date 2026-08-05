@@ -1,26 +1,19 @@
 import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
-import { groupEnvieWith, reorderEnvieNear } from "./storage.js";
-import { computeContainerStatus, formatStatutLabel } from "./progress.js";
+import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour } from "./storage.js";
+
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
-import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
-import { initPhotoCouverture } from "./photos.js";
-import { renderCarnetVoyage } from "./carnet.js";
-import { openVoyageImport } from "./voyage-import.js";
-import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
-import { getFoyerId } from "./auth.js";
-import { updateNoteJour } from "./storage.js";
-
-
-import { isLogementCategory } from "./envie.js";
-
-
-import { buildPromptVoyage } from "./promptgen.js";
-
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
 import { getEnvies, updateEnvieVoyage, updateEnvieRealise } from "./storage.js";
 import { openMap } from "./carte.js";
+import { renderCarnetVoyage } from "./carnet.js";
+import { computeContainerStatus, formatStatutLabel } from "./progress.js";
+import { initPhotoCouverture } from "./photos.js";
+import { buildPromptVoyage } from "./promptgen.js";
+import { openVoyageImport } from "./voyage-import.js";
+import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
+import { getFoyerId } from "./auth.js";
 
 export function renderVoyageSection(envie) {
 
@@ -31,7 +24,7 @@ export function renderVoyageSection(envie) {
 
     container.innerHTML = "";
 
-        if (isContainer(envie.categorie)) {
+    if (isContainer(envie.categorie)) {
 
         const { statut } = computeContainerStatus(envie);
 
@@ -45,18 +38,10 @@ export function renderVoyageSection(envie) {
         renderRattachement(envie, container);
     }
 
-
 }
-
-
-
-
 
 function renderVoyageContenu(envie, container) {
 
-    const enfants = getEnvies().filter(e => e.voyageId === envie.id);
-
-    const { statut, pourcentage } = computeContainerStatus(envie);
     const couvertureRow = document.createElement("div");
     couvertureRow.className = "voyageCouvertureRow";
 
@@ -73,6 +58,10 @@ function renderVoyageContenu(envie, container) {
 
     container.appendChild(couvertureRow);
 
+    const enfants = getEnvies().filter(e => e.voyageId === envie.id);
+
+    const { statut, pourcentage } = computeContainerStatus(envie);
+
     const statutBox = document.createElement("div");
     statutBox.className = "containerStatutBox";
     statutBox.innerHTML = `
@@ -83,20 +72,6 @@ function renderVoyageContenu(envie, container) {
         <div class="containerStatutPct">${pourcentage}%</div>
     `;
     container.appendChild(statutBox);
-    const logements = enfants.filter(e => isLogementCategory(e.categorie));
-
-    if (logements.length > 0) {
-
-        const header = document.createElement("div");
-        header.className = "checklistCategorieHeader";
-        header.textContent = "🏨 Logements";
-        container.appendChild(header);
-
-        logements.forEach(logement => {
-            container.appendChild(createLogementRow(logement, envie));
-        });
-
-    }
 
     const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today);
@@ -129,16 +104,32 @@ function renderVoyageContenu(envie, container) {
 
     }
 
+    const logements = enfants.filter(e => isLogementCategoryLocal(e.categorie));
+
+    if (logements.length > 0) {
+
+        const header = document.createElement("div");
+        header.className = "checklistCategorieHeader";
+        header.textContent = "🏨 Logements";
+        container.appendChild(header);
+
+        logements.forEach(logement => {
+            container.appendChild(createLogementRow(logement, envie));
+        });
+
+    }
+
     if (enfants.length === 0) {
         container.innerHTML += `<div class="emptyState">Ce ${envie.categorie === "projet" ? "projet" : "voyage"} ne contient aucune envie pour l'instant.</div>`;
     }
 
-        const enfantsRestants = enfants.filter(e => e.date?.start !== today && !isLogementCategory(e.categorie));
+    const enfantsRestants = enfants.filter(e =>
+        e.date?.start !== today && !isLogementCategoryLocal(e.categorie)
+    );
 
     const { groups, todo } = groupAndSort(enfantsRestants);
 
-
-       groups.forEach(group => {
+    groups.forEach(group => {
         appendCollapsibleGroup(container, group.label, group.items, envie, group.key);
     });
 
@@ -146,29 +137,17 @@ function renderVoyageContenu(envie, container) {
         appendCollapsibleGroup(container, "Sans date", todo, envie, "todo");
     }
 
+    const promptButton = document.createElement("button");
+    promptButton.className = "secondaryButton";
+    promptButton.textContent = "🔎 Quoi faire autour (1h15)";
+    promptButton.style.marginTop = "14px";
 
-        const partageButton = document.createElement("button");
-    partageButton.className = "secondaryButton";
-    partageButton.textContent = envie.partagePublic ? "🔗 Gérer le partage" : "🔗 Partager ce voyage";
-    partageButton.style.marginTop = "14px";
-
-    partageButton.addEventListener("click", () => {
-        ouvrirPartageModal(envie);
+    promptButton.addEventListener("click", () => {
+        document.getElementById("promptModalContent").value = buildPromptVoyage(envie);
+        document.getElementById("promptModal").classList.remove("hidden");
     });
 
-    container.appendChild(partageButton);
-
-
-    const mapButton = document.createElement("button");
-    mapButton.className = "secondaryButton";
-    mapButton.textContent = "🗺️ Voir sur la carte";
-    mapButton.style.marginTop = "14px";
-
-    mapButton.addEventListener("click", () => {
-        openMap(envie.id);
-    });
-
-    container.appendChild(mapButton);
+    container.appendChild(promptButton);
 
     const importButton = document.createElement("button");
     importButton.className = "secondaryButton";
@@ -181,6 +160,28 @@ function renderVoyageContenu(envie, container) {
 
     container.appendChild(importButton);
 
+    const partageButton = document.createElement("button");
+    partageButton.className = "secondaryButton";
+    partageButton.textContent = envie.partagePublic ? "🔗 Gérer le partage" : "🔗 Partager ce voyage";
+    partageButton.style.marginTop = "14px";
+
+    partageButton.addEventListener("click", () => {
+        ouvrirPartageModal(envie);
+    });
+
+    container.appendChild(partageButton);
+
+    const mapButton = document.createElement("button");
+    mapButton.className = "secondaryButton";
+    mapButton.textContent = "🗺️ Voir sur la carte";
+    mapButton.style.marginTop = "14px";
+
+    mapButton.addEventListener("click", () => {
+        openMap(envie.id);
+    });
+
+    container.appendChild(mapButton);
+
     const addButton = document.createElement("button");
     addButton.className = "secondaryButton";
     addButton.textContent = "➕ Ajouter une envie existante";
@@ -191,7 +192,70 @@ function renderVoyageContenu(envie, container) {
     });
 
     container.appendChild(addButton);
+
     initPhotoCouverture();
+
+}
+
+function isLogementCategoryLocal(categorieId) {
+
+    const cat = getCategorieById(categorieId);
+    return cat?.label?.toLowerCase().includes("logement") || false;
+
+}
+
+function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) {
+
+    const done = items.filter(i => i.realise).length;
+    const total = items.length;
+
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "accordionHeader groupCollapseHeader";
+    header.innerHTML = `
+        <span>${label} <small class="groupProgress">(${done}/${total})</small></span>
+        <span class="accordionIcon">▸</span>
+    `;
+
+    const content = document.createElement("div");
+    content.className = "accordionContent hidden";
+
+    items.forEach(item => {
+        content.appendChild(createVoyageItemRow(item, voyageEnvie));
+    });
+
+    const noteWrapper = document.createElement("div");
+    noteWrapper.style.marginTop = "10px";
+
+    const noteLabel = document.createElement("label");
+    noteLabel.className = "fieldTitle";
+    noteLabel.textContent = "📝 Note du jour";
+
+    const noteTextarea = document.createElement("textarea");
+    noteTextarea.rows = 2;
+    noteTextarea.placeholder = "Un souvenir, une anecdote...";
+    noteTextarea.style = "width:100%;padding:10px;border-radius:12px;border:1px solid var(--color-border);font-size:14px;box-sizing:border-box;";
+    noteTextarea.value = voyageEnvie.notesJour?.[groupKey] || "";
+
+    noteTextarea.addEventListener("blur", () => {
+        updateNoteJour(voyageEnvie.id, groupKey, noteTextarea.value.trim());
+    });
+
+    noteWrapper.appendChild(noteLabel);
+    noteWrapper.appendChild(noteTextarea);
+    content.appendChild(noteWrapper);
+
+    header.addEventListener("click", () => {
+
+        content.classList.toggle("hidden");
+
+        const icon = header.querySelector(".accordionIcon");
+        icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
+
+    });
+
+    container.appendChild(header);
+    container.appendChild(content);
 
 }
 
@@ -249,11 +313,9 @@ function createVoyageItemRow(enfant, voyageEnvie) {
 
     });
 
-
-        row.querySelector(".editButton").addEventListener("click", () => {
+    row.querySelector(".editButton").addEventListener("click", () => {
         openEnvie(enfant.id, voyageEnvie.id);
     });
-
 
     row.querySelector(".deleteButton").addEventListener("click", () => {
         updateEnvieVoyage(enfant.id, null);
@@ -287,126 +349,6 @@ function createVoyageItemRow(enfant, voyageEnvie) {
 
 }
 
-
-
-function renderRattachement(envie, container) {
-
-      const voyages = getEnvies().filter(e => isContainer(e.categorie) && e.id !== envie.id);
-
-    const voyageActuel = voyages.find(v => v.id === envie.voyageId);
-
-    if (voyageActuel) {
-
-        container.innerHTML = `<div class="templateRowNom">🧳 ${voyageActuel.titre}</div>`;
-
-        const removeButton = document.createElement("button");
-        removeButton.className = "secondaryButton";
-        removeButton.textContent = "Retirer du voyage";
-        removeButton.style.marginTop = "10px";
-
-        removeButton.addEventListener("click", () => {
-            updateEnvieVoyage(envie.id, null);
-            openEnvie(envie.id, null);
-
-            renderEnvies();
-            showToast("✓ Retiré du voyage");
-        });
-
-        container.appendChild(removeButton);
-
-        return;
-
-    }
-
-    if (voyages.length === 0) {
-        container.innerHTML = `<div class="emptyState">Aucun voyage créé pour l'instant.</div>`;
-        return;
-    }
-
-    const select = document.createElement("select");
-    select.className = "categorieSelect";
-
-    select.innerHTML = `<option value="">Choisir un voyage...</option>` +
-        voyages.map(v => `<option value="${v.id}">${v.titre}</option>`).join("");
-
-    select.addEventListener("change", () => {
-
-        if (!select.value)
-            return;
-
-        updateEnvieVoyage(envie.id, select.value);
-        openEnvie(envie.id);
-        renderEnvies();
-        showToast("✓ Rattaché au voyage");
-
-    });
-
-    container.appendChild(select);
-
-}
-
-function openEnviePicker(voyageId) {
-
-    const container = document.getElementById("enviePickerList");
-
-       const candidats = getEnvies().filter(e =>
-        !e.voyageId && !isContainer(e.categorie) && e.id !== voyageId
-    );
-
-
-    container.innerHTML = "";
-
-    if (candidats.length === 0) {
-        container.innerHTML = `<div class="emptyState">Aucune envie disponible à ajouter.</div>`;
-    }
-
-    candidats.forEach(candidat => {
-
-        const row = document.createElement("div");
-        row.className = "templateRow";
-
-        row.innerHTML = `
-            <div class="templateRowNom">
-                              ${getCategorieById(candidat.categorie)?.emoji || "💡"} ${candidat.titre}
-            </div>
-            <div class="templateRowActions">
-                <button class="actionButton editButton">Ajouter</button>
-            </div>
-        `;
-
-        row.querySelector(".editButton").addEventListener("click", () => {
-
-            updateEnvieVoyage(candidat.id, voyageId);
-
-            document.getElementById("enviePickerModal").classList.add("hidden");
-
-            openEnvie(voyageId, null);
-            renderEnvies();
-
-            showToast("✓ Envie ajoutée au voyage");
-
-        });
-
-        container.appendChild(row);
-
-    });
-
-    document.getElementById("enviePickerModal").classList.remove("hidden");
-
-}
-
-export function initVoyage() {
-
-    document.getElementById("closeEnviePicker").addEventListener("click", () => {
-        document.getElementById("enviePickerModal").classList.add("hidden");
-    });
-    
-        document.getElementById("closePartage")?.addEventListener("click", () => {
-        document.getElementById("partageModal").classList.add("hidden");
-    });
-
-
-}
 function createLogementRow(logement, voyageEnvie) {
 
     const row = document.createElement("div");
@@ -469,37 +411,106 @@ function formatLogementPeriode(date) {
 
 }
 
-function appendCollapsibleGroup(container, label, items, voyageEnvie) {
+function renderRattachement(envie, container) {
 
-    const done = items.filter(i => i.realise).length;
-    const total = items.length;
+    const voyages = getEnvies().filter(e => isContainer(e.categorie) && e.id !== envie.id);
+    const voyageActuel = voyages.find(v => v.id === envie.voyageId);
 
-    const header = document.createElement("button");
-    header.type = "button";
-    header.className = "accordionHeader groupCollapseHeader";
-    header.innerHTML = `
-        <span>${label} <small class="groupProgress">(${done}/${total})</small></span>
-        <span class="accordionIcon">▸</span>
-    `;
+    if (voyageActuel) {
 
-    const content = document.createElement("div");
-    content.className = "accordionContent hidden";
+        container.innerHTML = `<div class="templateRowNom">🧳 ${voyageActuel.titre}</div>`;
 
-    items.forEach(item => {
-        content.appendChild(createVoyageItemRow(item, voyageEnvie));
+        const removeButton = document.createElement("button");
+        removeButton.className = "secondaryButton";
+        removeButton.textContent = "Retirer du voyage";
+        removeButton.style.marginTop = "10px";
+
+        removeButton.addEventListener("click", () => {
+            updateEnvieVoyage(envie.id, null);
+            openEnvie(envie.id);
+            renderEnvies();
+            showToast("✓ Retiré du voyage");
+        });
+
+        container.appendChild(removeButton);
+
+        return;
+
+    }
+
+    if (voyages.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun voyage créé pour l'instant.</div>`;
+        return;
+    }
+
+    const select = document.createElement("select");
+    select.className = "categorieSelect";
+
+    select.innerHTML = `<option value="">Choisir un voyage...</option>` +
+        voyages.map(v => `<option value="${v.id}">${v.titre}</option>`).join("");
+
+    select.addEventListener("change", () => {
+
+        if (!select.value)
+            return;
+
+        updateEnvieVoyage(envie.id, select.value);
+        openEnvie(envie.id);
+        renderEnvies();
+        showToast("✓ Rattaché au voyage");
+
     });
 
-    header.addEventListener("click", () => {
+    container.appendChild(select);
 
-        content.classList.toggle("hidden");
+}
 
-        const icon = header.querySelector(".accordionIcon");
-        icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
+function openEnviePicker(voyageId) {
+
+    const container = document.getElementById("enviePickerList");
+
+    const candidats = getEnvies().filter(e =>
+        !e.voyageId && !isContainer(e.categorie) && e.id !== voyageId
+    );
+
+    container.innerHTML = "";
+
+    if (candidats.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucune envie disponible à ajouter.</div>`;
+    }
+
+    candidats.forEach(candidat => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">
+                ${getCategorieById(candidat.categorie)?.emoji || "💡"} ${candidat.titre}
+            </div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton">Ajouter</button>
+            </div>
+        `;
+
+        row.querySelector(".editButton").addEventListener("click", () => {
+
+            updateEnvieVoyage(candidat.id, voyageId);
+
+            document.getElementById("enviePickerModal").classList.add("hidden");
+
+            openEnvie(voyageId);
+            renderEnvies();
+
+            showToast("✓ Envie ajoutée au voyage");
+
+        });
+
+        container.appendChild(row);
 
     });
 
-    container.appendChild(header);
-    container.appendChild(content);
+    document.getElementById("enviePickerModal").classList.remove("hidden");
 
 }
 
@@ -524,7 +535,7 @@ function ouvrirPartageModal(envie) {
             showToast("✓ Lien copié");
         });
 
-                content.querySelector("#desactiverPartage").addEventListener("click", () => {
+        content.querySelector("#desactiverPartage").addEventListener("click", () => {
 
             desactiverPartagePublic(envie.id);
 
@@ -542,8 +553,7 @@ function ouvrirPartageModal(envie) {
 
         });
 
-
-      } else {
+    } else {
 
         content.innerHTML = `
             <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Générer un lien public que tu peux envoyer à qui tu veux, sans qu'ils aient besoin de créer un compte.</p>
@@ -568,86 +578,40 @@ function ouvrirPartageModal(envie) {
                 showToast("✓ Lien copié");
             });
 
-                   content.querySelector("#desactiverPartage").addEventListener("click", () => {
+            content.querySelector("#desactiverPartage").addEventListener("click", () => {
 
-            desactiverPartagePublic(envie.id);
+                desactiverPartagePublic(envie.id);
 
-            content.innerHTML = `
-                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Générer un lien public que tu peux envoyer à qui tu veux, sans qu'ils aient besoin de créer un compte.</p>
-                <button id="activerPartage" class="primaryButton" style="width:100%;">🔗 Créer le lien de partage</button>
-            `;
+                content.innerHTML = `
+                    <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Générer un lien public que tu peux envoyer à qui tu veux, sans qu'ils aient besoin de créer un compte.</p>
+                    <button id="activerPartage2" class="primaryButton" style="width:100%;">🔗 Créer le lien de partage</button>
+                `;
 
-            content.querySelector("#activerPartage").addEventListener("click", () => {
-                activerPartagePublic(envie.id);
-                ouvrirPartageModal({ ...envie, partagePublic: true });
+                content.querySelector("#activerPartage2").addEventListener("click", () => {
+                    activerPartagePublic(envie.id);
+                    ouvrirPartageModal({ ...envie, partagePublic: true });
+                });
+
+                showToast("✓ Partage désactivé");
+
             });
-
-            showToast("✓ Partage désactivé");
-
-        });
-
 
         });
 
     }
 
-
     modal.classList.remove("hidden");
 
 }
 
-function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) {
+export function initVoyage() {
 
-    const done = items.filter(i => i.realise).length;
-    const total = items.length;
-
-    const header = document.createElement("button");
-    header.type = "button";
-    header.className = "accordionHeader groupCollapseHeader";
-    header.innerHTML = `
-        <span>${label} <small class="groupProgress">(${done}/${total})</small></span>
-        <span class="accordionIcon">▸</span>
-    `;
-
-    const content = document.createElement("div");
-    content.className = "accordionContent hidden";
-
-    items.forEach(item => {
-        content.appendChild(createVoyageItemRow(item, voyageEnvie));
+    document.getElementById("closeEnviePicker").addEventListener("click", () => {
+        document.getElementById("enviePickerModal").classList.add("hidden");
     });
 
-    const noteWrapper = document.createElement("div");
-    noteWrapper.style.marginTop = "10px";
-
-    const noteLabel = document.createElement("label");
-    noteLabel.className = "fieldTitle";
-    noteLabel.textContent = "📝 Note du jour";
-
-    const noteTextarea = document.createElement("textarea");
-    noteTextarea.rows = 2;
-    noteTextarea.placeholder = "Un souvenir, une anecdote...";
-    noteTextarea.style = "width:100%;padding:10px;border-radius:12px;border:1px solid var(--color-border);font-size:14px;box-sizing:border-box;";
-    noteTextarea.value = voyageEnvie.notesJour?.[groupKey] || "";
-
-    noteTextarea.addEventListener("blur", () => {
-        updateNoteJour(voyageEnvie.id, groupKey, noteTextarea.value.trim());
+    document.getElementById("closePartage")?.addEventListener("click", () => {
+        document.getElementById("partageModal").classList.add("hidden");
     });
-
-    noteWrapper.appendChild(noteLabel);
-    noteWrapper.appendChild(noteTextarea);
-    content.appendChild(noteWrapper);
-
-    header.addEventListener("click", () => {
-
-        content.classList.toggle("hidden");
-
-        const icon = header.querySelector(".accordionIcon");
-        icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
-
-    });
-
-    container.appendChild(header);
-    container.appendChild(content);
 
 }
-
