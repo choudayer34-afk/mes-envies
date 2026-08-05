@@ -100,3 +100,35 @@ function createCarnetActiviteCard(envie) {
     return card;
 
 }
+
+function createCarnetJourBlock(label, items, voyageEnvie, groupKey) {
+
+    const block = document.createElement("div");
+    block.className = "carnetJourBlock";
+
+    const header = document.createElement("div");
+    header.className = "checklistCategorieHeader";
+    header.textContent = label;
+    block.appendChild(header);
+
+    const note = voyageEnvie.notesJour?.[groupKey];
+
+    if (note) {
+
+        const noteEl = document.createElement("p");
+        noteEl.className = "carnetActiviteDescription";
+        noteEl.style.fontStyle = "italic";
+        noteEl.style.marginBottom = "12px";
+        noteEl.textContent = `📝 ${note}`;
+
+        block.appendChild(noteEl);
+
+    }
+
+    items.forEach(item => {
+        block.appendChild(createCarnetActiviteCard(item));
+    });
+
+    return block;
+
+}
