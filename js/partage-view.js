@@ -173,18 +173,33 @@ function renderVoyagePartage(voyage, enfants, container) {
 
     const { groupesTries, sansDate } = groupParDate(enfantsAvecPhotos);
 
-    groupesTries.forEach(groupe => {
+        groupesTries.forEach(groupe => {
 
         const header = document.createElement("div");
         header.className = "checklistCategorieHeader";
         header.textContent = groupe.label;
         container.appendChild(header);
 
+        const note = voyage.notesJour?.[groupe.key];
+
+        if (note) {
+
+            const noteEl = document.createElement("p");
+            noteEl.className = "carnetActiviteDescription";
+            noteEl.style.fontStyle = "italic";
+            noteEl.style.marginBottom = "12px";
+            noteEl.textContent = `📝 ${note}`;
+
+            container.appendChild(noteEl);
+
+        }
+
         groupe.items.forEach(envie => {
             container.appendChild(createCartePartage(envie));
         });
 
     });
+
 
     if (sansDate.length > 0) {
 
