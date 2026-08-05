@@ -110,10 +110,10 @@ initPlus();
     initSurvieEditor();
 
     initFoyerDataSync(() => {});
-
+initModal();
     renderEnvies();
 
-    initModal();
+    
     initDeleteModal();
     initDateModal();
     
