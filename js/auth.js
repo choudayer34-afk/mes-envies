@@ -19,6 +19,8 @@ export function getFoyerId() {
     return currentFoyerId;
 }
 
+console.log("Fichier auth.js chargé");
+
 export function initAuth(onReady) {
 
     onReadyCallback = onReady;
@@ -32,9 +34,14 @@ export function initAuth(onReady) {
 
     initFoyerScreen();
 
-           authReady.then(() => {
+       console.log("Avant authReady.then, authReady=" + authReady);
 
-        onAuthStateChanged(auth, async (user) => {
+authReady.then(() => {
+
+    console.log("authReady résolu, on enregistre onAuthStateChanged");
+
+    onAuthStateChanged(auth, async (user) => {
+
 
 
         console.log("Auth state:", user ? user.email : "déconnecté");
