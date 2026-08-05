@@ -46,23 +46,7 @@ export function renderCarnetVoyage(envie, container) {
 }
 
 
-function createCarnetJourBlock(label, items) {
 
-    const block = document.createElement("div");
-    block.className = "carnetJourBlock";
-
-    const header = document.createElement("div");
-    header.className = "checklistCategorieHeader";
-    header.textContent = label;
-    block.appendChild(header);
-
-    items.forEach(item => {
-        block.appendChild(createCarnetActiviteCard(item));
-    });
-
-    return block;
-
-}
 
 function createCarnetActiviteCard(envie) {
 
