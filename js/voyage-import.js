@@ -8,6 +8,26 @@ let voyageIdActuel = null;
 
 export function initVoyageImport() {
 
+    document.getElementById("generateVoyageImportPromptButton").addEventListener("click", async () => {
+
+        const texte = genererPromptImport();
+
+        try {
+            await navigator.clipboard.writeText(texte);
+        } catch {}
+
+        document.getElementById("voyageImportFormStep").classList.add("hidden");
+        document.getElementById("voyageImportJsonStep").classList.remove("hidden");
+
+        showToast("✓ Prompt copié, colle-le dans ton IA");
+
+    });
+
+    document.getElementById("backToFormStep").addEventListener("click", () => {
+        document.getElementById("voyageImportFormStep").classList.remove("hidden");
+        document.getElementById("voyageImportJsonStep").classList.add("hidden");
+    });
+
     document.getElementById("closeVoyageImport").addEventListener("click", closeVoyageImport);
 
            const original = btn.textContent;
