@@ -94,6 +94,7 @@ console.log("ETAPE 5 avant initSurvie");
     initPhotos();
     console.log("ETAPE b5 avant initSurvie");
     initJeux();
+    console.log("ETAPE b5 avant initSurvie");
     initPhotoDescription();
     console.log("ETAPE 5c avant initSurvie");
 initPlus();
