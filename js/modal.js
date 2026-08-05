@@ -60,7 +60,10 @@ export function initModal() {
 
 
 }
+
 export function renderCreationCategorieSelector(categorieIdPreselectionnee = null) {
+
+    console.log("renderCreationCategorieSelector appelée, categorieGridOuverte=" + categorieGridOuverte);
 
     const container = document.getElementById("categorieSelector");
     container.className = "categorieSelectorWrapper";
@@ -70,7 +73,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
     const idActif = categorieIdPreselectionnee || categories[0]?.id;
     const catActive = categories.find(c => c.id === idActif);
 
-        container.innerHTML = `
+    container.innerHTML = `
         <button type="button" id="creationCategorieToggle" class="dateButton">
             <span>${catActive ? `${catActive.emoji} ${catActive.label}` : "Choisir..."}</span>
             <span>▾</span>
@@ -78,10 +81,11 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
         <div id="creationCategorieGrid" class="categorieSelector" style="margin-top:10px;display:${categorieGridOuverte ? "grid" : "none"};"></div>
     `;
 
-
     const grid = document.getElementById("creationCategorieGrid");
     const toggle = document.getElementById("creationCategorieToggle");
- 
+
+    console.log("grid.style.display initial = " + grid.style.display);
+
     categories.forEach((cat) => {
 
         const chip = document.createElement("button");
@@ -90,7 +94,9 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
         chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
         chip.dataset.categorieId = cat.id;
 
-              chip.addEventListener("click", () => {
+        chip.addEventListener("click", () => {
+
+            console.log("CLIC sur chip " + cat.label);
 
             document.querySelectorAll("#creationCategorieGrid .categorieChip")
                 .forEach(c => c.classList.remove("active"));
@@ -103,15 +109,23 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
             categorieGridOuverte = false;
             grid.style.display = "none";
 
+            console.log("après clic, grid.style.display = " + grid.style.display);
+
         });
 
         grid.appendChild(chip);
 
     });
 
-        toggle.addEventListener("click", () => {
+    toggle.addEventListener("click", () => {
+
+        console.log("CLIC sur toggle, avant: categorieGridOuverte=" + categorieGridOuverte);
+
         categorieGridOuverte = !categorieGridOuverte;
         grid.style.display = categorieGridOuverte ? "grid" : "none";
+
+        console.log("après clic toggle, categorieGridOuverte=" + categorieGridOuverte + " display=" + grid.style.display);
+
     });
 
     currentCategorie = idActif;
