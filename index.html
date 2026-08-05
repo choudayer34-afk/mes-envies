@@ -20,23 +20,42 @@ function renderDebug() {
 
         const closeBtn = document.createElement("button");
         closeBtn.textContent = "✕ Fermer";
-        closeBtn.style = "position:sticky;top:0;float:right;background:#0f0;color:#111;border:none;padding:4px 10px;border-radius:6px;font-weight:bold;";
+        closeBtn.style = "position:sticky;top:0;float:right;background:#0f0;color:#111;border:none;padding:4px 10px;border-radius:6px;font-weight:bold;margin-left:8px;";
         closeBtn.onclick = () => box.remove();
+
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "📋 Copier les logs";
+        copyBtn.style = "position:sticky;top:0;float:right;background:#0f0;color:#111;border:none;padding:4px 10px;border-radius:6px;font-weight:bold;";
+        copyBtn.onclick = async () => {
+
+            try {
+                await navigator.clipboard.writeText(window.debugLogs.join("\n\n"));
+                copyBtn.textContent = "✓ Copié";
+            } catch (err) {
+                copyBtn.textContent = "❌ Échec";
+            }
+
+            setTimeout(() => { copyBtn.textContent = "📋 Copier les logs"; }, 2000);
+
+        };
 
         document.body.appendChild(box);
         box.appendChild(closeBtn);
+        box.appendChild(copyBtn);
     }
 
     let content = box.querySelector("#debugContent");
     if (!content) {
         content = document.createElement("div");
         content.id = "debugContent";
+        content.style = "clear:both;";
         box.appendChild(content);
     }
 
     content.textContent = window.debugLogs.join("\n\n");
 
 }
+
 
 const originalLog = console.log;
 console.log = function(...args) {
