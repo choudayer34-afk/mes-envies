@@ -75,36 +75,14 @@ function renderVoyageContenu(envie, container) {
     `;
     container.appendChild(statutBox);
 
-    const today = new Date().toISOString().slice(0, 10);
+        const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today);
 
     if (ajourdhuiItems.length > 0) {
-
-        const ajourdhuiHeader = document.createElement("button");
-        ajourdhuiHeader.type = "button";
-        ajourdhuiHeader.className = "accordionHeader";
-        ajourdhuiHeader.innerHTML = `<span>🔆 Aujourd'hui</span><span class="accordionIcon">▾</span>`;
-
-        const ajourdhuiContent = document.createElement("div");
-        ajourdhuiContent.className = "accordionContent";
-
-        ajourdhuiItems.forEach(item => {
-            ajourdhuiContent.appendChild(createVoyageItemRow(item, envie));
-        });
-
-        ajourdhuiHeader.addEventListener("click", () => {
-
-            ajourdhuiContent.classList.toggle("hidden");
-
-            const icon = ajourdhuiHeader.querySelector(".accordionIcon");
-            icon.textContent = ajourdhuiContent.classList.contains("hidden") ? "▸" : "▾";
-
-        });
-
-        container.appendChild(ajourdhuiHeader);
-        container.appendChild(ajourdhuiContent);
-
+        appendCollapsibleGroup(container, "🔆 Aujourd'hui", ajourdhuiItems, envie, `d_${today}`, true);
     }
+
+    
 
     const logements = enfants.filter(e => isLogementCategoryLocal(e.categorie));
 
@@ -206,7 +184,7 @@ function isLogementCategoryLocal(categorieId) {
 
 }
 
-function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) {
+function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey, ouvertParDefaut = false) {
 
     const done = items.filter(i => i.realise).length;
     const total = items.length;
@@ -216,11 +194,11 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) 
     header.className = "accordionHeader groupCollapseHeader";
     header.innerHTML = `
         <span>${label} <small class="groupProgress">(${done}/${total})</small></span>
-        <span class="accordionIcon">▸</span>
+        <span class="accordionIcon">${ouvertParDefaut ? "▾" : "▸"}</span>
     `;
 
     const content = document.createElement("div");
-    content.className = "accordionContent hidden";
+    content.className = "accordionContent" + (ouvertParDefaut ? "" : " hidden");
 
     items.forEach(item => {
         content.appendChild(createVoyageItemRow(item, voyageEnvie));
