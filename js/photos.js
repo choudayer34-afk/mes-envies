@@ -196,5 +196,5 @@ export function initPhotoCouverture() {
 }
 
 
-}
+
 
