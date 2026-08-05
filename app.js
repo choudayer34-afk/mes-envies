@@ -87,12 +87,16 @@ function init() {
 console.log("ETAPE 5 avant initSurvie");
     initAdmin();
         initVoyage();
+        console.log("ETAPE 5a avant initSurvie");
             initCarte();
                 initPromptModal();
+                console.log("ETAPE b5 avant initSurvie");
     initPhotos();
     initJeux();
     initPhotoDescription();
+    console.log("ETAPE 5c avant initSurvie");
 initPlus();
+console.log("ETAPE 5d avant initSurvie");
     initFicheTitre();
     initAgenda();
     initFicheDelete();
