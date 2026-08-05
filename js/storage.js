@@ -840,3 +840,58 @@ export function dupliquerEnvieVersVoyage(envieId, voyageId) {
     return nouvelId;
 
 }
+
+const DEFAULT_PROMPT_REGION = `Tu es un expert en tourisme et en organisation de voyages en France (et pays limitrophes si pertinent).
+
+Je cherche une région ou destination pour un voyage, sans idée précise encore du lieu.
+
+📍 Point de départ : {{zoneDepart}}
+📅 Durée envisagée : {{duree}}
+💰 Budget global approximatif : {{budget}}
+🎯 Type d'activités recherchées : {{typeActivites}}
+👨‍👩‍👧 Enfants présents : {{enfants}}
+🚗 Distance/temps de trajet maximum accepté depuis le point de départ : {{distanceMax}}
+
+Propose-moi 3 à 5 régions ou destinations différentes qui correspondent à ces critères, avec pour chacune :
+
+- Le nom de la région/destination
+- Pourquoi elle correspond bien à ma demande (2-3 phrases)
+- Le temps de trajet approximatif depuis mon point de départ
+- 3 à 4 exemples concrets d'activités qui y sont possibles
+- Une estimation de budget pour ce type de séjour dans cette zone
+
+Termine par un tableau récapitulatif comparatif des options proposées, trié par pertinence.
+
+Réponds de façon concise et directement exploitable, sans blabla inutile.`;
+
+let promptRegionCache = DEFAULT_PROMPT_REGION;
+
+export function getPromptRegion() {
+    return promptRegionCache;
+}
+
+export function initPromptRegionSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(doc(db, "foyers", foyerId, "settings", "promptRegion"), (snap) => {
+
+        if (snap.exists()) {
+            promptRegionCache = snap.data().texte;
+        } else {
+            promptRegionCache = DEFAULT_PROMPT_REGION;
+        }
+
+        onChange();
+
+    });
+
+}
+
+export function updatePromptRegion(texte) {
+    setDoc(doc(db, "foyers", getFoyerId(), "settings", "promptRegion"), { texte }).catch(console.error);
+}
+
+export function resetPromptRegion() {
+    updatePromptRegion(DEFAULT_PROMPT_REGION);
+}
