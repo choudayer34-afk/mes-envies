@@ -63,36 +63,54 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
     const container = document.getElementById("categorieSelector");
     const categories = getEnvieCategories();
 
-    container.innerHTML = "";
-
     const idActif = categorieIdPreselectionnee || categories[0]?.id;
+    const catActive = categories.find(c => c.id === idActif);
+
+    container.innerHTML = `
+        <button type="button" id="creationCategorieToggle" class="dateButton">
+            <span>${catActive ? `${catActive.emoji} ${catActive.label}` : "Choisir..."}</span>
+            <span>▾</span>
+        </button>
+        <div id="creationCategorieGrid" class="categorieSelector" style="margin-top:10px;"></div>
+    `;
+
+    const grid = document.getElementById("creationCategorieGrid");
+    const toggle = document.getElementById("creationCategorieToggle");
 
     categories.forEach((cat) => {
 
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "categorieChip" + (cat.id === idActif ? " active" : "");
-             chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
-
+        chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
         chip.dataset.categorieId = cat.id;
 
         chip.addEventListener("click", () => {
 
-            document.querySelectorAll("#categorieSelector .categorieChip")
+            document.querySelectorAll("#creationCategorieGrid .categorieChip")
                 .forEach(c => c.classList.remove("active"));
 
             chip.classList.add("active");
             currentCategorie = cat.id;
 
+            toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}`;
+
+            grid.classList.add("hidden");
+
         });
 
-        container.appendChild(chip);
+        grid.appendChild(chip);
 
+    });
+
+    toggle.addEventListener("click", () => {
+        grid.classList.toggle("hidden");
     });
 
     currentCategorie = idActif;
 
 }
+
 
 
 export function openModal(title = "💡 Une envie", value = "", editId = null) {
