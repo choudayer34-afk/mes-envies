@@ -1672,3 +1672,32 @@ button {
 #creationCategorieGrid{
     display:grid !important;
 }
+
+.envie-card{
+    position:relative;
+}
+
+.decompteBadge{
+    position:absolute;
+    top:16px;
+    right:16px;
+    background:var(--color-primary);
+    color:white;
+    border-radius:12px;
+    padding:8px 10px;
+    text-align:center;
+    line-height:1.1;
+    box-shadow:var(--shadow-small);
+}
+
+.decompteBadge .decompteNombre{
+    font-size:18px;
+    font-weight:800;
+    display:block;
+}
+
+.decompteBadge .decompteLabel{
+    font-size:9px;
+    text-transform:uppercase;
+    opacity:.9;
+}
