@@ -749,3 +749,41 @@ export function setChecklistItems(envieId, checklist) {
 export function updateEnviePhotos(id, photos) {
     patchEnvie(id, { photos });
 }
+
+let fichesSurvieCustomCache = [];
+
+export function getFichesSurvieCustom() {
+    return fichesSurvieCustomCache;
+}
+
+export function initFichesSurvieCustomSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(collection(db, "foyers", foyerId, "fichesSurvieCustom"), (snap) => {
+        fichesSurvieCustomCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+    });
+
+}
+
+export function createFicheSurvieCustom(fiche) {
+
+    const id = crypto.randomUUID();
+
+    setDoc(doc(db, "foyers", getFoyerId(), "fichesSurvieCustom", id), fiche)
+        .catch(console.error);
+
+    return { id, ...fiche };
+
+}
+
+export function updateFicheSurvieCustom(id, fiche) {
+    updateDoc(doc(db, "foyers", getFoyerId(), "fichesSurvieCustom", id), fiche)
+        .catch(console.error);
+}
+
+export function deleteFicheSurvieCustom(id) {
+    deleteDoc(doc(db, "foyers", getFoyerId(), "fichesSurvieCustom", id)).catch(console.error);
+}
+
