@@ -17,12 +17,12 @@ export function initPlus() {
 
     document.getElementById("plusBtnJeux").addEventListener("click", () => {
         document.getElementById("plusModal").classList.add("hidden");
-        document.getElementById("btnJeuxReel")?.click();
+        document.getElementById("btnJeux")?.click();
     });
 
     document.getElementById("plusBtnSurvie").addEventListener("click", () => {
         document.getElementById("plusModal").classList.add("hidden");
-        document.getElementById("btnSurvieReel")?.click();
+        document.getElementById("btnSurvie")?.click();
     });
 
 }
