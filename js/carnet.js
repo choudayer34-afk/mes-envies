@@ -4,7 +4,8 @@ import { getGroupKey, formatDateLabel } from "./grouping.js";
 
 export function renderCarnetVoyage(envie, container) {
 
-    const enfants = getEnvies().filter(e => e.voyageId === envie.id && e.realise);
+  const enfants = getEnvies().filter(e => e.voyageId === envie.id && (e.realise || isLogementCategory(e.categorie)));
+
 
     if (enfants.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune activité réalisée n'a encore été enregistrée pour ce voyage.</div>`;
