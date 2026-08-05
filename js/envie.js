@@ -133,7 +133,8 @@ function renderCategorieSelector(envie) {
             <span>${categorieActuelle ? `${categorieActuelle.emoji} ${categorieActuelle.label}` : "Choisir..."}</span>
             <span>▾</span>
         </button>
-        <div id="categorieSelectorGrid" class="categorieSelector hidden" style="margin-top:10px;"></div>
+                <div id="categorieSelectorGrid" class="categorieSelector" style="margin-top:10px;display:none;"></div>
+
     `;
 
     const grid = document.getElementById("categorieSelectorGrid");
@@ -158,9 +159,11 @@ function renderCategorieSelector(envie) {
 
     });
 
-    toggle.addEventListener("click", () => {
-        grid.classList.toggle("hidden");
+            toggle.addEventListener("click", () => {
+        grid.style.display = grid.style.display === "none" ? "grid" : "none";
     });
+
+
 
 }
 
