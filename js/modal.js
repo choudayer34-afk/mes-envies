@@ -70,17 +70,18 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
     const idActif = categorieIdPreselectionnee || categories[0]?.id;
     const catActive = categories.find(c => c.id === idActif);
 
-    container.innerHTML = `
+        container.innerHTML = `
         <button type="button" id="creationCategorieToggle" class="dateButton">
             <span>${catActive ? `${catActive.emoji} ${catActive.label}` : "Choisir..."}</span>
             <span>▾</span>
         </button>
-        <div id="creationCategorieGrid" class="categorieSelector${categorieGridOuverte ? "" : " hidden"}" style="margin-top:10px;"></div>
+        <div id="creationCategorieGrid" class="categorieSelector" style="margin-top:10px;display:${categorieGridOuverte ? "grid" : "none"};"></div>
     `;
+
 
     const grid = document.getElementById("creationCategorieGrid");
     const toggle = document.getElementById("creationCategorieToggle");
-
+ 
     categories.forEach((cat) => {
 
         const chip = document.createElement("button");
@@ -89,7 +90,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
         chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
         chip.dataset.categorieId = cat.id;
 
-        chip.addEventListener("click", () => {
+              chip.addEventListener("click", () => {
 
             document.querySelectorAll("#creationCategorieGrid .categorieChip")
                 .forEach(c => c.classList.remove("active"));
@@ -100,7 +101,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
             toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}`;
 
             categorieGridOuverte = false;
-            grid.classList.add("hidden");
+            grid.style.display = "none";
 
         });
 
@@ -108,9 +109,9 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
 
     });
 
-    toggle.addEventListener("click", () => {
+        toggle.addEventListener("click", () => {
         categorieGridOuverte = !categorieGridOuverte;
-        grid.classList.toggle("hidden");
+        grid.style.display = categorieGridOuverte ? "grid" : "none";
     });
 
     currentCategorie = idActif;
