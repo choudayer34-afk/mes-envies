@@ -722,7 +722,7 @@ function openOptimiserModal(items, voyageEnvie) {
 
             });
 
-
+});
 
     }
 
