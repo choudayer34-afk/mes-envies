@@ -104,6 +104,7 @@ export async function uploadToCloudinary(file, customName = null) {
 
 }
 
+
 export function renderPhotosGrid(envie) {
 
     const container = document.getElementById("photosGrid");
@@ -127,7 +128,7 @@ export function renderPhotosGrid(envie) {
         `;
 
         item.querySelector("img").addEventListener("click", () => {
-            openPhotoDescriptionEditor(envie.id, photo);
+            openPhotoViewer(envie.id, photo);
         });
 
         item.querySelector(".photoDeleteButton").addEventListener("click", (event) => {
@@ -151,6 +152,81 @@ export function renderPhotosGrid(envie) {
     });
 
 }
+
+function openPhotoViewer(envieId, photo) {
+
+    const modal = document.getElementById("photoViewerModal");
+    const img = document.getElementById("photoViewerImage");
+    const legende = document.getElementById("photoViewerLegende");
+
+    img.src = photo.url;
+    legende.textContent = photo.description || "";
+    legende.classList.toggle("hidden", !photo.description);
+
+    modal.dataset.envieId = envieId;
+    modal.dataset.photoId = photo.id;
+    modal.dataset.photoUrl = photo.url;
+
+    modal.classList.remove("hidden");
+
+}
+
+export function initPhotoViewer() {
+
+    document.getElementById("closePhotoViewer").addEventListener("click", () => {
+        document.getElementById("photoViewerModal").classList.add("hidden");
+    });
+
+    document.getElementById("sharePhotoButton").addEventListener("click", async () => {
+
+        const modal = document.getElementById("photoViewerModal");
+        const url = modal.dataset.photoUrl;
+
+        try {
+
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const file = new File([blob], "photo.jpg", { type: blob.type });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+
+                await navigator.share({ files: [file] });
+
+            } else if (navigator.share) {
+
+                await navigator.share({ url });
+
+            } else {
+
+                await navigator.clipboard.writeText(url);
+                showToast("✓ Lien copié (partage non disponible sur ce navigateur)");
+
+            }
+
+        } catch (err) {
+
+            if (err.name !== "AbortError") {
+                console.error("Erreur partage: " + err.message);
+            }
+
+        }
+
+    });
+
+    document.getElementById("editPhotoDescriptionButton").addEventListener("click", () => {
+
+        const modal = document.getElementById("photoViewerModal");
+
+        modal.classList.add("hidden");
+
+        const photo = { id: modal.dataset.photoId, url: modal.dataset.photoUrl, description: document.getElementById("photoViewerLegende").textContent };
+
+        openPhotoDescriptionEditor(modal.dataset.envieId, photo);
+
+    });
+
+}
+
 
 function openPhotoDescriptionEditor(envieId, photo) {
 
