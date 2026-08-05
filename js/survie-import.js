@@ -67,9 +67,10 @@ export function initSurvieImport() {
         document.getElementById("uploadForm").classList.toggle("hidden");
     });
 
-    document.getElementById("uploadConfirmButton").addEventListener("click", async () => {
+        document.getElementById("uploadConfirmButton").addEventListener("click", async () => {
 
         const fileInput = document.getElementById("uploadFileInput");
+        const nameInput = document.getElementById("uploadFilenameInput");
         const statusEl = document.getElementById("uploadStatus");
         const file = fileInput.files[0];
 
@@ -82,7 +83,8 @@ export function initSurvieImport() {
 
         try {
 
-            const result = await uploadToCloudinary(file);
+            const customName = nameInput.value.trim() || null;
+            const result = await uploadToCloudinary(file, customName);
 
             statusEl.innerHTML = `✓ Envoyée. URL à coller dans le champ "illustration" :<br><code style="word-break:break-all;font-size:11px;">${result.secure_url}</code>`;
 
@@ -93,6 +95,7 @@ export function initSurvieImport() {
         }
 
     });
+
 
     document.getElementById("importAnalyserButton").addEventListener("click", analyserImport);
 
