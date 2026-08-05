@@ -714,5 +714,10 @@ export function initVoyage() {
     document.getElementById("closePartage")?.addEventListener("click", () => {
         document.getElementById("partageModal").classList.add("hidden");
     });
+    
+        document.getElementById("closeOptimiser")?.addEventListener("click", () => {
+        document.getElementById("optimiserModal").classList.add("hidden");
+    });
+
 
 }
