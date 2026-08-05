@@ -112,7 +112,7 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
 
         content = document.createElement("div");
         content.id = containerId;
-        content.className = "homeSectionContent";
+        content.className = "homeSectionContent hidden";
 
         section.innerHTML = "";
         section.appendChild(header);
@@ -129,7 +129,9 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
 
     }
 
-    header.innerHTML = `<span>${label} (${items.length})</span><span class="accordionIcon">▾</span>`;
+    const icon = content.classList.contains("hidden") ? "▸" : "▾";
+
+    header.innerHTML = `<span>${label} (${items.length})</span><span class="accordionIcon">${icon}</span>`;
 
     content.innerHTML = "";
 
@@ -138,6 +140,7 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
     });
 
 }
+
 
 
 function createCompactRow(envie) {
