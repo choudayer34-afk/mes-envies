@@ -124,26 +124,44 @@ function renderCategorieSelector(envie) {
     if (!container)
         return;
 
-    container.innerHTML = "";
+    const categorieActuelle = getCategorieById(envie.categorie);
+
+    container.innerHTML = `
+        <button type="button" id="categorieSelectorToggle" class="dateButton">
+            <span>${categorieActuelle ? `${categorieActuelle.emoji} ${categorieActuelle.label}` : "Choisir..."}</span>
+            <span>▾</span>
+        </button>
+        <div id="categorieSelectorGrid" class="categorieSelector hidden" style="margin-top:10px;"></div>
+    `;
+
+    const grid = document.getElementById("categorieSelectorGrid");
+    const toggle = document.getElementById("categorieSelectorToggle");
 
     getEnvieCategories().forEach(cat => {
 
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "categorieChip" + (cat.id === envie.categorie ? " active" : "");
-                chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
-
+        chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
 
         chip.addEventListener("click", () => {
+
             updateEnvieCategorie(envie.id, cat.id);
+
             renderCategorieSelector({ ...envie, categorie: cat.id });
+
         });
 
-        container.appendChild(chip);
+        grid.appendChild(chip);
 
     });
 
+    toggle.addEventListener("click", () => {
+        grid.classList.toggle("hidden");
+    });
+
 }
+
 
 
 export function closeFiche() {
