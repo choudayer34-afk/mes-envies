@@ -160,16 +160,24 @@ initPlus();
 
 function initMainButton() {
 
-    const button = document.getElementById("btnEnvie");
+    const boutons = [
+        document.getElementById("btnEnvie"),
+        document.getElementById("btnEnvieCompact")
+    ];
 
-    if (!button) {
-        console.error("Bouton principal introuvable.");
-        return;
-    }
+    boutons.forEach(button => {
 
-    button.addEventListener("click", () => openModal());
+        if (!button) {
+            console.error("Bouton principal introuvable.");
+            return;
+        }
+
+        button.addEventListener("click", () => openModal());
+
+    });
 
 }
+
 
 function registerServiceWorker() {
 
