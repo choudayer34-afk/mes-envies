@@ -4,6 +4,7 @@ import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate,
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes } from "./itineraire.js";
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
+import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape } from "./itineraire.js";
 
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { renderEnvies } from "./ui.js";
@@ -17,6 +18,8 @@ import { buildPromptVoyage } from "./promptgen.js";
 import { openVoyageImport } from "./voyage-import.js";
 import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
 import { getFoyerId } from "./auth.js";
+
+let resultatCalcule = null;
 
 export function renderVoyageSection(envie) {
 
@@ -668,7 +671,7 @@ function openOptimiserModal(items, voyageEnvie) {
         setupAdresseManuelle("departManuelInput", "departManuelSuggestions", (place) => { departManuel = place; });
         setupAdresseManuelle("arriveeManuelleInput", "arriveeManuelleSuggestions", (place) => { arriveeManuelle = place; });
 
-        content.querySelector("#lancerOptimisation").addEventListener("click", () => {
+            content.querySelector("#lancerOptimisation").addEventListener("click", () => {
 
             const depart = departId === "manuel"
                 ? (departManuel ? { id: "depart-manuel", titre: departManuel.nom, lieu: departManuel } : null)
@@ -686,16 +689,42 @@ function openOptimiserModal(items, voyageEnvie) {
                 updateEnvieOrdre(item.id, Date.now() + ordreIndex++);
             });
 
-            const lien = buildLienGoogleMapsMultiEtapes(resultat);
+            resultatCalcule = resultat;
 
-            if (lien) {
-                window.open(lien, "_blank");
-            }
+            content.innerHTML = `
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Itinéraire calculé et ordre mis à jour. Ouvrir avec :</p>
+                <button id="ouvrirGoogleMaps" class="primaryButton" style="width:100%;margin-bottom:10px;">🗺️ Google Maps (itinéraire complet)</button>
+                <button id="ouvrirWaze" class="secondaryButton" style="width:100%;">🚗 Waze (première étape)</button>
+            `;
 
-            modal.classList.add("hidden");
-            renderVoyageSection(voyageEnvie);
+            content.querySelector("#ouvrirGoogleMaps").addEventListener("click", () => {
+
+                const lien = buildLienGoogleMapsMultiEtapes(resultatCalcule);
+
+                if (lien) {
+                    window.location.href = lien;
+                }
+
+                modal.classList.add("hidden");
+                renderVoyageSection(voyageEnvie);
+
+            });
+
+            content.querySelector("#ouvrirWaze").addEventListener("click", () => {
+
+                const lien = buildLienWazePremiereEtape(resultatCalcule);
+
+                if (lien) {
+                    window.location.href = lien;
+                }
+
+                modal.classList.add("hidden");
+                renderVoyageSection(voyageEnvie);
+
+            });
 
         });
+
 
     }
 
