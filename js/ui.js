@@ -223,12 +223,19 @@ function createEnvieCard(envie) {
 
         let decompteHtml = "";
 
-        if (statut === "planifie" && envie.date?.start) {
+               if (statut === "planifie" && envie.date?.start) {
 
             const jours = Math.ceil((new Date(envie.date.start) - new Date()) / (1000 * 60 * 60 * 24));
-            decompteHtml = `<div class="containerStatutPct">📅 Dans ${jours} jour${jours > 1 ? "s" : ""}</div>`;
+
+            decompteHtml = `
+                <div class="decompteBadge">
+                    <span class="decompteNombre">${jours}</span>
+                    <span class="decompteLabel">jour${jours > 1 ? "s" : ""}</span>
+                </div>
+            `;
 
         } else {
+
 
             decompteHtml = `
                 <div class="progressBarTrack" style="margin-top:8px;">
