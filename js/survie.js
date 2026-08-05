@@ -1128,21 +1128,47 @@ function renderSurvie() {
 
         titleEl.textContent = `${fiche.emoji} ${fiche.titre}`;
 
-        if (ficheActuelleEstCustom) {
+              if (ficheActuelleEstCustom) {
+
+            const actionsRow = document.createElement("div");
+            actionsRow.style.display = "flex";
+            actionsRow.style.gap = "10px";
+            actionsRow.style.marginBottom = "14px";
 
             const editButton = document.createElement("button");
             editButton.className = "secondaryButton";
-            editButton.textContent = "✏️ Modifier cette fiche";
-            editButton.style.width = "100%";
-            editButton.style.marginBottom = "14px";
+            editButton.textContent = "✏️ Modifier";
+            editButton.style.flex = "1";
 
             editButton.addEventListener("click", () => {
                 openFicheEditor(fiche);
             });
 
-            container.appendChild(editButton);
+            const deleteButton = document.createElement("button");
+            deleteButton.className = "secondaryButton";
+            deleteButton.textContent = "🗑️ Supprimer";
+            deleteButton.style.flex = "1";
+            deleteButton.style.background = "#FEE2E2";
+            deleteButton.style.color = "#DC2626";
+
+            deleteButton.addEventListener("click", () => {
+
+                if (!window.confirm(`Supprimer "${fiche.titre}" ?`))
+                    return;
+
+                deleteFicheSurvieCustom(fiche.id);
+
+                vueActuelle = "fiches";
+                renderSurvie();
+
+            });
+
+            actionsRow.appendChild(editButton);
+            actionsRow.appendChild(deleteButton);
+            container.appendChild(actionsRow);
 
         }
+
 
         if (fiche.resume && fiche.resume.length > 0) {
 
