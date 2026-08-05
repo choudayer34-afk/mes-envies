@@ -789,4 +789,18 @@ export function deleteFicheSurvieCustom(id) {
 export function updateEnviePhotoCouverture(id, url) {
     patchEnvie(id, { photoCouverture: url });
 }
+export function updatePhotoDescription(envieId, photoId, description) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const photos = (envie.photos || []).map(p =>
+        p.id === photoId ? { ...p, description } : p
+    );
+
+    patchEnvie(envieId, { photos });
+
+}
 
