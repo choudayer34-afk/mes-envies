@@ -96,7 +96,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    if (request.mode === 'navigate') {
+        if (request.mode === 'navigate') {
 
         event.respondWith(
             (async () => {
@@ -105,8 +105,10 @@ self.addEventListener('fetch', (event) => {
 
                     const response = await fetch(request);
 
-                    const cache = await caches.open(CACHE_NAME);
-                    cache.put('./index.html', response.clone()).catch(() => {});
+                    if (!response.redirected) {
+                        const cache = await caches.open(CACHE_NAME);
+                        cache.put('./index.html', response.clone()).catch(() => {});
+                    }
 
                     return response;
 
@@ -122,6 +124,9 @@ self.addEventListener('fetch', (event) => {
         );
 
         return;
+
+    
+
 
     }
 
