@@ -1,6 +1,7 @@
 import { getEnvies } from "./storage.js";
 import { getCategorieById } from "./envie.js";
 import { getGroupKey, formatDateLabel } from "./grouping.js";
+import { isLogementCategory } from "./envie.js";
 
 export function renderCarnetVoyage(envie, container) {
 
