@@ -4,7 +4,8 @@ import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate,
 
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
-import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape } from "./itineraire.js";
+
+import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp } from "./itineraire.js";
 
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { renderEnvies } from "./ui.js";
@@ -697,12 +698,23 @@ function openOptimiserModal(items, voyageEnvie) {
                 <button id="ouvrirWaze" class="secondaryButton" style="width:100%;">🚗 Waze (première étape)</button>
             `;
 
-            content.querySelector("#ouvrirGoogleMaps").addEventListener("click", () => {
+                        content.querySelector("#ouvrirGoogleMaps").addEventListener("click", () => {
 
-                const lien = buildLienGoogleMapsMultiEtapes(resultatCalcule);
+                const lienApp = buildLienGoogleMapsApp(resultatCalcule);
+                const lienWeb = buildLienGoogleMapsMultiEtapes(resultatCalcule);
 
-                if (lien) {
-                    window.location.href = lien;
+                if (lienApp) {
+
+                    window.location.href = lienApp;
+
+                    setTimeout(() => {
+                        if (lienWeb) window.location.href = lienWeb;
+                    }, 1500);
+
+                } else if (lienWeb) {
+
+                    window.location.href = lienWeb;
+
                 }
 
                 modal.classList.add("hidden");
@@ -710,20 +722,6 @@ function openOptimiserModal(items, voyageEnvie) {
 
             });
 
-            content.querySelector("#ouvrirWaze").addEventListener("click", () => {
-
-                const lien = buildLienWazePremiereEtape(resultatCalcule);
-
-                if (lien) {
-                    window.location.href = lien;
-                }
-
-                modal.classList.add("hidden");
-                renderVoyageSection(voyageEnvie);
-
-            });
-
-        });
 
 
     }
