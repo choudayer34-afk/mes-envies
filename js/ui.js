@@ -92,14 +92,14 @@ function renderHomeSections() {
     });
 
     renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
-    renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard);
+    renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
     renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
     renderCollapsibleSection("projetSection", "projetContainer", "🛠️ En projet", enProjetItems, createEnvieCard);
 
 }
 
 
-function renderCollapsibleSection(sectionId, containerId, label, items, rowFactory) {
+function renderCollapsibleSection(sectionId, containerId, label, items, rowFactory, ouvertParDefaut = false) {
 
     const section = document.getElementById(sectionId);
 
@@ -124,7 +124,7 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
 
         content = document.createElement("div");
         content.id = containerId;
-        content.className = "homeSectionContent hidden";
+        content.className = "homeSectionContent" + (ouvertParDefaut ? "" : " hidden");
 
         section.innerHTML = "";
         section.appendChild(header);
@@ -152,6 +152,7 @@ function renderCollapsibleSection(sectionId, containerId, label, items, rowFacto
     });
 
 }
+
 
 
 
