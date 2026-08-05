@@ -45,6 +45,8 @@ import { initPhotoDescription } from "./js/photos.js";
 import { initPhotoViewer } from "./js/photos.js";
 import { initPlus } from "./js/plus.js";
 import { initCatalogue } from "./js/catalogue.js";
+import { initRegionFinder, initPromptRegionAdmin } from "./js/region.js";
+import { initPromptRegionSync } from "./js/storage.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -95,6 +97,9 @@ function init() {
     initSurvieImport();
     initPhotoViewer();
     initCatalogue();
+    initRegionFinder();
+    initPromptRegionAdmin();
+    initPromptRegionSync(() => {});
 
     initAdmin();
         initVoyage();
