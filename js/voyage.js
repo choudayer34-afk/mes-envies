@@ -5,7 +5,8 @@ import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate,
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
 
-import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp } from "./itineraire.js";
+
+import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp, calculerDistancesEtapes } from "./itineraire.js";
 
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { renderEnvies } from "./ui.js";
@@ -690,13 +691,26 @@ function openOptimiserModal(items, voyageEnvie) {
                 updateEnvieOrdre(item.id, Date.now() + ordreIndex++);
             });
 
-            resultatCalcule = resultat;
+                        resultatCalcule = resultat;
+
+            const etapes = calculerDistancesEtapes(resultat);
+
+            const etapesHtml = etapes.map((etape, index) => `
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-border);">
+                    <span style="font-weight:700;color:var(--color-primary);">${index + 1}.</span>
+                    <span style="flex:1;">${etape.titre}</span>
+                    ${etape.distanceDepuisPrecedent !== null ? `<span style="font-size:12px;color:var(--color-text-light);">${etape.distanceDepuisPrecedent.toFixed(1)} km</span>` : ""}
+                </div>
+            `).join("");
 
             content.innerHTML = `
-                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Itinéraire calculé et ordre mis à jour. Ouvrir avec :</p>
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ordre optimisé (ordre mis à jour dans le voyage) :</p>
+                <div style="margin-bottom:16px;">${etapesHtml}</div>
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ouvrir avec :</p>
                 <button id="ouvrirGoogleMaps" class="primaryButton" style="width:100%;margin-bottom:10px;">🗺️ Google Maps (itinéraire complet)</button>
-                <button id="ouvrirWaze" class="secondaryButton" style="width:100%;">🚗 Waze (première étape)</button>
+                <button id="ouvrirWaze" class="secondaryButton" style="width:100%;">🚗 Waze (vers la 1ère étape)</button>
             `;
+
 
                         content.querySelector("#ouvrirGoogleMaps").addEventListener("click", () => {
 
