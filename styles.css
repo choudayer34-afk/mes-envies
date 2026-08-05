@@ -1669,9 +1669,7 @@ button {
     display:block;
 }
 
-#creationCategorieGrid{
-    display:grid !important;
-}
+
 
 .envie-card{
     position:relative;
