@@ -522,11 +522,24 @@ function ouvrirPartageModal(envie) {
             showToast("✓ Lien copié");
         });
 
-        content.querySelector("#desactiverPartage").addEventListener("click", () => {
+                content.querySelector("#desactiverPartage").addEventListener("click", () => {
+
             desactiverPartagePublic(envie.id);
-            modal.classList.add("hidden");
+
+            content.innerHTML = `
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Générer un lien public que tu peux envoyer à qui tu veux, sans qu'ils aient besoin de créer un compte.</p>
+                <button id="activerPartage" class="primaryButton" style="width:100%;">🔗 Créer le lien de partage</button>
+            `;
+
+            content.querySelector("#activerPartage").addEventListener("click", () => {
+                activerPartagePublic(envie.id);
+                ouvrirPartageModal({ ...envie, partagePublic: true });
+            });
+
             showToast("✓ Partage désactivé");
+
         });
+
 
       } else {
 
@@ -553,11 +566,24 @@ function ouvrirPartageModal(envie) {
                 showToast("✓ Lien copié");
             });
 
-            content.querySelector("#desactiverPartage").addEventListener("click", () => {
-                desactiverPartagePublic(envie.id);
-                modal.classList.add("hidden");
-                showToast("✓ Partage désactivé");
+                   content.querySelector("#desactiverPartage").addEventListener("click", () => {
+
+            desactiverPartagePublic(envie.id);
+
+            content.innerHTML = `
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">Générer un lien public que tu peux envoyer à qui tu veux, sans qu'ils aient besoin de créer un compte.</p>
+                <button id="activerPartage" class="primaryButton" style="width:100%;">🔗 Créer le lien de partage</button>
+            `;
+
+            content.querySelector("#activerPartage").addEventListener("click", () => {
+                activerPartagePublic(envie.id);
+                ouvrirPartageModal({ ...envie, partagePublic: true });
             });
+
+            showToast("✓ Partage désactivé");
+
+        });
+
 
         });
 
