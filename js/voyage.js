@@ -5,6 +5,8 @@ import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { removeFromJourGroup, updateEnvieDate } from "./storage.js";
 import { initPhotoCouverture } from "./photos.js";
+import { renderCarnetVoyage } from "./carnet.js";
+import { computeContainerStatus } from "./progress.js";
 
 import { isLogementCategory } from "./envie.js";
 
@@ -25,11 +27,20 @@ export function renderVoyageSection(envie) {
 
     container.innerHTML = "";
 
-    if (isContainer(envie.categorie)) {
-        renderVoyageContenu(envie, container);
+        if (isContainer(envie.categorie)) {
+
+        const { statut } = computeContainerStatus(envie);
+
+        if (statut === "termine") {
+            renderCarnetVoyage(envie, container);
+        } else {
+            renderVoyageContenu(envie, container);
+        }
+
     } else {
         renderRattachement(envie, container);
     }
+
 
 }
 
