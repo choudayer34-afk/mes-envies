@@ -936,3 +936,55 @@ export function creerEnvieDansVoyage(voyageId, data) {
     return id;
 
 }
+
+const DEFAULT_PROMPT_IMPORT = `Tu es un assistant de planification de voyage.
+
+Je pars pour : {{destination}}
+Dates : {{dates}}
+Durée : {{duree}}
+Personnes : {{personnes}}
+Ce que je recherche : {{activites}}
+
+Génère une liste d'idées concrètes au format JSON strict suivant, sans aucun texte avant ou après :
+
+{
+  "idees": [
+    {
+      "titre": "Nom court de l'activité/lieu",
+      "categorie": "un mot parmi : Idée, Événement, Maison, Jardin, Courses, Sortie, Logement (choisis le plus pertinent)",
+      "lieu": "Nom du lieu et ville, le plus précis possible pour être géolocalisé (ex: 'Cascade de Sillans, Sillans-la-Cascade')",
+      "description": "1 à 2 phrases décrivant l'intérêt de cette idée"
+    }
+  ]
+}
+
+Génère entre 15 et 25 idées variées (activités, randonnées, restaurants, visites, logement si pertinent).
+Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut valide.
+Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.`;
+
+let promptImportCache = DEFAULT_PROMPT_IMPORT;
+
+export function getPromptImport() {
+    return promptImportCache;
+}
+
+export function initPromptImportSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(doc(db, "foyers", foyerId, "settings", "promptImport"), (snap) => {
+
+        promptImportCache = snap.exists() ? snap.data().texte : DEFAULT_PROMPT_IMPORT;
+        onChange();
+
+    });
+
+}
+
+export function updatePromptImport(texte) {
+    setDoc(doc(db, "foyers", getFoyerId(), "settings", "promptImport"), { texte }).catch(console.error);
+}
+
+export function resetPromptImport() {
+    updatePromptImport(DEFAULT_PROMPT_IMPORT);
+}
