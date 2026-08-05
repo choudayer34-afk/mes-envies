@@ -1,4 +1,4 @@
-import { getEnvies, updateEnviePhotos } from "./storage.js";
+import { updateEnviePhotos } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 import { updateEnviePhotoCouverture, getEnvies } from "./storage.js";
