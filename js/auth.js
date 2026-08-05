@@ -38,6 +38,8 @@ export function initAuth(onReady) {
 
 
         console.log("Auth state:", user ? user.email : "déconnecté");
+      
+        console.log("navigator.onLine = " + navigator.onLine);
 
         document.getElementById("loadingScreen")?.classList.add("hidden");
 
