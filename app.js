@@ -90,8 +90,9 @@ console.log("ETAPE 5 avant initSurvie");
         console.log("ETAPE 5a avant initSurvie");
             initCarte();
                 initPromptModal();
-                console.log("ETAPE b5 avant initSurvie");
+                
     initPhotos();
+    console.log("ETAPE b5 avant initSurvie");
     initJeux();
     initPhotoDescription();
     console.log("ETAPE 5c avant initSurvie");
