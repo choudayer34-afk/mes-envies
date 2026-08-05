@@ -96,6 +96,62 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
+    if (request.destination === "image") {
+
+        event.respondWith(
+            (async () => {
+
+                try {
+
+                    const response = await fetch(request);
+
+                    if (response.ok) {
+                        const cache = await caches.open(CACHE_NAME);
+                        cache.put(request, response.clone()).catch(() => {});
+                    }
+
+                    return response;
+
+                } catch (err) {
+
+                    const cached = await caches.match(request, { ignoreSearch: true });
+
+                    return cached || Response.error();
+
+                }
+
+            })()
+        );
+
+        return;
+
+    }
+
+    event.respondWith(
+        (async () => {
+
+            try {
+
+                const response = await fetch(request);
+
+                if (response.ok) {
+                    const cache = await caches.open(CACHE_NAME);
+                    cache.put(request, response.clone()).catch(() => {});
+                }
+
+                return response;
+
+            } catch (err) {
+
+                const cached = await caches.match(request, { ignoreSearch: true });
+
+                return cached || Response.error();
+
+            }
+
+        })()
+    );
+
     const FIREBASE_CDN_URLS = [
     "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
     "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
