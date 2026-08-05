@@ -158,7 +158,13 @@ function renderVoyagePartage(voyage, enfants, container) {
 
     }
 
-    const enfantsAvecPhotos = enfants.filter(e => e.realise);
+    const enfantsAvecPhotos = enfants.filter(e => e.realise || isLogementCategorie(e.categorie));
+
+    function isLogementCategorie(catId) {
+        const cat = getCategorieById(catId);
+        return cat?.label?.toLowerCase().includes("logement") || false;
+    }
+
 
     if (enfantsAvecPhotos.length === 0) {
         container.innerHTML += `<div class="emptyState">Aucun souvenir enregistré pour l'instant.</div>`;
