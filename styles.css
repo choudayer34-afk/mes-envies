@@ -234,6 +234,7 @@ main{
 #survieImportModal,
 #photoDescriptionModal,
  #photoViewerModal,
+ #plusModal,
 #enviePickerModal{
     z-index:2100;
 }
