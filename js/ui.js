@@ -291,7 +291,7 @@ export function initHomeMeteo() {
             try {
 
                 const jours = await fetchMeteo3Jours(latitude, longitude);
-                renderMeteoWidget(document.getElementById("homeMeteoWidget"), jours);
+                renderMeteoWidget(document.getElementById("plusMeteoWidget"), jours);
 
             } catch (err) {
                 console.error("Erreur météo: " + err.message);
@@ -300,7 +300,7 @@ export function initHomeMeteo() {
             try {
 
                 const lieu = await reverseGeocodeLieu(latitude, longitude);
-                const label = document.getElementById("homeMeteoLieu");
+                const label = document.getElementById("plusMeteoLieu");
 
                 if (label) {
                     label.textContent = `📍 ${lieu}`;
@@ -314,10 +314,10 @@ export function initHomeMeteo() {
 
         () => {
 
-            const widget = document.getElementById("homeMeteoWidget");
+            const widget = document.getElementById("plusMeteoWidget");
             if (widget) widget.innerHTML = `<div class="emptyState" style="padding:10px;font-size:13px;">Position non disponible</div>`;
 
-            const label = document.getElementById("homeMeteoLieu");
+            const label = document.getElementById("plusMeteoLieu");
             if (label) label.textContent = "";
 
         }
@@ -325,4 +325,5 @@ export function initHomeMeteo() {
     );
 
 }
+
 
