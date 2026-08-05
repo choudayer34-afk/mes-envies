@@ -942,6 +942,24 @@ window.toggleDebug = function() {
     </div>
 
 </div>
+<div id="photoViewerModal" class="modal-overlay hidden" style="background:rgba(0,0,0,.92);">
+
+    <div class="modal" style="background:transparent;box-shadow:none;padding:16px;">
+
+        <button id="closePhotoViewer" class="backButton" style="color:white;">← Retour</button>
+
+        <img id="photoViewerImage" style="width:100%;border-radius:16px;margin:10px 0;">
+
+        <p id="photoViewerLegende" style="color:white;font-size:14px;text-align:center;margin-bottom:16px;"></p>
+
+        <div class="modal-actions">
+            <button id="editPhotoDescriptionButton" class="secondaryButton">📝 Légende</button>
+            <button id="sharePhotoButton" class="primaryButton">📤 Partager</button>
+        </div>
+
+    </div>
+
+</div>
 
 <div id="assignModal" class="modal-overlay hidden">
 
