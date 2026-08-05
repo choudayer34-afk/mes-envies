@@ -398,6 +398,11 @@ export function initVoyage() {
     document.getElementById("closeEnviePicker").addEventListener("click", () => {
         document.getElementById("enviePickerModal").classList.add("hidden");
     });
+    
+        document.getElementById("closePartage")?.addEventListener("click", () => {
+        document.getElementById("partageModal").classList.add("hidden");
+    });
+
 
 }
 function createLogementRow(logement, voyageEnvie) {
