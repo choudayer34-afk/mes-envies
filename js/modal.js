@@ -11,6 +11,8 @@ import { openEnvie } from "./envie.js";
 let currentEditId = null;
 let currentCategorie = "general";
 let currentDeleteId = null;
+let categorieGridOuverte = false;
+
 
 /* ---------- Modale création / édition ---------- */
 
@@ -67,13 +69,21 @@ const container = document.getElementById("categorieSelector");
     const idActif = categorieIdPreselectionnee || categories[0]?.id;
     const catActive = categories.find(c => c.id === idActif);
 
-    container.innerHTML = `
-        <button type="button" id="creationCategorieToggle" class="dateButton">
-            <span>${catActive ? `${catActive.emoji} ${catActive.label}` : "Choisir..."}</span>
-            <span>▾</span>
-        </button>
-        <div id="creationCategorieGrid" class="categorieSelector" style="margin-top:10px;"></div>
-    `;
+            chip.addEventListener("click", () => {
+
+            document.querySelectorAll("#creationCategorieGrid .categorieChip")
+                .forEach(c => c.classList.remove("active"));
+
+            chip.classList.add("active");
+            currentCategorie = cat.id;
+
+            toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}`;
+
+            categorieGridOuverte = false;
+            grid.classList.add("hidden");
+
+        });
+
 
     const grid = document.getElementById("creationCategorieGrid");
     const toggle = document.getElementById("creationCategorieToggle");
@@ -105,8 +115,10 @@ const container = document.getElementById("categorieSelector");
     });
 
     toggle.addEventListener("click", () => {
+        categorieGridOuverte = !categorieGridOuverte;
         grid.classList.toggle("hidden");
     });
+
 
     currentCategorie = idActif;
 
