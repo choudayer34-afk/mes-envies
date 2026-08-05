@@ -804,3 +804,39 @@ export function updatePhotoDescription(envieId, photoId, description) {
 
 }
 
+export function dupliquerEnvieVersVoyage(envieId, voyageId) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return null;
+
+    const nouvelId = crypto.randomUUID();
+
+    const copie = {
+        titre: envie.titre,
+        categorie: envie.categorie,
+        favorite: false,
+        realise: false,
+        description: envie.description || "",
+        photos: [],
+        checklist: [],
+        urls: [],
+        tags: envie.tags || [],
+        lieu: { ...envie.lieu },
+        date: null,
+        personnesIds: [],
+        jourGroupId: null,
+        ordre: Date.now(),
+        voyageId: voyageId,
+        archived: false,
+        statut: "inbox",
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+    };
+
+    setDoc(envieRef(nouvelId), copie).catch(console.error);
+
+    return nouvelId;
+
+}
