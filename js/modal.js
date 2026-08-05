@@ -220,30 +220,14 @@ export function removeEnvie(id) {
 /* ---------- Date (placeholder, logique complète en Sprint XII) ---------- */
 export function openModalVoyage() {
 
+    const categories = getEnvieCategories();
+    const voyageCat = categories.find(c => c.label.toLowerCase().includes("voyage"));
+
+    renderCreationCategorieSelector(voyageCat?.id || null);
+
     openModal();
 
-    setTimeout(() => {
-
-        const categories = getEnvieCategories();
-        const voyageCat = categories.find(c => c.label.toLowerCase().includes("voyage"));
-
-        if (!voyageCat)
-            return;
-
-        document.querySelectorAll("#categorieSelector .categorieChip").forEach(chip => {
-
-            const estVoyage = chip.dataset.categorieId === voyageCat.id;
-
-            chip.classList.toggle("active", estVoyage);
-
-            if (estVoyage) {
-                currentCategorie = voyageCat.id;
-            }
-
-        });
-
-    }, 100);
-
 }
+
 
 
