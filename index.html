@@ -6,6 +6,7 @@
 <script>
 window.debugLogs = [];
 window.debugEnabled = true;
+window.toggleDebug = function() {};
 
 function renderDebug() {
     let box = document.getElementById("debugBox");
@@ -18,6 +19,13 @@ function renderDebug() {
     box.textContent = window.debugLogs.join("\n\n");
 }
 
+const originalLog = console.log;
+console.log = function(...args) {
+    window.debugLogs.push("LOG: " + args.map(a => String(a)).join(" "));
+    renderDebug();
+    originalLog.apply(console, args);
+};
+
 const originalError = console.error;
 console.error = function(...args) {
     window.debugLogs.push("ERROR: " + args.map(a => String(a)).join(" "));
@@ -29,9 +37,6 @@ window.onerror = function(message, source, lineno) {
     window.debugLogs.push("ERREUR JS: " + message + "\n" + source + ":" + lineno);
     renderDebug();
 };
-
-
-
 </script>
 
 
