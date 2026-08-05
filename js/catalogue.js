@@ -2,6 +2,7 @@ import { getEnvies } from "./storage.js";
 import { getCategorieById, openEnvie, isContainer } from "./envie.js";
 import { openMap } from "./carte.js";
 
+
 let searchQuery = "";
 let filtreCategorieId = "tous";
 let triActuel = "recent";
@@ -200,7 +201,16 @@ function renderCatalogue() {
 
     const envies = getEnviesFiltrees();
 
-    if (vueActuelle === "carte") {
+       if (vueActuelle === "carte") {
+
+        container.innerHTML = `<div class="emptyState">Carte affichée dans une fenêtre séparée. Utilise "← Retour" pour revenir ici.</div>`;
+
+        openMap(null, envies);
+
+        return;
+
+    }
+
 
         const emptyMsg = document.createElement("div");
         emptyMsg.className = "emptyState";
