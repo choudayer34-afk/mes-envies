@@ -9,6 +9,7 @@ import { renderCarnetVoyage } from "./carnet.js";
 import { openVoyageImport } from "./voyage-import.js";
 import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
 import { getFoyerId } from "./auth.js";
+import { updateNoteJour } from "./storage.js";
 
 
 import { isLogementCategory } from "./envie.js";
@@ -137,13 +138,14 @@ function renderVoyageContenu(envie, container) {
     const { groups, todo } = groupAndSort(enfantsRestants);
 
 
-    groups.forEach(group => {
-        appendCollapsibleGroup(container, group.label, group.items, envie);
+       groups.forEach(group => {
+        appendCollapsibleGroup(container, group.label, group.items, envie, group.key);
     });
 
     if (todo.length > 0) {
-        appendCollapsibleGroup(container, "Sans date", todo, envie);
+        appendCollapsibleGroup(container, "Sans date", todo, envie, "todo");
     }
+
 
         const partageButton = document.createElement("button");
     partageButton.className = "secondaryButton";
@@ -591,6 +593,61 @@ function ouvrirPartageModal(envie) {
 
 
     modal.classList.remove("hidden");
+
+}
+
+function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey) {
+
+    const done = items.filter(i => i.realise).length;
+    const total = items.length;
+
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "accordionHeader groupCollapseHeader";
+    header.innerHTML = `
+        <span>${label} <small class="groupProgress">(${done}/${total})</small></span>
+        <span class="accordionIcon">▸</span>
+    `;
+
+    const content = document.createElement("div");
+    content.className = "accordionContent hidden";
+
+    items.forEach(item => {
+        content.appendChild(createVoyageItemRow(item, voyageEnvie));
+    });
+
+    const noteWrapper = document.createElement("div");
+    noteWrapper.style.marginTop = "10px";
+
+    const noteLabel = document.createElement("label");
+    noteLabel.className = "fieldTitle";
+    noteLabel.textContent = "📝 Note du jour";
+
+    const noteTextarea = document.createElement("textarea");
+    noteTextarea.rows = 2;
+    noteTextarea.placeholder = "Un souvenir, une anecdote...";
+    noteTextarea.style = "width:100%;padding:10px;border-radius:12px;border:1px solid var(--color-border);font-size:14px;box-sizing:border-box;";
+    noteTextarea.value = voyageEnvie.notesJour?.[groupKey] || "";
+
+    noteTextarea.addEventListener("blur", () => {
+        updateNoteJour(voyageEnvie.id, groupKey, noteTextarea.value.trim());
+    });
+
+    noteWrapper.appendChild(noteLabel);
+    noteWrapper.appendChild(noteTextarea);
+    content.appendChild(noteWrapper);
+
+    header.addEventListener("click", () => {
+
+        content.classList.toggle("hidden");
+
+        const icon = header.querySelector(".accordionIcon");
+        icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
+
+    });
+
+    container.appendChild(header);
+    container.appendChild(content);
 
 }
 
