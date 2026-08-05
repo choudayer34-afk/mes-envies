@@ -72,7 +72,8 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = "categorieChip" + (cat.id === idActif ? " active" : "");
-        chip.textContent = `${cat.emoji} ${cat.label}`;
+             chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
+
         chip.dataset.categorieId = cat.id;
 
         chip.addEventListener("click", () => {
