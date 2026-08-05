@@ -1038,7 +1038,4 @@ export function updateNoteJour(voyageId, groupKey, note) {
 
 }
 
-export function updateEnvieOrdre(id, ordre) {
-    patchEnvie(id, { ordre });
-}
 
