@@ -12,31 +12,57 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 
 }
 
-export function optimiserOrdre(items) {
+function calculerDistanceKm(lat1, lon1, lat2, lon2) {
+
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+}
+
+export function optimiserOrdre(items, depart = null, arrivee = null) {
 
     const geolocalises = items.filter(i => i.lieu?.latitude && i.lieu?.longitude);
     const nonGeolocalises = items.filter(i => !(i.lieu?.latitude && i.lieu?.longitude));
 
-    if (geolocalises.length <= 1) {
-        return [...geolocalises, ...nonGeolocalises];
+    if (geolocalises.length === 0) {
+        return { itineraire: [], depart, arrivee, autres: nonGeolocalises };
     }
 
-    const restants = [...geolocalises];
-    const ordonnes = [restants.shift()];
+    let restants = [...geolocalises];
+    let pointCourant = depart;
+
+    if (arrivee) {
+        restants = restants.filter(i => i.id !== arrivee.id);
+    }
+
+    if (depart) {
+        restants = restants.filter(i => i.id !== depart.id);
+    } else if (restants.length > 0) {
+        pointCourant = restants.shift();
+    }
+
+    const ordonnes = pointCourant ? [] : [];
+    let dernierPoint = pointCourant;
 
     while (restants.length > 0) {
-
-        const dernier = ordonnes[ordonnes.length - 1];
 
         let plusProcheIndex = 0;
         let plusProcheDistance = Infinity;
 
         restants.forEach((item, index) => {
 
-            const distance = calculerDistanceKm(
-                dernier.lieu.latitude, dernier.lieu.longitude,
-                item.lieu.latitude, item.lieu.longitude
-            );
+            const ref = dernierPoint || item;
+
+            const distance = dernierPoint
+                ? calculerDistanceKm(dernierPoint.lieu.latitude, dernierPoint.lieu.longitude, item.lieu.latitude, item.lieu.longitude)
+                : 0;
 
             if (distance < plusProcheDistance) {
                 plusProcheDistance = distance;
@@ -45,30 +71,34 @@ export function optimiserOrdre(items) {
 
         });
 
-        ordonnes.push(restants.splice(plusProcheIndex, 1)[0]);
+        const prochain = restants.splice(plusProcheIndex, 1)[0];
+        ordonnes.push(prochain);
+        dernierPoint = prochain;
 
     }
 
-    return [...ordonnes, ...nonGeolocalises];
+    return { itineraire: ordonnes, depart, arrivee, autres: nonGeolocalises };
 
 }
 
-export function buildLienGoogleMapsMultiEtapes(itemsOrdonnes) {
+export function buildLienGoogleMapsMultiEtapes({ itineraire, depart, arrivee }) {
 
-    const geolocalises = itemsOrdonnes.filter(i => i.lieu?.latitude && i.lieu?.longitude);
+    const points = [];
 
-    if (geolocalises.length === 0)
+    if (depart) points.push(depart);
+    points.push(...itineraire);
+    if (arrivee) points.push(arrivee);
+
+    if (points.length === 0)
         return null;
 
-    if (geolocalises.length === 1) {
-
-        const lieu = geolocalises[0].lieu;
+    if (points.length === 1) {
+        const lieu = points[0].lieu;
         return `https://www.google.com/maps/dir/?api=1&destination=${lieu.latitude},${lieu.longitude}`;
-
     }
 
-    const destination = geolocalises[geolocalises.length - 1].lieu;
-    const waypoints = geolocalises.slice(0, -1).map(i => `${i.lieu.latitude},${i.lieu.longitude}`).join("|");
+    const destination = points[points.length - 1].lieu;
+    const waypoints = points.slice(0, -1).map(i => `${i.lieu.latitude},${i.lieu.longitude}`).join("|");
 
     return `https://www.google.com/maps/dir/?api=1&destination=${destination.latitude},${destination.longitude}&waypoints=${encodeURIComponent(waypoints)}`;
 
