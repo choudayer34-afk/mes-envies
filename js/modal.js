@@ -59,8 +59,9 @@ export function initModal() {
 
 }
 export function renderCreationCategorieSelector(categorieIdPreselectionnee = null) {
+const container = document.getElementById("categorieSelector");
+    container.className = "categorieSelectorWrapper";
 
-    const container = document.getElementById("categorieSelector");
     const categories = getEnvieCategories();
 
     const idActif = categorieIdPreselectionnee || categories[0]?.id;
