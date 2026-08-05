@@ -109,7 +109,7 @@ let ficheesAImporter = [];
 
 function analyserImport() {
 
-    const input = document.getElementById("importJsonInput").value.trim();
+    let input = document.getElementById("importJsonInput").value.trim();
     const reportEl = document.getElementById("importReportContent");
 
     reportEl.innerHTML = "";
@@ -120,6 +120,10 @@ function analyserImport() {
         return;
     }
 
+    input = input
+        .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+        .replace(/[\u2018\u2019\u201A\u201B]/g, "'");
+
     let data;
 
     try {
@@ -128,6 +132,7 @@ function analyserImport() {
         reportEl.innerHTML = `<div class="emptyState">❌ JSON invalide : ${err.message}</div>`;
         return;
     }
+
 
     const fiches = data.fiches || [];
     const categoriesValides = [
