@@ -228,6 +228,7 @@ main{
 #urlModal,
 #dateModal,
 #templatePickerModal,
+#catalogueModal,
 #mapModal,
 #promptModal,
 #ficheEditorModal,
@@ -235,7 +236,7 @@ main{
 #photoDescriptionModal,
  #photoViewerModal,
  #plusModal,
-#catalogueModal,
+
 #enviePickerModal{
     z-index:2100;
 }
