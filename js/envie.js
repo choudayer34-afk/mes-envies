@@ -315,4 +315,66 @@ export function isLogementCategory(categorieId) {
     return cat?.label?.toLowerCase().includes("logement") || false;
 }
 
+function gererAccordeonsVides(envie) {
+
+    const accordeonsAVerifier = [
+        { sectionId: "periodeSection", aDuContenu: () => !!envie.date?.start },
+        { sectionId: "voyageSection", aDuContenu: () => !!envie.voyageId || isContainer(envie.categorie) },
+        { sectionId: "lieuSection", aDuContenu: () => !!envie.lieu?.nom },
+        { sectionId: "evaluationSection", aDuContenu: () => !!(envie.evaluation?.note || envie.evaluation?.enfants || envie.evaluation?.difficulte) },
+        { sectionId: "photosSection", aDuContenu: () => (envie.photos || []).length > 0 },
+        { sectionId: "ficheDescriptionSection", aDuContenu: () => !!envie.description },
+        { sectionId: "checklistSection", aDuContenu: () => (envie.checklist || []).length > 0 },
+        { sectionId: "lienSection", aDuContenu: () => (envie.urls || []).length > 0 }
+    ];
+
+    const zoneAjout = document.getElementById("ficheAjoutRubriques");
+    zoneAjout.innerHTML = "";
+
+    accordeonsAVerifier.forEach(({ sectionId, aDuContenu }) => {
+
+        const section = document.getElementById(sectionId);
+        const accordion = section?.closest(".accordion");
+
+        if (!accordion)
+            return;
+
+        const dejaOuvertManuel = accordion.dataset.forceVisible === "true";
+
+        if (aDuContenu() || dejaOuvertManuel) {
+            accordion.classList.remove("hidden");
+            return;
+        }
+
+        accordion.classList.add("hidden");
+
+        const label = accordion.querySelector(".accordionHeader span")?.textContent || "Ajouter";
+
+        const bouton = document.createElement("button");
+        bouton.type = "button";
+        bouton.className = "ajoutRubriqueButton";
+        bouton.textContent = `+ ${label}`;
+
+        bouton.addEventListener("click", () => {
+
+            accordion.dataset.forceVisible = "true";
+            accordion.classList.remove("hidden");
+
+            const contentSection = document.getElementById(sectionId);
+            contentSection.classList.remove("hidden");
+
+            const icon = accordion.querySelector(".accordionIcon");
+            if (icon) icon.textContent = "▾";
+
+            bouton.remove();
+
+        });
+
+        zoneAjout.appendChild(bouton);
+
+    });
+
+}
+
+    gererAccordeonsVides(envie);
 
