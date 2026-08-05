@@ -218,7 +218,8 @@ let filtreMateriel = "tous";
 
 export function initJeux() {
 
-    document.getElementById("btnJeux").addEventListener("click", openJeux);
+        document.getElementById("btnJeuxReel").addEventListener("click", openJeux);
+
     document.getElementById("closeJeux").addEventListener("click", closeJeux);
 
     document.getElementById("jeuxSearchInput").addEventListener("input", (event) => {
