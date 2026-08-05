@@ -67,7 +67,7 @@ export function initSurvieImport() {
         document.getElementById("uploadForm").classList.toggle("hidden");
     });
 
-        document.getElementById("uploadConfirmButton").addEventListener("click", async () => {
+      document.getElementById("uploadConfirmButton").addEventListener("click", async () => {
 
         const fileInput = document.getElementById("uploadFileInput");
         const nameInput = document.getElementById("uploadFilenameInput");
@@ -86,15 +86,33 @@ export function initSurvieImport() {
             const customName = nameInput.value.trim() || null;
             const result = await uploadToCloudinary(file, customName);
 
-            statusEl.innerHTML = `✓ Envoyée. URL à coller dans le champ "illustration" :<br><code style="word-break:break-all;font-size:11px;">${result.secure_url}</code>`;
+            statusEl.innerHTML = `
+                ✓ Envoyée.<br>
+                <code id="uploadedUrlText" style="word-break:break-all;font-size:11px;display:block;margin:6px 0;">${result.secure_url}</code>
+                <button id="copyUploadedUrlButton" class="secondaryButton" style="margin-top:4px;">📋 Copier l'URL</button>
+            `;
 
-            navigator.clipboard.writeText(result.secure_url).catch(() => {});
+            document.getElementById("copyUploadedUrlButton").addEventListener("click", async () => {
+
+                const btn = document.getElementById("copyUploadedUrlButton");
+
+                try {
+                    await navigator.clipboard.writeText(result.secure_url);
+                    btn.textContent = "✓ Copié";
+                } catch {
+                    btn.textContent = "Échec";
+                }
+
+                setTimeout(() => { btn.textContent = "📋 Copier l'URL"; }, 2000);
+
+            });
 
         } catch (err) {
             statusEl.textContent = "❌ Erreur d'envoi : " + err.message;
         }
 
     });
+
 
 
     document.getElementById("importAnalyserButton").addEventListener("click", analyserImport);
