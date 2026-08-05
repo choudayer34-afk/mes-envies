@@ -14,13 +14,33 @@ export function initPlus() {
     });
 
     document.getElementById("plusBtnJeux").addEventListener("click", () => {
+
+        console.log("Clic sur plusBtnJeux détecté");
+
         document.getElementById("plusModal").classList.add("hidden");
-        openJeux();
+
+        try {
+            openJeux();
+            console.log("openJeux() appelée sans erreur");
+        } catch (err) {
+            console.error("Erreur dans openJeux: " + err.message);
+        }
+
     });
 
     document.getElementById("plusBtnSurvie").addEventListener("click", () => {
+
+        console.log("Clic sur plusBtnSurvie détecté");
+
         document.getElementById("plusModal").classList.add("hidden");
-        openSurvie();
+
+        try {
+            openSurvie();
+            console.log("openSurvie() appelée sans erreur");
+        } catch (err) {
+            console.error("Erreur dans openSurvie: " + err.message);
+        }
+
     });
 
 }
