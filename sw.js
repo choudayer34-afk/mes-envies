@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v8';
+const CACHE_NAME = 'envie-cache-v9';
 
 const APP_SHELL = [
     './index.html',
@@ -35,7 +35,11 @@ const APP_SHELL = [
     './js/region.js',
     './js/voyage-import.js',
     './js/urls.js',
-    './js/carnet.js'
+    './js/carnet.js',
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+
 ];
 
 self.addEventListener('install', (event) => {
@@ -92,9 +96,16 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
-    if (url.origin !== self.location.origin) {
-        return;
-    }
+    const FIREBASE_CDN_URLS = [
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+    "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+];
+
+if (url.origin !== self.location.origin && !FIREBASE_CDN_URLS.includes(request.url)) {
+    return;
+}
+
 
         if (request.mode === 'navigate') {
 
