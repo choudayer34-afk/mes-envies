@@ -1,3 +1,13 @@
+export function buildLienWazePremiereEtape({ itineraire, depart, arrivee }) {
+
+    const premierPoint = depart || itineraire[0] || arrivee;
+
+    if (!premierPoint?.lieu)
+        return null;
+
+    return `https://waze.com/ul?ll=${premierPoint.lieu.latitude},${premierPoint.lieu.longitude}&navigate=yes`;
+
+}
 
 
 function calculerDistanceKm(lat1, lon1, lat2, lon2) {
