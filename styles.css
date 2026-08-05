@@ -238,6 +238,7 @@ main{
  #plusModal,
 #dupliquerPickerModal,
 #regionFinderModal,
+ #voyageImportModal,
 #enviePickerModal{
     z-index:2100;
 }
