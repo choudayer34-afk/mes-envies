@@ -3,6 +3,7 @@ import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour } from "./storage.js";
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes } from "./itineraire.js";
 import { updateEnvieOrdre } from "./storage.js";
+import { searchLocation } from "./location.js";
 
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { renderEnvies } from "./ui.js";
@@ -606,28 +607,48 @@ function ouvrirPartageModal(envie) {
 
 function openOptimiserModal(items, voyageEnvie) {
 
+    const tousLesEnfants = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
+    const logements = tousLesEnfants.filter(e => isLogementCategoryLocal(e.categorie) && e.lieu?.latitude && e.lieu?.longitude);
+
     const geolocalises = items.filter(i => i.lieu?.latitude && i.lieu?.longitude);
+    const optionsDisponibles = [...logements, ...geolocalises];
 
     const modal = document.getElementById("optimiserModal");
     const content = document.getElementById("optimiserModalContent");
 
     let departId = null;
     let arriveeId = null;
+    let departManuel = null;
+    let arriveeManuelle = null;
 
     function renderChoix() {
 
         content.innerHTML = `
-            <label class="fieldTitle">Point de départ (facultatif)</label>
-            <select id="optimiserDepart" class="categorieSelect" style="margin-bottom:14px;">
+            <label class="fieldTitle">Point de départ</label>
+            <select id="optimiserDepart" class="categorieSelect" style="margin-bottom:10px;">
                 <option value="">Aucun (calcul libre)</option>
+                ${logements.map(i => `<option value="${i.id}" ${departId === i.id ? "selected" : ""}>🏨 ${i.titre}</option>`).join("")}
                 ${geolocalises.map(i => `<option value="${i.id}" ${departId === i.id ? "selected" : ""}>${i.titre}</option>`).join("")}
+                <option value="manuel" ${departId === "manuel" ? "selected" : ""}>✏️ Autre adresse...</option>
             </select>
 
-            <label class="fieldTitle">Point d'arrivée (facultatif)</label>
-            <select id="optimiserArrivee" class="categorieSelect" style="margin-bottom:16px;">
+            <div id="departManuelField" class="field hidden" style="margin-bottom:14px;">
+                <input type="text" id="departManuelInput" placeholder="Adresse ou nom du lieu de départ" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+                <div id="departManuelSuggestions" class="lieuSuggestions"></div>
+            </div>
+
+            <label class="fieldTitle">Point d'arrivée</label>
+            <select id="optimiserArrivee" class="categorieSelect" style="margin-bottom:10px;">
                 <option value="">Aucun (calcul libre)</option>
+                ${logements.map(i => `<option value="${i.id}" ${arriveeId === i.id ? "selected" : ""}>🏨 ${i.titre}</option>`).join("")}
                 ${geolocalises.map(i => `<option value="${i.id}" ${arriveeId === i.id ? "selected" : ""}>${i.titre}</option>`).join("")}
+                <option value="manuel" ${arriveeId === "manuel" ? "selected" : ""}>✏️ Autre adresse...</option>
             </select>
+
+            <div id="arriveeManuelleField" class="field hidden" style="margin-bottom:16px;">
+                <input type="text" id="arriveeManuelleInput" placeholder="Adresse ou nom du lieu d'arrivée" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+                <div id="arriveeManuelleSuggestions" class="lieuSuggestions"></div>
+            </div>
 
             <button id="lancerOptimisation" class="primaryButton" style="width:100%;">
                 🗺️ Calculer et ouvrir l'itinéraire
@@ -636,32 +657,34 @@ function openOptimiserModal(items, voyageEnvie) {
 
         content.querySelector("#optimiserDepart").addEventListener("change", (e) => {
             departId = e.target.value || null;
+            document.getElementById("departManuelField").classList.toggle("hidden", departId !== "manuel");
         });
 
         content.querySelector("#optimiserArrivee").addEventListener("change", (e) => {
             arriveeId = e.target.value || null;
+            document.getElementById("arriveeManuelleField").classList.toggle("hidden", arriveeId !== "manuel");
         });
+
+        setupAdresseManuelle("departManuelInput", "departManuelSuggestions", (place) => { departManuel = place; });
+        setupAdresseManuelle("arriveeManuelleInput", "arriveeManuelleSuggestions", (place) => { arriveeManuelle = place; });
 
         content.querySelector("#lancerOptimisation").addEventListener("click", () => {
 
-            const depart = geolocalises.find(i => i.id === departId) || null;
-            const arrivee = geolocalises.find(i => i.id === arriveeId) || null;
+            const depart = departId === "manuel"
+                ? (departManuel ? { id: "depart-manuel", titre: departManuel.nom, lieu: departManuel } : null)
+                : optionsDisponibles.find(i => i.id === departId) || null;
+
+            const arrivee = arriveeId === "manuel"
+                ? (arriveeManuelle ? { id: "arrivee-manuelle", titre: arriveeManuelle.nom, lieu: arriveeManuelle } : null)
+                : optionsDisponibles.find(i => i.id === arriveeId) || null;
 
             const resultat = optimiserOrdre(items, depart, arrivee);
 
             let ordreIndex = 0;
 
-            if (resultat.depart) {
-                updateEnvieOrdre(resultat.depart.id, Date.now() + ordreIndex++);
-            }
-
             resultat.itineraire.forEach(item => {
                 updateEnvieOrdre(item.id, Date.now() + ordreIndex++);
             });
-
-            if (resultat.arrivee) {
-                updateEnvieOrdre(resultat.arrivee.id, Date.now() + ordreIndex++);
-            }
 
             const lien = buildLienGoogleMapsMultiEtapes(resultat);
 
@@ -681,6 +704,65 @@ function openOptimiserModal(items, voyageEnvie) {
     modal.classList.remove("hidden");
 
 }
+
+function setupAdresseManuelle(inputId, suggestionsId, onSelect) {
+
+    const input = document.getElementById(inputId);
+    const suggestionsBox = document.getElementById(suggestionsId);
+
+    if (!input || !suggestionsBox)
+        return;
+
+    let debounce;
+
+    input.addEventListener("input", () => {
+
+        clearTimeout(debounce);
+
+        const query = input.value.trim();
+
+        if (query.length < 3) {
+            suggestionsBox.innerHTML = "";
+            return;
+        }
+
+        debounce = setTimeout(async () => {
+
+            const resultats = await searchLocation(query);
+
+            suggestionsBox.innerHTML = "";
+
+            resultats.forEach(result => {
+
+                const item = document.createElement("div");
+                item.className = "lieuItem";
+                item.textContent = result.display_name;
+
+                item.addEventListener("click", () => {
+
+                    const place = {
+                        nom: result.display_name,
+                        adresse: result.display_name,
+                        latitude: parseFloat(result.lat),
+                        longitude: parseFloat(result.lon)
+                    };
+
+                    input.value = place.nom;
+                    suggestionsBox.innerHTML = "";
+                    onSelect(place);
+
+                });
+
+                suggestionsBox.appendChild(item);
+
+            });
+
+        }, 400);
+
+    });
+
+}
+
 
 
 export function initVoyage() {
