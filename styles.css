@@ -459,30 +459,41 @@ main{
     font-size:14px;
 }
 
+.categorieSelector{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:10px;
+    margin-top:10px;
+}
 
 .categorieChip{
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:8px;
-    height:50px;
+    gap:6px;
+    height:76px;
     width:100%;
-    padding:0 14px;
+    padding:8px 4px;
     border:none;
     border-radius:16px;
     background:#EEF4F6;
     color:#4B5B66;
-    font-size:16px;
-    font-weight:500;
+    font-size:12px;
+    font-weight:600;
+    text-align:center;
+    line-height:1.2;
     transition:all .2s ease;
 }
 
 .categorieChip.active{
     background:#6FAFC4;
     color:white;
-    font-weight:600;
+    font-weight:700;
     box-shadow:0 8px 20px rgba(111,175,196,.35);
 }
+
+
 
 .fieldTitle{
     display:block;
