@@ -4,10 +4,10 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
     signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+} from "../vendor/firebase/firebase-auth.js";
 import {
     doc, getDoc, setDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+} from "../vendor/firebase/firebase-firestore.js";
 import { migrateLocalDataToFoyer } from "./storage.js";
 import { auth, db, authReady } from "./firebase.js";
 
