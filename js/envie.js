@@ -331,7 +331,7 @@ function gererAccordeonsVides(envie) {
     const zoneAjout = document.getElementById("ficheAjoutRubriques");
     zoneAjout.innerHTML = "";
 
-    accordeonsAVerifier.forEach(({ sectionId, aDuContenu }) => {
+        accordeonsAVerifier.forEach(({ sectionId, aDuContenu }) => {
 
         const section = document.getElementById(sectionId);
         const accordion = section?.closest(".accordion");
@@ -341,7 +341,16 @@ function gererAccordeonsVides(envie) {
 
         const dejaOuvertManuel = accordion.dataset.forceVisible === "true";
 
-        if (aDuContenu() || dejaOuvertManuel) {
+        let contenuPresent = false;
+
+        try {
+            contenuPresent = aDuContenu();
+        } catch (err) {
+            console.error("Erreur vérification contenu pour " + sectionId + ": " + err.message);
+            contenuPresent = false;
+        }
+
+        if (contenuPresent || dejaOuvertManuel) {
             accordion.classList.remove("hidden");
             return;
         }
@@ -373,6 +382,7 @@ function gererAccordeonsVides(envie) {
         zoneAjout.appendChild(bouton);
 
     });
+
 
 }
 
