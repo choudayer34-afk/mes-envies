@@ -38,6 +38,8 @@ import { initHomeMeteo } from "./js/ui.js";
 import { initPromptModal } from "./js/envie.js";
 import { initPhotos } from "./js/photos.js";
 import { initJeux } from "./js/jeux.js";
+import { initFichesSurvieCustomSync } from "./js/storage.js";
+import { initSurvieEditor } from "./js/survie.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -105,6 +107,12 @@ initHomeMeteo();
         renderCreationCategorieSelector();
     });
 
+    initFichesSurvieCustomSync(() => {
+        if (document.getElementById("survieModal")?.classList.contains("hidden") === false) {
+            renderSurvie();
+        }
+    });
+    initSurvieEditor();
 
     initFoyerDataSync(() => {});
 
