@@ -1,6 +1,8 @@
 import { getEnvies } from "./storage.js";
 import { getCategorieById, openEnvie, isContainer } from "./envie.js";
 import { openMap } from "./carte.js";
+import { dupliquerEnvieVersVoyage } from "./storage.js";
+import { showToast } from "./toast.js";
 
 
 let searchQuery = "";
@@ -13,6 +15,9 @@ export function initCatalogue() {
 
     document.getElementById("btnCatalogue").addEventListener("click", openCatalogue);
     document.getElementById("closeCatalogue").addEventListener("click", closeCatalogue);
+    document.getElementById("closeDupliquerPicker").addEventListener("click", () => {
+        document.getElementById("dupliquerPickerModal").classList.add("hidden");
+    });
 
     document.getElementById("catalogueSearchInput").addEventListener("input", (event) => {
         searchQuery = event.target.value.toLowerCase().trim();
@@ -223,29 +228,76 @@ function renderCatalogue() {
 
 }
 
-
 function createCatalogueRow(envie) {
 
     const row = document.createElement("div");
     row.className = "templateRow";
-    row.style.cursor = "pointer";
 
     const cat = getCategorieById(envie.categorie);
     const distanceLabel = envie._distance !== null ? `${envie._distance.toFixed(1)} km` : "";
 
     row.innerHTML = `
-        <div class="templateRowNom">
+        <div class="templateRowNom" style="cursor:pointer;">
             ${cat?.emoji || "💡"} ${envie.titre}
-            <small>${envie.voyageId ? "🧳 Dans un voyage" : "Sans voyage"}${envie.lieu?.nom ? ` · ${envie.lieu.nom}` : ""}</small>
+            <small>${envie.voyageId ? "🧳 Dans un voyage" : "Sans voyage"}${envie.lieu?.nom ? ` · ${envie.lieu.nom}` : ""}${distanceLabel ? ` · ${distanceLabel}` : ""}</small>
         </div>
-        ${distanceLabel ? `<div class="templateRowActions"><span class="containerStatutPct">${distanceLabel}</span></div>` : ""}
+        <div class="templateRowActions">
+            <button class="actionButton editButton" title="Dupliquer vers un voyage">📋</button>
+        </div>
     `;
 
-    row.addEventListener("click", () => {
+    row.querySelector(".templateRowNom").addEventListener("click", () => {
         closeCatalogue();
         openEnvie(envie.id, null);
+    });
+
+    row.querySelector(".editButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        openDupliquerPicker(envie);
     });
 
     return row;
 
 }
+
+function openDupliquerPicker(envie) {
+
+    const voyages = getEnvies().filter(e => isContainer(e.categorie));
+
+    const container = document.getElementById("dupliquerPickerList");
+    container.innerHTML = "";
+
+    if (voyages.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun voyage créé pour l'instant.</div>`;
+    }
+
+    voyages.forEach(voyage => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">🧳 ${voyage.titre}</div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton">Dupliquer ici</button>
+            </div>
+        `;
+
+        row.querySelector(".editButton").addEventListener("click", () => {
+
+            dupliquerEnvieVersVoyage(envie.id, voyage.id);
+
+            document.getElementById("dupliquerPickerModal").classList.add("hidden");
+
+            showToast(`✓ "${envie.titre}" dupliquée vers ${voyage.titre}`);
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+    document.getElementById("dupliquerPickerModal").classList.remove("hidden");
+
+}
+
