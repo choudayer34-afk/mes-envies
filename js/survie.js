@@ -983,7 +983,8 @@ let ficheActuelle = null;
 
 export function initSurvie() {
 
-    document.getElementById("btnSurvie").addEventListener("click", openSurvie);
+       document.getElementById("btnSurvieReel").addEventListener("click", openSurvie);
+
     document.getElementById("closeSurvie").addEventListener("click", closeSurvie);
 
     document.getElementById("survieBackButton").addEventListener("click", () => {
