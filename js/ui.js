@@ -10,14 +10,13 @@ function isUntriaged(envie) {
     if (envie.voyageId)
         return false;
 
-    if (isContainer(envie.categorie)) {
-        const { statut } = computeContainerStatus(envie);
-        return statut === "planifie";
-    }
+    if (isContainer(envie.categorie))
+        return false;
 
     return !envie.date?.start;
 
 }
+
 
 export function renderEnvies() {
     renderHomeSections();
@@ -62,18 +61,31 @@ function renderHomeSections() {
         !isContainer(e.categorie) && e.date?.start === today
     );
 
-
-    const continuerItems = envies.filter(e => {
-        if (!isContainer(e.categorie))
-            return false;
+    const enCoursItems = envies.filter(e => {
+        if (!isContainer(e.categorie)) return false;
         const { statut } = computeContainerStatus(e);
         return statut === "en_cours";
     });
 
+    const aVenirItems = envies.filter(e => {
+        if (!isContainer(e.categorie)) return false;
+        const { statut } = computeContainerStatus(e);
+        return statut === "planifie" && !!e.date?.start;
+    });
+
+    const enProjetItems = envies.filter(e => {
+        if (!isContainer(e.categorie)) return false;
+        const { statut } = computeContainerStatus(e);
+        return statut === "planifie" && !e.date?.start;
+    });
+
     renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
-    renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ Continuer", continuerItems, createEnvieCard);
+    renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard);
+    renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
+    renderCollapsibleSection("projetSection", "projetContainer", "🛠️ En projet", enProjetItems, createEnvieCard);
 
 }
+
 
 function renderCollapsibleSection(sectionId, containerId, label, items, rowFactory) {
 
@@ -187,23 +199,43 @@ function createEnvieCard(envie) {
 
     });
 
-    let statutHtml = "";
+        let statutHtml = "";
 
     if (isContainer(envie.categorie)) {
 
         const { statut, pourcentage } = computeContainerStatus(envie);
 
-        statutHtml = `
-            <div class="progressBarTrack" style="margin-top:8px;">
-                <div class="progressBarFill" style="width:${pourcentage}%"></div>
-            </div>
-            <div class="containerStatutPct">${formatStatutLabel(statut)} · ${pourcentage}%</div>
-        `;
+        let decompteHtml = "";
 
+        if (statut === "planifie" && envie.date?.start) {
+
+            const jours = Math.ceil((new Date(envie.date.start) - new Date()) / (1000 * 60 * 60 * 24));
+            decompteHtml = `<div class="containerStatutPct">📅 Dans ${jours} jour${jours > 1 ? "s" : ""}</div>`;
+
+        } else {
+
+            decompteHtml = `
+                <div class="progressBarTrack" style="margin-top:8px;">
+                    <div class="progressBarFill" style="width:${pourcentage}%"></div>
+                </div>
+                <div class="containerStatutPct">${formatStatutLabel(statut)} · ${pourcentage}%</div>
+            `;
+
+        }
+
+        statutHtml = decompteHtml;
+
+    }
+
+
+      if (isContainer(envie.categorie) && envie.photoCouverture) {
+        card.style.backgroundImage = `linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.45)), url(${envie.photoCouverture})`;
+        card.classList.add("envie-card-avec-photo");
     }
 
     card.innerHTML = `
         <div class="envieHeader">
+
             <button class="favoriteButton" data-id="${envie.id}">
                 ${envie.favorite ? "⭐" : "☆"}
             </button>
