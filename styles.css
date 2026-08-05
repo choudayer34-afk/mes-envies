@@ -230,6 +230,7 @@ main{
 #templatePickerModal,
 #mapModal,
 #promptModal,
+#ficheEditorModal,
 #enviePickerModal{
     z-index:2100;
 }
