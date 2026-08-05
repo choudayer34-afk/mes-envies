@@ -19,9 +19,17 @@ function isUntriaged(envie) {
 
 
 export function renderEnvies() {
+
+    const auMoinsUneEnvie = getEnvies().length > 0;
+
+    document.getElementById("headerAccueilVide").classList.toggle("hidden", auMoinsUneEnvie);
+    document.getElementById("headerAccueilActif").classList.toggle("hidden", !auMoinsUneEnvie);
+
     renderHomeSections();
     renderInboxList();
+
 }
+
 
 function renderInboxList() {
 
