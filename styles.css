@@ -1652,4 +1652,16 @@ button {
     padding:4px 2px;
     font-style:italic;
 }
+.headerCompact .logo,
+.headerCompact p{
+    display:none;
+}
+
+.headerCompact{
+    padding:12px 20px 4px;
+}
+
+.headerCompact h1{
+    font-size:20px;
+}
 
