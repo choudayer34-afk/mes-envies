@@ -786,4 +786,7 @@ export function updateFicheSurvieCustom(id, fiche) {
 export function deleteFicheSurvieCustom(id) {
     deleteDoc(doc(db, "foyers", getFoyerId(), "fichesSurvieCustom", id)).catch(console.error);
 }
+export function updateEnviePhotoCouverture(id, url) {
+    patchEnvie(id, { photoCouverture: url });
+}
 
