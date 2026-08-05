@@ -1,13 +1,43 @@
-export function buildLienWazePremiereEtape({ itineraire, depart, arrivee }) {
+export function buildLienWazePremiereEtape({ itineraire, arrivee }) {
 
-    const premierPoint = depart || itineraire[0] || arrivee;
+    const cible = itineraire[0] || arrivee;
 
-    if (!premierPoint?.lieu)
+    if (!cible?.lieu)
         return null;
 
-    return `https://waze.com/ul?ll=${premierPoint.lieu.latitude},${premierPoint.lieu.longitude}&navigate=yes`;
+    return `https://waze.com/ul?ll=${cible.lieu.latitude},${cible.lieu.longitude}&navigate=yes`;
 
 }
+export function calculerDistancesEtapes({ itineraire, depart, arrivee }) {
+
+    const points = [];
+
+    if (depart) points.push(depart);
+    points.push(...itineraire);
+    if (arrivee) points.push(arrivee);
+
+    const etapes = [];
+
+    for (let i = 0; i < points.length; i++) {
+
+        const distanceDepuisPrecedent = i > 0
+            ? calculerDistanceKm(
+                points[i - 1].lieu.latitude, points[i - 1].lieu.longitude,
+                points[i].lieu.latitude, points[i].lieu.longitude
+            )
+            : null;
+
+        etapes.push({
+            titre: points[i].titre,
+            distanceDepuisPrecedent
+        });
+
+    }
+
+    return etapes;
+
+}
+
 
 export function buildLienGoogleMapsApp({ itineraire, depart, arrivee }) {
 
