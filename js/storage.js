@@ -2,7 +2,7 @@ import { db } from "./firebase.js";
 import { getFoyerId } from "./auth.js";
 import {
     collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc
-} from "../vendor/firebase/firebase-firestore.js";
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 let enviesCache = [];
 let onChangeCallback = null;
