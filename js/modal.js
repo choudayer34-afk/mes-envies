@@ -61,7 +61,8 @@ export function initModal() {
 
 }
 export function renderCreationCategorieSelector(categorieIdPreselectionnee = null) {
-const container = document.getElementById("categorieSelector");
+
+    const container = document.getElementById("categorieSelector");
     container.className = "categorieSelectorWrapper";
 
     const categories = getEnvieCategories();
@@ -69,21 +70,13 @@ const container = document.getElementById("categorieSelector");
     const idActif = categorieIdPreselectionnee || categories[0]?.id;
     const catActive = categories.find(c => c.id === idActif);
 
-            chip.addEventListener("click", () => {
-
-            document.querySelectorAll("#creationCategorieGrid .categorieChip")
-                .forEach(c => c.classList.remove("active"));
-
-            chip.classList.add("active");
-            currentCategorie = cat.id;
-
-            toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}`;
-
-            categorieGridOuverte = false;
-            grid.classList.add("hidden");
-
-        });
-
+    container.innerHTML = `
+        <button type="button" id="creationCategorieToggle" class="dateButton">
+            <span>${catActive ? `${catActive.emoji} ${catActive.label}` : "Choisir..."}</span>
+            <span>▾</span>
+        </button>
+        <div id="creationCategorieGrid" class="categorieSelector${categorieGridOuverte ? "" : " hidden"}" style="margin-top:10px;"></div>
+    `;
 
     const grid = document.getElementById("creationCategorieGrid");
     const toggle = document.getElementById("creationCategorieToggle");
@@ -106,6 +99,7 @@ const container = document.getElementById("categorieSelector");
 
             toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}`;
 
+            categorieGridOuverte = false;
             grid.classList.add("hidden");
 
         });
@@ -119,10 +113,10 @@ const container = document.getElementById("categorieSelector");
         grid.classList.toggle("hidden");
     });
 
-
     currentCategorie = idActif;
 
 }
+
 
 
 
