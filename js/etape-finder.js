@@ -274,40 +274,84 @@ function analyserEtapes() {
 }
 
 
-function renderEtapes() {
+async function renderEtapes() {
 
     const resultEl = document.getElementById("etapeResultat");
+
+    resultEl.innerHTML = `
+        <div id="etapeMiniMap" style="height:220px;border-radius:16px;margin-bottom:16px;"></div>
+        <div class="emptyState">🚗 Calcul des trajets en cours...</div>
+    `;
+
+    const trajets = [];
+
+    for (const etape of etapesTrouvees) {
+
+        const lat = parseFloat(etape.latitude);
+        const lon = parseFloat(etape.longitude);
+
+        let depuisDepart = null;
+        let versArrivee = null;
+
+        if (!isNaN(lat) && !isNaN(lon)) {
+
+            if (lieuDepart?.latitude) {
+                depuisDepart = await calculerTrajetOSRM(lieuDepart.latitude, lieuDepart.longitude, lat, lon);
+            }
+
+            if (lieuArrivee?.latitude) {
+                versArrivee = await calculerTrajetOSRM(lat, lon, lieuArrivee.latitude, lieuArrivee.longitude);
+            }
+
+        }
+
+        trajets.push({ depuisDepart, versArrivee });
+
+    }
 
     resultEl.innerHTML = `<div id="etapeMiniMap" style="height:220px;border-radius:16px;margin-bottom:16px;"></div>`;
 
     etapesTrouvees.forEach((etape, index) => {
 
         const rechercheAvis = encodeURIComponent(etape.nom);
+        const trajet = trajets[index];
+
+        let trajetHtml = "";
+
+        if (trajet.depuisDepart) {
+
+            trajetHtml += `<div>🚩 Depuis le départ : ${trajet.depuisDepart.distanceKm.toFixed(0)} km · ${formatDureeTrajet(trajet.depuisDepart.dureeMin)}</div>`;
+
+        }
+
+        if (trajet.versArrivee) {
+
+            trajetHtml += `<div>🏁 Vers l'arrivée : ${trajet.versArrivee.distanceKm.toFixed(0)} km · ${formatDureeTrajet(trajet.versArrivee.dureeMin)}</div>`;
+
+        }
 
         const card = document.createElement("div");
         card.className = "carnetActiviteCard";
 
-                card.innerHTML = `
+        card.innerHTML = `
             <div class="carnetActiviteTitre">📍 ${etape.nom}${etape.detourKm ? ` <small style="color:var(--color-text-light);font-weight:400;">· +${etape.detourKm} km de détour</small>` : ""}</div>
+            ${trajetHtml ? `<div style="font-size:12px;color:var(--color-text-light);margin:6px 0 10px;line-height:1.6;">${trajetHtml}</div>` : ""}
             ${etape.description ? `<p class="carnetActiviteDescription">${etape.description}</p>` : ""}
             ${etape.pointsForts?.length ? `<ul style="font-size:13px;color:var(--color-text-light);margin:8px 0 10px 18px;">${etape.pointsForts.map(p => `<li>${p}</li>`).join("")}</ul>` : ""}
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
                 <a href="https://www.google.com/search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
                 <a href="https://www.tripadvisor.fr/Search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">⭐ Avis TripAdvisor</a>
             </div>
-                                  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+            <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
                 <button class="secondaryButton chercherBookingButton" data-index="${index}" style="flex:1;min-width:80px;">🏨 Booking</button>
                 <button class="secondaryButton chercherAirbnbButton" data-index="${index}" style="flex:1;min-width:80px;">🏠 Airbnb</button>
                 <button class="secondaryButton chercherTrivagoButton" data-index="${index}" style="flex:1;min-width:80px;">🔍 Trivago</button>
                 <button class="secondaryButton chercherCozycozyButton" data-index="${index}" style="flex:1;min-width:80px;">🌐 Cozycozy</button>
             </div>
-
-
             <button class="primaryButton creerVoyageEtapeButton" data-index="${index}" style="width:100%;">
                 🧳 Créer un voyage ici
             </button>
         `;
-
 
         resultEl.appendChild(card);
 
@@ -327,7 +371,7 @@ function renderEtapes() {
 
     });
 
-        resultEl.querySelectorAll(".chercherBookingButton").forEach(btn => {
+    resultEl.querySelectorAll(".chercherBookingButton").forEach(btn => {
 
         btn.addEventListener("click", () => {
 
@@ -366,7 +410,7 @@ function renderEtapes() {
 
     });
 
-            resultEl.querySelectorAll(".chercherCozycozyButton").forEach(btn => {
+    resultEl.querySelectorAll(".chercherCozycozyButton").forEach(btn => {
 
         btn.addEventListener("click", () => {
 
@@ -385,12 +429,22 @@ function renderEtapes() {
 
     });
 
-
-
-        setTimeout(async () => await initMiniMap(), 100);
-
+    setTimeout(async () => await initMiniMap(), 100);
 
 }
+
+function formatDureeTrajet(minutes) {
+
+    if (minutes < 60)
+        return `${minutes} min`;
+
+    const heures = Math.floor(minutes / 60);
+    const min = minutes % 60;
+
+    return `${heures}h${min > 0 ? min.toString().padStart(2, "0") : ""}`;
+
+}
+
 
 async function initMiniMap() {
 
@@ -591,5 +645,28 @@ function afficherChoixIA(texte) {
             <a href="https://gemini.google.com/app?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">✨ Gemini</a>
         </div>
     `;
+
+}
+
+async function calculerTrajetOSRM(lat1, lon1, lat2, lon2) {
+
+    try {
+
+        const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.code !== "Ok" || !data.routes?.[0])
+            return null;
+
+        return {
+            distanceKm: data.routes[0].distance / 1000,
+            dureeMin: Math.round(data.routes[0].duration / 60)
+        };
+
+    } catch (err) {
+        return null;
+    }
 
 }
