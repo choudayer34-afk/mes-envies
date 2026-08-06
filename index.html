@@ -907,6 +907,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="categorieChip" type="button" data-target="envieCategories">🎯 Catégories d'envie</button>
         <button class="categorieChip" type="button" data-target="external">🔗 Outils externes</button>
         <button class="categorieChip" type="button" data-target="promptRegion">🧭 Prompt région</button>
+<button class="categorieChip" type="button" data-target="activiteTypes">🏞️ Types d'activités</button>
+<button class="categorieChip" type="button" data-target="criteresVoyage">✅ Critères voyage</button>
 
 
 
@@ -1009,6 +1011,15 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="savePromptRegionButton" class="primaryButton">Enregistrer</button>
     </div>
 
+</div>
+<div id="adminActiviteTypes" class="adminSection hidden">
+    <div id="activiteTypesList"></div>
+    <button id="addActiviteTypeButton" class="secondaryButton">➕ Nouveau type d'activité</button>
+</div>
+
+<div id="adminCriteresVoyage" class="adminSection hidden">
+    <div id="criteresVoyageList"></div>
+    <button id="addCritereVoyageButton" class="secondaryButton">➕ Nouveau critère</button>
 </div>
 
         <button id="showFoyerCodeButton" class="secondaryButton" style="margin-top:24px;">
