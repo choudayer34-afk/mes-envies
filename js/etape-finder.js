@@ -256,11 +256,13 @@ function renderEtapes() {
                 <a href="https://www.google.com/search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
                 <a href="https://www.tripadvisor.fr/Search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">⭐ Avis TripAdvisor</a>
             </div>
-                      <div style="display:flex;gap:8px;margin-bottom:8px;">
-                <button class="secondaryButton chercherBookingButton" data-index="${index}" style="flex:1;">🏨 Booking</button>
-                <button class="secondaryButton chercherAirbnbButton" data-index="${index}" style="flex:1;">🏠 Airbnb</button>
-                <button class="secondaryButton chercherTrivagoButton" data-index="${index}" style="flex:1;">🔍 Trivago</button>
+                                  <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+                <button class="secondaryButton chercherBookingButton" data-index="${index}" style="flex:1;min-width:80px;">🏨 Booking</button>
+                <button class="secondaryButton chercherAirbnbButton" data-index="${index}" style="flex:1;min-width:80px;">🏠 Airbnb</button>
+                <button class="secondaryButton chercherTrivagoButton" data-index="${index}" style="flex:1;min-width:80px;">🔍 Trivago</button>
+                <button class="secondaryButton chercherCozycozyButton" data-index="${index}" style="flex:1;min-width:80px;">🌐 Cozycozy</button>
             </div>
+
 
             <button class="primaryButton creerVoyageEtapeButton" data-index="${index}" style="width:100%;">
                 🧳 Créer un voyage ici
@@ -325,6 +327,18 @@ function renderEtapes() {
 
     });
 
+    resultEl.querySelectorAll(".chercherCozycozyButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const etape = etapesTrouvees[parseInt(btn.dataset.index, 10)];
+            const recherche = encodeURIComponent(etape.nom);
+
+            window.open(`https://www.cozycozy.com/fr/search/${recherche}`, "_blank");
+
+        });
+
+    });
 
         setTimeout(async () => await initMiniMap(), 100);
 
