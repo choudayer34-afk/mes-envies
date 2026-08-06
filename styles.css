@@ -241,7 +241,10 @@ main{
  #voyageImportModal,
  #partageModal,
 #optimiserModal,
-#enviePickerModal{
+#enviePickerModal,
+#outilsMenuModal, #pileOuFaceModal, #roueDecisionModal, #tirageNombreModal, #tirageLettreModal, #motAleatoireModal, #ardoiseModal, 
+#minuteurModal
+{
     z-index:2100;
 }
 
@@ -1735,5 +1738,15 @@ button {
     align-items:center;
     justify-content:center;
     box-shadow:var(--shadow-small);
+}
+
+.resultatAnime{
+    animation:pop .3s ease;
+}
+
+@keyframes pop{
+    0%{ transform:scale(0.8); }
+    50%{ transform:scale(1.15); }
+    100%{ transform:scale(1); }
 }
 
