@@ -463,62 +463,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <h2>🛣️ Trouver une étape sur la route</h2>
 
-        <div id="etapeFinderFormStep">
+    <div id="etapeFinderFormStep">
 
-            <label class="fieldTitle">Point de départ</label>
-            <input id="etapeDepart" type="text" placeholder="Ex : Brassac" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
-
-            <label class="fieldTitle">Point d'arrivée</label>
-            <input id="etapeArrivee" type="text" placeholder="Ex : Montpellier" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
-
-            <label class="fieldTitle">Durée du stop envisagée</label>
-            <input id="etapeDuree" type="text" placeholder="Ex : 1 à 2 jours" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
-
-           <label class="fieldTitle">Période de l'année (pour adapter aux saisons/météo)</label>
-<input id="etapePeriode" type="text" placeholder="Ex : Août, ou du 15 au 20 juillet" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:16px;box-sizing:border-box;">
-
-<label class="fieldTitle">Type d'activités recherchées</label>
-<div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-    <button type="button" id="toutCocherActivitesButton" class="secondaryButton" style="padding:6px 12px;font-size:12px;">Tout cocher</button>
-</div>
-<div id="etapeActivitesCheckboxes" class="categorieSelector fiche" style="margin-bottom:16px;">
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Nature & randonnée" style="margin-right:6px;">🏞️ Nature & randonnée</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Plage & baignade" style="margin-right:6px;">🏖️ Plage & baignade</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Montagne" style="margin-right:6px;">🌄 Montagne</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Culture & patrimoine" style="margin-right:6px;">🏛️ Culture & patrimoine</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Gastronomie" style="margin-right:6px;">🍽️ Gastronomie</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Détente & bien-être" style="margin-right:6px;">🧘 Détente & bien-être</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Sport & aventure" style="margin-right:6px;">🚴 Sport & aventure</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Famille & enfants" style="margin-right:6px;">👨‍👩‍👧 Famille & enfants</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Romantique" style="margin-right:6px;">💑 Romantique</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Vie urbaine" style="margin-right:6px;">🏙️ Vie urbaine</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Shopping" style="margin-right:6px;">🛍️ Shopping</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Vie nocturne" style="margin-right:6px;">🎉 Vie nocturne</label>
-</div>
-
-<label class="fieldTitle">Critères importants</label>
-<div style="display:flex;justify-content:flex-end;margin-bottom:8px;">
-    <button type="button" id="toutCocherCriteresButton" class="secondaryButton" style="padding:6px 12px;font-size:12px;">Tout cocher</button>
-</div>
-<div id="etapeCriteresCheckboxes" class="categorieSelector fiche" style="margin-bottom:16px;">
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Budget maîtrisé" style="margin-right:6px;">💰 Budget maîtrisé</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Peu de foule" style="margin-right:6px;">🧑‍🤝‍🧑 Peu de foule</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Adapté bébés/jeunes enfants" style="margin-right:6px;">👶 Bébés/jeunes enfants</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Accepte les animaux" style="margin-right:6px;">🐾 Accepte les animaux</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Accessible PMR" style="margin-right:6px;">♿ Accessible PMR</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Activités intérieures (pluie)" style="margin-right:6px;">🌂 Activités si pluie</label>
-    <label class="categorieChip" style="cursor:pointer;"><input type="checkbox" value="Parking facile" style="margin-right:6px;">🅿️ Parking facile</label>
-</div>
-
-<label class="fieldTitle">Précisions supplémentaires (facultatif)</label>
-<input id="etapeActivites" type="text" placeholder="Ex : rando facile, pas trop physique" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:16px;box-sizing:border-box;">
-
-
-            <button id="generateEtapePromptButton" class="primaryButton" style="width:100%;">
-                🔎 Générer et copier le prompt
-            </button>
-
+    <label class="fieldTitle">Point de départ</label>
+    <div class="lieuInputRow">
+        <div class="lieuInputWrapper">
+            <input id="etapeDepart" type="text" placeholder="Ex : Brassac" autocomplete="off">
         </div>
+        <button type="button" id="btnDepartMaPosition" class="dateClearButton" title="Utiliser ma position">📍</button>
+    </div>
+    <div id="etapeDepartSuggestions" class="lieuSuggestions" style="margin-bottom:10px;"></div>
+
+    <label class="fieldTitle">Point d'arrivée</label>
+    <input id="etapeArrivee" type="text" placeholder="Ex : Montpellier" autocomplete="off" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:6px;box-sizing:border-box;">
+    <div id="etapeArriveeSuggestions" class="lieuSuggestions" style="margin-bottom:10px;"></div>
+
+    <label class="fieldTitle">Durée du stop envisagée</label>
+    <input id="etapeDuree" type="text" placeholder="Ex : 1 à 2 jours" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
+
+    <label class="fieldTitle">Période de l'année</label>
+    <input id="etapePeriode" type="text" placeholder="Ex : Août" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:14px;box-sizing:border-box;">
+
+    <label class="fieldTitle">Type d'activités recherchées</label>
+    <div id="etapeActivitesContainer" style="margin-bottom:14px;"></div>
+
+    <label class="fieldTitle">Critères importants</label>
+    <div id="etapeCriteresContainer" style="margin-bottom:14px;"></div>
+
+    <label class="fieldTitle">Précisions supplémentaires (facultatif)</label>
+    <input id="etapeActivites" type="text" placeholder="Ex : rando facile" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:16px;box-sizing:border-box;">
+
+    <button id="generateEtapePromptButton" class="primaryButton" style="width:100%;">
+        🔎 Générer et copier le prompt
+    </button>
+
+</div>
+
 
         <div id="etapeFinderJsonStep" class="hidden">
 
