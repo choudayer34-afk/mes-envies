@@ -1750,3 +1750,36 @@ button {
     100%{ transform:scale(1); }
 }
 
+.catalogueRowWrapper{
+    position:relative;
+    overflow:hidden;
+    border-radius:16px;
+    margin-bottom:10px;
+    max-height:100px;
+    transition:max-height 0.2s ease, opacity 0.2s ease, margin-bottom 0.2s ease;
+}
+
+.catalogueRowDeleteZone{
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    width:90px;
+    background:#ef4444;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13px;
+    font-weight:600;
+    text-align:center;
+    padding:0 8px;
+}
+
+.catalogueRowContent{
+    position:relative;
+    background:var(--color-card);
+    z-index:1;
+    margin-bottom:0;
+}
+
