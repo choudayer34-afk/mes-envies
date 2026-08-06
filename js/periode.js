@@ -8,6 +8,19 @@ import { updateEnviePersonnesIds, getPersonnes } from "./storage.js";
 let selectedPeriode = null;
 let currentType = "single";
 let context = "creation"; // "creation" | "fiche"
+let periodeLibreCallback = null;
+let periodeLibreValeur = null;
+
+export function ouvrirSelecteurPeriodeLibre(onChoisi, valeurActuelle = null) {
+
+    periodeLibreCallback = onChoisi;
+    periodeLibreValeur = valeurActuelle;
+
+    context = "libre";
+
+    openDateModal();
+
+}
 
 export function getSelectedPeriode() {
     return selectedPeriode;
@@ -184,12 +197,24 @@ function showCustomPanel() {
 function applyPeriode(periode) {
 
     if (context === "creation") {
+
         selectedPeriode = periode;
         updateLabel(document.getElementById("dateLabel"), periode);
+
+    } else if (context === "libre") {
+
+        periodeLibreValeur = periode;
+
+        if (periodeLibreCallback) {
+            periodeLibreCallback(periode);
+        }
+
     } else {
+
         updateEnvieDate(getCurrentEnvieId(), periode);
         propagateDateToGroup(getCurrentEnvieId(), periode);
         updateLabel(document.getElementById("fichePeriodeLabel"), periode);
+
     }
 
 }
