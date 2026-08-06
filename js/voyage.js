@@ -21,6 +21,7 @@ import { openVoyageImport } from "./voyage-import.js";
 import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
 import { getFoyerId } from "./auth.js";
 
+const groupesOuverts = new Set();
 
 
 export function renderVoyageSection(envie) {
@@ -192,6 +193,8 @@ function isLogementCategoryLocal(categorieId) {
 
 function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey, ouvertParDefaut = false) {
 
+    const estOuvert = ouvertParDefaut || groupesOuverts.has(groupKey);
+
     const done = items.filter(i => i.realise).length;
     const total = items.length;
 
@@ -200,11 +203,11 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey, 
     header.className = "accordionHeader groupCollapseHeader";
     header.innerHTML = `
         <span>${label} <small class="groupProgress">(${done}/${total})</small></span>
-        <span class="accordionIcon">${ouvertParDefaut ? "▾" : "▸"}</span>
+        <span class="accordionIcon">${estOuvert ? "▾" : "▸"}</span>
     `;
 
     const content = document.createElement("div");
-    content.className = "accordionContent" + (ouvertParDefaut ? "" : " hidden");
+    content.className = "accordionContent" + (estOuvert ? "" : " hidden");
 
     items.forEach(item => {
         content.appendChild(createVoyageItemRow(item, voyageEnvie));
@@ -231,14 +234,21 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey, 
     noteWrapper.appendChild(noteTextarea);
     content.appendChild(noteWrapper);
 
-    header.addEventListener("click", () => {
+        header.addEventListener("click", () => {
 
         content.classList.toggle("hidden");
+
+        if (content.classList.contains("hidden")) {
+            groupesOuverts.delete(groupKey);
+        } else {
+            groupesOuverts.add(groupKey);
+        }
 
         const icon = header.querySelector(".accordionIcon");
         icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
 
     });
+
 
     container.appendChild(header);
     container.appendChild(content);
