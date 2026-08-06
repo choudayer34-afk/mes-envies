@@ -335,31 +335,13 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         openEnvie(enfant.id, voyageEnvie.id);
     });
 
-    row.querySelector(".deleteButton").addEventListener("click", () => {
+     row.querySelector(".deleteButton").addEventListener("click", () => {
 
-        console.log("Clic sur bouton retirer, enfant.id=" + enfant.id + " titre=" + enfant.titre);
-
-        try {
-
-            updateEnvieVoyage(enfant.id, null);
-
-            enfant.voyageId = null;
-
-            console.log("Après suppression, enfant.voyageId=" + enfant.voyageId);
-
-            const enfantsRestantsCheck = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
-            console.log("Enfants restants: " + JSON.stringify(enfantsRestantsCheck.map(e => ({ id: e.id, titre: e.titre }))));
-
-            renderVoyageSection(voyageEnvie);
-            renderEnvies();
-
-            showToast("✓ Retiré du voyage");
-
-        } catch (err) {
-            console.error("Erreur suppression envie du voyage: " + err.message);
-        }
+        updateEnvieVoyage(enfant.id, null);
+        showToast("✓ Retiré du voyage");
 
     });
+
 
     makeRowDraggable(row, enfant.id, (targetId) => {
 
@@ -410,27 +392,13 @@ function createLogementRow(logement, voyageEnvie) {
         openEnvie(logement.id, voyageEnvie.id);
     });
 
-      row.querySelector(".deleteButton").addEventListener("click", () => {
-
-        try {
-
-            updateEnvieVoyage(enfant.id, null);
-
-            enfant.voyageId = null;
-
-            console.log("Après suppression, enfant.voyageId=" + enfant.voyageId);
-            console.log("Nombre d'enfants du voyage après filtre: " + getEnvies().filter(e => e.voyageId === voyageEnvie.id).length);
-
-            renderVoyageSection(voyageEnvie);
-            renderEnvies();
-
-            showToast("✓ Retiré du voyage");
-
-        } catch (err) {
-            console.error("Erreur suppression envie du voyage: " + err.message);
-        }
-
+          row.querySelector(".deleteButton").addEventListener("click", () => {
+        updateEnvieVoyage(logement.id, null);
+        renderVoyageSection(voyageEnvie);
+        renderEnvies();
+        showToast("✓ Retiré du voyage");
     });
+
 
 
 
