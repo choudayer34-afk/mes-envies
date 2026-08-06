@@ -11,6 +11,7 @@ let filtreCategorieId = "tous";
 let triActuel = "recent";
 let positionActuelle = null;
 let vueActuelle = "liste";
+let filtreAssociation = "tous";
 
 export function initCatalogue() {
 
@@ -19,6 +20,12 @@ export function initCatalogue() {
     document.getElementById("closeDupliquerPicker").addEventListener("click", () => {
         document.getElementById("dupliquerPickerModal").classList.add("hidden");
     });
+
+    document.getElementById("catalogueAssociationSelect")?.addEventListener("change", (event) => {
+        filtreAssociation = event.target.value;
+        renderCatalogue();
+    });
+
 
     document.getElementById("catalogueSearchInput").addEventListener("input", (event) => {
         searchQuery = event.target.value.toLowerCase().trim();
@@ -163,6 +170,12 @@ function getEnviesFiltrees() {
         envies = envies.filter(e => e.categorie === filtreCategorieId);
     }
 
+    if (filtreAssociation === "associe") {
+        envies = envies.filter(e => !!e.voyageId);
+    } else if (filtreAssociation === "non-associe") {
+        envies = envies.filter(e => !e.voyageId);
+    }
+
     envies = envies.map(e => {
 
         let distance = null;
@@ -199,6 +212,7 @@ function getEnviesFiltrees() {
     return envies;
 
 }
+
 
 function renderCatalogue() {
 
@@ -247,7 +261,7 @@ function createCatalogueRow(envie) {
     row.innerHTML = `
         <div class="templateRowNom" style="cursor:pointer;">
             ${cat?.emoji || "💡"} ${envie.titre}
-            <small>${envie.voyageId ? "🧳 Dans un voyage" : "Sans voyage"}${envie.lieu?.nom ? ` · ${envie.lieu.nom}` : ""}${distanceLabel ? ` · ${distanceLabel}` : ""}</small>
+            <small>${envie.voyageId ? `🧳 ${getNomVoyage(envie.voyageId)}` : "Sans voyage"}${envie.lieu?.nom ? ` · ${envie.lieu.nom}` : ""}${distanceLabel ? ` · ${distanceLabel}` : ""}</small>
         </div>
         <div class="templateRowActions">
             <button class="actionButton editButton" title="Dupliquer vers un voyage">📋</button>
@@ -374,6 +388,13 @@ function openDupliquerPicker(envie) {
     });
 
     document.getElementById("dupliquerPickerModal").classList.remove("hidden");
+
+}
+
+function getNomVoyage(voyageId) {
+
+    const voyage = getEnvies().find(e => e.id === voyageId);
+    return voyage ? voyage.titre : "Voyage";
 
 }
 
