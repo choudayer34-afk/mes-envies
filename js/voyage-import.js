@@ -5,6 +5,7 @@ import { getDureeJours } from "./periode.js";
 import { getPersonnes } from "./storage.js";
 
 let modeTriRapport = "pertinence";
+const categoriesRepliees = new Set();
 
 
 export function openVoyageImport(voyageId) {
@@ -335,7 +336,7 @@ function renderRapportImport() {
             html += renderCarteIdee(idee);
         });
 
-    } else if (modeTriRapport === "categorie") {
+      } else if (modeTriRapport === "categorie") {
 
         const groupes = {};
 
@@ -355,15 +356,27 @@ function renderRapportImport() {
                 return a._distance - b._distance;
             });
 
-            html += `<div class="checklistCategorieHeader">${categorie}</div>`;
+            const estReplie = categoriesRepliees.has(categorie);
+            const nbSelectionneesGroupe = groupes[categorie].filter(i => i.selectionne).length;
+
+            html += `
+                <button type="button" class="accordionHeader categorieRepliButton" data-categorie="${categorie}" style="margin-top:12px;">
+                    <span>${categorie} <small class="groupProgress">(${nbSelectionneesGroupe}/${groupes[categorie].length})</small></span>
+                    <span class="accordionIcon">${estReplie ? "▸" : "▾"}</span>
+                </button>
+                <div class="categorieRepliContent" data-categorie-content="${categorie}" style="${estReplie ? "display:none;" : ""}">
+            `;
 
             groupes[categorie].forEach(idee => {
                 html += renderCarteIdee(idee);
             });
 
+            html += `</div>`;
+
         });
 
     }
+
 
     if (ideesAImporter.length > 0) {
         html += `<button id="confirmVoyageImportButton" class="primaryButton" style="width:100%;margin-top:14px;">✅ Importer les idées sélectionnées</button>`;
@@ -376,6 +389,26 @@ function renderRapportImport() {
         chip.addEventListener("click", () => {
             modeTriRapport = chip.dataset.tri;
             renderRapportImport();
+        });
+
+    });
+    reportEl.querySelectorAll(".categorieRepliButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const categorie = btn.dataset.categorie;
+            const content = reportEl.querySelector(`[data-categorie-content="${categorie}"]`);
+
+            if (categoriesRepliees.has(categorie)) {
+                categoriesRepliees.delete(categorie);
+                content.style.display = "";
+                btn.querySelector(".accordionIcon").textContent = "▾";
+            } else {
+                categoriesRepliees.add(categorie);
+                content.style.display = "none";
+                btn.querySelector(".accordionIcon").textContent = "▸";
+            }
+
         });
 
     });
