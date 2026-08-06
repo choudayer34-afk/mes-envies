@@ -1054,7 +1054,7 @@ Ce que je recherche pour ce stop : {{activites}}
 
 Important : tiens compte de la période de l'année indiquée pour évaluer la météo probable, la température, et la pertinence saisonnière des activités (par exemple, éviter de proposer une plage en plein hiver, ou une activité de montagne enneigée en été si ce n'est pas explicitement demandé). Mentionne dans la description si une activité est particulièrement adaptée ou déconseillée à cette période.
 
-Propose-moi 3 à 5 étapes intermédiaires pertinentes, situées sur ou proche du trajet entre ces deux points (pas de détour excessif), au format JSON strict suivant, sans aucun texte avant ou après :
+Propose-moi  5 a 10 étapes intermédiaires pertinentes, situées sur ou proche du trajet entre ces deux points (pas de détour excessif), au format JSON strict suivant, sans aucun texte avant ou après :
 
 {
   "etapes": [
@@ -1069,7 +1069,7 @@ Propose-moi 3 à 5 étapes intermédiaires pertinentes, situées sur ou proche d
   ]
 }
 
-Génère entre 3 et 5 étapes, classées par pertinence.
+Génère entre 5 a 10 étapes, classées par pertinence.
 Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut valide.
 Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.
 N'invente jamais de coordonnées GPS approximatives — laisse le champ vide si tu n'es pas certain.
