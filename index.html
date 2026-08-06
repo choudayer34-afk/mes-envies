@@ -321,6 +321,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 class="locationButton">
                 📍 Utiliser ma position
             </button>
+<button
+    id="btnChoisirSurCarte"
+    class="locationButton">
+    🗺️ Choisir sur la carte
+</button>
 
         </div>
 
@@ -440,6 +445,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <button id="generateRegionPromptButton" class="primaryButton" style="width:100%;">
             🔎 Générer le prompt
+        </button>
+
+    </div>
+
+</div>
+<div id="mapPickerModal" class="modal-overlay hidden">
+
+    <div class="modal" style="height:85dvh;display:flex;flex-direction:column;">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <button id="closeMapPicker" class="backButton">← Retour</button>
+            <button id="recentrerPositionButton" class="secondaryButton" style="padding:8px 14px;">📍 Ma position</button>
+        </div>
+
+        <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">
+            Tape sur la carte pour placer un repère, ou fais-le glisser pour ajuster.
+        </p>
+
+        <div id="mapPickerContainer" style="flex:1;border-radius:16px;overflow:hidden;"></div>
+
+        <button id="validerMapPickerButton" class="primaryButton" style="width:100%;margin-top:14px;" disabled data-lat="" data-lng="">
+            ✓ Valider ce lieu
         </button>
 
     </div>
