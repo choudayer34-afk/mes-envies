@@ -334,20 +334,20 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         openEnvie(enfant.id, voyageEnvie.id);
     });
 
-           row.querySelector(".deleteButton").addEventListener("click", () => {
-
-        console.log("Clic sur bouton retirer, enfant.id=" + enfant.id);
+    row.querySelector(".deleteButton").addEventListener("click", () => {
+console.log("VERSION TEST 123");
 
         try {
 
             updateEnvieVoyage(enfant.id, null);
-            console.log("updateEnvieVoyage OK");
+
+            enfant.voyageId = null;
+
+            console.log("Après suppression, enfant.voyageId=" + enfant.voyageId);
+            console.log("Nombre d'enfants du voyage après filtre: " + getEnvies().filter(e => e.voyageId === voyageEnvie.id).length);
 
             renderVoyageSection(voyageEnvie);
-            console.log("renderVoyageSection OK");
-
             renderEnvies();
-            console.log("renderEnvies OK");
 
             showToast("✓ Retiré du voyage");
 
@@ -356,6 +356,7 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         }
 
     });
+
 
 
 
