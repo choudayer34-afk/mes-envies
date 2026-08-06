@@ -57,6 +57,24 @@ export function initLocation() {
         });
     }
     
+        const btnChoisirSurCarte = document.getElementById("btnChoisirSurCarte");
+
+    if (btnChoisirSurCarte) {
+
+        btnChoisirSurCarte.addEventListener("click", () => {
+
+            openMapPicker((place) => {
+
+                document.getElementById("envieLieu").value = place.nom;
+                selectedLieu = place;
+
+            });
+
+        });
+
+    }
+
+    
         const btnLocateFiche = document.getElementById("btnLocateFiche");
 
     if (btnLocateFiche) {
