@@ -227,25 +227,26 @@ function renderVoyagePartage(voyage, enfants, container) {
 
 }
 
-function createCartePartage(envie) {
+function createCartePartage(envie, photosDuJour = []) {
 
     const card = document.createElement("div");
     card.className = "carnetActiviteCard";
 
     const emoji = getCategorieById(envie.categorie)?.emoji || "💡";
 
-      let photosHtml = "";
+    let photosHtml = "";
 
     if (envie.photos && envie.photos.length > 0) {
 
         photosHtml = `<div class="carnetPhotosGrid">`;
 
-        envie.photos.forEach((photo, index) => {
+        envie.photos.forEach(photo => {
 
             const thumbUrl = photo.url.replace("/upload/", "/upload/w_400,h_400,c_fill,q_auto/");
+            const indexGlobal = photosDuJour.findIndex(p => p.url === photo.url && p.activiteTitre === envie.titre);
 
             photosHtml += `
-                <div class="carnetPhotoItem" data-photo-index="${index}" style="cursor:pointer;">
+                <div class="carnetPhotoItem" data-index-global="${indexGlobal}" style="cursor:pointer;">
                     <img src="${thumbUrl}" loading="lazy">
                     ${photo.description ? `<div class="carnetPhotoLegende">${photo.description}</div>` : ""}
                 </div>
@@ -270,10 +271,9 @@ function createCartePartage(envie) {
 
             item.addEventListener("click", () => {
 
-                const index = parseInt(item.dataset.photoIndex, 10);
-                const photo = envie.photos[index];
+                const indexGlobal = parseInt(item.dataset.indexGlobal, 10);
 
-                openPhotoViewerPublic(photo.url, photo.description);
+                openPhotoViewerPublic(photosDuJour, indexGlobal);
 
             });
 
@@ -283,8 +283,8 @@ function createCartePartage(envie) {
 
     return card;
 
-
 }
+
 
 function getJourColor(envie, jourColorMap) {
 
