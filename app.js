@@ -28,6 +28,7 @@ import { openModalVoyage } from "./js/modal.js";
 import { initVoyageImport } from "./js/voyage-import.js";
 import { getCurrentEnvieId } from "./js/envie.js";
 import { renderVoyageSection } from "./js/voyage.js";
+import { initMapPicker } from "./js/location.js";
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -76,6 +77,7 @@ function init() {
     initMainButton();
     initLocation();
         initOutils();
+    initMapPicker();
 
         initSurvie();
     initSurvieImport();
