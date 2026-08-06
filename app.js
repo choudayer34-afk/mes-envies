@@ -29,7 +29,7 @@ import { initVoyageImport } from "./js/voyage-import.js";
 import { getCurrentEnvieId } from "./js/envie.js";
 import { renderVoyageSection } from "./js/voyage.js";
 
-import { initFoyerDataSync, getEnvies.js } from "./js/storage.js";
+import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
 import { renderCreationCategorieSelector } from "./js/modal.js";
 import { initSurvie } from "./js/survie.js";
