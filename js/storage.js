@@ -951,7 +951,7 @@ Génère une liste d'idées concrètes au format JSON strict suivant, sans aucun
   "idees": [
     {
       "titre": "Nom court de l'activité/lieu",
-      "categorie": "un mot parmi : Idée, Événement, Maison, Jardin, Courses, Sortie, Logement (choisis le plus pertinent)",
+      "categorie": "un mot parmi : {{categories}} (choisis le plus pertinent)", 
       "lieu": "Nom du lieu et ville, le plus précis possible (ex: 'Cascade de Sillans, Sillans-la-Cascade')",
       "latitude": "Coordonnée GPS latitude précise de ce lieu si tu la connais avec certitude, sinon laisser vide",
       "longitude": "Coordonnée GPS longitude précise de ce lieu si tu la connais avec certitude, sinon laisser vide",
