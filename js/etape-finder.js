@@ -215,19 +215,21 @@ function ouvrirCreationVoyageAvecLieu(etape) {
         const lat = parseFloat(etape.latitude);
         const lon = parseFloat(etape.longitude);
 
-        if (!isNaN(lat) && !isNaN(lon)) {
+               if (!isNaN(lat) && !isNaN(lon)) {
 
-            import("./location.js").then(({ getSelectedLieu }) => {
+            import("./location.js").then(({ setSelectedLieu }) => {
 
-                const lieu = getSelectedLieu();
-                lieu.nom = etape.nom;
-                lieu.adresse = etape.nom;
-                lieu.latitude = lat;
-                lieu.longitude = lon;
+                setSelectedLieu({
+                    nom: etape.nom,
+                    adresse: etape.nom,
+                    latitude: lat,
+                    longitude: lon
+                });
 
             });
 
         }
+
 
         const titreInput = document.getElementById("envieInput");
 
