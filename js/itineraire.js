@@ -57,6 +57,10 @@ export function buildLienGoogleMapsMultiEtapes({ itineraire, depart, arrivee }) 
 }
 async function calculerDistanceRouteKm(lat1, lon1, lat2, lon2) {
 
+    if (!navigator.onLine) {
+        return calculerDistanceKmVolOiseau(lat1, lon1, lat2, lon2);
+    }
+
     try {
 
         const url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=false`;
@@ -75,7 +79,6 @@ async function calculerDistanceRouteKm(lat1, lon1, lat2, lon2) {
 
     } catch (err) {
 
-        console.error("Erreur OSRM, repli sur vol d'oiseau: " + err.message);
         return calculerDistanceKmVolOiseau(lat1, lon1, lat2, lon2);
 
     }
