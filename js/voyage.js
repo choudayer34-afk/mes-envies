@@ -334,11 +334,12 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         openEnvie(enfant.id, voyageEnvie.id);
     });
 
-      row.querySelector(".deleteButton").addEventListener("click", () => {
+        row.querySelector(".deleteButton").addEventListener("click", () => {
 
         try {
 
             updateEnvieVoyage(enfant.id, null);
+            renderVoyageSection(voyageEnvie);
             renderEnvies();
             showToast("✓ Retiré du voyage");
 
@@ -347,6 +348,7 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         }
 
     });
+
 
 
     makeRowDraggable(row, enfant.id, (targetId) => {
@@ -397,11 +399,12 @@ function createLogementRow(logement, voyageEnvie) {
         openEnvie(logement.id, voyageEnvie.id);
     });
 
-     row.querySelector(".deleteButton").addEventListener("click", () => {
+      row.querySelector(".deleteButton").addEventListener("click", () => {
 
         try {
 
             updateEnvieVoyage(enfant.id, null);
+            renderVoyageSection(voyageEnvie);
             renderEnvies();
             showToast("✓ Retiré du voyage");
 
@@ -410,6 +413,7 @@ function createLogementRow(logement, voyageEnvie) {
         }
 
     });
+
 
 
     return row;
