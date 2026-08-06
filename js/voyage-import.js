@@ -133,44 +133,120 @@ function analyserImportVoyage() {
     const idees = data.idees || [];
     const valides = idees.filter(i => i.titre);
 
-    ideesAImporter = valides;
+    ideesAImporter = valides.map(i => ({ ...i, selectionne: true }));
+
+    renderRapportImport();
+
+}
+
+function renderRapportImport() {
+
+    const reportEl = document.getElementById("voyageImportReport");
+
+    const nbSelectionnees = ideesAImporter.filter(i => i.selectionne).length;
 
     let html = `<div class="containerStatutBox">
-        <div class="containerStatutLabel">📊 Rapport d'analyse</div>
-        <div class="containerStatutPct">${valides.length} idée${valides.length > 1 ? "s" : ""} valide${valides.length > 1 ? "s" : ""} sur ${idees.length} détectée${idees.length > 1 ? "s" : ""}</div>
+        <div class="containerStatutLabel">📊 ${nbSelectionnees} idée${nbSelectionnees > 1 ? "s" : ""} sélectionnée${nbSelectionnees > 1 ? "s" : ""} sur ${ideesAImporter.length}</div>
     </div>`;
 
-    if (valides.length > 0) {
+    html += `
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <button id="toutSelectionnerButton" class="secondaryButton" style="flex:1;">Tout cocher</button>
+            <button id="toutDeselectionnerButton" class="secondaryButton" style="flex:1;">Tout décocher</button>
+        </div>
+    `;
 
-        valides.forEach(i => {
-            html += `<div class="templateRow"><div class="templateRowNom">💡 ${i.titre} <small>${i.categorie || ""}</small></div></div>`;
-        });
+    ideesAImporter.forEach((idee, index) => {
 
-        html += `<button id="confirmVoyageImportButton" class="primaryButton" style="width:100%;margin-top:14px;">✅ Importer ces ${valides.length} idée${valides.length > 1 ? "s" : ""}</button>`;
+        const destination = document.getElementById("voyageImportDestination").value.trim();
+        const recherche = encodeURIComponent(`${idee.titre} ${idee.lieu || destination}`);
 
+        html += `
+            <div class="templateRow" style="align-items:flex-start;">
+                <label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">
+                    <input type="checkbox" class="ideeCheckbox" data-index="${index}" ${idee.selectionne ? "checked" : ""} style="width:20px;height:20px;margin-top:2px;flex-shrink:0;">
+                    <span>
+                        <div class="templateRowNom">${idee.titre}</div>
+                        <small style="color:var(--color-text-light);">${idee.categorie || ""}${idee.description ? ` · ${idee.description}` : ""}</small>
+                        <div style="margin-top:6px;display:flex;gap:8px;">
+                            <a href="https://www.google.com/search?q=${recherche}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
+                            <a href="https://www.tripadvisor.fr/Search?q=${recherche}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 TripAdvisor</a>
+                        </div>
+                    </span>
+                </label>
+            </div>
+        `;
+
+    });
+
+    if (ideesAImporter.length > 0) {
+        html += `<button id="confirmVoyageImportButton" class="primaryButton" style="width:100%;margin-top:14px;">✅ Importer les idées sélectionnées</button>`;
     }
 
     reportEl.innerHTML = html;
 
-    const confirmBtn = document.getElementById("confirmVoyageImportButton");
+    reportEl.querySelectorAll(".ideeCheckbox").forEach(checkbox => {
 
-    if (confirmBtn) {
-        confirmBtn.addEventListener("click", confirmerImportVoyage);
-    }
+        checkbox.addEventListener("change", (event) => {
+
+            const index = parseInt(event.target.dataset.index, 10);
+            ideesAImporter[index].selectionne = event.target.checked;
+
+            const label = reportEl.querySelectorAll(".containerStatutLabel")[0];
+            const nb = ideesAImporter.filter(i => i.selectionne).length;
+            label.textContent = `📊 ${nb} idée${nb > 1 ? "s" : ""} sélectionnée${nb > 1 ? "s" : ""} sur ${ideesAImporter.length}`;
+
+        });
+
+    });
+
+    document.getElementById("toutSelectionnerButton")?.addEventListener("click", () => {
+        ideesAImporter.forEach(i => i.selectionne = true);
+        renderRapportImport();
+    });
+
+    document.getElementById("toutDeselectionnerButton")?.addEventListener("click", () => {
+        ideesAImporter.forEach(i => i.selectionne = false);
+        renderRapportImport();
+    });
+
+    document.getElementById("confirmVoyageImportButton")?.addEventListener("click", confirmerImportVoyage);
 
 }
 
 async function confirmerImportVoyage() {
 
     const reportEl = document.getElementById("voyageImportReport");
+    const selection = ideesAImporter.filter(i => i.selectionne);
 
-    reportEl.innerHTML = `<div class="emptyState">📍 Géolocalisation des idées en cours...</div>`;
+    if (selection.length === 0) {
+        showToast("Aucune idée sélectionnée");
+        return;
+    }
 
-    for (const idee of ideesAImporter) {
+    reportEl.innerHTML = `<div class="emptyState">📍 Import en cours...</div>`;
+
+    for (const idee of selection) {
 
         let lieu = null;
 
-        if (idee.lieu) {
+        const latitudeIA = parseFloat(idee.latitude);
+        const longitudeIA = parseFloat(idee.longitude);
+
+        const coordonneesIAValides =
+            !isNaN(latitudeIA) && !isNaN(longitudeIA) &&
+            Math.abs(latitudeIA) <= 90 && Math.abs(longitudeIA) <= 180;
+
+        if (coordonneesIAValides) {
+
+            lieu = {
+                nom: idee.lieu || "",
+                adresse: idee.lieu || "",
+                latitude: latitudeIA,
+                longitude: longitudeIA
+            };
+
+        } else if (idee.lieu) {
 
             try {
 
@@ -201,17 +277,21 @@ async function confirmerImportVoyage() {
             titre: idee.titre,
             categorieId: trouverCategorieId(idee.categorie),
             description: idee.description || "",
-            lieu
+            lieu,
+            url: idee.url || ""
         });
 
-        await new Promise(resolve => setTimeout(resolve, 1100));
+        if (!coordonneesIAValides && idee.lieu) {
+            await new Promise(resolve => setTimeout(resolve, 1100));
+        }
 
     }
 
-    showToast(`✓ ${ideesAImporter.length} idée${ideesAImporter.length > 1 ? "s" : ""} importée${ideesAImporter.length > 1 ? "s" : ""}`);
+    showToast(`✓ ${selection.length} idée${selection.length > 1 ? "s" : ""} importée${selection.length > 1 ? "s" : ""}`);
 
     ideesAImporter = [];
 
     closeVoyageImport();
 
 }
+
