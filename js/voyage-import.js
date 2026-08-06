@@ -4,6 +4,20 @@ import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } 
 
 let voyageIdActuel = null;
 
+function calculerDistanceKm(lat1, lon1, lat2, lon2) {
+
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+}
+
 export function initVoyageImport() {
 
     document.getElementById("generateVoyageImportPromptButton").addEventListener("click", async () => {
@@ -170,6 +184,27 @@ function renderRapportImport() {
             <a href="https://www.google.com/search?q=${recherche}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
             <a href="https://www.tripadvisor.fr/Search?q=${encodeURIComponent(idee.titre + " " + (idee.lieu || destination))}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 TripAdvisor</a>
         `;
+        
+        if (idee.lieu) {
+
+            const rechercheMeteo = encodeURIComponent(idee.lieu);
+            liensHtml += `<a href="https://www.windy.com/?${rechercheMeteo}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🌤️ Météo</a>`;
+
+        }
+        
+                const estLogement = (idee.categorie || "").toLowerCase().includes("logement");
+
+        if (estLogement) {
+
+            const destination = document.getElementById("voyageImportDestination").value.trim();
+            const dates = document.getElementById("voyageImportDates").value.trim();
+            const rechercheBooking = encodeURIComponent(idee.lieu || destination);
+
+            liensHtml += `<a href="https://www.booking.com/searchresults.html?ss=${rechercheBooking}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🏨 Booking</a>`;
+
+        }
+
+
 
         if (estRando) {
 
