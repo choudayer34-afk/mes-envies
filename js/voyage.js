@@ -324,12 +324,20 @@ function createVoyageItemRow(enfant, voyageEnvie) {
         openEnvie(enfant.id, voyageEnvie.id);
     });
 
-    row.querySelector(".deleteButton").addEventListener("click", () => {
-        updateEnvieVoyage(enfant.id, null);
-        renderVoyageSection(voyageEnvie);
-        renderEnvies();
-        showToast("✓ Retiré du voyage");
+      row.querySelector(".deleteButton").addEventListener("click", () => {
+
+        try {
+
+            updateEnvieVoyage(enfant.id, null);
+            renderEnvies();
+            showToast("✓ Retiré du voyage");
+
+        } catch (err) {
+            console.error("Erreur suppression envie du voyage: " + err.message);
+        }
+
     });
+
 
     makeRowDraggable(row, enfant.id, (targetId) => {
 
@@ -379,12 +387,20 @@ function createLogementRow(logement, voyageEnvie) {
         openEnvie(logement.id, voyageEnvie.id);
     });
 
-    row.querySelector(".deleteButton").addEventListener("click", () => {
-        updateEnvieVoyage(logement.id, null);
-        renderVoyageSection(voyageEnvie);
-        renderEnvies();
-        showToast("✓ Retiré du voyage");
+     row.querySelector(".deleteButton").addEventListener("click", () => {
+
+        try {
+
+            updateEnvieVoyage(enfant.id, null);
+            renderEnvies();
+            showToast("✓ Retiré du voyage");
+
+        } catch (err) {
+            console.error("Erreur suppression envie du voyage: " + err.message);
+        }
+
     });
+
 
     return row;
 
