@@ -79,7 +79,7 @@ export function initEtapeFinder() {
         document.getElementById("etapeFinderModal").classList.add("hidden");
     });
 
-    document.getElementById("generateEtapePromptButton")?.addEventListener("click", async () => {
+        document.getElementById("generateEtapePromptButton")?.addEventListener("click", async () => {
 
         const texte = genererPromptEtape();
 
@@ -90,9 +90,10 @@ export function initEtapeFinder() {
         document.getElementById("etapeFinderFormStep").classList.add("hidden");
         document.getElementById("etapeFinderJsonStep").classList.remove("hidden");
 
-        showToast("✓ Prompt copié, colle-le dans ton IA");
+        afficherChoixIA(texte);
 
     });
+
 
     document.getElementById("backToEtapeFormStep")?.addEventListener("click", () => {
         document.getElementById("etapeFinderFormStep").classList.remove("hidden");
@@ -573,3 +574,22 @@ function extraireDatesCozycozy() {
 }
 
 
+function afficherChoixIA(texte) {
+
+    const zone = document.getElementById("etapeChoixIAZone");
+
+    if (!zone)
+        return;
+
+    const encode = encodeURIComponent(texte);
+
+    zone.innerHTML = `
+        <p style="font-size:13px;color:var(--color-text-light);margin-bottom:8px;">Prompt copié ! Ouvrir directement dans :</p>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <a href="https://chatgpt.com/?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">💬 ChatGPT</a>
+            <a href="https://www.perplexity.ai/search?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">🔍 Perplexity</a>
+            <a href="https://gemini.google.com/app?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">✨ Gemini</a>
+        </div>
+    `;
+
+}
