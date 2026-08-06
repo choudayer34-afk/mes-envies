@@ -223,18 +223,18 @@ function createCartePartage(envie) {
 
     const emoji = getCategorieById(envie.categorie)?.emoji || "💡";
 
-    let photosHtml = "";
+      let photosHtml = "";
 
     if (envie.photos && envie.photos.length > 0) {
 
         photosHtml = `<div class="carnetPhotosGrid">`;
 
-        envie.photos.forEach(photo => {
+        envie.photos.forEach((photo, index) => {
 
             const thumbUrl = photo.url.replace("/upload/", "/upload/w_400,h_400,c_fill,q_auto/");
 
             photosHtml += `
-                <div class="carnetPhotoItem">
+                <div class="carnetPhotoItem" data-photo-index="${index}" style="cursor:pointer;">
                     <img src="${thumbUrl}" loading="lazy">
                     ${photo.description ? `<div class="carnetPhotoLegende">${photo.description}</div>` : ""}
                 </div>
@@ -253,7 +253,25 @@ function createCartePartage(envie) {
         ${photosHtml}
     `;
 
+    if (envie.photos && envie.photos.length > 0) {
+
+        card.querySelectorAll(".carnetPhotoItem").forEach(item => {
+
+            item.addEventListener("click", () => {
+
+                const index = parseInt(item.dataset.photoIndex, 10);
+                const photo = envie.photos[index];
+
+                openPhotoViewerPublic(photo.url, photo.description);
+
+            });
+
+        });
+
+    }
+
     return card;
+
 
 }
 
@@ -360,6 +378,31 @@ function renderLegendePartage(lieux, jourColorMap) {
         legend.appendChild(item);
 
     });
+
+}
+
+function openPhotoViewerPublic(url, description) {
+
+    const modal = document.createElement("div");
+    modal.style = "position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;padding:16px;";
+
+    modal.innerHTML = `
+        <button style="align-self:flex-start;background:none;border:none;color:white;font-size:16px;margin-bottom:10px;">← Retour</button>
+        <img src="${url}" style="width:100%;border-radius:16px;flex-shrink:0;">
+        ${description ? `<p style="color:white;font-size:14px;text-align:center;margin-top:16px;">${description}</p>` : ""}
+    `;
+
+    modal.querySelector("button").addEventListener("click", () => {
+        modal.remove();
+    });
+
+    modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+            modal.remove();
+        }
+    });
+
+    document.body.appendChild(modal);
 
 }
 
