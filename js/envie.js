@@ -203,17 +203,37 @@ export function initAccordions() {
         if (!section)
             return;
 
-        section.classList.toggle("hidden");
+        const etaitOuvert = !section.classList.contains("hidden");
+
+        document.querySelectorAll(".accordionHeader").forEach(autreHeader => {
+
+            const autreSection = document.getElementById(autreHeader.dataset.target);
+
+            if (!autreSection || autreSection === section)
+                return;
+
+            autreSection.classList.add("hidden");
+
+            const autreIcon = autreHeader.querySelector(".accordionIcon");
+
+            if (autreIcon) {
+                autreIcon.textContent = "▸";
+            }
+
+        });
+
+        section.classList.toggle("hidden", etaitOuvert);
 
         const icon = header.querySelector(".accordionIcon");
 
         if (icon) {
-            icon.textContent = section.classList.contains("hidden") ? "▸" : "▾";
+            icon.textContent = etaitOuvert ? "▸" : "▾";
         }
 
     });
 
 }
+
 
 
 export function openEvaluationAccordion() {
