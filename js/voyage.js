@@ -735,6 +735,25 @@ function openOptimiserModal(items, voyageEnvie) {
                 renderVoyageSection(voyageEnvie);
 
             });
+                        content.querySelector("#ouvrirWaze").addEventListener("click", () => {
+
+                console.log("resultatCalcule: " + JSON.stringify(resultatCalcule));
+
+                const lien = buildLienWazePremiereEtape(resultatCalcule);
+
+                console.log("Lien Waze: " + lien);
+
+                if (lien) {
+                    window.location.href = lien;
+                } else {
+                    console.error("Aucun lien Waze généré (lien est null/undefined)");
+                }
+
+                modal.classList.add("hidden");
+                renderVoyageSection(voyageEnvie);
+
+            });
+
 
 });
 
