@@ -194,16 +194,38 @@ function analyserEtapes() {
         return;
     }
 
-    etapesTrouvees = (data.etapes || []).filter(e => e.nom);
+        etapesTrouvees = (data.etapes || []).filter(e => e.nom);
 
     if (etapesTrouvees.length === 0) {
         resultEl.innerHTML = `<div class="emptyState">Aucune étape valide trouvée dans le JSON.</div>`;
         return;
     }
 
+    if (lieuDepart?.latitude) {
+
+        etapesTrouvees.sort((a, b) => {
+
+            const latA = parseFloat(a.latitude);
+            const lonA = parseFloat(a.longitude);
+            const latB = parseFloat(b.latitude);
+            const lonB = parseFloat(b.longitude);
+
+            const distA = !isNaN(latA) && !isNaN(lonA)
+                ? calculerDistanceKm(lieuDepart.latitude, lieuDepart.longitude, latA, lonA)
+                : Infinity;
+
+            const distB = !isNaN(latB) && !isNaN(lonB)
+                ? calculerDistanceKm(lieuDepart.latitude, lieuDepart.longitude, latB, lonB)
+                : Infinity;
+
+            return distA - distB;
+
+        });
+
+    }
+
     renderEtapes();
 
-}
 
 function renderEtapes() {
 
@@ -399,3 +421,18 @@ function ouvrirCreationVoyageAvecLieu(etape) {
     }, 200);
 
 }
+
+function calculerDistanceKm(lat1, lon1, lat2, lon2) {
+
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+}
+
