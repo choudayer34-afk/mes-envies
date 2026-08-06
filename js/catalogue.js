@@ -12,6 +12,9 @@ let triActuel = "recent";
 let positionActuelle = null;
 let vueActuelle = "liste";
 let filtreAssociation = "tous";
+let modeSelection = false;
+let idsSelectionnes = new Set();
+
 
 export function initCatalogue() {
 
@@ -24,6 +27,48 @@ export function initCatalogue() {
     document.getElementById("catalogueAssociationSelect")?.addEventListener("change", (event) => {
         filtreAssociation = event.target.value;
         renderCatalogue();
+    });
+    document.getElementById("catalogueSelectionButton")?.addEventListener("click", () => {
+
+        modeSelection = !modeSelection;
+        idsSelectionnes.clear();
+
+        document.getElementById("catalogueSelectionButton").textContent = modeSelection ? "✕ Annuler" : "☑️ Sélectionner";
+        document.getElementById("catalogueSelectionBar").classList.toggle("hidden", !modeSelection);
+
+        renderCatalogue();
+
+    });
+
+    document.getElementById("supprimerSelectionButton")?.addEventListener("click", () => {
+
+        if (idsSelectionnes.size === 0)
+            return;
+
+        if (!window.confirm(`Supprimer ${idsSelectionnes.size} idée${idsSelectionnes.size > 1 ? "s" : ""} ?`))
+            return;
+
+        idsSelectionnes.forEach(id => deleteEnvie(id));
+
+        showToast(`✓ ${idsSelectionnes.size} idée${idsSelectionnes.size > 1 ? "s" : ""} supprimée${idsSelectionnes.size > 1 ? "s" : ""}`);
+
+        modeSelection = false;
+        idsSelectionnes.clear();
+
+        document.getElementById("catalogueSelectionButton").textContent = "☑️ Sélectionner";
+        document.getElementById("catalogueSelectionBar").classList.add("hidden");
+
+        renderCatalogue();
+
+    });
+
+    document.getElementById("toutSelectionnerCatalogueButton")?.addEventListener("click", () => {
+
+        const envies = getEnviesFiltrees();
+        envies.forEach(e => idsSelectionnes.add(e.id));
+
+        renderCatalogue();
+
     });
 
 
@@ -77,13 +122,19 @@ function updateVueToggle() {
 
 function openCatalogue() {
 
-    renderCategorieFiltre();
+    modeSelection = false;
+    idsSelectionnes.clear();
+
+    vueActuelle = "liste";
     updateVueToggle();
+
+    renderCategorieFiltre();
     renderCatalogue();
 
     document.getElementById("catalogueModal").classList.remove("hidden");
 
 }
+
 
 function closeCatalogue() {
     document.getElementById("catalogueModal").classList.add("hidden");
@@ -248,6 +299,43 @@ function createCatalogueRow(envie) {
     const wrapper = document.createElement("div");
     wrapper.className = "catalogueRowWrapper";
 
+    if (modeSelection) {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+        row.style.alignItems = "flex-start";
+
+        const cat = getCategorieById(envie.categorie);
+        const distanceLabel = envie._distance !== null ? `${envie._distance.toFixed(1)} km` : "";
+
+        row.innerHTML = `
+            <label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">
+                <input type="checkbox" class="catalogueSelectCheckbox" ${idsSelectionnes.has(envie.id) ? "checked" : ""} style="width:22px;height:22px;margin-top:2px;flex-shrink:0;">
+                <span class="templateRowNom">
+                    ${cat?.emoji || "💡"} ${envie.titre}
+                    <small>${envie.voyageId ? `🧳 ${getNomVoyage(envie.voyageId)}` : "Sans voyage"}${envie.lieu?.nom ? ` · ${envie.lieu.nom}` : ""}${distanceLabel ? ` · ${distanceLabel}` : ""}</small>
+                </span>
+            </label>
+        `;
+
+        row.querySelector(".catalogueSelectCheckbox").addEventListener("change", (event) => {
+
+            if (event.target.checked) {
+                idsSelectionnes.add(envie.id);
+            } else {
+                idsSelectionnes.delete(envie.id);
+            }
+
+            document.getElementById("selectionCompteur").textContent = `${idsSelectionnes.size} sélectionnée${idsSelectionnes.size > 1 ? "s" : ""}`;
+
+        });
+
+        wrapper.appendChild(row);
+
+        return wrapper;
+
+    }
+
     const deleteZone = document.createElement("div");
     deleteZone.className = "catalogueRowDeleteZone";
     deleteZone.innerHTML = "🗑️ Supprimer";
@@ -286,11 +374,9 @@ function createCatalogueRow(envie) {
     let dragging = false;
 
     row.addEventListener("touchstart", (event) => {
-
         startX = event.touches[0].clientX;
         dragging = true;
         row.style.transition = "none";
-
     });
 
     row.addEventListener("touchmove", (event) => {
@@ -300,11 +386,8 @@ function createCatalogueRow(envie) {
 
         currentX = event.touches[0].clientX - startX;
 
-        if (currentX > 0)
-            currentX = 0;
-
-        if (currentX < -90)
-            currentX = -90;
+        if (currentX > 0) currentX = 0;
+        if (currentX < -90) currentX = -90;
 
         row.style.transform = `translateX(${currentX}px)`;
 
@@ -316,13 +399,9 @@ function createCatalogueRow(envie) {
         row.style.transition = "transform 0.2s ease";
 
         if (currentX < -50) {
-
             row.style.transform = "translateX(-90px)";
-
         } else {
-
             row.style.transform = "translateX(0)";
-
         }
 
     });
@@ -348,6 +427,7 @@ function createCatalogueRow(envie) {
     return wrapper;
 
 }
+
 
 
 function openDupliquerPicker(envie) {
