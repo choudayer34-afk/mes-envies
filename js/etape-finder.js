@@ -248,7 +248,7 @@ function renderEtapes() {
         const card = document.createElement("div");
         card.className = "carnetActiviteCard";
 
-        card.innerHTML = `
+                card.innerHTML = `
             <div class="carnetActiviteTitre">📍 ${etape.nom}${etape.detourKm ? ` <small style="color:var(--color-text-light);font-weight:400;">· +${etape.detourKm} km de détour</small>` : ""}</div>
             ${etape.description ? `<p class="carnetActiviteDescription">${etape.description}</p>` : ""}
             ${etape.pointsForts?.length ? `<ul style="font-size:13px;color:var(--color-text-light);margin:8px 0 10px 18px;">${etape.pointsForts.map(p => `<li>${p}</li>`).join("")}</ul>` : ""}
@@ -256,10 +256,17 @@ function renderEtapes() {
                 <a href="https://www.google.com/search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
                 <a href="https://www.tripadvisor.fr/Search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">⭐ Avis TripAdvisor</a>
             </div>
+                      <div style="display:flex;gap:8px;margin-bottom:8px;">
+                <button class="secondaryButton chercherBookingButton" data-index="${index}" style="flex:1;">🏨 Booking</button>
+                <button class="secondaryButton chercherAirbnbButton" data-index="${index}" style="flex:1;">🏠 Airbnb</button>
+                <button class="secondaryButton chercherTrivagoButton" data-index="${index}" style="flex:1;">🔍 Trivago</button>
+            </div>
+
             <button class="primaryButton creerVoyageEtapeButton" data-index="${index}" style="width:100%;">
                 🧳 Créer un voyage ici
             </button>
         `;
+
 
         resultEl.appendChild(card);
 
@@ -278,6 +285,46 @@ function renderEtapes() {
         });
 
     });
+
+        resultEl.querySelectorAll(".chercherBookingButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const etape = etapesTrouvees[parseInt(btn.dataset.index, 10)];
+            const recherche = encodeURIComponent(etape.nom);
+
+            window.open(`https://www.booking.com/searchresults.html?ss=${recherche}`, "_blank");
+
+        });
+
+    });
+
+    resultEl.querySelectorAll(".chercherAirbnbButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const etape = etapesTrouvees[parseInt(btn.dataset.index, 10)];
+            const recherche = encodeURIComponent(etape.nom);
+
+            window.open(`https://www.airbnb.fr/s/${recherche}/homes`, "_blank");
+
+        });
+
+    });
+
+    resultEl.querySelectorAll(".chercherTrivagoButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const etape = etapesTrouvees[parseInt(btn.dataset.index, 10)];
+            const recherche = encodeURIComponent(etape.nom);
+
+            window.open(`https://www.trivago.fr/fr/srl/hotels-${recherche}`, "_blank");
+
+        });
+
+    });
+
 
         setTimeout(async () => await initMiniMap(), 100);
 
