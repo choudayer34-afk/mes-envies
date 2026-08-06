@@ -1,13 +1,31 @@
-import { getPromptEtape } from "./storage.js";
+import { getPromptEtape, getActiviteTypes, getCriteresVoyage } from "./storage.js";
 import { openModalVoyage } from "./modal.js";
 import { showToast } from "./toast.js";
+import { searchLocation, useCurrentLocation } from "./location.js";
+import { renderMultiSelectCollapsible } from "./multiselect.js";
 
 let etapesTrouvees = [];
 let miniMap = null;
+let lieuDepart = null;
+let lieuArrivee = null;
+
+const activitesSelectionnees = new Set();
+const criteresSelectionnes = new Set();
 
 export function initEtapeFinder() {
 
     document.getElementById("btnEtapeFinder")?.addEventListener("click", () => {
+
+        activitesSelectionnees.clear();
+        criteresSelectionnes.clear();
+        lieuDepart = null;
+        lieuArrivee = null;
+
+        renderMultiSelectCollapsible("etapeActivitesContainer", getActiviteTypes(), activitesSelectionnees, () => {});
+        renderMultiSelectCollapsible("etapeCriteresContainer", getCriteresVoyage(), criteresSelectionnes, () => {});
+
+        setupAutocompleteChamp("etapeDepart", "etapeDepartSuggestions", (place) => { lieuDepart = place; });
+        setupAutocompleteChamp("etapeArrivee", "etapeArriveeSuggestions", (place) => { lieuArrivee = place; });
 
         document.getElementById("etapeFinderJsonStep").classList.add("hidden");
         document.getElementById("etapeFinderFormStep").classList.remove("hidden");
@@ -15,22 +33,15 @@ export function initEtapeFinder() {
 
     });
 
-    document.getElementById("toutCocherActivitesButton")?.addEventListener("click", () => {
+    document.getElementById("btnDepartMaPosition")?.addEventListener("click", (event) => {
 
-        document.querySelectorAll("#etapeActivitesCheckboxes input[type='checkbox']").forEach(cb => {
-            cb.checked = true;
-        });
-
-    });
-
-    document.getElementById("toutCocherCriteresButton")?.addEventListener("click", () => {
-
-        document.querySelectorAll("#etapeCriteresCheckboxes input[type='checkbox']").forEach(cb => {
-            cb.checked = true;
-        });
+        useCurrentLocation(
+            document.getElementById("etapeDepart"),
+            (place) => { lieuDepart = place; },
+            event.currentTarget
+        );
 
     });
-
 
     document.getElementById("closeEtapeFinder")?.addEventListener("click", () => {
         document.getElementById("etapeFinderModal").classList.add("hidden");
@@ -60,24 +71,79 @@ export function initEtapeFinder() {
 
 }
 
+function setupAutocompleteChamp(inputId, suggestionsId, onSelect) {
+
+    const input = document.getElementById(inputId);
+    const suggestionsBox = document.getElementById(suggestionsId);
+
+    if (!input || !suggestionsBox)
+        return;
+
+    input.value = "";
+    suggestionsBox.innerHTML = "";
+
+    let debounce;
+
+    input.oninput = () => {
+
+        clearTimeout(debounce);
+
+        const query = input.value.trim();
+
+        if (query.length < 3) {
+            suggestionsBox.innerHTML = "";
+            return;
+        }
+
+        debounce = setTimeout(async () => {
+
+            const resultats = await searchLocation(query);
+
+            suggestionsBox.innerHTML = "";
+
+            resultats.forEach(result => {
+
+                const item = document.createElement("div");
+                item.className = "lieuItem";
+                item.textContent = result.display_name;
+
+                item.addEventListener("click", () => {
+
+                    const place = {
+                        nom: result.display_name,
+                        adresse: result.display_name,
+                        latitude: parseFloat(result.lat),
+                        longitude: parseFloat(result.lon)
+                    };
+
+                    input.value = place.nom;
+                    suggestionsBox.innerHTML = "";
+                    onSelect(place);
+
+                });
+
+                suggestionsBox.appendChild(item);
+
+            });
+
+        }, 400);
+
+    };
+
+}
+
 function genererPromptEtape() {
 
-    const depart = document.getElementById("etapeDepart").value.trim();
-    const arrivee = document.getElementById("etapeArrivee").value.trim();
+    const depart = lieuDepart?.nom || document.getElementById("etapeDepart").value.trim();
+    const arrivee = lieuArrivee?.nom || document.getElementById("etapeArrivee").value.trim();
     const duree = document.getElementById("etapeDuree").value.trim();
     const periode = document.getElementById("etapePeriode").value.trim();
     const precisions = document.getElementById("etapeActivites").value.trim();
 
-    const activitesCochees = Array.from(document.querySelectorAll("#etapeActivitesCheckboxes input:checked"))
-        .map(cb => cb.value);
+    let activitesTexte = Array.from(activitesSelectionnees).join(", ") || "toutes activités pertinentes";
 
-    const criteresCoches = Array.from(document.querySelectorAll("#etapeCriteresCheckboxes input:checked"))
-        .map(cb => cb.value);
-
-    let activitesTexte = activitesCochees.join(", ") || "toutes activités pertinentes";
-
-    if (criteresCoches.length > 0) {
-        activitesTexte += `. Critères importants : ${criteresCoches.join(", ")}`;
+    if (criteresSelectionnes.size > 0) {
+        activitesTexte += `. Critères importants : ${Array.from(criteresSelectionnes).join(", ")}`;
     }
 
     if (precisions) {
@@ -96,7 +162,6 @@ function genererPromptEtape() {
     return texte;
 
 }
-
 
 function normaliserGuillemets(texte) {
 
@@ -246,12 +311,18 @@ function ouvrirCreationVoyageAvecLieu(etape) {
 
     setTimeout(() => {
 
+        const titreInput = document.getElementById("envieInput");
+
+        if (titreInput && !titreInput.value) {
+            titreInput.value = etape.nom;
+        }
+
         document.getElementById("envieLieu").value = etape.nom;
 
         const lat = parseFloat(etape.latitude);
         const lon = parseFloat(etape.longitude);
 
-               if (!isNaN(lat) && !isNaN(lon)) {
+        if (!isNaN(lat) && !isNaN(lon)) {
 
             import("./location.js").then(({ setSelectedLieu }) => {
 
@@ -264,13 +335,6 @@ function ouvrirCreationVoyageAvecLieu(etape) {
 
             });
 
-        }
-
-
-        const titreInput = document.getElementById("envieInput");
-
-        if (titreInput && !titreInput.value) {
-            titreInput.value = etape.nom;
         }
 
     }, 200);
