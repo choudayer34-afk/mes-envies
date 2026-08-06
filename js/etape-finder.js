@@ -200,7 +200,7 @@ function analyserEtapes() {
         return;
     }
 
-        etapesTrouvees = (data.etapes || []).filter(e => e.nom);
+    etapesTrouvees = (data.etapes || []).filter(e => e.nom);
 
     if (etapesTrouvees.length === 0) {
         resultEl.innerHTML = `<div class="emptyState">Aucune étape valide trouvée dans le JSON.</div>`;
@@ -231,6 +231,8 @@ function analyserEtapes() {
     }
 
     renderEtapes();
+
+}
 
 
 function renderEtapes() {
