@@ -156,10 +156,30 @@ function renderRapportImport() {
         </div>
     `;
 
-    ideesAImporter.forEach((idee, index) => {
+        ideesAImporter.forEach((idee, index) => {
 
         const destination = document.getElementById("voyageImportDestination").value.trim();
-        const recherche = encodeURIComponent(`${idee.titre} ${idee.lieu || destination}`);
+        const dates = document.getElementById("voyageImportDates").value.trim();
+
+        const rechercheTexte = `${idee.titre} ${idee.lieu || destination} ${dates}`.trim();
+        const recherche = encodeURIComponent(rechercheTexte);
+
+        const estRando = (idee.categorie || "").toLowerCase().includes("randon");
+
+        let liensHtml = `
+            <a href="https://www.google.com/search?q=${recherche}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
+            <a href="https://www.tripadvisor.fr/Search?q=${encodeURIComponent(idee.titre + " " + (idee.lieu || destination))}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 TripAdvisor</a>
+        `;
+
+        if (estRando) {
+
+            const rechercheRando = encodeURIComponent(`${idee.titre} ${idee.lieu || destination}`);
+
+            liensHtml += `
+                <a href="https://www.visorando.com/rechercher.php?q=${rechercheRando}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🥾 Visorando</a>
+            `;
+
+        }
 
         html += `
             <div class="templateRow" style="align-items:flex-start;">
@@ -168,16 +188,15 @@ function renderRapportImport() {
                     <span>
                         <div class="templateRowNom">${idee.titre}</div>
                         <small style="color:var(--color-text-light);">${idee.categorie || ""}${idee.description ? ` · ${idee.description}` : ""}</small>
-                        <div style="margin-top:6px;display:flex;gap:8px;">
-                            <a href="https://www.google.com/search?q=${recherche}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
-                            <a href="https://www.tripadvisor.fr/Search?q=${recherche}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 TripAdvisor</a>
-                        </div>
+                        ${idee.url ? `<div style="margin-top:4px;"><a href="${idee.url}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;">🔗 Lien suggéré par l'IA</a></div>` : ""}
+                        <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">${liensHtml}</div>
                     </span>
                 </label>
             </div>
         `;
 
     });
+
 
     if (ideesAImporter.length > 0) {
         html += `<button id="confirmVoyageImportButton" class="primaryButton" style="width:100%;margin-top:14px;">✅ Importer les idées sélectionnées</button>`;
