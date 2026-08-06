@@ -416,25 +416,21 @@ let mapPickerInstance = null;
 let mapPickerMarker = null;
 let onLieuChoisiCallback = null;
 
-export function openMapPicker(onLieuChoisi) {
+    const btnChoisirSurCarteFiche = document.getElementById("btnChoisirSurCarteFiche");
 
-    onLieuChoisiCallback = onLieuChoisi;
+    if (btnChoisirSurCarteFiche) {
 
-    document.getElementById("mapPickerModal").classList.remove("hidden");
+        btnChoisirSurCarteFiche.addEventListener("click", () => {
 
-    requestAnimationFrame(() => {
+            const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
 
-        if (!mapPickerInstance) {
-            initMapPickerLeaflet();
-        }
+            openMapPicker((place) => {
+                updateEnvieLieu(getCurrentEnvieId(), place);
+            }, envie?.lieu);
 
-        centrerSurPositionActuelle();
+        });
 
-        setTimeout(() => mapPickerInstance.invalidateSize(), 100);
-
-    });
-
-}
+    }
 
 function initMapPickerLeaflet() {
 
