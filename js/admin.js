@@ -2,6 +2,7 @@ import {
     getEnvieCategories, createEnvieCategory, updateEnvieCategoryDef,
     deleteEnvieCategoryDef, moveEnvieCategory
 } from "./storage.js";
+import { fusionnerActiviteTypesParDefaut, fusionnerCriteresVoyageParDefaut } from "./storage.js";
 
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
@@ -37,6 +38,33 @@ export function initAdmin() {
 
         createActiviteType(label.trim(), emoji.trim());
         renderActiviteTypesList();
+
+    });
+    document.getElementById("fusionnerActiviteTypesButton")?.addEventListener("click", async () => {
+
+        const nb = await fusionnerActiviteTypesParDefaut();
+
+        if (nb === 0) {
+            alert("Aucun nouveau type à ajouter, tu as déjà tout.");
+        } else {
+            alert(`✓ ${nb} nouveau${nb > 1 ? "x" : ""} type${nb > 1 ? "s" : ""} d'activité ajouté${nb > 1 ? "s" : ""}`);
+        }
+
+        setTimeout(renderActiviteTypesList, 300);
+
+    });
+
+    document.getElementById("fusionnerCriteresVoyageButton")?.addEventListener("click", async () => {
+
+        const nb = await fusionnerCriteresVoyageParDefaut();
+
+        if (nb === 0) {
+            alert("Aucun nouveau critère à ajouter, tu as déjà tout.");
+        } else {
+            alert(`✓ ${nb} nouveau${nb > 1 ? "x" : ""} critère${nb > 1 ? "s" : ""} ajouté${nb > 1 ? "s" : ""}`);
+        }
+
+        setTimeout(renderCriteresVoyageList, 300);
 
     });
 
