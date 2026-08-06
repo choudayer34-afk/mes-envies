@@ -21,7 +21,7 @@ import { openVoyageImport } from "./voyage-import.js";
 import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
 import { getFoyerId } from "./auth.js";
 
-let resultatCalcule = null;
+
 
 export function renderVoyageSection(envie) {
 
@@ -253,9 +253,10 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey, 
         optimiserButton.style.width = "100%";
         optimiserButton.style.marginTop = "10px";
 
-        optimiserButton.addEventListener("click", () => {
-            openOptimiserModal(items, voyageEnvie);
+                optimiserButton.addEventListener("click", () => {
+            openOptimiserModal(items, voyageEnvie, groupKey);
         });
+
 
         content.appendChild(optimiserButton);
 
@@ -610,7 +611,30 @@ function ouvrirPartageModal(envie) {
 
 }
 
-function openOptimiserModal(items, voyageEnvie) {
+function trouverLogementDuJour(logements, groupKey) {
+
+    if (!groupKey || !groupKey.startsWith("d_"))
+        return null;
+
+    const dateStr = groupKey.replace("d_", "").split("_")[0];
+
+    return logements.find(logement => {
+
+        if (!logement.date?.start)
+            return false;
+
+        const debut = logement.date.start;
+        const fin = logement.date.end || logement.date.start;
+
+        return dateStr >= debut && dateStr <= fin;
+
+    }) || null;
+
+}
+
+
+
+function openOptimiserModal(items, voyageEnvie, groupKey) {
 
     const tousLesEnfants = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
     const logements = tousLesEnfants.filter(e => isLogementCategoryLocal(e.categorie) && e.lieu?.latitude && e.lieu?.longitude);
@@ -621,12 +645,18 @@ function openOptimiserModal(items, voyageEnvie) {
     const modal = document.getElementById("optimiserModal");
     const content = document.getElementById("optimiserModalContent");
 
-    let departId = null;
-    let arriveeId = null;
+    const logementDuJour = trouverLogementDuJour(logements, groupKey);
+
+    let departId = logementDuJour?.id || null;
+    let arriveeId = logementDuJour?.id || null;
     let departManuel = null;
     let arriveeManuelle = null;
 
+    let resultatCalcule = null;
+
     function renderChoix() {
+        // ... (le reste de la fonction reste identique)
+
 
         content.innerHTML = `
             <label class="fieldTitle">Point de départ</label>
