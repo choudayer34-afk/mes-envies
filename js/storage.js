@@ -952,15 +952,20 @@ Génère une liste d'idées concrètes au format JSON strict suivant, sans aucun
     {
       "titre": "Nom court de l'activité/lieu",
       "categorie": "un mot parmi : Idée, Événement, Maison, Jardin, Courses, Sortie, Logement (choisis le plus pertinent)",
-      "lieu": "Nom du lieu et ville, le plus précis possible pour être géolocalisé (ex: 'Cascade de Sillans, Sillans-la-Cascade')",
-      "description": "1 à 2 phrases décrivant l'intérêt de cette idée"
+      "lieu": "Nom du lieu et ville, le plus précis possible (ex: 'Cascade de Sillans, Sillans-la-Cascade')",
+      "latitude": "Coordonnée GPS latitude précise de ce lieu si tu la connais avec certitude, sinon laisser vide",
+      "longitude": "Coordonnée GPS longitude précise de ce lieu si tu la connais avec certitude, sinon laisser vide",
+      "description": "1 à 2 phrases décrivant l'intérêt de cette idée",
+      "url": "Lien vers le site officiel ou une page d'information fiable sur cette activité, si tu en connais un existant réellement. Laisser une chaîne vide si aucun lien fiable n'est connu."
     }
   ]
 }
 
 Génère entre 15 et 25 idées variées (activités, randonnées, restaurants, visites, logement si pertinent).
 Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut valide.
-Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.`;
+Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.
+Important : n'invente jamais une URL ni des coordonnées GPS approximatives — si tu n'es pas certain d'une information précise, laisse le champ vide plutôt que de proposer une donnée incorrecte. Privilégie toujours de fournir des coordonnées GPS précises quand tu les connais, plutôt que de laisser le géocodage se faire uniquement sur le nom du lieu.`;
+
 
 let promptImportCache = DEFAULT_PROMPT_IMPORT;
 
