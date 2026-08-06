@@ -26,35 +26,44 @@ export function initModal() {
     document.getElementById("saveEnvie")
         .addEventListener("click", saveCurrentEnvie);
         
-            document.getElementById("advancedModeButton").addEventListener("click", async () => {
+     
+    document.getElementById("advancedModeButton").addEventListener("click", async () => {
 
-        const input = document.getElementById("envieInput");
-        const titre = input.value.trim();
+        try {
 
-        if (!titre)
-            return;
+            const input = document.getElementById("envieInput");
+            const titre = input.value.trim();
 
-        createEnvie({
-            titre,
-            categorie: currentCategorie,
-            lieu: getSelectedLieu(),
-            date: getSelectedPeriode()
-        });
+            if (!titre)
+                return;
 
-        resetSelectedLieu();
-        resetSelectedPeriode();
+            createEnvie({
+                titre,
+                categorie: currentCategorie,
+                lieu: getSelectedLieu(),
+                date: getSelectedPeriode()
+            });
 
-        closeModal();
+            resetSelectedLieu();
+            resetSelectedPeriode();
 
-        setTimeout(() => {
+            closeModal();
 
-            const nouvelle = getEnvies()[0];
+            setTimeout(() => {
 
-            if (nouvelle) {
-                openEnvie(nouvelle.id, null);
-            }
+                const nouvelle = getEnvies()[0];
 
-        }, 400);
+                if (nouvelle) {
+                    openEnvie(nouvelle.id, null);
+                }
+
+            }, 400);
+
+        } catch (err) {
+
+            console.error("Erreur advancedModeButton: " + err.message + " | Stack: " + err.stack);
+
+        }
 
     });
 
@@ -166,38 +175,48 @@ export function editEnvie(envie) {
 
 function saveCurrentEnvie() {
 
-    const input = document.getElementById("envieInput");
-    const titre = input.value.trim();
+    try {
 
-    if (!titre)
-        return;
+        const input = document.getElementById("envieInput");
+        const titre = input.value.trim();
 
-    if (currentEditId) {
+        if (!titre)
+            return;
 
-        updateEnvie(currentEditId, titre);
-        showToast("✓ Envie modifiée");
+        if (currentEditId) {
 
-    } else {
+            updateEnvie(currentEditId, titre);
+            showToast("✓ Envie modifiée");
 
-               createEnvie({
-            titre,
-            categorie: currentCategorie,
-            lieu: getSelectedLieu(),
-            date: getSelectedPeriode()
-        });
+        } else {
 
-        resetSelectedLieu();
-        resetSelectedPeriode();
+            createEnvie({
+                titre,
+                categorie: currentCategorie,
+                lieu: getSelectedLieu(),
+                date: getSelectedPeriode()
+            });
 
-        showToast("✓ Envie ajoutée");
+            resetSelectedLieu();
+            resetSelectedPeriode();
+
+            showToast("✓ Envie ajoutée");
+
+        }
+
+        currentEditId = null;
+        closeModal();
+        renderEnvies();
+
+    } catch (err) {
+
+        console.error("Erreur saveCurrentEnvie: " + err.message + " | Stack: " + err.stack);
 
     }
 
-    currentEditId = null;
-    closeModal();
-    renderEnvies();
-
 }
+
+
 
 /* ---------- Modale suppression ---------- */
 
