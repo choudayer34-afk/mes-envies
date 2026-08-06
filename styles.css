@@ -243,7 +243,8 @@ main{
 #optimiserModal,
 #enviePickerModal,
 #outilsMenuModal, #pileOuFaceModal, #roueDecisionModal, #tirageNombreModal, #tirageLettreModal, #motAleatoireModal, #ardoiseModal, 
-#minuteurModal
+#minuteurModal,
+ #mapPickerModal
 {
     z-index:2100;
 }
