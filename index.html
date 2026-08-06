@@ -1204,6 +1204,15 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="closeCatalogue" class="backButton">← Retour</button>
 
         <h2>📚 Catalogue d'idées</h2>
+<button id="catalogueSelectionButton" class="secondaryButton" style="width:100%;margin-bottom:12px;">
+    ☑️ Sélectionner
+</button>
+
+<div id="catalogueSelectionBar" class="hidden" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;background:#F5F8F9;padding:10px;border-radius:14px;">
+    <span id="selectionCompteur" style="flex:1;font-size:13px;">0 sélectionnée</span>
+    <button id="toutSelectionnerCatalogueButton" class="secondaryButton" style="padding:8px 12px;font-size:13px;">Tout</button>
+    <button id="supprimerSelectionButton" class="secondaryButton" style="padding:8px 12px;font-size:13px;background:#FEE2E2;color:#DC2626;">🗑️ Supprimer</button>
+</div>
 
         <input
             id="catalogueSearchInput"
