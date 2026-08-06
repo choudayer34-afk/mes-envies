@@ -15,6 +15,10 @@ export function getSelectedLieu() {
     return selectedLieu;
 }
 
+export function setSelectedLieu(lieu) {
+    selectedLieu = { ...lieu };
+}
+
 export function resetSelectedLieu() {
     selectedLieu = { nom: "", adresse: "", latitude: null, longitude: null };
 }
