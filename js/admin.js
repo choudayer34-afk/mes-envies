@@ -6,6 +6,10 @@ import {
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
 import { renderPromptRegionAdmin } from "./region.js";
+import {
+    getActiviteTypes, createActiviteType, updateActiviteType, deleteActiviteType, moveActiviteType,
+    getCriteresVoyage, createCritereVoyage, updateCritereVoyage, deleteCritereVoyage, moveCritereVoyage
+} from "./storage.js";
 
 import { groupByCategorie } from "./checklist.js";
 import {
@@ -24,7 +28,30 @@ export function initAdmin() {
 
     document.getElementById("btnSettings").addEventListener("click", openAdmin);
     document.getElementById("closeAdmin").addEventListener("click", closeAdmin);
-    
+        document.getElementById("addActiviteTypeButton")?.addEventListener("click", () => {
+
+        const label = prompt("Nom du type d'activité :");
+        if (!label?.trim()) return;
+
+        const emoji = prompt("Emoji :", "🏷️") || "🏷️";
+
+        createActiviteType(label.trim(), emoji.trim());
+        renderActiviteTypesList();
+
+    });
+
+    document.getElementById("addCritereVoyageButton")?.addEventListener("click", () => {
+
+        const label = prompt("Nom du critère :");
+        if (!label?.trim()) return;
+
+        const emoji = prompt("Emoji :", "🏷️") || "🏷️";
+
+        createCritereVoyage(label.trim(), emoji.trim());
+        renderCriteresVoyageList();
+
+    });
+
             document.getElementById("addEnvieCategorieButton").addEventListener("click", () => {
 
         const label = prompt("Nom de la catégorie :");
@@ -59,6 +86,11 @@ export function initAdmin() {
                 .classList.toggle("hidden", target !== "templates");
             document.getElementById("adminPromptRegion")
                 .classList.toggle("hidden", target !== "promptRegion");
+            document.getElementById("adminActiviteTypes")?.classList.toggle("hidden", target !== "activiteTypes");
+            document.getElementById("adminCriteresVoyage")?.classList.toggle("hidden", target !== "criteresVoyage");
+
+            if (target === "activiteTypes") renderActiviteTypesList();
+            if (target === "criteresVoyage") renderCriteresVoyageList();
 
             if (target === "promptRegion")
                 renderPromptRegionAdmin();
@@ -619,4 +651,120 @@ function renderEnvieCategoriesList() {
     });
 
 }
+
+
+function renderActiviteTypesList() {
+
+    const container = document.getElementById("activiteTypesList");
+    const items = getActiviteTypes();
+
+    container.innerHTML = "";
+
+    items.forEach((item, index) => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">${item.emoji} ${item.label}</div>
+            <div class="templateRowActions">
+                <button class="actionButton" title="Monter">⬆️</button>
+                <button class="actionButton" title="Descendre">⬇️</button>
+                <button class="actionButton editButton" title="Modifier">✏️</button>
+                <button class="actionButton deleteButton" title="Supprimer">🗑️</button>
+            </div>
+        `;
+
+        const [upBtn, downBtn, editBtn, deleteBtn] = row.querySelectorAll("button");
+
+        upBtn.disabled = index === 0;
+        downBtn.disabled = index === items.length - 1;
+
+        upBtn.addEventListener("click", () => { moveActiviteType(item.id, -1); renderActiviteTypesList(); });
+        downBtn.addEventListener("click", () => { moveActiviteType(item.id, 1); renderActiviteTypesList(); });
+
+        editBtn.addEventListener("click", () => {
+
+            const label = prompt("Nom :", item.label);
+            if (!label?.trim()) return;
+
+            const emoji = prompt("Emoji :", item.emoji) || item.emoji;
+
+            updateActiviteType(item.id, label.trim(), emoji.trim());
+            renderActiviteTypesList();
+
+        });
+
+        deleteBtn.addEventListener("click", () => {
+
+            if (!window.confirm(`Supprimer "${item.label}" ?`)) return;
+
+            deleteActiviteType(item.id);
+            renderActiviteTypesList();
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+}
+
+function renderCriteresVoyageList() {
+
+    const container = document.getElementById("criteresVoyageList");
+    const items = getCriteresVoyage();
+
+    container.innerHTML = "";
+
+    items.forEach((item, index) => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">${item.emoji} ${item.label}</div>
+            <div class="templateRowActions">
+                <button class="actionButton" title="Monter">⬆️</button>
+                <button class="actionButton" title="Descendre">⬇️</button>
+                <button class="actionButton editButton" title="Modifier">✏️</button>
+                <button class="actionButton deleteButton" title="Supprimer">🗑️</button>
+            </div>
+        `;
+
+        const [upBtn, downBtn, editBtn, deleteBtn] = row.querySelectorAll("button");
+
+        upBtn.disabled = index === 0;
+        downBtn.disabled = index === items.length - 1;
+
+        upBtn.addEventListener("click", () => { moveCritereVoyage(item.id, -1); renderCriteresVoyageList(); });
+        downBtn.addEventListener("click", () => { moveCritereVoyage(item.id, 1); renderCriteresVoyageList(); });
+
+        editBtn.addEventListener("click", () => {
+
+            const label = prompt("Nom :", item.label);
+            if (!label?.trim()) return;
+
+            const emoji = prompt("Emoji :", item.emoji) || item.emoji;
+
+            updateCritereVoyage(item.id, label.trim(), emoji.trim());
+            renderCriteresVoyageList();
+
+        });
+
+        deleteBtn.addEventListener("click", () => {
+
+            if (!window.confirm(`Supprimer "${item.label}" ?`)) return;
+
+            deleteCritereVoyage(item.id);
+            renderCriteresVoyageList();
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+}
+
 
