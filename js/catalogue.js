@@ -3,6 +3,7 @@ import { getCategorieById, openEnvie, isContainer } from "./envie.js";
 import { openMap } from "./carte.js";
 import { dupliquerEnvieVersVoyage } from "./storage.js";
 import { showToast } from "./toast.js";
+import { deleteEnvie } from "./storage.js";
 
 
 let searchQuery = "";
@@ -230,8 +231,15 @@ function renderCatalogue() {
 
 function createCatalogueRow(envie) {
 
+    const wrapper = document.createElement("div");
+    wrapper.className = "catalogueRowWrapper";
+
+    const deleteZone = document.createElement("div");
+    deleteZone.className = "catalogueRowDeleteZone";
+    deleteZone.innerHTML = "🗑️ Supprimer";
+
     const row = document.createElement("div");
-    row.className = "templateRow";
+    row.className = "templateRow catalogueRowContent";
 
     const cat = getCategorieById(envie.categorie);
     const distanceLabel = envie._distance !== null ? `${envie._distance.toFixed(1)} km` : "";
@@ -256,9 +264,77 @@ function createCatalogueRow(envie) {
         openDupliquerPicker(envie);
     });
 
-    return row;
+    wrapper.appendChild(deleteZone);
+    wrapper.appendChild(row);
+
+    let startX = 0;
+    let currentX = 0;
+    let dragging = false;
+
+    row.addEventListener("touchstart", (event) => {
+
+        startX = event.touches[0].clientX;
+        dragging = true;
+        row.style.transition = "none";
+
+    });
+
+    row.addEventListener("touchmove", (event) => {
+
+        if (!dragging)
+            return;
+
+        currentX = event.touches[0].clientX - startX;
+
+        if (currentX > 0)
+            currentX = 0;
+
+        if (currentX < -90)
+            currentX = -90;
+
+        row.style.transform = `translateX(${currentX}px)`;
+
+    });
+
+    row.addEventListener("touchend", () => {
+
+        dragging = false;
+        row.style.transition = "transform 0.2s ease";
+
+        if (currentX < -50) {
+
+            row.style.transform = "translateX(-90px)";
+
+        } else {
+
+            row.style.transform = "translateX(0)";
+
+        }
+
+    });
+
+    deleteZone.addEventListener("click", () => {
+
+        if (!window.confirm(`Supprimer "${envie.titre}" ?`))
+            return;
+
+        deleteEnvie(envie.id);
+
+        wrapper.style.transition = "all 0.2s ease";
+        wrapper.style.maxHeight = "0";
+        wrapper.style.opacity = "0";
+        wrapper.style.marginBottom = "0";
+
+        setTimeout(() => wrapper.remove(), 200);
+
+        showToast("✓ Idée supprimée");
+
+    });
+
+    return wrapper;
 
 }
+
 
 function openDupliquerPicker(envie) {
 
