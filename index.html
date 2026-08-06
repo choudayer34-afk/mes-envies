@@ -1311,6 +1311,10 @@ document.addEventListener("DOMContentLoaded", () => {
 <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">
     Des jeux simples pour toutes les situations.
 </p>
+<button id="btnOutilsMenu" class="secondaryButton" style="width:100%;margin-bottom:14px;">
+    🧰 Autres petits outils
+</button>
+
 <button id="btnDes" class="secondaryButton" style="width:100%;margin-bottom:14px;">
     🎲 Lancer des dés
 </button>
@@ -1363,6 +1367,103 @@ document.addEventListener("DOMContentLoaded", () => {
 
     </div>
 
+</div>
+<div id="outilsMenuModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button id="closeOutilsMenu" class="backButton">← Retour</button>
+        <h2>🧰 Petits outils</h2>
+        <button class="secondaryButton outilOuvrirButton" data-modal="pileOuFaceModal" style="width:100%;margin-bottom:10px;">🪙 Pile ou face</button>
+        <button class="secondaryButton outilOuvrirButton" data-modal="roueDecisionModal" style="width:100%;margin-bottom:10px;">🎯 Roue de la décision</button>
+        <button class="secondaryButton outilOuvrirButton" data-modal="tirageNombreModal" style="width:100%;margin-bottom:10px;">🔢 Tirage d'un nombre</button>
+        <button class="secondaryButton outilOuvrirButton" data-modal="tirageLettreModal" style="width:100%;margin-bottom:10px;">🅰️ Tirage d'une lettre</button>
+        <button class="secondaryButton outilOuvrirButton" data-modal="motAleatoireModal" style="width:100%;margin-bottom:10px;">🔤 Mot aléatoire</button>
+        <button class="secondaryButton outilOuvrirButton" data-modal="ardoiseModal" id="btnOuvrirArdoise" style="width:100%;margin-bottom:10px;">🎨 Ardoise de dessin</button>
+        <button class="secondaryButton outilOuvrirButton" data-modal="minuteurModal" style="width:100%;">⏱️ Minuteur</button>
+    </div>
+</div>
+
+<div id="pileOuFaceModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🪙 Pile ou face</h2>
+        <div id="pileOuFaceResultat" style="font-size:40px;font-weight:800;margin:30px 0;">🪙 ?</div>
+        <button id="lancerPileOuFaceButton" class="primaryButton" style="width:100%;">Lancer</button>
+    </div>
+</div>
+
+<div id="roueDecisionModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton outilFermerButton">← Retour</button>
+        <h2>🎯 Roue de la décision</h2>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <input id="roueOptionInput" type="text" placeholder="Ajouter une option..." style="flex:1;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);">
+            <button id="ajouterOptionRoueButton" class="secondaryButton">➕</button>
+        </div>
+        <div id="roueOptionsListe" style="margin-bottom:16px;"></div>
+        <div id="roueResultat" style="font-size:24px;font-weight:800;text-align:center;margin:20px 0;"></div>
+        <button id="tirerRoueButton" class="primaryButton" style="width:100%;">🎯 Tirer au hasard</button>
+    </div>
+</div>
+
+<div id="tirageNombreModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🔢 Tirage d'un nombre</h2>
+        <div style="display:flex;gap:10px;margin:16px 0;">
+            <input id="nombreMinInput" type="number" value="1" placeholder="Min" style="flex:1;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);text-align:center;">
+            <input id="nombreMaxInput" type="number" value="100" placeholder="Max" style="flex:1;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);text-align:center;">
+        </div>
+        <div id="nombreResultat" style="font-size:48px;font-weight:800;margin:20px 0;">?</div>
+        <button id="tirerNombreButton" class="primaryButton" style="width:100%;">🔢 Tirer</button>
+    </div>
+</div>
+
+<div id="tirageLettreModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🅰️ Tirage d'une lettre</h2>
+        <div id="lettreResultat" style="font-size:60px;font-weight:800;margin:30px 0;">?</div>
+        <button id="tirerLettreButton" class="primaryButton" style="width:100%;">🅰️ Tirer</button>
+    </div>
+</div>
+
+<div id="motAleatoireModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🔤 Mot aléatoire</h2>
+        <div id="motResultat" style="font-size:28px;font-weight:800;margin:30px 0;">?</div>
+        <button id="tirerMotButton" class="primaryButton" style="width:100%;">🔤 Tirer un mot</button>
+    </div>
+</div>
+
+<div id="ardoiseModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton outilFermerButton">← Retour</button>
+        <h2>🎨 Ardoise de dessin</h2>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+            <input type="color" id="ardoiseCouleur" value="#000000" style="width:44px;height:44px;border:none;border-radius:10px;">
+            <button id="effacerArdoiseButton" class="secondaryButton" style="flex:1;">🗑️ Effacer</button>
+        </div>
+        <canvas id="ardoiseCanvas" style="width:100%;height:350px;border-radius:16px;border:1px solid var(--color-border);touch-action:none;"></canvas>
+    </div>
+</div>
+
+<div id="minuteurModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>⏱️ Minuteur</h2>
+        <div id="minuteurAffichage" style="font-size:48px;font-weight:800;margin:20px 0;">0:00</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <button class="secondaryButton minuteurPreset" data-minutes="5" style="flex:1;">5 min</button>
+            <button class="secondaryButton minuteurPreset" data-minutes="10" style="flex:1;">10 min</button>
+            <button class="secondaryButton minuteurPreset" data-minutes="30" style="flex:1;">30 min</button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+            <input id="minuteurPersoInput" type="number" placeholder="Minutes" style="flex:1;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);text-align:center;">
+            <button id="lancerMinuteurPersoButton" class="secondaryButton">Lancer</button>
+        </div>
+        <button id="arreterMinuteurButton" class="secondaryButton" style="width:100%;">⏹️ Arrêter</button>
+    </div>
 </div>
 
 <div id="survieModal" class="modal-overlay hidden">
