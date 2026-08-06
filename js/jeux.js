@@ -215,6 +215,8 @@ const JEUX_FILE_ATTENTE = [
 
 let searchQuery = "";
 let filtreMateriel = "tous";
+let nombreDes = 1;
+let valeursDes = [1];
 
 export function initJeux() {
 
@@ -225,6 +227,37 @@ export function initJeux() {
         searchQuery = event.target.value.toLowerCase().trim();
         renderJeux();
     });
+
+    document.getElementById("lancerDesButton")?.addEventListener("click", lancerDes);
+
+    document.getElementById("desMoins")?.addEventListener("click", () => {
+
+        if (nombreDes > 1) {
+            nombreDes--;
+            document.getElementById("desNombre").textContent = nombreDes;
+        }
+
+    });
+
+    document.getElementById("desPlus")?.addEventListener("click", () => {
+
+        if (nombreDes < 6) {
+            nombreDes++;
+            document.getElementById("desNombre").textContent = nombreDes;
+        }
+
+    });
+
+    document.getElementById("btnDes")?.addEventListener("click", () => {
+        document.getElementById("desModal").classList.remove("hidden");
+        valeursDes = Array.from({ length: nombreDes }, () => 1);
+        renderDes();
+    });
+
+    document.getElementById("closeDes")?.addEventListener("click", () => {
+        document.getElementById("desModal").classList.add("hidden");
+    });
+
 
     document.querySelectorAll(".jeuxFiltreChip").forEach(chip => {
 
@@ -366,6 +399,28 @@ function tirerJeuAleatoire() {
     retourButton.addEventListener("click", renderJeux);
 
     container.appendChild(retourButton);
+
+}
+function lancerDes() {
+
+    valeursDes = Array.from({ length: nombreDes }, () => Math.floor(Math.random() * 6) + 1);
+
+    renderDes();
+
+}
+
+function renderDes() {
+
+    const container = document.getElementById("desContainer");
+
+    if (!container)
+        return;
+
+    const faces = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+
+    container.innerHTML = valeursDes.map(v => `
+        <div class="deFace">${faces[v]}</div>
+    `).join("");
 
 }
 
