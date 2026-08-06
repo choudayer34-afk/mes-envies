@@ -1182,20 +1182,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div id="catalogueCategorieFiltre" class="categorieSelector fiche" style="margin-bottom:12px;"></div>
 
-        <div style="display:flex;gap:10px;margin-bottom:14px;">
+       <div style="display:flex;gap:10px;margin-bottom:10px;">
 
-            <select id="catalogueTriSelect" style="flex:1;height:44px;border-radius:14px;border:1px solid var(--color-border);padding:0 10px;font-size:14px;">
-                <option value="recent">Plus récent</option>
-                <option value="distance">Distance</option>
-                <option value="alphabetique">Alphabétique</option>
-            </select>
+    <select id="catalogueTriSelect" style="flex:1;height:44px;border-radius:14px;border:1px solid var(--color-border);padding:0 10px;font-size:14px;">
+        <option value="recent">Plus récent</option>
+        <option value="distance">Distance</option>
+        <option value="alphabetique">Alphabétique</option>
+    </select>
 
-            <div class="itemTypeToggle" style="flex:1;">
-                <button type="button" id="catalogueVueToggleListe" class="itemTypeChip active">📋 Liste</button>
-                <button type="button" id="catalogueVueToggleCarte" class="itemTypeChip">🗺️ Carte</button>
-            </div>
+    <select id="catalogueAssociationSelect" style="flex:1;height:44px;border-radius:14px;border:1px solid var(--color-border);padding:0 10px;font-size:14px;">
+        <option value="tous">Tous</option>
+        <option value="associe">🧳 Associées</option>
+        <option value="non-associe">Non associées</option>
+    </select>
 
-        </div>
+</div>
+
+<div class="itemTypeToggle" style="margin-bottom:14px;">
+    <button type="button" id="catalogueVueToggleListe" class="itemTypeChip active">📋 Liste</button>
+    <button type="button" id="catalogueVueToggleCarte" class="itemTypeChip">🗺️ Carte</button>
+</div>
+
 
         <div id="catalogueContent"></div>
 
