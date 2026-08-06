@@ -253,7 +253,7 @@ function renderEtapes() {
 
 }
 
-function initMiniMap() {
+async function initMiniMap() {
 
     const mapEl = document.getElementById("etapeMiniMap");
 
@@ -273,6 +273,30 @@ function initMiniMap() {
     }).addTo(miniMap);
 
     const bounds = [];
+
+    if (lieuDepart?.latitude && lieuDepart?.longitude) {
+
+        L.marker([lieuDepart.latitude, lieuDepart.longitude], {
+            icon: creerPinDepartArrivee("#22c55e", "🚩")
+        }).addTo(miniMap).bindPopup(`<strong>🚩 Départ : ${lieuDepart.nom}</strong>`);
+
+        bounds.push([lieuDepart.latitude, lieuDepart.longitude]);
+
+    }
+
+    if (lieuArrivee?.latitude && lieuArrivee?.longitude) {
+
+        L.marker([lieuArrivee.latitude, lieuArrivee.longitude], {
+            icon: creerPinDepartArrivee("#ef4444", "🏁")
+        }).addTo(miniMap).bindPopup(`<strong>🏁 Arrivée : ${lieuArrivee.nom}</strong>`);
+
+        bounds.push([lieuArrivee.latitude, lieuArrivee.longitude]);
+
+    }
+
+    if (lieuDepart?.latitude && lieuArrivee?.latitude) {
+        await dessinerTrajet(lieuDepart, lieuArrivee);
+    }
 
     etapesTrouvees.forEach((etape, index) => {
 
@@ -304,6 +328,40 @@ function initMiniMap() {
     }
 
 }
+
+function creerPinDepartArrivee(couleur, emoji) {
+
+    return L.divIcon({
+        className: "custom-map-pin",
+        html: `<div style="background:${couleur};width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid white;"><span style="font-size:16px;">${emoji}</span></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+
+}
+
+async function dessinerTrajet(depart, arrivee) {
+
+    try {
+
+        const url = `https://router.project-osrm.org/route/v1/driving/${depart.longitude},${depart.latitude};${arrivee.longitude},${arrivee.latitude}?overview=full&geometries=geojson`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.code !== "Ok" || !data.routes?.[0])
+            return;
+
+        const coords = data.routes[0].geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+
+        L.polyline(coords, { color: "#6FAFC4", weight: 4, opacity: 0.7, dashArray: "8, 6" }).addTo(miniMap);
+
+    } catch (err) {
+        console.error("Erreur tracé trajet: " + err.message);
+    }
+
+}
+
 
 function ouvrirCreationVoyageAvecLieu(etape) {
 
