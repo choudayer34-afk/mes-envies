@@ -408,23 +408,28 @@ function createLogementRow(logement, voyageEnvie) {
         openEnvie(logement.id, voyageEnvie.id);
     });
 
-       row.querySelector(".deleteButton").addEventListener("click", () => {
+      row.querySelector(".deleteButton").addEventListener("click", () => {
 
         try {
 
             updateEnvieVoyage(enfant.id, null);
 
-            row.remove();
+            enfant.voyageId = null;
+
+            console.log("Après suppression, enfant.voyageId=" + enfant.voyageId);
+            console.log("Nombre d'enfants du voyage après filtre: " + getEnvies().filter(e => e.voyageId === voyageEnvie.id).length);
+
+            renderVoyageSection(voyageEnvie);
+            renderEnvies();
 
             showToast("✓ Retiré du voyage");
-
-            renderEnvies();
 
         } catch (err) {
             console.error("Erreur suppression envie du voyage: " + err.message);
         }
 
     });
+
 
 
 
