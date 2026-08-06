@@ -342,6 +342,9 @@ async function renderEtapes() {
                 <a href="https://www.google.com/search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
                 <a href="https://www.tripadvisor.fr/Search?q=${rechercheAvis}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">⭐ Avis TripAdvisor</a>
             </div>
+                        <button class="secondaryButton ouvrirGoogleMapsEtapeButton" data-index="${index}" style="width:100%;margin-bottom:8px;">
+                🗺️ Itinéraire complet (départ → étape → arrivée)
+            </button>
             <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
                 <button class="secondaryButton chercherBookingButton" data-index="${index}" style="flex:1;min-width:80px;">🏨 Booking</button>
                 <button class="secondaryButton chercherAirbnbButton" data-index="${index}" style="flex:1;min-width:80px;">🏠 Airbnb</button>
@@ -351,6 +354,7 @@ async function renderEtapes() {
             <button class="primaryButton creerVoyageEtapeButton" data-index="${index}" style="width:100%;">
                 🧳 Créer un voyage ici
             </button>
+
         `;
 
         resultEl.appendChild(card);
@@ -366,6 +370,18 @@ async function renderEtapes() {
             document.getElementById("etapeFinderModal").classList.add("hidden");
 
             ouvrirCreationVoyageAvecLieu(etape);
+
+        });
+
+    });
+
+    resultEl.querySelectorAll(".ouvrirGoogleMapsEtapeButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const etape = etapesTrouvees[parseInt(btn.dataset.index, 10)];
+
+            ouvrirGoogleMapsEtape(etape);
 
         });
 
@@ -667,6 +683,79 @@ async function calculerTrajetOSRM(lat1, lon1, lat2, lon2) {
 
     } catch (err) {
         return null;
+    }
+
+}
+
+function buildLienGoogleMapsApp(depart, etape, arrivee) {
+
+    if (!etape.latitude || !etape.longitude)
+        return null;
+
+    const points = [];
+
+    if (depart?.latitude) points.push(`${depart.latitude},${depart.longitude}`);
+    points.push(`${etape.latitude},${etape.longitude}`);
+    if (arrivee?.latitude) points.push(`${arrivee.latitude},${arrivee.longitude}`);
+
+    if (points.length < 2)
+        return null;
+
+    const destination = points[points.length - 1];
+    const waypoints = points.slice(0, -1).join("+to:");
+
+    return `comgooglemaps://?daddr=${waypoints}+to:${destination}&directionsmode=driving`;
+
+}
+
+function buildLienGoogleMapsWeb(depart, etape, arrivee) {
+
+    if (!etape.latitude || !etape.longitude)
+        return null;
+
+    const points = [];
+
+    if (depart?.latitude) points.push(`${depart.latitude},${depart.longitude}`);
+    points.push(`${etape.latitude},${etape.longitude}`);
+    if (arrivee?.latitude) points.push(`${arrivee.latitude},${arrivee.longitude}`);
+
+    if (points.length < 2)
+        return null;
+
+    const destination = points[points.length - 1];
+    const waypoints = points.slice(0, -1).join("|");
+
+    return `https://www.google.com/maps/dir/?api=1&destination=${destination}&waypoints=${encodeURIComponent(waypoints)}`;
+
+}
+
+function ouvrirGoogleMapsEtape(etape) {
+
+    const lat = parseFloat(etape.latitude);
+    const lon = parseFloat(etape.longitude);
+
+    if (isNaN(lat) || isNaN(lon)) {
+        showToast("Cette étape n'a pas de coordonnées GPS");
+        return;
+    }
+
+    const etapeAvecCoords = { ...etape, latitude: lat, longitude: lon };
+
+    const lienApp = buildLienGoogleMapsApp(lieuDepart, etapeAvecCoords, lieuArrivee);
+    const lienWeb = buildLienGoogleMapsWeb(lieuDepart, etapeAvecCoords, lieuArrivee);
+
+    if (lienApp) {
+
+        window.location.href = lienApp;
+
+        setTimeout(() => {
+            if (lienWeb) window.location.href = lienWeb;
+        }, 1500);
+
+    } else if (lienWeb) {
+
+        window.location.href = lienWeb;
+
     }
 
 }
