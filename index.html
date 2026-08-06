@@ -1311,6 +1311,9 @@ document.addEventListener("DOMContentLoaded", () => {
 <p style="font-size:13px;color:var(--color-text-light);margin-bottom:14px;">
     Des jeux simples pour toutes les situations.
 </p>
+<button id="btnDes" class="secondaryButton" style="width:100%;margin-bottom:14px;">
+    🎲 Lancer des dés
+</button>
 
 <input
     id="jeuxSearchInput"
@@ -1337,6 +1340,31 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+
+<div id="desModal" class="modal-overlay hidden">
+
+    <div class="modal" style="text-align:center;">
+
+        <button id="closeDes" class="backButton" style="align-self:flex-start;">← Retour</button>
+
+        <h2>🎲 Dés</h2>
+
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:20px 0;">
+            <button id="desMoins" class="secondaryButton" style="width:44px;height:44px;padding:0;">−</button>
+            <span style="font-size:20px;font-weight:700;">Nombre de dés : <span id="desNombre">1</span></span>
+            <button id="desPlus" class="secondaryButton" style="width:44px;height:44px;padding:0;">+</button>
+        </div>
+
+        <div id="desContainer" style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin:24px 0;min-height:80px;"></div>
+
+        <button id="lancerDesButton" class="primaryButton" style="width:100%;">
+            🎲 Lancer
+        </button>
+
+    </div>
+
+</div>
+
 <div id="survieModal" class="modal-overlay hidden">
 
     <div class="modal">
