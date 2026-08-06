@@ -1103,7 +1103,7 @@ export function resetPromptEtape() {
     updatePromptEtape(DEFAULT_PROMPT_ETAPE);
 }
 
-consconst DEFAULT_ACTIVITE_TYPES = [
+const DEFAULT_ACTIVITE_TYPES = [
     { label: "Nature & randonnée", emoji: "🏞️", ordre: 0 },
     { label: "Plage & baignade", emoji: "🏖️", ordre: 1 },
     { label: "Montagne", emoji: "🌄", ordre: 2 },
