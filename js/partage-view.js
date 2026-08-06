@@ -173,7 +173,7 @@ function renderVoyagePartage(voyage, enfants, container) {
 
     const { groupesTries, sansDate } = groupParDate(enfantsAvecPhotos);
 
-        groupesTries.forEach(groupe => {
+            groupesTries.forEach(groupe => {
 
         const header = document.createElement("div");
         header.className = "checklistCategorieHeader";
@@ -194,11 +194,22 @@ function renderVoyagePartage(voyage, enfants, container) {
 
         }
 
+        const photosDuJour = [];
+
         groupe.items.forEach(envie => {
-            container.appendChild(createCartePartage(envie));
+
+            (envie.photos || []).forEach(photo => {
+                photosDuJour.push({ ...photo, activiteTitre: envie.titre });
+            });
+
+        });
+
+        groupe.items.forEach(envie => {
+            container.appendChild(createCartePartage(envie, photosDuJour));
         });
 
     });
+
 
 
     if (sansDate.length > 0) {
