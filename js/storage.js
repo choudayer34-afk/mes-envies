@@ -956,7 +956,8 @@ Génère une liste d'idées concrètes au format JSON strict suivant, sans aucun
       "latitude": "Coordonnée GPS latitude précise de ce lieu si tu la connais avec certitude, sinon laisser vide",
       "longitude": "Coordonnée GPS longitude précise de ce lieu si tu la connais avec certitude, sinon laisser vide",
       "description": "1 à 2 phrases décrivant l'intérêt de cette idée",
-      "url": "Lien vers le site officiel ou une page d'information fiable sur cette activité, si tu en connais un existant réellement. Laisser une chaîne vide si aucun lien fiable n'est connu."
+            "url": "Lien vers le site officiel, une page Wikipedia, ou une page d'information fiable et réellement existante sur cette activité. Pour une randonnée, privilégie un lien vers une fiche d'itinéraire connue (Visorando, IGN Rando, AllTrails) si tu en connais une réelle. Laisser une chaîne vide si aucun lien fiable n'est connu — ne jamais inventer une URL."
+
     }
   ]
 }
