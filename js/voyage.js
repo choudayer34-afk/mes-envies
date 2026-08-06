@@ -50,7 +50,9 @@ export function renderVoyageSection(envie) {
 }
 
 function renderVoyageContenu(envie, container) {
-container.innerHTML = "";
+
+    container.innerHTML = "";
+
     const couvertureRow = document.createElement("div");
     couvertureRow.className = "voyageCouvertureRow";
 
@@ -67,9 +69,7 @@ container.innerHTML = "";
 
     container.appendChild(couvertureRow);
 
-            const enfantsRestants = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
-            console.log("Enfants restants: " + JSON.stringify(enfantsRestants.map(e => ({ id: e.id, titre: e.titre, voyageId: e.voyageId }))));
-
+    const enfants = getEnvies().filter(e => e.voyageId === envie.id);
 
     const { statut, pourcentage } = computeContainerStatus(envie);
 
@@ -84,14 +84,12 @@ container.innerHTML = "";
     `;
     container.appendChild(statutBox);
 
-        const today = new Date().toISOString().slice(0, 10);
+    const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today);
 
     if (ajourdhuiItems.length > 0) {
         appendCollapsibleGroup(container, "🔆 Aujourd'hui", ajourdhuiItems, envie, `d_${today}`, true);
     }
-
-    
 
     const logements = enfants.filter(e => isLogementCategoryLocal(e.categorie));
 
@@ -185,6 +183,7 @@ container.innerHTML = "";
     initPhotoCouverture();
 
 }
+
 
 function isLogementCategoryLocal(categorieId) {
 
@@ -337,7 +336,8 @@ function createVoyageItemRow(enfant, voyageEnvie) {
     });
 
     row.querySelector(".deleteButton").addEventListener("click", () => {
-console.log("VERSION TEST 123");
+
+        console.log("Clic sur bouton retirer, enfant.id=" + enfant.id + " titre=" + enfant.titre);
 
         try {
 
@@ -346,7 +346,9 @@ console.log("VERSION TEST 123");
             enfant.voyageId = null;
 
             console.log("Après suppression, enfant.voyageId=" + enfant.voyageId);
-            console.log("Nombre d'enfants du voyage après filtre: " + getEnvies().filter(e => e.voyageId === voyageEnvie.id).length);
+
+            const enfantsRestantsCheck = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
+            console.log("Enfants restants: " + JSON.stringify(enfantsRestantsCheck.map(e => ({ id: e.id, titre: e.titre }))));
 
             renderVoyageSection(voyageEnvie);
             renderEnvies();
@@ -358,10 +360,6 @@ console.log("VERSION TEST 123");
         }
 
     });
-
-
-
-
 
     makeRowDraggable(row, enfant.id, (targetId) => {
 
@@ -387,6 +385,7 @@ console.log("VERSION TEST 123");
     return row;
 
 }
+
 
 function createLogementRow(logement, voyageEnvie) {
 
