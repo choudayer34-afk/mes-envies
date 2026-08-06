@@ -522,7 +522,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 Prompt copié ! Colle-le dans ton IA, puis colle le JSON obtenu ici.
             </p>
 
-            <textarea id="etapeJsonInput" rows="8" placeholder='{"etapes": [...]}' style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:13px;font-family:monospace;box-sizing:border-box;"></textarea>
+        <div style="position:relative;">
+    <textarea id="etapeJsonInput" rows="8" placeholder='{"etapes": [...]}' style="width:100%;padding:14px 40px 14px 14px;border-radius:16px;border:2px solid #D9E6EC;font-size:13px;font-family:monospace;box-sizing:border-box;"></textarea>
+    <button type="button" id="clearEtapeJsonInput" style="position:absolute;top:10px;right:10px;background:#F5F8F9;border:none;border-radius:50%;width:28px;height:28px;font-size:14px;color:#56707E;">✕</button>
+</div>
+
 
             <button id="etapeAnalyserButton" class="primaryButton" style="width:100%;margin-top:10px;">
                 🔍 Analyser
