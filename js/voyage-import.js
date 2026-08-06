@@ -69,13 +69,18 @@ export function openVoyageImport(voyageId) {
 
 }
 
-function genererPromptImport() {
+ function genererPromptImport() {
 
     const destination = document.getElementById("voyageImportDestination").value.trim();
     const dates = document.getElementById("voyageImportDates").value.trim();
     const duree = document.getElementById("voyageImportDuree").value.trim();
     const personnes = document.getElementById("voyageImportPersonnes").value.trim();
     const activites = document.getElementById("voyageImportActivites").value.trim();
+
+    const categoriesListe = getEnvieCategories()
+        .filter(c => !c.conteneur)
+        .map(c => c.label)
+        .join(", ");
 
     let texte = getPromptImport();
 
@@ -84,7 +89,8 @@ function genererPromptImport() {
         .replace(/{{dates}}/g, dates || "[à préciser]")
         .replace(/{{duree}}/g, duree || "[à préciser]")
         .replace(/{{personnes}}/g, personnes || "[à préciser]")
-        .replace(/{{activites}}/g, activites || "[à préciser]");
+        .replace(/{{activites}}/g, activites || "[à préciser]")
+        .replace(/{{categories}}/g, categoriesListe || "Idée");
 
     return texte;
 
