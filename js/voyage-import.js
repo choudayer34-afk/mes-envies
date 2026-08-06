@@ -4,6 +4,9 @@ import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } 
 import { getDureeJours } from "./periode.js";
 import { getPersonnes } from "./storage.js";
 
+let modeTriRapport = "pertinence";
+
+
 export function openVoyageImport(voyageId) {
 
     voyageIdActuel = voyageId;
@@ -219,9 +222,40 @@ function renderRapportImport() {
 
     const nbSelectionnees = ideesAImporter.filter(i => i.selectionne).length;
 
+    // Calcule la distance pour chaque idée une fois, réutilisée pour le tri
+    const voyage = getEnvies().find(e => e.id === voyageIdActuel);
+
+    ideesAImporter.forEach(idee => {
+
+        const latitudeIA = parseFloat(idee.latitude);
+        const longitudeIA = parseFloat(idee.longitude);
+
+        if (voyage?.lieu?.latitude && !isNaN(latitudeIA) && !isNaN(longitudeIA)) {
+
+            idee._distance = calculerDistanceKm(
+                voyage.lieu.latitude, voyage.lieu.longitude,
+                latitudeIA, longitudeIA
+            );
+
+        } else {
+
+            idee._distance = null;
+
+        }
+
+    });
+
     let html = `<div class="containerStatutBox">
         <div class="containerStatutLabel">📊 ${nbSelectionnees} idée${nbSelectionnees > 1 ? "s" : ""} sélectionnée${nbSelectionnees > 1 ? "s" : ""} sur ${ideesAImporter.length}</div>
     </div>`;
+
+    html += `
+        <div class="itemTypeToggle" style="margin-bottom:10px;">
+            <button type="button" class="itemTypeChip triRapportChip ${modeTriRapport === "pertinence" ? "active" : ""}" data-tri="pertinence">Pertinence</button>
+            <button type="button" class="itemTypeChip triRapportChip ${modeTriRapport === "distance" ? "active" : ""}" data-tri="distance">📏 Distance</button>
+            <button type="button" class="itemTypeChip triRapportChip ${modeTriRapport === "categorie" ? "active" : ""}" data-tri="categorie">🏷️ Par catégorie</button>
+        </div>
+    `;
 
     html += `
         <div style="display:flex;gap:8px;margin-bottom:14px;">
@@ -230,7 +264,11 @@ function renderRapportImport() {
         </div>
     `;
 
-    ideesAImporter.forEach((idee, index) => {
+    const indexOriginal = new Map(ideesAImporter.map((idee, i) => [idee, i]));
+
+    function renderCarteIdee(idee) {
+
+        const index = indexOriginal.get(idee);
 
         const destination = document.getElementById("voyageImportDestination").value.trim();
         const dates = document.getElementById("voyageImportDates").value.trim();
@@ -247,45 +285,23 @@ function renderRapportImport() {
         `;
 
         if (estRando) {
-
             const rechercheRando = encodeURIComponent(`${idee.titre} ${idee.lieu || destination}`);
             liensHtml += `<a href="https://www.visorando.com/rechercher.php?q=${rechercheRando}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🥾 Visorando</a>`;
-
         }
 
         if (idee.lieu) {
-
             const rechercheMeteo = encodeURIComponent(idee.lieu);
             liensHtml += `<a href="https://www.windy.com/?${rechercheMeteo}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🌤️ Météo</a>`;
-
         }
 
         if (estLogement) {
-
             const rechercheBooking = encodeURIComponent(idee.lieu || destination);
             liensHtml += `<a href="https://www.booking.com/searchresults.html?ss=${rechercheBooking}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🏨 Booking</a>`;
-
         }
 
-        const voyage = getEnvies().find(e => e.id === voyageIdActuel);
+        const distanceLabel = idee._distance !== null ? ` · 📏 ${idee._distance.toFixed(1)} km de la base` : "";
 
-        let distanceLabel = "";
-
-        const latitudeIA = parseFloat(idee.latitude);
-        const longitudeIA = parseFloat(idee.longitude);
-
-        if (voyage?.lieu?.latitude && !isNaN(latitudeIA) && !isNaN(longitudeIA)) {
-
-            const distance = calculerDistanceKm(
-                voyage.lieu.latitude, voyage.lieu.longitude,
-                latitudeIA, longitudeIA
-            );
-
-            distanceLabel = ` · 📏 ${distance.toFixed(1)} km de la base`;
-
-        }
-
-        html += `
+        return `
             <div class="templateRow" style="align-items:flex-start;">
                 <label style="display:flex;align-items:flex-start;gap:10px;flex:1;cursor:pointer;">
                     <input type="checkbox" class="ideeCheckbox" data-index="${index}" ${idee.selectionne ? "checked" : ""} style="width:20px;height:20px;margin-top:2px;flex-shrink:0;">
@@ -299,13 +315,70 @@ function renderRapportImport() {
             </div>
         `;
 
-    });
+    }
+
+    if (modeTriRapport === "pertinence") {
+
+        ideesAImporter.forEach(idee => {
+            html += renderCarteIdee(idee);
+        });
+
+    } else if (modeTriRapport === "distance") {
+
+        const triees = [...ideesAImporter].sort((a, b) => {
+            if (a._distance === null) return 1;
+            if (b._distance === null) return -1;
+            return a._distance - b._distance;
+        });
+
+        triees.forEach(idee => {
+            html += renderCarteIdee(idee);
+        });
+
+    } else if (modeTriRapport === "categorie") {
+
+        const groupes = {};
+
+        ideesAImporter.forEach(idee => {
+
+            const cle = idee.categorie || "Autre";
+            groupes[cle] ??= [];
+            groupes[cle].push(idee);
+
+        });
+
+        Object.keys(groupes).sort().forEach(categorie => {
+
+            groupes[categorie].sort((a, b) => {
+                if (a._distance === null) return 1;
+                if (b._distance === null) return -1;
+                return a._distance - b._distance;
+            });
+
+            html += `<div class="checklistCategorieHeader">${categorie}</div>`;
+
+            groupes[categorie].forEach(idee => {
+                html += renderCarteIdee(idee);
+            });
+
+        });
+
+    }
 
     if (ideesAImporter.length > 0) {
         html += `<button id="confirmVoyageImportButton" class="primaryButton" style="width:100%;margin-top:14px;">✅ Importer les idées sélectionnées</button>`;
     }
 
     reportEl.innerHTML = html;
+
+    reportEl.querySelectorAll(".triRapportChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+            modeTriRapport = chip.dataset.tri;
+            renderRapportImport();
+        });
+
+    });
 
     reportEl.querySelectorAll(".ideeCheckbox").forEach(checkbox => {
 
@@ -335,6 +408,7 @@ function renderRapportImport() {
     document.getElementById("confirmVoyageImportButton")?.addEventListener("click", confirmerImportVoyage);
 
 }
+
 
 
 async function confirmerImportVoyage() {
