@@ -249,7 +249,8 @@ function renderEtapes() {
 
     });
 
-    setTimeout(() => initMiniMap(), 100);
+        setTimeout(async () => await initMiniMap(), 100);
+
 
 }
 
