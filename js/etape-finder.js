@@ -3,6 +3,7 @@ import { openModalVoyage } from "./modal.js";
 import { showToast } from "./toast.js";
 import { searchLocation, useCurrentLocation } from "./location.js";
 import { renderMultiSelectCollapsible } from "./multiselect.js";
+import { renderVoyageursWidget, getVoyageursData, formatVoyageursTexte, formatVoyageursCozycozy } from "./voyageurs.js";
 
 let etapesTrouvees = [];
 let miniMap = null;
@@ -15,6 +16,7 @@ const criteresSelectionnes = new Set();
 export function initEtapeFinder() {
 
     document.getElementById("btnEtapeFinder")?.addEventListener("click", () => {
+        renderVoyageursWidget("etapeVoyageursContainer");
 
         activitesSelectionnees.clear();
         criteresSelectionnes.clear();
@@ -140,6 +142,8 @@ function genererPromptEtape() {
     const periode = document.getElementById("etapePeriode").value.trim();
     const precisions = document.getElementById("etapeActivites").value.trim();
     const rayon = document.getElementById("etapeRayon").value.trim();
+    const voyageurs = getVoyageursData("etapeVoyageursContainer");
+    const voyageursTexte = formatVoyageursTexte(voyageurs);
 
     let activitesTexte = Array.from(activitesSelectionnees).join(", ") || "toutes activités pertinentes";
 
@@ -151,9 +155,13 @@ function genererPromptEtape() {
         activitesTexte += `. Rayon acceptable autour de l'étape pour satisfaire ces critères et activités : ${rayon}`;
     }
 
+    activitesTexte += `. Voyageurs : ${voyageursTexte}`;
+
     if (precisions) {
         activitesTexte += `. Précisions : ${precisions}`;
     }
+
+  
 
     let texte = getPromptEtape();
 
@@ -327,7 +335,7 @@ function renderEtapes() {
 
     });
 
-        resultEl.querySelectorAll(".chercherCozycozyButton").forEach(btn => {
+            resultEl.querySelectorAll(".chercherCozycozyButton").forEach(btn => {
 
         btn.addEventListener("click", () => {
 
@@ -335,14 +343,17 @@ function renderEtapes() {
             const destination = encodeURIComponent(etape.nom);
 
             const { dateDebut, dateFin } = extraireDatesCozycozy();
+            const voyageurs = getVoyageursData("etapeVoyageursContainer");
+            const codeVoyageurs = formatVoyageursCozycozy(voyageurs);
 
-            const url = `https://www.cozycozy.com/fr/search/${destination}/${dateDebut}/${dateFin}/2-0-1/progress`;
+            const url = `https://www.cozycozy.com/fr/search/${destination}/${dateDebut}/${dateFin}/${codeVoyageurs}/progress`;
 
             window.open(url, "_blank");
 
         });
 
     });
+
 
 
         setTimeout(async () => await initMiniMap(), 100);
