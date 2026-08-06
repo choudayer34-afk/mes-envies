@@ -1269,3 +1269,44 @@ export function moveCritereVoyage(id, direction) {
 
 }
 
+export async function fusionnerActiviteTypesParDefaut() {
+
+    const foyerId = getFoyerId();
+    const existants = activiteTypesCache.map(a => a.label.toLowerCase());
+
+    const manquants = DEFAULT_ACTIVITE_TYPES.filter(d => !existants.includes(d.label.toLowerCase()));
+
+    const maxOrdre = Math.max(-1, ...activiteTypesCache.map(c => c.ordre || 0));
+
+    for (let i = 0; i < manquants.length; i++) {
+        await setDoc(doc(collection(db, "foyers", foyerId, "activiteTypes")), {
+            label: manquants[i].label,
+            emoji: manquants[i].emoji,
+            ordre: maxOrdre + 1 + i
+        });
+    }
+
+    return manquants.length;
+
+}
+
+export async function fusionnerCriteresVoyageParDefaut() {
+
+    const foyerId = getFoyerId();
+    const existants = criteresVoyageCache.map(c => c.label.toLowerCase());
+
+    const manquants = DEFAULT_CRITERES_VOYAGE.filter(d => !existants.includes(d.label.toLowerCase()));
+
+    const maxOrdre = Math.max(-1, ...criteresVoyageCache.map(c => c.ordre || 0));
+
+    for (let i = 0; i < manquants.length; i++) {
+        await setDoc(doc(collection(db, "foyers", foyerId, "criteresVoyage")), {
+            label: manquants[i].label,
+            emoji: manquants[i].emoji,
+            ordre: maxOrdre + 1 + i
+        });
+    }
+
+    return manquants.length;
+
+}
