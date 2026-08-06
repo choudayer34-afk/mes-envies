@@ -1,6 +1,79 @@
 import { searchLocation } from "./location.js";
 import { showToast } from "./toast.js";
 import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } from "./storage.js";
+import { getDureeJours } from "./periode.js";
+import { getPersonnes, getEnvieCategories } from "./storage.js";
+
+export function openVoyageImport(voyageId) {
+
+    voyageIdActuel = voyageId;
+
+    const voyage = getEnvies().find(e => e.id === voyageId);
+
+    document.getElementById("voyageImportDestination").value = voyage?.lieu?.nom || "";
+
+    document.getElementById("voyageImportDates").value = formatDatesVoyage(voyage?.date);
+
+    const jours = voyage?.date ? getDureeJours(voyage.date) : null;
+    document.getElementById("voyageImportDuree").value = jours ? `${jours} jour${jours > 1 ? "s" : ""}` : "";
+
+    document.getElementById("voyageImportPersonnes").value = formatPersonnesVoyage(voyage?.personnesIds);
+
+    document.getElementById("voyageImportActivites").value = formatCategoriesParDefaut();
+
+    document.getElementById("voyageImportJsonInput").value = "";
+    document.getElementById("voyageImportReport").innerHTML = "";
+
+    document.getElementById("voyageImportFormStep").classList.remove("hidden");
+    document.getElementById("voyageImportJsonStep").classList.add("hidden");
+
+    document.getElementById("voyageImportModal").classList.remove("hidden");
+
+}
+
+function formatDatesVoyage(date) {
+
+    if (!date?.start)
+        return "";
+
+    const formatDate = (iso) =>
+        new Date(iso).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+    if (date.type === "range" && date.end) {
+        return `Du ${formatDate(date.start)} au ${formatDate(date.end)}`;
+    }
+
+    return formatDate(date.start);
+
+}
+
+function formatPersonnesVoyage(personnesIds) {
+
+    if (!personnesIds || personnesIds.length === 0)
+        return "";
+
+    const personnes = getPersonnes();
+
+    const noms = personnesIds
+        .map(id => personnes.find(p => p.id === id)?.nom)
+        .filter(Boolean);
+
+    return noms.join(", ");
+
+}
+
+function formatCategoriesParDefaut() {
+
+    const categories = getEnvieCategories()
+        .filter(c => !c.conteneur)
+        .map(c => c.label);
+
+    if (categories.length === 0)
+        return "";
+
+    return `Activités variées dans ces catégories : ${categories.join(", ")}, ainsi que toute autre idée pertinente pour ce voyage.`;
+
+}
 
 
 let voyageIdActuel = null;
@@ -47,27 +120,7 @@ export function initVoyageImport() {
 
 }
 
-export function openVoyageImport(voyageId) {
 
-    voyageIdActuel = voyageId;
-
-    const voyage = getEnvies().find(e => e.id === voyageId);
-
-    document.getElementById("voyageImportDestination").value = voyage?.lieu?.nom || "";
-    document.getElementById("voyageImportDates").value = "";
-    document.getElementById("voyageImportDuree").value = "";
-    document.getElementById("voyageImportPersonnes").value = "";
-    document.getElementById("voyageImportActivites").value = "";
-
-    document.getElementById("voyageImportJsonInput").value = "";
-    document.getElementById("voyageImportReport").innerHTML = "";
-
-    document.getElementById("voyageImportFormStep").classList.remove("hidden");
-    document.getElementById("voyageImportJsonStep").classList.add("hidden");
-
-    document.getElementById("voyageImportModal").classList.remove("hidden");
-
-}
 
  function genererPromptImport() {
 
