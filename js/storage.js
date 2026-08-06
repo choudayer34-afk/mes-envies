@@ -1044,4 +1044,56 @@ export function updateNoteJour(voyageId, groupKey, note) {
 
 }
 
+const DEFAULT_PROMPT_ETAPE = `Tu es un expert en voyage et en itinéraires routiers.
+
+Je pars de : {{depart}}
+Je vais à : {{arrivee}}
+Durée du stop envisagée : {{duree}}
+Ce que je recherche pour ce stop : {{activites}}
+
+Propose-moi 3 à 5 étapes intermédiaires pertinentes, situées sur ou proche du trajet entre ces deux points (pas de détour excessif), au format JSON strict suivant, sans aucun texte avant ou après :
+
+{
+  "etapes": [
+    {
+      "nom": "Nom de la ville ou zone",
+      "latitude": "Coordonnée GPS latitude précise si tu la connais avec certitude, sinon vide",
+      "longitude": "Coordonnée GPS longitude précise si tu la connais avec certitude, sinon vide",
+      "description": "2-3 phrases expliquant pourquoi cette étape est pertinente pour ce que je recherche",
+      "detourKm": "Détour approximatif en km par rapport au trajet direct, un nombre",
+      "pointsForts": ["Point fort 1", "Point fort 2", "Point fort 3"]
+    }
+  ]
+}
+
+Génère entre 3 et 5 étapes, classées par pertinence.
+Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut valide.
+Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.
+N'invente jamais de coordonnées GPS approximatives — laisse le champ vide si tu n'es pas certain.`;
+
+let promptEtapeCache = DEFAULT_PROMPT_ETAPE;
+
+export function getPromptEtape() {
+    return promptEtapeCache;
+}
+
+export function initPromptEtapeSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(doc(db, "foyers", foyerId, "settings", "promptEtape"), (snap) => {
+        promptEtapeCache = snap.exists() ? snap.data().texte : DEFAULT_PROMPT_ETAPE;
+        onChange();
+    });
+
+}
+
+export function updatePromptEtape(texte) {
+    setDoc(doc(db, "foyers", getFoyerId(), "settings", "promptEtape"), { texte }).catch(console.error);
+}
+
+export function resetPromptEtape() {
+    updatePromptEtape(DEFAULT_PROMPT_ETAPE);
+}
+
 
