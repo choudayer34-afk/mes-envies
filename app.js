@@ -29,6 +29,8 @@ import { initVoyageImport } from "./js/voyage-import.js";
 import { getCurrentEnvieId } from "./js/envie.js";
 import { renderVoyageSection } from "./js/voyage.js";
 import { initMapPicker } from "./js/location.js";
+import { initEtapeFinder } from "./js/etape-finder.js";
+import { initPromptEtapeSync } from "./js/storage.js";
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -82,7 +84,9 @@ function init() {
         initSurvie();
     initSurvieImport();
     initPhotoViewer();
-    
+        initEtapeFinder();
+    initPromptEtapeSync(() => {});
+
     initCatalogue();
     initRegionFinder();
     
