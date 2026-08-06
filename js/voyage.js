@@ -705,8 +705,11 @@ function openOptimiserModal(items, voyageEnvie) {
                 </div>
             `).join("");
 
+                     const modeCalcul = navigator.onLine ? "temps de trajet routier réel" : "distance directe, hors-ligne";
+
             content.innerHTML = `
-                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ordre optimisé (temps de trajet routier réel) :</p>
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ordre optimisé (${modeCalcul}) :</p>
+
                 <div style="margin-bottom:16px;">${etapesHtml}</div>
                 <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ouvrir avec :</p>
                 <button id="ouvrirGoogleMaps" class="primaryButton" style="width:100%;margin-bottom:10px;">🗺️ Google Maps (itinéraire complet)</button>
