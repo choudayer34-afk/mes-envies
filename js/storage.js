@@ -1072,7 +1072,10 @@ Propose-moi 3 à 5 étapes intermédiaires pertinentes, situées sur ou proche d
 Génère entre 3 et 5 étapes, classées par pertinence.
 Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut valide.
 Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.
-N'invente jamais de coordonnées GPS approximatives — laisse le champ vide si tu n'es pas certain.`;
+N'invente jamais de coordonnées GPS approximatives — laisse le champ vide si tu n'es pas certain.
+Important : les critères et activités demandés doivent être satisfaits majoritairement dans le rayon (ou temps de trajet) indiqué autour de l'étape proposée elle-même, pas seulement dans la ville d'étape au sens strict. Mentionne explicitement dans la description si un critère ou une activité nécessite de sortir de ce rayon.
+`
+;
 
 
 let promptEtapeCache = DEFAULT_PROMPT_ETAPE;
