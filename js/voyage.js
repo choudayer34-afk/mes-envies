@@ -67,7 +67,9 @@ container.innerHTML = "";
 
     container.appendChild(couvertureRow);
 
-    const enfants = getEnvies().filter(e => e.voyageId === envie.id);
+            const enfantsRestants = getEnvies().filter(e => e.voyageId === voyageEnvie.id);
+            console.log("Enfants restants: " + JSON.stringify(enfantsRestants.map(e => ({ id: e.id, titre: e.titre, voyageId: e.voyageId }))));
+
 
     const { statut, pourcentage } = computeContainerStatus(envie);
 
