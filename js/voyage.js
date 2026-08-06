@@ -393,11 +393,12 @@ function createLogementRow(logement, voyageEnvie) {
     });
 
           row.querySelector(".deleteButton").addEventListener("click", () => {
+
         updateEnvieVoyage(logement.id, null);
-        renderVoyageSection(voyageEnvie);
-        renderEnvies();
         showToast("✓ Retiré du voyage");
+
     });
+
 
 
 
