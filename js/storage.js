@@ -1100,4 +1100,149 @@ export function resetPromptEtape() {
     updatePromptEtape(DEFAULT_PROMPT_ETAPE);
 }
 
+const DEFAULT_ACTIVITE_TYPES = [
+    { label: "Nature & randonnée", emoji: "🏞️", ordre: 0 },
+    { label: "Plage & baignade", emoji: "🏖️", ordre: 1 },
+    { label: "Montagne", emoji: "🌄", ordre: 2 },
+    { label: "Culture & patrimoine", emoji: "🏛️", ordre: 3 },
+    { label: "Gastronomie", emoji: "🍽️", ordre: 4 },
+    { label: "Détente & bien-être", emoji: "🧘", ordre: 5 },
+    { label: "Sport & aventure", emoji: "🚴", ordre: 6 },
+    { label: "Famille & enfants", emoji: "👨‍👩‍👧", ordre: 7 },
+    { label: "Romantique", emoji: "💑", ordre: 8 },
+    { label: "Vie urbaine", emoji: "🏙️", ordre: 9 },
+    { label: "Shopping", emoji: "🛍️", ordre: 10 },
+    { label: "Vie nocturne", emoji: "🎉", ordre: 11 }
+];
+
+const DEFAULT_CRITERES_VOYAGE = [
+    { label: "Budget maîtrisé", emoji: "💰", ordre: 0 },
+    { label: "Peu de foule", emoji: "🧑‍🤝‍🧑", ordre: 1 },
+    { label: "Bébés/jeunes enfants", emoji: "👶", ordre: 2 },
+    { label: "Accepte les animaux", emoji: "🐾", ordre: 3 },
+    { label: "Accessible PMR", emoji: "♿", ordre: 4 },
+    { label: "Activités si pluie", emoji: "🌂", ordre: 5 },
+    { label: "Parking facile", emoji: "🅿️", ordre: 6 }
+];
+
+let activiteTypesCache = [];
+let criteresVoyageCache = [];
+
+export function getActiviteTypes() {
+    return [...activiteTypesCache].sort((a, b) => a.ordre - b.ordre);
+}
+
+export function getCriteresVoyage() {
+    return [...criteresVoyageCache].sort((a, b) => a.ordre - b.ordre);
+}
+
+export function initActiviteTypesSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(collection(db, "foyers", foyerId, "activiteTypes"), async (snap) => {
+
+        if (snap.empty && activiteTypesCache.length === 0) {
+
+            for (const type of DEFAULT_ACTIVITE_TYPES) {
+                await setDoc(doc(collection(db, "foyers", foyerId, "activiteTypes")), type);
+            }
+
+            return;
+
+        }
+
+        activiteTypesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+
+    });
+
+}
+
+export function initCriteresVoyageSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(collection(db, "foyers", foyerId, "criteresVoyage"), async (snap) => {
+
+        if (snap.empty && criteresVoyageCache.length === 0) {
+
+            for (const critere of DEFAULT_CRITERES_VOYAGE) {
+                await setDoc(doc(collection(db, "foyers", foyerId, "criteresVoyage")), critere);
+            }
+
+            return;
+
+        }
+
+        criteresVoyageCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+
+    });
+
+}
+
+export function createActiviteType(label, emoji = "🏷️") {
+
+    const foyerId = getFoyerId();
+    const maxOrdre = Math.max(-1, ...activiteTypesCache.map(c => c.ordre || 0));
+
+    return setDoc(doc(collection(db, "foyers", foyerId, "activiteTypes")), { label, emoji, ordre: maxOrdre + 1 })
+        .catch(console.error);
+
+}
+
+export function updateActiviteType(id, label, emoji) {
+    updateDoc(doc(db, "foyers", getFoyerId(), "activiteTypes", id), { label, emoji }).catch(console.error);
+}
+
+export function deleteActiviteType(id) {
+    deleteDoc(doc(db, "foyers", getFoyerId(), "activiteTypes", id)).catch(console.error);
+}
+
+export function moveActiviteType(id, direction) {
+
+    const sorted = getActiviteTypes();
+    const index = sorted.findIndex(c => c.id === id);
+    const swapIndex = index + direction;
+
+    if (index === -1 || swapIndex < 0 || swapIndex >= sorted.length)
+        return;
+
+    updateDoc(doc(db, "foyers", getFoyerId(), "activiteTypes", sorted[index].id), { ordre: sorted[swapIndex].ordre }).catch(console.error);
+    updateDoc(doc(db, "foyers", getFoyerId(), "activiteTypes", sorted[swapIndex].id), { ordre: sorted[index].ordre }).catch(console.error);
+
+}
+
+export function createCritereVoyage(label, emoji = "🏷️") {
+
+    const foyerId = getFoyerId();
+    const maxOrdre = Math.max(-1, ...criteresVoyageCache.map(c => c.ordre || 0));
+
+    return setDoc(doc(collection(db, "foyers", foyerId, "criteresVoyage")), { label, emoji, ordre: maxOrdre + 1 })
+        .catch(console.error);
+
+}
+
+export function updateCritereVoyage(id, label, emoji) {
+    updateDoc(doc(db, "foyers", getFoyerId(), "criteresVoyage", id), { label, emoji }).catch(console.error);
+}
+
+export function deleteCritereVoyage(id) {
+    deleteDoc(doc(db, "foyers", getFoyerId(), "criteresVoyage", id)).catch(console.error);
+}
+
+export function moveCritereVoyage(id, direction) {
+
+    const sorted = getCriteresVoyage();
+    const index = sorted.findIndex(c => c.id === id);
+    const swapIndex = index + direction;
+
+    if (index === -1 || swapIndex < 0 || swapIndex >= sorted.length)
+        return;
+
+    updateDoc(doc(db, "foyers", getFoyerId(), "criteresVoyage", sorted[index].id), { ordre: sorted[swapIndex].ordre }).catch(console.error);
+    updateDoc(doc(db, "foyers", getFoyerId(), "criteresVoyage", sorted[swapIndex].id), { ordre: sorted[index].ordre }).catch(console.error);
+
+}
 
