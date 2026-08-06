@@ -544,18 +544,26 @@ function openEnviePicker(voyageId) {
             </div>
         `;
 
-        row.querySelector(".editButton").addEventListener("click", () => {
+         row.querySelector(".editButton").addEventListener("click", () => {
 
             updateEnvieVoyage(candidat.id, voyageId);
 
+            candidat.voyageId = voyageId;
+
             document.getElementById("enviePickerModal").classList.add("hidden");
 
-            openEnvie(voyageId);
+            const voyageEnvie = getEnvies().find(e => e.id === voyageId);
+
+            if (voyageEnvie) {
+                renderVoyageSection(voyageEnvie);
+            }
+
             renderEnvies();
 
             showToast("✓ Envie ajoutée au voyage");
 
         });
+
 
         container.appendChild(row);
 
