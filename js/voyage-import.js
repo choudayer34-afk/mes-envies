@@ -2,7 +2,7 @@ import { searchLocation } from "./location.js";
 import { showToast } from "./toast.js";
 import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } from "./storage.js";
 import { getDureeJours } from "./periode.js";
-import { getPersonnes, getEnvieCategories } from "./storage.js";
+import { getPersonnes } from "./storage.js";
 
 export function openVoyageImport(voyageId) {
 
