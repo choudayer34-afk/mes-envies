@@ -26,12 +26,12 @@ const groupesOuverts = new Set();
 
 export function renderVoyageSection(envie) {
 
-    const container = document.getElementById("ficheVoyageContent");
+ const container = document.getElementById("ficheVoyageContent");
 
     if (!container)
         return;
 
-    container.innerHTML = "";
+    container.innerHTML = "";   // ← vérifie que celle-ci existe bien
 
     if (isContainer(envie.categorie)) {
 
@@ -50,7 +50,7 @@ export function renderVoyageSection(envie) {
 }
 
 function renderVoyageContenu(envie, container) {
-
+container.innerHTML = "";
     const couvertureRow = document.createElement("div");
     couvertureRow.className = "voyageCouvertureRow";
 
