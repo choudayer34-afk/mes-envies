@@ -4,11 +4,13 @@ import { showToast } from "./toast.js";
 import { searchLocation, useCurrentLocation } from "./location.js";
 import { renderMultiSelectCollapsible } from "./multiselect.js";
 import { renderVoyageursWidget, getVoyageursData, formatVoyageursTexte, formatVoyageursCozycozy } from "./voyageurs.js";
+import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
 
 let etapesTrouvees = [];
 let miniMap = null;
 let lieuDepart = null;
 let lieuArrivee = null;
+let etapePeriodeChoisie = null;
 
 const activitesSelectionnees = new Set();
 const criteresSelectionnes = new Set();
@@ -17,6 +19,9 @@ export function initEtapeFinder() {
 
     document.getElementById("btnEtapeFinder")?.addEventListener("click", () => {
         renderVoyageursWidget("etapeVoyageursContainer");
+
+        etapePeriodeChoisie = null;
+        document.getElementById("etapeDateLabel").textContent = "Choisir...";
 
         activitesSelectionnees.clear();
         criteresSelectionnes.clear();
@@ -42,6 +47,25 @@ export function initEtapeFinder() {
             (place) => { lieuDepart = place; },
             event.currentTarget
         );
+
+    });
+
+    document.getElementById("etapeChooseDate")?.addEventListener("click", () => {
+
+        ouvrirSelecteurPeriodeLibre((periode) => {
+
+            etapePeriodeChoisie = periode;
+
+            document.getElementById("etapeDateLabel").textContent = formatPeriode(periode);
+
+        }, etapePeriodeChoisie);
+
+    });
+
+    document.getElementById("etapeClearDate")?.addEventListener("click", () => {
+
+        etapePeriodeChoisie = null;
+        document.getElementById("etapeDateLabel").textContent = "Choisir...";
 
     });
 
@@ -138,7 +162,7 @@ function genererPromptEtape() {
 
     const depart = lieuDepart?.nom || document.getElementById("etapeDepart").value.trim();
     const arrivee = lieuArrivee?.nom || document.getElementById("etapeArrivee").value.trim();
-    const duree = document.getElementById("etapeDuree").value.trim();
+    const duree = etapePeriodeChoisie ? formatPeriode(etapePeriodeChoisie) : "[à préciser]"; 
     const periode = document.getElementById("etapePeriode").value.trim();
     const precisions = document.getElementById("etapeActivites").value.trim();
     const rayon = document.getElementById("etapeRayon").value.trim();
@@ -523,19 +547,23 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 
 function extraireDatesCozycozy() {
 
+    if (etapePeriodeChoisie?.start) {
+
+        const dateDebut = etapePeriodeChoisie.start;
+        const dateFin = etapePeriodeChoisie.end || etapePeriodeChoisie.start;
+
+        return { dateDebut, dateFin };
+
+    }
+
     const aujourdhui = new Date();
     const dateDebut = aujourdhui.toISOString().slice(0, 10);
 
-    const dureeTexte = document.getElementById("etapeDuree").value.trim();
-    const matchNombre = dureeTexte.match(/(\d+)/);
-    const nbJours = matchNombre ? parseInt(matchNombre[1], 10) : 2;
-
     const finDate = new Date(aujourdhui);
-    finDate.setDate(finDate.getDate() + nbJours);
+    finDate.setDate(finDate.getDate() + 2);
 
-    const dateFin = finDate.toISOString().slice(0, 10);
-
-    return { dateDebut, dateFin };
+    return { dateDebut, dateFin: finDate.toISOString().slice(0, 10) };
 
 }
+
 
