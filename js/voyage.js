@@ -410,26 +410,22 @@ function createLogementRow(logement, voyageEnvie) {
 
        row.querySelector(".deleteButton").addEventListener("click", () => {
 
-        console.log("Clic sur bouton retirer, enfant.id=" + enfant.id);
-
         try {
 
             updateEnvieVoyage(enfant.id, null);
-            console.log("updateEnvieVoyage OK");
 
-            renderVoyageSection(voyageEnvie);
-            console.log("renderVoyageSection OK");
-
-            renderEnvies();
-            console.log("renderEnvies OK");
+            row.remove();
 
             showToast("✓ Retiré du voyage");
+
+            renderEnvies();
 
         } catch (err) {
             console.error("Erreur suppression envie du voyage: " + err.message);
         }
 
     });
+
 
 
 
