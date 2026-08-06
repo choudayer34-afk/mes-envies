@@ -380,3 +380,132 @@ export function renderLieuActions(envie) {
 
 }
 
+let mapPickerInstance = null;
+let mapPickerMarker = null;
+let onLieuChoisiCallback = null;
+
+export function openMapPicker(onLieuChoisi) {
+
+    onLieuChoisiCallback = onLieuChoisi;
+
+    document.getElementById("mapPickerModal").classList.remove("hidden");
+
+    requestAnimationFrame(() => {
+
+        if (!mapPickerInstance) {
+            initMapPickerLeaflet();
+        }
+
+        centrerSurPositionActuelle();
+
+        setTimeout(() => mapPickerInstance.invalidateSize(), 100);
+
+    });
+
+}
+
+function initMapPickerLeaflet() {
+
+    mapPickerInstance = L.map("mapPickerContainer");
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
+    }).addTo(mapPickerInstance);
+
+    mapPickerInstance.setView([46.6, 2.3], 5);
+
+    mapPickerInstance.on("click", (event) => {
+        placerMarker(event.latlng.lat, event.latlng.lng);
+    });
+
+}
+
+function centrerSurPositionActuelle() {
+
+    if (!("geolocation" in navigator))
+        return;
+
+    navigator.geolocation.getCurrentPosition(
+
+        (position) => {
+
+            const { latitude, longitude } = position.coords;
+
+            mapPickerInstance.setView([latitude, longitude], 13);
+            placerMarker(latitude, longitude);
+
+        },
+
+        () => {}
+
+    );
+
+}
+
+function placerMarker(lat, lng) {
+
+    if (mapPickerMarker) {
+        mapPickerInstance.removeLayer(mapPickerMarker);
+    }
+
+    mapPickerMarker = L.marker([lat, lng], { draggable: true }).addTo(mapPickerInstance);
+
+    mapPickerMarker.on("dragend", () => {
+
+        const pos = mapPickerMarker.getLatLng();
+        mettreAJourValidation(pos.lat, pos.lng);
+
+    });
+
+    mettreAJourValidation(lat, lng);
+
+}
+
+function mettreAJourValidation(lat, lng) {
+
+    const validateBtn = document.getElementById("validerMapPickerButton");
+
+    if (validateBtn) {
+
+        validateBtn.disabled = false;
+
+        validateBtn.dataset.lat = lat;
+        validateBtn.dataset.lng = lng;
+
+    }
+
+}
+
+export function initMapPicker() {
+
+    document.getElementById("closeMapPicker")?.addEventListener("click", () => {
+        document.getElementById("mapPickerModal").classList.add("hidden");
+    });
+
+    document.getElementById("validerMapPickerButton")?.addEventListener("click", (event) => {
+
+        const lat = parseFloat(event.target.dataset.lat);
+        const lng = parseFloat(event.target.dataset.lng);
+
+        if (isNaN(lat) || isNaN(lng))
+            return;
+
+        const place = {
+            nom: `Position (${lat.toFixed(5)}, ${lng.toFixed(5)})`,
+            adresse: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+            latitude: lat,
+            longitude: lng
+        };
+
+        if (onLieuChoisiCallback) {
+            onLieuChoisiCallback(place);
+        }
+
+        document.getElementById("mapPickerModal").classList.add("hidden");
+
+    });
+
+    document.getElementById("recentrerPositionButton")?.addEventListener("click", centrerSurPositionActuelle);
+
+}
