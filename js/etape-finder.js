@@ -327,18 +327,23 @@ function renderEtapes() {
 
     });
 
-    resultEl.querySelectorAll(".chercherCozycozyButton").forEach(btn => {
+        resultEl.querySelectorAll(".chercherCozycozyButton").forEach(btn => {
 
         btn.addEventListener("click", () => {
 
             const etape = etapesTrouvees[parseInt(btn.dataset.index, 10)];
-            const recherche = encodeURIComponent(etape.nom);
+            const destination = encodeURIComponent(etape.nom);
 
-            window.open(`https://www.cozycozy.com/fr/search/${recherche}`, "_blank");
+            const { dateDebut, dateFin } = extraireDatesCozycozy();
+
+            const url = `https://www.cozycozy.com/fr/search/${destination}/${dateDebut}/${dateFin}/2-0-1/progress`;
+
+            window.open(url, "_blank");
 
         });
 
     });
+
 
         setTimeout(async () => await initMiniMap(), 100);
 
@@ -502,6 +507,24 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
         Math.sin(dLon / 2) ** 2;
 
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+}
+
+function extraireDatesCozycozy() {
+
+    const aujourdhui = new Date();
+    const dateDebut = aujourdhui.toISOString().slice(0, 10);
+
+    const dureeTexte = document.getElementById("etapeDuree").value.trim();
+    const matchNombre = dureeTexte.match(/(\d+)/);
+    const nbJours = matchNombre ? parseInt(matchNombre[1], 10) : 2;
+
+    const finDate = new Date(aujourdhui);
+    finDate.setDate(finDate.getDate() + nbJours);
+
+    const dateFin = finDate.toISOString().slice(0, 10);
+
+    return { dateDebut, dateFin };
 
 }
 
