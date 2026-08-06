@@ -39,6 +39,12 @@ export function initEtapeFinder() {
         document.getElementById("etapeFinderModal").classList.remove("hidden");
 
     });
+    document.getElementById("clearEtapeJsonInput")?.addEventListener("click", () => {
+
+        document.getElementById("etapeJsonInput").value = "";
+        document.getElementById("etapeResultat").innerHTML = "";
+
+    });
 
     document.getElementById("btnDepartMaPosition")?.addEventListener("click", (event) => {
 
