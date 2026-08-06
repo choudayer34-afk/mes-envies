@@ -139,11 +139,16 @@ function genererPromptEtape() {
     const duree = document.getElementById("etapeDuree").value.trim();
     const periode = document.getElementById("etapePeriode").value.trim();
     const precisions = document.getElementById("etapeActivites").value.trim();
+    const rayon = document.getElementById("etapeRayon").value.trim();
 
     let activitesTexte = Array.from(activitesSelectionnees).join(", ") || "toutes activités pertinentes";
 
     if (criteresSelectionnes.size > 0) {
-        activitesTexte += `. Critères importants : ${Array.from(criteresSelectionnes).join(", ")}`;
+        activitesTexte += `. Critères importants (doivent être satisfaits majoritairement dans le rayon indiqué) : ${Array.from(criteresSelectionnes).join(", ")}`;
+    }
+
+    if (rayon) {
+        activitesTexte += `. Rayon acceptable autour de l'étape pour satisfaire ces critères et activités : ${rayon}`;
     }
 
     if (precisions) {
@@ -162,6 +167,7 @@ function genererPromptEtape() {
     return texte;
 
 }
+
 
 function normaliserGuillemets(texte) {
 
