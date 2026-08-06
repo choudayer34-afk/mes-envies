@@ -26,6 +26,8 @@ import { initRegionFinder, initPromptRegionAdmin } from "./js/region.js";
 import { initPromptRegionSync } from "./js/storage.js";
 import { openModalVoyage } from "./js/modal.js";
 import { initVoyageImport } from "./js/voyage-import.js";
+import { getCurrentEnvieId } from "./js/envie.js";
+import { renderVoyageSection } from "./js/voyage.js";
 
 import { initFoyerDataSync } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -103,9 +105,24 @@ initPlus();
     initAgenda();
     initFicheDelete();
 
-    initEnviesSync(() => {
+      initEnviesSync(() => {
+
         renderEnvies();
+
+        const ficheOverlay = document.getElementById("ficheOverlay");
+
+        if (ficheOverlay && !ficheOverlay.classList.contains("hidden")) {
+
+            const envieOuverte = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+            if (envieOuverte) {
+                renderVoyageSection(envieOuverte);
+            }
+
+        }
+
     });
+
     initEnvieCategoriesSync(() => {
         renderEnvies();
         renderCreationCategorieSelector();
