@@ -59,22 +59,27 @@ export function initLocation() {
         });
     }
 
-    const btnChoisirSurCarte = document.getElementById("btnChoisirSurCarte");
+        const btnChoisirSurCarte = document.getElementById("btnChoisirSurCarte");
 
     if (btnChoisirSurCarte) {
 
         btnChoisirSurCarte.addEventListener("click", () => {
+
+            document.getElementById("modalOverlay").classList.add("hidden");
 
             openMapPicker((place) => {
 
                 document.getElementById("envieLieu").value = place.nom;
                 selectedLieu = place;
 
+                document.getElementById("modalOverlay").classList.remove("hidden");
+
             });
 
         });
 
     }
+
 
     const btnLocateFiche = document.getElementById("btnLocateFiche");
 
@@ -88,7 +93,7 @@ export function initLocation() {
         });
     }
 
-    const btnChoisirSurCarteFiche = document.getElementById("btnChoisirSurCarteFiche");
+        const btnChoisirSurCarteFiche = document.getElementById("btnChoisirSurCarteFiche");
 
     if (btnChoisirSurCarteFiche) {
 
@@ -96,13 +101,20 @@ export function initLocation() {
 
             const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
 
+            document.getElementById("ficheOverlay").classList.add("hidden");
+
             openMapPicker((place) => {
+
                 updateEnvieLieu(getCurrentEnvieId(), place);
+
+                document.getElementById("ficheOverlay").classList.remove("hidden");
+
             }, envie?.lieu);
 
         });
 
     }
+
 
     const btnVoirSurCarte = document.getElementById("btnVoirLieuCarte");
 
