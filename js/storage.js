@@ -1100,7 +1100,7 @@ export function resetPromptEtape() {
     updatePromptEtape(DEFAULT_PROMPT_ETAPE);
 }
 
-const DEFAULT_ACTIVITE_TYPES = [
+consconst DEFAULT_ACTIVITE_TYPES = [
     { label: "Nature & randonnée", emoji: "🏞️", ordre: 0 },
     { label: "Plage & baignade", emoji: "🏖️", ordre: 1 },
     { label: "Montagne", emoji: "🌄", ordre: 2 },
@@ -1112,18 +1112,38 @@ const DEFAULT_ACTIVITE_TYPES = [
     { label: "Romantique", emoji: "💑", ordre: 8 },
     { label: "Vie urbaine", emoji: "🏙️", ordre: 9 },
     { label: "Shopping", emoji: "🛍️", ordre: 10 },
-    { label: "Vie nocturne", emoji: "🎉", ordre: 11 }
+    { label: "Vie nocturne", emoji: "🎉", ordre: 11 },
+    { label: "Parcs & jardins", emoji: "🌳", ordre: 12 },
+    { label: "Musées", emoji: "🖼", ordre: 13 },
+    { label: "Sites historiques", emoji: "🏰", ordre: 14 },
+    { label: "Vélo", emoji: "🚲", ordre: 15 },
+    { label: "Nautique (canoë, voile...)", emoji: "🛶", ordre: 16 },
+    { label: "Escalade", emoji: "🧗", ordre: 17 },
+    { label: "Parcs d'attractions", emoji: "🎢", ordre: 18 },
+    { label: "Marchés locaux", emoji: "🧺", ordre: 19 },
+    { label: "Œnotourisme", emoji: "🍷", ordre: 20 },
+    { label: "Photographie / paysages", emoji: "📷", ordre: 21 }
 ];
+
 
 const DEFAULT_CRITERES_VOYAGE = [
     { label: "Budget maîtrisé", emoji: "💰", ordre: 0 },
-    { label: "Peu de foule", emoji: "🧑‍🤝‍🧑", ordre: 1 },
+    { label: "Peu de foule", emoji: "🧑‍🤝", ordre: 1 },
     { label: "Bébés/jeunes enfants", emoji: "👶", ordre: 2 },
     { label: "Accepte les animaux", emoji: "🐾", ordre: 3 },
     { label: "Accessible PMR", emoji: "♿", ordre: 4 },
     { label: "Activités si pluie", emoji: "🌂", ordre: 5 },
-    { label: "Parking facile", emoji: "🅿️", ordre: 6 }
+    { label: "Parking facile", emoji: "🅿️", ordre: 6 },
+    { label: "Transports en commun", emoji: "🚌", ordre: 7 },
+    { label: "Restaurants à proximité", emoji: "🍴", ordre: 8 },
+    { label: "Wifi disponible", emoji: "📶", ordre: 9 },
+    { label: "Sécurisé la nuit", emoji: "🔒", ordre: 10 },
+    { label: "Calme / tranquille", emoji: "🤫", ordre: 11 },
+    { label: "Bon rapport qualité-prix logement", emoji: "🏨", ordre: 12 },
+    { label: "Éco-responsable", emoji: "🌱", ordre: 13 },
+    { label: "Peu de trajet en voiture nécessaire", emoji: "🚗", ordre: 14 }
 ];
+
 
 let activiteTypesCache = [];
 let criteresVoyageCache = [];
