@@ -381,30 +381,75 @@ function renderLegendePartage(lieux, jourColorMap) {
 
 }
 
-function openPhotoViewerPublic(url, description) {
+function openPhotoViewerPublic(toutesLesPhotosDuJour, indexDepart) {
+
+    let indexActuel = indexDepart;
 
     const modal = document.createElement("div");
     modal.style = "position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;padding:16px;";
 
-    modal.innerHTML = `
-        <button style="align-self:flex-start;background:none;border:none;color:white;font-size:16px;margin-bottom:10px;">← Retour</button>
-        <img src="${url}" style="width:100%;border-radius:16px;flex-shrink:0;">
-        ${description ? `<p style="color:white;font-size:14px;text-align:center;margin-top:16px;">${description}</p>` : ""}
-    `;
+    function render() {
 
-    modal.querySelector("button").addEventListener("click", () => {
-        modal.remove();
+        const photo = toutesLesPhotosDuJour[indexActuel];
+
+        modal.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <button id="fermerViewer" style="background:none;border:none;color:white;font-size:16px;">← Retour</button>
+                <span style="color:white;font-size:13px;">${indexActuel + 1} / ${toutesLesPhotosDuJour.length}</span>
+            </div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;">
+                ${indexActuel > 0 ? `<button id="photoPrec" style="position:absolute;left:0;background:rgba(255,255,255,.15);border:none;color:white;font-size:24px;width:44px;height:44px;border-radius:50%;">‹</button>` : ""}
+                <img src="${photo.url}" style="max-width:100%;max-height:70vh;border-radius:16px;">
+                ${indexActuel < toutesLesPhotosDuJour.length - 1 ? `<button id="photoSuiv" style="position:absolute;right:0;background:rgba(255,255,255,.15);border:none;color:white;font-size:24px;width:44px;height:44px;border-radius:50%;">›</button>` : ""}
+            </div>
+            ${photo.description ? `<p style="color:white;font-size:14px;text-align:center;margin-top:16px;">${photo.description}</p>` : ""}
+            ${photo.activiteTitre ? `<p style="color:rgba(255,255,255,.6);font-size:12px;text-align:center;margin-top:6px;">${photo.activiteTitre}</p>` : ""}
+        `;
+
+        modal.querySelector("#fermerViewer").addEventListener("click", () => modal.remove());
+
+        modal.querySelector("#photoPrec")?.addEventListener("click", () => {
+            indexActuel--;
+            render();
+        });
+
+        modal.querySelector("#photoSuiv")?.addEventListener("click", () => {
+            indexActuel++;
+            render();
+        });
+
+    }
+
+    render();
+
+    let touchStartX = 0;
+
+    modal.addEventListener("touchstart", (e) => {
+        touchStartX = e.touches[0].clientX;
     });
 
-    modal.addEventListener("click", (event) => {
-        if (event.target === modal) {
-            modal.remove();
+    modal.addEventListener("touchend", (e) => {
+
+        const touchEndX = e.changedTouches[0].clientX;
+        const diff = touchStartX - touchEndX;
+
+        if (Math.abs(diff) < 50)
+            return;
+
+        if (diff > 0 && indexActuel < toutesLesPhotosDuJour.length - 1) {
+            indexActuel++;
+            render();
+        } else if (diff < 0 && indexActuel > 0) {
+            indexActuel--;
+            render();
         }
+
     });
 
     document.body.appendChild(modal);
 
 }
+
 
 function createPin(color, emoji) {
 
