@@ -2,6 +2,7 @@ import { searchLocation } from "./location.js";
 import { showToast } from "./toast.js";
 import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } from "./storage.js";
 
+
 let voyageIdActuel = null;
 
 function calculerDistanceKm(lat1, lon1, lat2, lon2) {
@@ -170,7 +171,7 @@ function renderRapportImport() {
         </div>
     `;
 
-        ideesAImporter.forEach((idee, index) => {
+    ideesAImporter.forEach((idee, index) => {
 
         const destination = document.getElementById("voyageImportDestination").value.trim();
         const dates = document.getElementById("voyageImportDates").value.trim();
@@ -179,40 +180,49 @@ function renderRapportImport() {
         const recherche = encodeURIComponent(rechercheTexte);
 
         const estRando = (idee.categorie || "").toLowerCase().includes("randon");
+        const estLogement = (idee.categorie || "").toLowerCase().includes("logement");
 
         let liensHtml = `
             <a href="https://www.google.com/search?q=${recherche}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 Google</a>
             <a href="https://www.tripadvisor.fr/Search?q=${encodeURIComponent(idee.titre + " " + (idee.lieu || destination))}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🔍 TripAdvisor</a>
         `;
-        
+
+        if (estRando) {
+
+            const rechercheRando = encodeURIComponent(`${idee.titre} ${idee.lieu || destination}`);
+            liensHtml += `<a href="https://www.visorando.com/rechercher.php?q=${rechercheRando}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🥾 Visorando</a>`;
+
+        }
+
         if (idee.lieu) {
 
             const rechercheMeteo = encodeURIComponent(idee.lieu);
             liensHtml += `<a href="https://www.windy.com/?${rechercheMeteo}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🌤️ Météo</a>`;
 
         }
-        
-                const estLogement = (idee.categorie || "").toLowerCase().includes("logement");
 
         if (estLogement) {
 
-            const destination = document.getElementById("voyageImportDestination").value.trim();
-            const dates = document.getElementById("voyageImportDates").value.trim();
             const rechercheBooking = encodeURIComponent(idee.lieu || destination);
-
             liensHtml += `<a href="https://www.booking.com/searchresults.html?ss=${rechercheBooking}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🏨 Booking</a>`;
 
         }
 
+        const voyage = getEnvies().find(e => e.id === voyageIdActuel);
 
+        let distanceLabel = "";
 
-        if (estRando) {
+        const latitudeIA = parseFloat(idee.latitude);
+        const longitudeIA = parseFloat(idee.longitude);
 
-            const rechercheRando = encodeURIComponent(`${idee.titre} ${idee.lieu || destination}`);
+        if (voyage?.lieu?.latitude && !isNaN(latitudeIA) && !isNaN(longitudeIA)) {
 
-            liensHtml += `
-                <a href="https://www.visorando.com/rechercher.php?q=${rechercheRando}" target="_blank" style="font-size:12px;color:var(--color-primary-dark);text-decoration:none;">🥾 Visorando</a>
-            `;
+            const distance = calculerDistanceKm(
+                voyage.lieu.latitude, voyage.lieu.longitude,
+                latitudeIA, longitudeIA
+            );
+
+            distanceLabel = ` · 📏 ${distance.toFixed(1)} km de la base`;
 
         }
 
@@ -222,7 +232,7 @@ function renderRapportImport() {
                     <input type="checkbox" class="ideeCheckbox" data-index="${index}" ${idee.selectionne ? "checked" : ""} style="width:20px;height:20px;margin-top:2px;flex-shrink:0;">
                     <span>
                         <div class="templateRowNom">${idee.titre}</div>
-                        <small style="color:var(--color-text-light);">${idee.categorie || ""}${idee.description ? ` · ${idee.description}` : ""}</small>
+                        <small style="color:var(--color-text-light);">${idee.categorie || ""}${idee.description ? ` · ${idee.description}` : ""}${distanceLabel}</small>
                         ${idee.url ? `<div style="margin-top:4px;"><a href="${idee.url}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;">🔗 Lien suggéré par l'IA</a></div>` : ""}
                         <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">${liensHtml}</div>
                     </span>
@@ -231,7 +241,6 @@ function renderRapportImport() {
         `;
 
     });
-
 
     if (ideesAImporter.length > 0) {
         html += `<button id="confirmVoyageImportButton" class="primaryButton" style="width:100%;margin-top:14px;">✅ Importer les idées sélectionnées</button>`;
@@ -267,6 +276,7 @@ function renderRapportImport() {
     document.getElementById("confirmVoyageImportButton")?.addEventListener("click", confirmerImportVoyage);
 
 }
+
 
 async function confirmerImportVoyage() {
 
