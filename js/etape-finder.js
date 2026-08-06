@@ -15,6 +15,23 @@ export function initEtapeFinder() {
 
     });
 
+    document.getElementById("toutCocherActivitesButton")?.addEventListener("click", () => {
+
+        document.querySelectorAll("#etapeActivitesCheckboxes input[type='checkbox']").forEach(cb => {
+            cb.checked = true;
+        });
+
+    });
+
+    document.getElementById("toutCocherCriteresButton")?.addEventListener("click", () => {
+
+        document.querySelectorAll("#etapeCriteresCheckboxes input[type='checkbox']").forEach(cb => {
+            cb.checked = true;
+        });
+
+    });
+
+
     document.getElementById("closeEtapeFinder")?.addEventListener("click", () => {
         document.getElementById("etapeFinderModal").classList.add("hidden");
     });
@@ -48,7 +65,24 @@ function genererPromptEtape() {
     const depart = document.getElementById("etapeDepart").value.trim();
     const arrivee = document.getElementById("etapeArrivee").value.trim();
     const duree = document.getElementById("etapeDuree").value.trim();
-    const activites = document.getElementById("etapeActivites").value.trim();
+    const periode = document.getElementById("etapePeriode").value.trim();
+    const precisions = document.getElementById("etapeActivites").value.trim();
+
+    const activitesCochees = Array.from(document.querySelectorAll("#etapeActivitesCheckboxes input:checked"))
+        .map(cb => cb.value);
+
+    const criteresCoches = Array.from(document.querySelectorAll("#etapeCriteresCheckboxes input:checked"))
+        .map(cb => cb.value);
+
+    let activitesTexte = activitesCochees.join(", ") || "toutes activités pertinentes";
+
+    if (criteresCoches.length > 0) {
+        activitesTexte += `. Critères importants : ${criteresCoches.join(", ")}`;
+    }
+
+    if (precisions) {
+        activitesTexte += `. Précisions : ${precisions}`;
+    }
 
     let texte = getPromptEtape();
 
@@ -56,11 +90,13 @@ function genererPromptEtape() {
         .replace(/{{depart}}/g, depart || "[à préciser]")
         .replace(/{{arrivee}}/g, arrivee || "[à préciser]")
         .replace(/{{duree}}/g, duree || "[à préciser]")
-        .replace(/{{activites}}/g, activites || "[à préciser]");
+        .replace(/{{periode}}/g, periode || "[non précisée]")
+        .replace(/{{activites}}/g, activitesTexte);
 
     return texte;
 
 }
+
 
 function normaliserGuillemets(texte) {
 
