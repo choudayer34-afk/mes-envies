@@ -14,11 +14,13 @@ export function renderMultiSelectCollapsible(containerId, items, selectedValues,
             <span>${resume}</span>
             <span>▾</span>
         </button>
-        <div class="categorieSelector multiSelectGrid hidden" style="margin-top:10px;"></div>
+        <div class="categorieSelector multiSelectGrid" style="margin-top:10px;display:none;"></div>
     `;
 
     const toggle = container.querySelector(".multiSelectToggle");
     const grid = container.querySelector(".multiSelectGrid");
+
+    let ouvert = false;
 
     items.forEach(item => {
 
@@ -50,7 +52,10 @@ export function renderMultiSelectCollapsible(containerId, items, selectedValues,
     });
 
     toggle.addEventListener("click", () => {
-        grid.classList.toggle("hidden");
+
+        ouvert = !ouvert;
+        grid.style.display = ouvert ? "grid" : "none";
+
     });
 
 }
