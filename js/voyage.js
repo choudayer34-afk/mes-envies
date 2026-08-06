@@ -673,7 +673,7 @@ function openOptimiserModal(items, voyageEnvie) {
         setupAdresseManuelle("departManuelInput", "departManuelSuggestions", (place) => { departManuel = place; });
         setupAdresseManuelle("arriveeManuelleInput", "arriveeManuelleSuggestions", (place) => { arriveeManuelle = place; });
 
-            content.querySelector("#lancerOptimisation").addEventListener("click", () => {
+                    content.querySelector("#lancerOptimisation").addEventListener("click", async () => {
 
             const depart = departId === "manuel"
                 ? (departManuel ? { id: "depart-manuel", titre: departManuel.nom, lieu: departManuel } : null)
@@ -683,7 +683,9 @@ function openOptimiserModal(items, voyageEnvie) {
                 ? (arriveeManuelle ? { id: "arrivee-manuelle", titre: arriveeManuelle.nom, lieu: arriveeManuelle } : null)
                 : optionsDisponibles.find(i => i.id === arriveeId) || null;
 
-            const resultat = optimiserOrdre(items, depart, arrivee);
+            content.innerHTML = `<div class="emptyState">🗺️ Calcul de l'itinéraire en cours...</div>`;
+
+            const resultat = await optimiserOrdre(items, depart, arrivee);
 
             let ordreIndex = 0;
 
@@ -691,28 +693,27 @@ function openOptimiserModal(items, voyageEnvie) {
                 updateEnvieOrdre(item.id, Date.now() + ordreIndex++);
             });
 
-                        resultatCalcule = resultat;
+            resultatCalcule = resultat;
 
-            const etapes = calculerDistancesEtapes(resultat);
+            const etapes = await calculerDistancesEtapes(resultat);
 
             const etapesHtml = etapes.map((etape, index) => `
                 <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--color-border);">
                     <span style="font-weight:700;color:var(--color-primary);">${index + 1}.</span>
                     <span style="flex:1;">${etape.titre}</span>
-                    ${etape.distanceDepuisPrecedent !== null ? `<span style="font-size:12px;color:var(--color-text-light);">${etape.distanceDepuisPrecedent.toFixed(1)} km</span>` : ""}
+                    ${etape.distanceDepuisPrecedent !== null ? `<span style="font-size:12px;color:var(--color-text-light);">${etape.distanceDepuisPrecedent.toFixed(1)} km · ${etape.dureeDepuisPrecedent} min</span>` : ""}
                 </div>
             `).join("");
 
             content.innerHTML = `
-                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ordre optimisé (ordre mis à jour dans le voyage) :</p>
+                <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ordre optimisé (temps de trajet routier réel) :</p>
                 <div style="margin-bottom:16px;">${etapesHtml}</div>
                 <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Ouvrir avec :</p>
                 <button id="ouvrirGoogleMaps" class="primaryButton" style="width:100%;margin-bottom:10px;">🗺️ Google Maps (itinéraire complet)</button>
                 <button id="ouvrirWaze" class="secondaryButton" style="width:100%;">🚗 Waze (vers la 1ère étape)</button>
             `;
 
-
-                        content.querySelector("#ouvrirGoogleMaps").addEventListener("click", () => {
+            content.querySelector("#ouvrirGoogleMaps").addEventListener("click", () => {
 
                 const lienApp = buildLienGoogleMapsApp(resultatCalcule);
                 const lienWeb = buildLienGoogleMapsMultiEtapes(resultatCalcule);
@@ -735,18 +736,13 @@ function openOptimiserModal(items, voyageEnvie) {
                 renderVoyageSection(voyageEnvie);
 
             });
-                        content.querySelector("#ouvrirWaze").addEventListener("click", () => {
 
-                console.log("resultatCalcule: " + JSON.stringify(resultatCalcule));
+            content.querySelector("#ouvrirWaze").addEventListener("click", () => {
 
                 const lien = buildLienWazePremiereEtape(resultatCalcule);
 
-                console.log("Lien Waze: " + lien);
-
                 if (lien) {
                     window.location.href = lien;
-                } else {
-                    console.error("Aucun lien Waze généré (lien est null/undefined)");
                 }
 
                 modal.classList.add("hidden");
@@ -754,8 +750,8 @@ function openOptimiserModal(items, voyageEnvie) {
 
             });
 
+        });
 
-});
 
     }
 
