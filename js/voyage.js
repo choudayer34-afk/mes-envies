@@ -169,6 +169,25 @@ function renderVoyageContenu(envie, container) {
 
     container.appendChild(mapButton);
 
+    if (envie.lieu?.latitude && envie.lieu?.longitude) {
+
+        const carteTouristiqueButton = document.createElement("button");
+        carteTouristiqueButton.className = "secondaryButton";
+        carteTouristiqueButton.textContent = "🗺️ Carte touristique autour";
+        carteTouristiqueButton.style.marginTop = "10px";
+
+        carteTouristiqueButton.addEventListener("click", () => {
+
+            const lien = `https://www.google.com/maps/search/choses+à+faire+tourisme/@${envie.lieu.latitude},${envie.lieu.longitude},12z`;
+            window.open(lien, "_blank");
+
+        });
+
+        container.appendChild(carteTouristiqueButton);
+
+    }
+
+
     const addButton = document.createElement("button");
     addButton.className = "secondaryButton";
     addButton.textContent = "➕ Ajouter une envie existante";
