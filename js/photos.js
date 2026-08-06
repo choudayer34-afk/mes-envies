@@ -14,20 +14,26 @@ export function initPhotos() {
 
     ficheOverlay.dataset.photosInit = "true";
 
-    ficheOverlay.addEventListener("click", (event) => {
+        ficheOverlay.addEventListener("click", (event) => {
 
         const btn = event.target.closest("#addPhotoButton");
+
+        console.log("Clic détecté, addPhotoButton trouvé=" + !!btn);
 
         if (!btn)
             return;
 
         const input = document.getElementById("photoInput");
 
+        console.log("photoInput trouvé=" + !!input);
+
         if (input) {
             input.click();
+            console.log("input.click() appelé");
         }
 
     });
+
 
     ficheOverlay.addEventListener("change", async (event) => {
 
