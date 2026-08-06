@@ -1,13 +1,15 @@
 /* js/location.js */
 
-import { updateEnvieLieu } from "./storage.js";
+import { updateEnvieLieu, getEnvies } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { openMapSingleLieu } from "./carte.js";
-import { getEnvies } from "./storage.js";
-
 
 let selectedLieu = { nom: "", adresse: "", latitude: null, longitude: null };
 let debounceTimer = null;
+
+let mapPickerInstance = null;
+let mapPickerMarker = null;
+let onLieuChoisiCallback = null;
 
 export function getSelectedLieu() {
     return selectedLieu;
@@ -56,8 +58,8 @@ export function initLocation() {
             );
         });
     }
-    
-        const btnChoisirSurCarte = document.getElementById("btnChoisirSurCarte");
+
+    const btnChoisirSurCarte = document.getElementById("btnChoisirSurCarte");
 
     if (btnChoisirSurCarte) {
 
@@ -74,8 +76,7 @@ export function initLocation() {
 
     }
 
-    
-        const btnLocateFiche = document.getElementById("btnLocateFiche");
+    const btnLocateFiche = document.getElementById("btnLocateFiche");
 
     if (btnLocateFiche) {
         btnLocateFiche.addEventListener("click", () => {
@@ -93,9 +94,11 @@ export function initLocation() {
 
         btnChoisirSurCarteFiche.addEventListener("click", () => {
 
+            const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
+
             openMapPicker((place) => {
                 updateEnvieLieu(getCurrentEnvieId(), place);
-            });
+            }, envie?.lieu);
 
         });
 
@@ -161,7 +164,6 @@ function initClearButton(button, input, suggestionsBox, onClear) {
     });
 
 }
-
 
 function setupAutocomplete(input, suggestionsBox, onSelect) {
 
@@ -266,8 +268,6 @@ function parseCoordinates(text) {
 
 }
 
-
-
 export function useCurrentLocation(input, onSelect, button = null) {
 
     if (!("geolocation" in navigator)) {
@@ -319,7 +319,6 @@ function resetButton(button, originalLabel) {
 
 }
 
-
 function showPrecision(input, accuracy) {
 
     if (!input)
@@ -336,7 +335,6 @@ function showPrecision(input, accuracy) {
     label.textContent = `📶 Précision : ± ${Math.round(accuracy)} m`;
 
 }
-
 
 async function reverseGeocode(latitude, longitude) {
 
@@ -412,25 +410,34 @@ export function renderLieuActions(envie) {
 
 }
 
-let mapPickerInstance = null;
-let mapPickerMarker = null;
-let onLieuChoisiCallback = null;
+export function openMapPicker(onLieuChoisi, lieuExistant = null) {
 
-    const btnChoisirSurCarteFiche = document.getElementById("btnChoisirSurCarteFiche");
+    onLieuChoisiCallback = onLieuChoisi;
 
-    if (btnChoisirSurCarteFiche) {
+    document.getElementById("mapPickerModal").classList.remove("hidden");
 
-        btnChoisirSurCarteFiche.addEventListener("click", () => {
+    requestAnimationFrame(() => {
 
-            const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
+        if (!mapPickerInstance) {
+            initMapPickerLeaflet();
+        }
 
-            openMapPicker((place) => {
-                updateEnvieLieu(getCurrentEnvieId(), place);
-            }, envie?.lieu);
+        if (lieuExistant?.latitude && lieuExistant?.longitude) {
 
-        });
+            mapPickerInstance.setView([lieuExistant.latitude, lieuExistant.longitude], 14);
+            placerMarker(lieuExistant.latitude, lieuExistant.longitude);
 
-    }
+        } else {
+
+            centrerSurPositionActuelle();
+
+        }
+
+        setTimeout(() => mapPickerInstance.invalidateSize(), 100);
+
+    });
+
+}
 
 function initMapPickerLeaflet() {
 
