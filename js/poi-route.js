@@ -60,6 +60,7 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 
 }
 
+
 async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     const filtreTags = tags.map(t => {
@@ -78,11 +79,9 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
 
         try {
 
-            const response = await fetch(miroir, {
-                method: "POST",
-                headers: { "Content-Type": "text/plain" },
-                body: query
-            });
+            const url = `${miroir}?data=${encodeURIComponent(query)}`;
+
+            const response = await fetch(url, { method: "GET" });
 
             if (!response.ok) {
                 console.error(`Miroir ${miroir} status: ${response.status}`);
@@ -90,6 +89,8 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
             }
 
             const data = await response.json();
+
+            console.log(`Miroir ${miroir} OK, éléments=${data.elements?.length || 0}`);
 
             return (data.elements || []).map(el => ({
                 nom: el.tags?.name || null,
@@ -107,7 +108,6 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
     return [];
 
 }
-
 
 export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress) {
 
