@@ -953,12 +953,17 @@ let anglaisTotal = 0;
 function initAnglais() {
 
     document.getElementById("btnOuvrirAnglais")?.addEventListener("click", () => {
+
         anglaisScore = 0;
         anglaisTotal = 0;
+
         nouvelleQuestionAnglais();
+
     });
 
 }
+
+
 
 function nouvelleQuestionAnglais() {
 
