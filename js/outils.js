@@ -10,23 +10,7 @@ const MOTS_ALEATOIRES = [
 let lettresUtiliseesCount = 0;
 let lectureNiveauActuel = "tous";
 
-function demarrerLecture(niveau = "tous") {
 
-    lectureNiveauActuel = niveau;
-
-    let liste = SYLLABES_LECTURE;
-
-    if (niveau === "1") liste = SYLLABES_LECTURE.slice(0, 18);
-    else if (niveau === "2") liste = SYLLABES_LECTURE.slice(18, 32);
-    else if (niveau === "3") liste = SYLLABES_LECTURE.slice(32, 44);
-    else if (niveau === "4") liste = SYLLABES_LECTURE.slice(44);
-
-    lectureOrdre = liste.map((_, i) => SYLLABES_LECTURE.indexOf(liste[i])).sort(() => Math.random() - 0.5);
-    lectureIndex = 0;
-
-    afficherLecture();
-
-}
 
 export function initOutils() {
 
