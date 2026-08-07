@@ -1,4 +1,5 @@
 import { showToast } from "./toast.js";
+import { initVerrouillage } from "./verrouillage.js";
 
 const MOTS_ALEATOIRES = [
     "Éléphant", "Cascade", "Montagne", "Bicyclette", "Parapluie", "Tortue", "Volcan",
@@ -52,6 +53,12 @@ export function initOutils() {
     initMinuteur();
     initAnglais();
 
+    initVerrouillage([
+        "pileOuFaceModal", "roueDecisionModal", "tirageNombreModal",
+        "tirageLettreModal", "motAleatoireModal", "ardoiseModal",
+        "minuteurModal", "morpionModal", "memoryModal",
+        "lectureModal", "anglaisModal", "desModal", "jeuxModal"
+    ]);
 
 }
 
