@@ -705,7 +705,6 @@ function initLecture() {
 
 }
 
-let lectureNiveauActuel = "tous";
 
 function demarrerLecture(niveau = "tous") {
 
