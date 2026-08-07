@@ -98,6 +98,7 @@ export function createEnvie({
 
     }).catch(console.error);
 
+return id ;
 }
 
 function patchEnvie(id, fields) {
