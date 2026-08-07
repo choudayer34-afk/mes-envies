@@ -5,6 +5,7 @@ import { isLogementCategory } from "./envie.js";
 import { activerModeEditionVoyage } from "./voyage.js";
 import { updateEnvieVoyage, deleteEnvie } from "./storage.js";
 import { showToast } from "./toast.js";
+import { isContainer } from "./envie.js";
 
 export function renderCarnetVoyage(envie, container) {
 
@@ -41,13 +42,15 @@ export function renderCarnetVoyage(envie, container) {
             const row = document.createElement("div");
             row.className = "templateRow";
 
-            row.innerHTML = `
+                        row.innerHTML = `
                 <div class="templateRowNom">${idee.titre}</div>
                 <div class="templateRowActions">
+                    <button class="actionButton basculerButton" title="Basculer vers un autre voyage">🧳</button>
                     <button class="actionButton libererButton" title="Remettre dans le catalogue">📚</button>
                     <button class="actionButton deleteButton" title="Supprimer">🗑️</button>
                 </div>
             `;
+
 
             row.querySelector(".libererButton").addEventListener("click", () => {
 
@@ -55,6 +58,10 @@ export function renderCarnetVoyage(envie, container) {
                 showToast(`✓ "${idee.titre}" remise dans le catalogue`);
                 renderCarnetVoyage(envie, container.parentElement || container);
 
+            });
+
+            row.querySelector(".basculerButton").addEventListener("click", () => {
+                ouvrirSelecteurVoyageCible(idee, envie.id);
             });
 
             row.querySelector(".deleteButton").addEventListener("click", () => {
@@ -190,3 +197,45 @@ function createCarnetJourBlock(label, items, voyageEnvie, groupKey) {
     return block;
 
 }
+
+function ouvrirSelecteurVoyageCible(idee, voyageActuelId) {
+
+    const voyages = getEnvies().filter(e => isContainer(e.categorie) && e.id !== voyageActuelId);
+
+    const container = document.getElementById("dupliquerPickerList");
+    container.innerHTML = "";
+
+    if (voyages.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun autre voyage disponible.</div>`;
+    }
+
+    voyages.forEach(voyage => {
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">🧳 ${voyage.titre}</div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton">Basculer ici</button>
+            </div>
+        `;
+
+        row.querySelector(".editButton").addEventListener("click", () => {
+
+            updateEnvieVoyage(idee.id, voyage.id);
+
+            document.getElementById("dupliquerPickerModal").classList.add("hidden");
+
+            showToast(`✓ "${idee.titre}" basculée vers ${voyage.titre}`);
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+    document.getElementById("dupliquerPickerModal").classList.remove("hidden");
+
+}
+
