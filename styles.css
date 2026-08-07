@@ -1815,3 +1815,46 @@ button {
     margin-left:8px;
 }
 
+.albumPageCard{
+    background:var(--color-card);
+    border:1px solid var(--color-border);
+    border-radius:16px;
+    padding:14px;
+    margin-bottom:12px;
+}
+
+.albumPageHeader{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.albumPhotosGrid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:6px;
+}
+
+.albumPhotoCheckItem{
+    position:relative;
+    aspect-ratio:1;
+    border-radius:10px;
+    overflow:hidden;
+    display:block;
+}
+
+.albumPhotoCheckItem img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.albumPhotoCheckbox{
+    position:absolute;
+    top:4px;
+    right:4px;
+    width:20px;
+    height:20px;
+}
+
