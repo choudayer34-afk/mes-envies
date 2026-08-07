@@ -790,20 +790,16 @@ export function initPoiRoute() {
 
         document.getElementById("annulerPoiButton").addEventListener("click", annulerRecherchePoi);
 
-        const resultat = await trouverPoiSurItineraire(lieuDepart, lieuArrivee, rayonKm, categoriesActives, (msg) => {
+                const resultat = await trouverPoiSurItineraire(lieuDepart, lieuArrivee, rayonKm, categoriesActives, (msg) => {
             resultEl.innerHTML = `<div class="emptyState">🔍 ${msg}</div>`;
         });
-
-        
-
-        renderResultatsPoi(resultat.resultatsParCategorie, resultat.trajet);
 
         if (resultat.erreur) {
             resultEl.innerHTML = `<div class="emptyState">❌ ${resultat.erreur}</div>`;
             return;
         }
 
-        renderResultatsPoi(resultat.resultatsParCategorie);
+        renderResultatsPoi(resultat.resultatsParCategorie, resultat.trajet);
 
     });
 
