@@ -526,17 +526,22 @@ function resetMemory() {
 
     document.getElementById("memoryMessage").textContent = "Trouve toutes les paires !";
 
-    const grille = document.getElementById("memoryGrille");
+        const grille = document.getElementById("memoryGrille");
 
-    if (memoryNiveauActuel <= 12) {
-        grille.style.gridTemplateColumns = "repeat(4, 1fr)";
-    } else if (memoryNiveauActuel <= 24) {
-        grille.style.gridTemplateColumns = "repeat(5, 1fr)";
-    } else {
-        grille.style.gridTemplateColumns = "repeat(6, 1fr)";
+    if (grille) {
+
+        if (memoryNiveauActuel <= 12) {
+            grille.style.gridTemplateColumns = "repeat(4, 1fr)";
+        } else if (memoryNiveauActuel <= 24) {
+            grille.style.gridTemplateColumns = "repeat(5, 1fr)";
+        } else {
+            grille.style.gridTemplateColumns = "repeat(6, 1fr)";
+        }
+
     }
 
     renderMemory();
+
 
 }
 
