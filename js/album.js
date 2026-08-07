@@ -2,6 +2,7 @@ import { getEnvies, getEnvieCategories } from "./storage.js";
 import { getCategorieById } from "./envie.js";
 import { getGroupKey, formatDateLabel } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
+import { genererPdfAlbum } from "./album-pdf.js";
 
 let voyageActuel = null;
 let albumPages = [];
@@ -13,10 +14,47 @@ export function initAlbum() {
         document.getElementById("albumPrepModal").classList.add("hidden");
     });
 
-    document.getElementById("genererAlbumButton")?.addEventListener("click", () => {
-        // branché au Sprint B
-        alert("Génération du PDF — arrive au Sprint B");
+      document.getElementById("genererAlbumButton")?.addEventListener("click", async () => {
+
+        const btn = document.getElementById("genererAlbumButton");
+        const original = btn.textContent;
+
+        btn.disabled = true;
+
+        try {
+
+            const titre = document.getElementById("albumTitreInput").value.trim();
+            const moisAnnee = document.getElementById("albumMoisAnneeInput").value.trim();
+
+            const doc = await genererPdfAlbum({
+                titre,
+                moisAnnee,
+                couvertureUrl: albumCouverturePhotoUrl,
+                pages: albumPages
+            }, (message) => {
+                btn.textContent = `🎨 ${message}`;
+            });
+
+            const nomFichier = `${titre || "album"}.pdf`.replace(/[^\w\s.-]/g, "");
+
+            doc.save(nomFichier);
+
+            btn.textContent = "✓ PDF téléchargé !";
+
+        } catch (err) {
+
+            console.error("Erreur génération PDF: " + err.message);
+            btn.textContent = "❌ Erreur";
+
+        }
+
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.disabled = false;
+        }, 2500);
+
     });
+
 
     document.getElementById("exporterZipButton")?.addEventListener("click", () => {
         // branché au Sprint C
