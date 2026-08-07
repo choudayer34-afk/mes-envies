@@ -12,6 +12,11 @@ export function annulerRecherchePoi() {
     rechercheAnnulee = true;
 }
 
+export function rechercheAnnuleeReset() {
+    rechercheAnnulee = false;
+}
+
+
 async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     const filtreTags = tags.map(t => {
