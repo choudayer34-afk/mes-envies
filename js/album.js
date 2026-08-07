@@ -18,6 +18,16 @@ export function initAlbum() {
 
         const btn = document.getElementById("genererAlbumButton");
         const original = btn.textContent;
+            const doc = await genererPdfAlbum({
+                titre: document.getElementById("albumTitreInput").value.trim(),
+                moisAnnee: document.getElementById("albumMoisAnneeInput").value.trim(),
+                couvertureUrl: albumCouverturePhotoUrl,
+                couleurPrincipale: document.getElementById("albumCouleurInput").value,
+                couleurAccent: document.getElementById("albumCouleurAccentInput").value,
+                pages: albumPages
+            }, (message) => {
+                btn.textContent = `🎨 ${message}`;
+            });
 
         btn.disabled = true;
 
@@ -124,6 +134,7 @@ function creerPageDepuisEnvie(envie) {
         pageId: `page_${compteurPageId}`,
         envieIds: [envie.id],
         titres: [envie.titre],
+        titrePrincipal: envie.titre,
         lieuLabel: envie.lieu?.nom || envie.titre,
         texte: envie.description || "",
         photosDisponibles,
@@ -131,6 +142,7 @@ function creerPageDepuisEnvie(envie) {
     };
 
 }
+
 
 function initialiserFormulaireAlbum(voyage) {
 
@@ -148,7 +160,11 @@ function initialiserFormulaireAlbum(voyage) {
 
     }
 
+    document.getElementById("albumCouleurInput").value = "#B8283D";
+    document.getElementById("albumCouleurAccentInput").value = "#1A2740";
+
 }
+
 
 function renderChoixCouverture(enfants) {
 
@@ -224,6 +240,8 @@ function creerPageCard(page, index) {
             <span class="groupProgress">(${page.photosSelectionnees.size}/4 photos)</span>
             ${albumPages.length > 1 ? `<button class="actionButton deleteButton albumSepareButton" title="Séparer cette page" style="margin-left:auto;">✕</button>` : ""}
         </div>
+        <label class="fieldTitle">Titre de la page</label>
+        <input type="text" class="albumTitrePageInput" data-page="${page.pageId}" value="${page.titrePrincipal}" style="width:100%;height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
 
         <label class="fieldTitle">Lieu / titre de la page</label>
         <input type="text" class="albumLieuInput" data-page="${page.pageId}" value="${page.lieuLabel}" style="width:100%;height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
@@ -234,6 +252,9 @@ function creerPageCard(page, index) {
         <label class="fieldTitle" style="margin-top:10px;">Récit</label>
         <textarea class="albumTexteInput" data-page="${page.pageId}" rows="3" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--color-border);font-size:13px;box-sizing:border-box;">${page.texte}</textarea>
     `;
+    card.querySelector(".albumTitrePageInput").addEventListener("input", (e) => {
+        page.titrePrincipal = e.target.value;
+    });
 
     card.querySelector(".albumLieuInput").addEventListener("input", (e) => {
         page.lieuLabel = e.target.value;
@@ -305,6 +326,7 @@ function fusionnerPages(sourceId, targetId) {
     targetPage.titres.push(...sourcePage.titres);
     targetPage.lieuLabel = `${targetPage.lieuLabel} / ${sourcePage.lieuLabel}`;
     targetPage.texte = [targetPage.texte, sourcePage.texte].filter(Boolean).join("\n\n");
+    targetPage.titrePrincipal = `${targetPage.titrePrincipal} & ${sourcePage.titrePrincipal}`;
 
     targetPage.photosDisponibles.push(...sourcePage.photosDisponibles);
 
