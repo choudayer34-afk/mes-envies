@@ -34,6 +34,7 @@ import { initPromptEtapeSync } from "./js/storage.js";
 import { initActiviteTypesSync, initCriteresVoyageSync } from "./js/storage.js";
 import { initCarteVoyages } from "./js/carte-voyages.js";
 import { initAlbum } from "./js/album.js";
+import { initPoiRoute } from "./js/etape-finder.js";
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -85,6 +86,7 @@ function init() {
     initMapPicker();
     initCarteVoyages();
     initAlbum();
+    initPoiRoute();
 
         initSurvie();
     initSurvieImport();
