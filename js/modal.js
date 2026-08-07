@@ -12,6 +12,14 @@ let currentEditId = null;
 let currentCategorie = "general";
 let currentDeleteId = null;
 let categorieGridOuverte = false;
+let voyageContextId = null;
+
+export function openModalVoyageContext(voyageId) {
+
+    voyageContextId = voyageId;
+    openModal();
+
+}
 
 
 /* ---------- Modale création / édition ---------- */
@@ -190,21 +198,27 @@ function saveCurrentEnvie() {
 
         } else {
 
-            createEnvie({
+            const nouvelId = createEnvie({
                 titre,
                 categorie: currentCategorie,
                 lieu: getSelectedLieu(),
                 date: getSelectedPeriode()
             });
 
+            if (voyageContextId) {
+                updateEnvieVoyage(nouvelId, voyageContextId);
+            }
+
             resetSelectedLieu();
             resetSelectedPeriode();
 
-            showToast("✓ Envie ajoutée");
+            showToast(voyageContextId ? "✓ Idée ajoutée au voyage" : "✓ Envie ajoutée");
 
         }
 
         currentEditId = null;
+        voyageContextId = null;
+
         closeModal();
         renderEnvies();
 
@@ -215,6 +229,7 @@ function saveCurrentEnvie() {
     }
 
 }
+
 
 
 
