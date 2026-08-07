@@ -18,16 +18,6 @@ export function initAlbum() {
 
         const btn = document.getElementById("genererAlbumButton");
         const original = btn.textContent;
-            const doc = await genererPdfAlbum({
-                titre: document.getElementById("albumTitreInput").value.trim(),
-                moisAnnee: document.getElementById("albumMoisAnneeInput").value.trim(),
-                couvertureUrl: albumCouverturePhotoUrl,
-                couleurPrincipale: document.getElementById("albumCouleurInput").value,
-                couleurAccent: document.getElementById("albumCouleurAccentInput").value,
-                pages: albumPages
-            }, (message) => {
-                btn.textContent = `🎨 ${message}`;
-            });
 
         btn.disabled = true;
 
@@ -40,6 +30,8 @@ export function initAlbum() {
                 titre,
                 moisAnnee,
                 couvertureUrl: albumCouverturePhotoUrl,
+                couleurPrincipale: document.getElementById("albumCouleurInput").value,
+                couleurAccent: document.getElementById("albumCouleurAccentInput").value,
                 pages: albumPages
             }, (message) => {
                 btn.textContent = `🎨 ${message}`;
