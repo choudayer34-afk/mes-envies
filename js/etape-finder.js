@@ -5,8 +5,8 @@ import { searchLocation, useCurrentLocation } from "./location.js";
 import { renderMultiSelectCollapsible } from "./multiselect.js";
 import { renderVoyageursWidget, getVoyageursData, formatVoyageursTexte, formatVoyageursCozycozy } from "./voyageurs.js";
 import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
-import { trouverPoiSurItineraire, getCategoriesPoi } from "./poi-route.js";
 
+import { trouverPoiSurItineraire, getCategoriesPoi, annulerRecherchePoi } from "./poi-route.js";
 let etapesTrouvees = [];
 let miniMap = null;
 let lieuDepart = null;
@@ -780,8 +780,15 @@ export function initPoiRoute() {
             return;
         }
 
+               rechercheAnnuleeReset();
+
         const resultEl = document.getElementById("poiResultat");
-        resultEl.innerHTML = `<div class="emptyState">🔍 Recherche en cours, ça peut prendre 1-2 minutes...</div>`;
+        resultEl.innerHTML = `
+            <div class="emptyState">🔍 Recherche en cours, ça peut prendre 30 secondes à 1 minute...</div>
+            <button id="annulerPoiButton" class="secondaryButton" style="width:100%;margin-top:10px;">✕ Annuler la recherche</button>
+        `;
+
+        document.getElementById("annulerPoiButton").addEventListener("click", annulerRecherchePoi);
 
         const resultat = await trouverPoiSurItineraire(lieuDepart, lieuArrivee, rayonKm, categoriesActives, (msg) => {
             resultEl.innerHTML = `<div class="emptyState">🔍 ${msg}</div>`;
