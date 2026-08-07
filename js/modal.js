@@ -1,4 +1,4 @@
-import { deleteEnvie, updateEnvie, createEnvie, getEnvies } from "./storage.js";
+import { deleteEnvie, updateEnvie, updateEnvieVoyage, createEnvie, getEnvies } from "./storage.js";
 import { closeAllOverlaysExcept } from "./modal-utils.js";
 
 import { renderEnvies } from "./ui.js";
@@ -7,6 +7,7 @@ import { getSelectedLieu, resetSelectedLieu } from "./location.js";
 import { getSelectedPeriode, resetSelectedPeriode } from "./periode.js";
 import { getEnvieCategories } from "./storage.js";
 import { openEnvie } from "./envie.js";
+
 
 let currentEditId = null;
 let currentCategorie = "general";
