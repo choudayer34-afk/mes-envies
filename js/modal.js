@@ -55,7 +55,7 @@ export function initModal() {
 
             resetSelectedLieu();
             resetSelectedPeriode();
-
+voyageContextId = null; 
             closeModal();
 
             setTimeout(() => {
