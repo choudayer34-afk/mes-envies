@@ -6,6 +6,12 @@ const CATEGORIES_POI = {
     services: { emoji: "⛽", label: "Services", overpassTags: ['amenity=fuel', 'highway=rest_area'] }
 };
 
+export let rechercheAnnulee = false;
+
+export function annulerRecherchePoi() {
+    rechercheAnnulee = true;
+}
+
 async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     const filtreTags = tags.map(t => {
@@ -83,7 +89,9 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
         onProgress?.(`Recherche : ${categorie.label}...`);
 
         for (const point of echantillons) {
-
+     if (rechercheAnnulee) {
+                return { erreur: "Recherche annulée." };
+            }
             const pois = await chercherPoiAutourPoint(point, rayonKm * 1000, categorie.overpassTags);
 
             pois.forEach(poi => {
@@ -134,7 +142,8 @@ async function calculerItineraireOSRM(depart, arrivee) {
 
 }
 
-function echantillonnerTrajet(points, intervalleKm = 5) {
+function echantillonnerTrajet(points, intervalleKm = 15) {
+
 
     if (points.length === 0)
         return [];
