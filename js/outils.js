@@ -8,6 +8,25 @@ const MOTS_ALEATOIRES = [
 ];
 
 let lettresUtiliseesCount = 0;
+let lectureNiveauActuel = "tous";
+
+function demarrerLecture(niveau = "tous") {
+
+    lectureNiveauActuel = niveau;
+
+    let liste = SYLLABES_LECTURE;
+
+    if (niveau === "1") liste = SYLLABES_LECTURE.slice(0, 18);
+    else if (niveau === "2") liste = SYLLABES_LECTURE.slice(18, 32);
+    else if (niveau === "3") liste = SYLLABES_LECTURE.slice(32, 44);
+    else if (niveau === "4") liste = SYLLABES_LECTURE.slice(44);
+
+    lectureOrdre = liste.map((_, i) => SYLLABES_LECTURE.indexOf(liste[i])).sort(() => Math.random() - 0.5);
+    lectureIndex = 0;
+
+    afficherLecture();
+
+}
 
 export function initOutils() {
 
@@ -578,31 +597,90 @@ function retournerCarteMemory(index) {
 /* ---------- Apprendre à lire ---------- */
 
 const SYLLABES_LECTURE = [
+    // Niveau 1 : voyelles + consonnes simples
     { syllabe: "MA", mot: "MAMAN", emoji: "👩" },
     { syllabe: "PA", mot: "PAPA", emoji: "👨" },
-    { syllabe: "CHA", mot: "CHAT", emoji: "🐱" },
+    { syllabe: "LA", mot: "LAPIN", emoji: "🐰" },
     { syllabe: "TO", mot: "TOTO", emoji: "🐶" },
+    { syllabe: "MI", mot: "MIEL", emoji: "🍯" },
     { syllabe: "LU", mot: "LUNE", emoji: "🌙" },
     { syllabe: "SO", mot: "SOLEIL", emoji: "☀️" },
-    { syllabe: "BA", mot: "BALLON", emoji: "⚽" },
     { syllabe: "PO", mot: "POMME", emoji: "🍎" },
-    { syllabe: "VE", mot: "VÉLO", emoji: "🚲" },
-    { syllabe: "MI", mot: "MIEL", emoji: "🍯" },
     { syllabe: "RI", mot: "RIZ", emoji: "🍚" },
-    { syllabe: "FLE", mot: "FLEUR", emoji: "🌸" },
-    { syllabe: "TA", mot: "TABLE", emoji: "🪑" },
-    { syllabe: "LI", mot: "LIVRE", emoji: "📖" },
-    { syllabe: "NA", mot: "NAGE", emoji: "🏊" }
+    { syllabe: "NA", mot: "NAGE", emoji: "🏊" },
+    { syllabe: "DO", mot: "DODO", emoji: "😴" },
+    { syllabe: "BA", mot: "BALLON", emoji: "⚽" },
+    { syllabe: "VE", mot: "VÉLO", emoji: "🚲" },
+    { syllabe: "CA", mot: "CANARD", emoji: "🦆" },
+    { syllabe: "FE", mot: "FÉE", emoji: "🧚" },
+    { syllabe: "GA", mot: "GÂTEAU", emoji: "🎂" },
+    { syllabe: "JU", mot: "JUS", emoji: "🧃" },
+    { syllabe: "KO", mot: "KOALA", emoji: "🐨" },
+
+    // Niveau 2 : sons composés (CH, OU, ON, AN...)
+    { syllabe: "CHA", mot: "CHAT", emoji: "🐱" },
+    { syllabe: "CHE", mot: "CHEVAL", emoji: "🐴" },
+    { syllabe: "CHOU", mot: "CHOU", emoji: "🥬" },
+    { syllabe: "OUR", mot: "OURS", emoji: "🐻" },
+    { syllabe: "POU", mot: "POULE", emoji: "🐔" },
+    { syllabe: "SOU", mot: "SOURIS", emoji: "🐭" },
+    { syllabe: "BON", mot: "BONBON", emoji: "🍬" },
+    { syllabe: "MON", mot: "MONTRE", emoji: "⌚" },
+    { syllabe: "PON", mot: "PONT", emoji: "🌉" },
+    { syllabe: "GAN", mot: "GANT", emoji: "🧤" },
+    { syllabe: "DAN", mot: "DANSE", emoji: "💃" },
+    { syllabe: "VIN", mot: "VINGT", emoji: "20️⃣" },
+    { syllabe: "PAIN", mot: "PAIN", emoji: "🍞" },
+    { syllabe: "TRAIN", mot: "TRAIN", emoji: "🚂" },
+
+    // Niveau 3 : mots à deux syllabes complexes
+    { syllabe: "FLEUR", mot: "FLEUR", emoji: "🌸" },
+    { syllabe: "TABLE", mot: "TABLE", emoji: "🪑" },
+    { syllabe: "LIVRE", mot: "LIVRE", emoji: "📖" },
+    { syllabe: "ARBRE", mot: "ARBRE", emoji: "🌳" },
+    { syllabe: "CLASSE", mot: "CLASSE", emoji: "🏫" },
+    { syllabe: "PLAGE", mot: "PLAGE", emoji: "🏖️" },
+    { syllabe: "GLACE", mot: "GLACE", emoji: "🍦" },
+    { syllabe: "PIERRE", mot: "PIERRE", emoji: "🪨" },
+    { syllabe: "OISEAU", mot: "OISEAU", emoji: "🐦" },
+    { syllabe: "BATEAU", mot: "BATEAU", emoji: "⛵" },
+    { syllabe: "GÂTEAU", mot: "GÂTEAU", emoji: "🎂" },
+    { syllabe: "CADEAU", mot: "CADEAU", emoji: "🎁" },
+
+    // Niveau 4 : mots plus longs
+    { syllabe: "ÉCOLE", mot: "ÉCOLE", emoji: "🏫" },
+    { syllabe: "FAMILLE", mot: "FAMILLE", emoji: "👨‍👩‍👧‍👦" },
+    { syllabe: "MAISON", mot: "MAISON", emoji: "🏠" },
+    { syllabe: "JARDIN", mot: "JARDIN", emoji: "🌻" },
+    { syllabe: "PAPILLON", mot: "PAPILLON", emoji: "🦋" },
+    { syllabe: "CROCODILE", mot: "CROCODILE", emoji: "🐊" },
+    { syllabe: "ÉLÉPHANT", mot: "ÉLÉPHANT", emoji: "🐘" },
+    { syllabe: "DINOSAURE", mot: "DINOSAURE", emoji: "🦕" }
 ];
+
 
 let lectureIndex = 0;
 let lectureOrdre = [];
 
 function initLecture() {
 
-    document.getElementById("btnOuvrirLecture")?.addEventListener("click", () => {
-        demarrerLecture();
+       document.getElementById("btnOuvrirLecture")?.addEventListener("click", () => {
+        document.querySelector('[data-modal="lectureModal"]').click();
     });
+
+    document.querySelectorAll(".lectureNiveauButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            document.querySelectorAll(".lectureNiveauButton").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            demarrerLecture(btn.dataset.niveau);
+
+        });
+
+    });
+
 
     document.getElementById("lectureSuivantButton")?.addEventListener("click", () => {
         lectureIndex = (lectureIndex + 1) % lectureOrdre.length;
@@ -650,27 +728,176 @@ function afficherLecture() {
 /* ---------- Apprendre l'anglais ---------- */
 
 const VOCABULAIRE_ANGLAIS = [
+    // Famille
+    { fr: "Maman", en: "Mom", emoji: "👩" },
+    { fr: "Papa", en: "Dad", emoji: "👨" },
+    { fr: "Frère", en: "Brother", emoji: "👦" },
+    { fr: "Sœur", en: "Sister", emoji: "👧" },
+    { fr: "Bébé", en: "Baby", emoji: "👶" },
+    { fr: "Famille", en: "Family", emoji: "👨‍👩‍👧‍👦" },
+    { fr: "Ami", en: "Friend", emoji: "🧑‍🤝‍🧑" },
+
+    // Animaux
     { fr: "Chat", en: "Cat", emoji: "🐱" },
     { fr: "Chien", en: "Dog", emoji: "🐶" },
-    { fr: "Maison", en: "House", emoji: "🏠" },
-    { fr: "Soleil", en: "Sun", emoji: "☀️" },
-    { fr: "Lune", en: "Moon", emoji: "🌙" },
-    { fr: "Pomme", en: "Apple", emoji: "🍎" },
-    { fr: "Eau", en: "Water", emoji: "💧" },
-    { fr: "Livre", en: "Book", emoji: "📖" },
-    { fr: "Voiture", en: "Car", emoji: "🚗" },
     { fr: "Oiseau", en: "Bird", emoji: "🐦" },
     { fr: "Poisson", en: "Fish", emoji: "🐟" },
+    { fr: "Lapin", en: "Rabbit", emoji: "🐰" },
+    { fr: "Cheval", en: "Horse", emoji: "🐴" },
+    { fr: "Vache", en: "Cow", emoji: "🐮" },
+    { fr: "Cochon", en: "Pig", emoji: "🐷" },
+    { fr: "Mouton", en: "Sheep", emoji: "🐑" },
+    { fr: "Souris", en: "Mouse", emoji: "🐭" },
+    { fr: "Ours", en: "Bear", emoji: "🐻" },
+    { fr: "Lion", en: "Lion", emoji: "🦁" },
+    { fr: "Éléphant", en: "Elephant", emoji: "🐘" },
+    { fr: "Singe", en: "Monkey", emoji: "🐵" },
+    { fr: "Grenouille", en: "Frog", emoji: "🐸" },
+    { fr: "Papillon", en: "Butterfly", emoji: "🦋" },
+    { fr: "Abeille", en: "Bee", emoji: "🐝" },
+    { fr: "Araignée", en: "Spider", emoji: "🕷️" },
+
+    // Maison
+    { fr: "Maison", en: "House", emoji: "🏠" },
+    { fr: "Porte", en: "Door", emoji: "🚪" },
+    { fr: "Fenêtre", en: "Window", emoji: "🪟" },
+    { fr: "Table", en: "Table", emoji: "🪑" },
+    { fr: "Chaise", en: "Chair", emoji: "🪑" },
+    { fr: "Lit", en: "Bed", emoji: "🛏️" },
+    { fr: "Cuisine", en: "Kitchen", emoji: "🍳" },
+    { fr: "Salle de bain", en: "Bathroom", emoji: "🛁" },
+    { fr: "Clé", en: "Key", emoji: "🔑" },
+    { fr: "Lampe", en: "Lamp", emoji: "💡" },
+    { fr: "Miroir", en: "Mirror", emoji: "🪞" },
+    { fr: "Horloge", en: "Clock", emoji: "🕐" },
+
+    // Nourriture
+    { fr: "Pomme", en: "Apple", emoji: "🍎" },
+    { fr: "Banane", en: "Banana", emoji: "🍌" },
+    { fr: "Orange", en: "Orange", emoji: "🍊" },
+    { fr: "Fraise", en: "Strawberry", emoji: "🍓" },
+    { fr: "Raisin", en: "Grapes", emoji: "🍇" },
+    { fr: "Pain", en: "Bread", emoji: "🍞" },
+    { fr: "Fromage", en: "Cheese", emoji: "🧀" },
+    { fr: "Lait", en: "Milk", emoji: "🥛" },
+    { fr: "Eau", en: "Water", emoji: "💧" },
+    { fr: "Œuf", en: "Egg", emoji: "🥚" },
+    { fr: "Gâteau", en: "Cake", emoji: "🎂" },
+    { fr: "Glace", en: "Ice cream", emoji: "🍦" },
+    { fr: "Chocolat", en: "Chocolate", emoji: "🍫" },
+    { fr: "Pizza", en: "Pizza", emoji: "🍕" },
+    { fr: "Soupe", en: "Soup", emoji: "🍲" },
+    { fr: "Miel", en: "Honey", emoji: "🍯" },
+    { fr: "Riz", en: "Rice", emoji: "🍚" },
+    { fr: "Carotte", en: "Carrot", emoji: "🥕" },
+
+    // Corps
+    { fr: "Tête", en: "Head", emoji: "🗣️" },
+    { fr: "Main", en: "Hand", emoji: "✋" },
+    { fr: "Pied", en: "Foot", emoji: "🦶" },
+    { fr: "Œil", en: "Eye", emoji: "👁️" },
+    { fr: "Bouche", en: "Mouth", emoji: "👄" },
+    { fr: "Nez", en: "Nose", emoji: "👃" },
+    { fr: "Oreille", en: "Ear", emoji: "👂" },
+    { fr: "Cœur", en: "Heart", emoji: "❤️" },
+
+    // Nature & météo
+    { fr: "Soleil", en: "Sun", emoji: "☀️" },
+    { fr: "Lune", en: "Moon", emoji: "🌙" },
+    { fr: "Étoile", en: "Star", emoji: "⭐" },
+    { fr: "Nuage", en: "Cloud", emoji: "☁️" },
+    { fr: "Pluie", en: "Rain", emoji: "🌧️" },
+    { fr: "Neige", en: "Snow", emoji: "❄️" },
+    { fr: "Vent", en: "Wind", emoji: "💨" },
+    { fr: "Arbre", en: "Tree", emoji: "🌳" },
     { fr: "Fleur", en: "Flower", emoji: "🌸" },
-    { fr: "Ballon", en: "Ball", emoji: "⚽" },
+    { fr: "Montagne", en: "Mountain", emoji: "⛰️" },
+    { fr: "Mer", en: "Sea", emoji: "🌊" },
+    { fr: "Plage", en: "Beach", emoji: "🏖️" },
+    { fr: "Feu", en: "Fire", emoji: "🔥" },
+    { fr: "Rivière", en: "River", emoji: "🏞️" },
+
+    // Transports
+    { fr: "Voiture", en: "Car", emoji: "🚗" },
+    { fr: "Vélo", en: "Bike", emoji: "🚲" },
+    { fr: "Bus", en: "Bus", emoji: "🚌" },
+    { fr: "Train", en: "Train", emoji: "🚂" },
+    { fr: "Avion", en: "Plane", emoji: "✈️" },
+    { fr: "Bateau", en: "Boat", emoji: "⛵" },
+    { fr: "Fusée", en: "Rocket", emoji: "🚀" },
+
+    // École & activités
     { fr: "École", en: "School", emoji: "🏫" },
-    { fr: "Ami", en: "Friend", emoji: "🧑‍🤝‍🧑" },
+    { fr: "Livre", en: "Book", emoji: "📖" },
+    { fr: "Crayon", en: "Pencil", emoji: "✏️" },
+    { fr: "Cahier", en: "Notebook", emoji: "📓" },
+    { fr: "Ballon", en: "Ball", emoji: "⚽" },
+    { fr: "Jouet", en: "Toy", emoji: "🧸" },
+    { fr: "Musique", en: "Music", emoji: "🎵" },
+    { fr: "Jeu", en: "Game", emoji: "🎮" },
+    { fr: "Dessin", en: "Drawing", emoji: "🎨" },
+
+    // Vêtements
+    { fr: "Chapeau", en: "Hat", emoji: "🧢" },
+    { fr: "Chaussure", en: "Shoe", emoji: "👟" },
+    { fr: "Robe", en: "Dress", emoji: "👗" },
+    { fr: "Manteau", en: "Coat", emoji: "🧥" },
+
+    // Couleurs
     { fr: "Rouge", en: "Red", emoji: "🔴" },
     { fr: "Bleu", en: "Blue", emoji: "🔵" },
+    { fr: "Vert", en: "Green", emoji: "🟢" },
+    { fr: "Jaune", en: "Yellow", emoji: "🟡" },
+    { fr: "Noir", en: "Black", emoji: "⚫" },
+    { fr: "Blanc", en: "White", emoji: "⚪" },
+    { fr: "Rose", en: "Pink", emoji: "🌸" },
+    { fr: "Violet", en: "Purple", emoji: "🟣" },
+    { fr: "Orange (couleur)", en: "Orange", emoji: "🟠" },
+
+    // Nombres
     { fr: "Un", en: "One", emoji: "1️⃣" },
     { fr: "Deux", en: "Two", emoji: "2️⃣" },
-    { fr: "Trois", en: "Three", emoji: "3️⃣" }
+    { fr: "Trois", en: "Three", emoji: "3️⃣" },
+    { fr: "Quatre", en: "Four", emoji: "4️⃣" },
+    { fr: "Cinq", en: "Five", emoji: "5️⃣" },
+    { fr: "Six", en: "Six", emoji: "6️⃣" },
+    { fr: "Sept", en: "Seven", emoji: "7" },
+    { fr: "Huit", en: "Eight", emoji: "8️⃣" },
+    { fr: "Neuf", en: "Nine", emoji: "9️⃣" },
+    { fr: "Dix", en: "Ten", emoji: "🔟" },
+
+    // Jours & temps
+    { fr: "Aujourd'hui", en: "Today", emoji: "📅" },
+    { fr: "Demain", en: "Tomorrow", emoji: "➡️" },
+    { fr: "Matin", en: "Morning", emoji: "🌅" },
+    { fr: "Soir", en: "Evening", emoji: "🌆" },
+    { fr: "Nuit", en: "Night", emoji: "🌃" },
+
+    // Émotions & adjectifs
+    { fr: "Content", en: "Happy", emoji: "😊" },
+    { fr: "Triste", en: "Sad", emoji: "😢" },
+    { fr: "Fatigué", en: "Tired", emoji: "😴" },
+    { fr: "Grand", en: "Big", emoji: "🔼" },
+    { fr: "Petit", en: "Small", emoji: "🔽" },
+    { fr: "Chaud", en: "Hot", emoji: "🥵" },
+    { fr: "Froid", en: "Cold", emoji: "🥶" },
+    { fr: "Rapide", en: "Fast", emoji: "⚡" },
+
+    // Verbes courants (mots isolés simples)
+    { fr: "Manger", en: "Eat", emoji: "🍽️" },
+    { fr: "Boire", en: "Drink", emoji: "🥤" },
+    { fr: "Dormir", en: "Sleep", emoji: "😴" },
+    { fr: "Courir", en: "Run", emoji: "🏃" },
+    { fr: "Sauter", en: "Jump", emoji: "🤸" },
+    { fr: "Nager", en: "Swim", emoji: "🏊" },
+    { fr: "Lire", en: "Read", emoji: "📖" },
+    { fr: "Écrire", en: "Write", emoji: "✍️" },
+    { fr: "Jouer", en: "Play", emoji: "🎲" },
+    { fr: "Danser", en: "Dance", emoji: "💃" },
+    { fr: "Chanter", en: "Sing", emoji: "🎤" },
+    { fr: "Marcher", en: "Walk", emoji: "🚶" }
 ];
+
 
 let anglaisMotActuel = null;
 let anglaisScore = 0;
