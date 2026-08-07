@@ -46,16 +46,13 @@ export function initModal() {
             if (!titre)
                 return;
 
-            const nouvelId = createEnvie({
+                        const nouvelId = createEnvie({
                 titre,
                 categorie: currentCategorie,
                 lieu: getSelectedLieu(),
-                date: getSelectedPeriode()
+                date: getSelectedPeriode(),
+                voyageId: voyageContextId || null
             });
-
-            if (voyageContextId) {
-                updateEnvieVoyage(nouvelId, voyageContextId);
-            }
 
             resetSelectedLieu();
             resetSelectedPeriode();
@@ -63,6 +60,7 @@ export function initModal() {
             voyageContextId = null;
 
             closeModal();
+
 
             setTimeout(() => {
 
@@ -204,18 +202,15 @@ function saveCurrentEnvie() {
             updateEnvie(currentEditId, titre);
             showToast("✓ Envie modifiée");
 
-        } else {
+              } else {
 
             const nouvelId = createEnvie({
                 titre,
                 categorie: currentCategorie,
                 lieu: getSelectedLieu(),
-                date: getSelectedPeriode()
+                date: getSelectedPeriode(),
+                voyageId: voyageContextId || null
             });
-
-            if (voyageContextId) {
-                updateEnvieVoyage(nouvelId, voyageContextId);
-            }
 
             resetSelectedLieu();
             resetSelectedPeriode();
@@ -223,6 +218,7 @@ function saveCurrentEnvie() {
             showToast(voyageContextId ? "✓ Idée ajoutée au voyage" : "✓ Envie ajoutée");
 
         }
+
 
         currentEditId = null;
         voyageContextId = null;
