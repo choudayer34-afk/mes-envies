@@ -255,6 +255,9 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="btnEtapeFinder" class="iconButtonRow" title="Trouver une étape" aria-label="Trouver une étape">
     🛣️
 </button>
+<button id="btnCarteVoyages" class="iconButtonRow" title="Carte des voyages" aria-label="Carte des voyages">
+    🌍
+</button>
 
             <button id="btnPlus" class="iconButtonRow" title="Plus" aria-label="Plus">
                 🧰
@@ -1233,6 +1236,17 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="closeCarte" class="backButton">← Retour</button>
 
         <div id="mapContainer" class="mapContainer"></div>
+
+    </div>
+
+</div>
+<div id="carteVoyagesModal" class="modal-overlay hidden">
+
+    <div class="modal mapModal">
+
+        <button id="closeCarteVoyages" class="backButton">← Retour</button>
+
+        <div id="carteVoyagesContainer" class="mapContainer"></div>
 
     </div>
 
