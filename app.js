@@ -32,6 +32,7 @@ import { initMapPicker } from "./js/location.js";
 import { initEtapeFinder } from "./js/etape-finder.js";
 import { initPromptEtapeSync } from "./js/storage.js";
 import { initActiviteTypesSync, initCriteresVoyageSync } from "./js/storage.js";
+import { initCarteVoyages } from "./js/carte-voyages.js";
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -81,6 +82,7 @@ function init() {
     initLocation();
         initOutils();
     initMapPicker();
+    initCarteVoyages();
 
         initSurvie();
     initSurvieImport();
