@@ -77,6 +77,9 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
     const resultatsParCategorie = {};
     const dejaVus = new Set();
 
+    let indexGlobal = 0;
+    const totalRequetes = categoriesActives.length * echantillons.length;
+
     for (const catId of categoriesActives) {
 
         const categorie = CATEGORIES_POI[catId];
@@ -86,13 +89,18 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
 
         resultatsParCategorie[catId] = [];
 
-        onProgress?.(`Recherche : ${categorie.label}...`);
-
         for (const point of echantillons) {
-     if (rechercheAnnulee) {
+
+            if (rechercheAnnulee) {
                 return { erreur: "Recherche annulée." };
             }
+
+            indexGlobal++;
+
+            onProgress?.(`${categorie.label} — point ${indexGlobal} / ${totalRequetes}`);
+
             const pois = await chercherPoiAutourPoint(point, rayonKm * 1000, categorie.overpassTags);
+
 
             pois.forEach(poi => {
 
