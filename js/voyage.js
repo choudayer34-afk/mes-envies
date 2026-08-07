@@ -4,6 +4,8 @@ import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate,
 
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
+import { supprimerVoyageEtContenu } from "./storage.js";
+import { closeFiche } from "./envie.js";
 
 
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp, calculerDistancesEtapes } from "./itineraire.js";
@@ -220,6 +222,31 @@ function renderVoyageContenu(envie, container) {
     });
 
     container.appendChild(addButton);
+
+    const supprimerVoyageButton = document.createElement("button");
+    supprimerVoyageButton.className = "secondaryButton";
+    supprimerVoyageButton.textContent = "🗑️ Supprimer ce voyage et tout son contenu";
+    supprimerVoyageButton.style.marginTop = "20px";
+    supprimerVoyageButton.style.background = "#FEE2E2";
+    supprimerVoyageButton.style.color = "#DC2626";
+
+    supprimerVoyageButton.addEventListener("click", async () => {
+
+        const nbEnfants = getEnvies().filter(e => e.voyageId === envie.id).length;
+
+        if (!window.confirm(`Supprimer "${envie.titre}" et ses ${nbEnfants} idée${nbEnfants > 1 ? "s" : ""} (photos comprises) ? Cette action est irréversible.`))
+            return;
+
+        await supprimerVoyageEtContenu(envie.id);
+
+        closeFiche();
+        renderEnvies();
+        showToast("✓ Voyage et son contenu supprimés");
+
+    });
+
+    container.appendChild(supprimerVoyageButton);
+
 
     initPhotoCouverture();
 
