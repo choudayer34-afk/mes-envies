@@ -50,6 +50,8 @@ export function initOutils() {
     initMotAleatoire();
     initArdoiseDessin();
     initMinuteur();
+    initAnglais();
+
 
 }
 
