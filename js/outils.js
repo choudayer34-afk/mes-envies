@@ -597,13 +597,22 @@ function resetMemory() {
     renderMemory();
     renderClassementMemory();
 
+    memoryChronoDemarre = false;
+
     if (memoryModeActuel === "limite") {
-        demarrerChronoLimite();
+
+        memoryTempsLimiteSec = parseInt(document.getElementById("memoryTempsLimiteInput")?.value, 10) || 60;
+        afficherChronoLimite();
+
     } else {
-        demarrerChronoMemory();
+
+        memoryTempsEcoule = 0;
+        afficherChronoMemory();
+
     }
 
 }
+
 
 function demarrerChronoLimite() {
 
