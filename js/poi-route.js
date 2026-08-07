@@ -69,34 +69,45 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     const query = `[out:json][timeout:15];(${filtreTags});out center 20;`;
 
-    console.log("Requête Overpass: " + query);
+    const miroirs = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter"
+    ];
 
-    try {
+    for (const miroir of miroirs) {
 
-        const response = await fetch("https://overpass-api.de/api/interpreter", {
-            method: "POST",
-            body: query
-        });
+        try {
 
-        console.log("Réponse Overpass status: " + response.status);
+            const response = await fetch(miroir, {
+                method: "POST",
+                headers: { "Content-Type": "text/plain" },
+                body: query
+            });
 
-        const data = await response.json();
+            if (!response.ok) {
+                console.error(`Miroir ${miroir} status: ${response.status}`);
+                continue;
+            }
 
-        console.log("Nombre d'éléments trouvés: " + (data.elements?.length || 0));
+            const data = await response.json();
 
-        return (data.elements || []).map(el => ({
-            nom: el.tags?.name || null,
-            lat: el.lat || el.center?.lat,
-            lon: el.lon || el.center?.lon,
-            type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
-        })).filter(p => p.nom && p.lat && p.lon);
+            return (data.elements || []).map(el => ({
+                nom: el.tags?.name || null,
+                lat: el.lat || el.center?.lat,
+                lon: el.lon || el.center?.lon,
+                type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
+            })).filter(p => p.nom && p.lat && p.lon);
 
-    } catch (err) {
-        console.error("Erreur Overpass: " + err.message);
-        return [];
+        } catch (err) {
+            console.error(`Erreur miroir ${miroir}: ${err.message}`);
+        }
+
     }
 
+    return [];
+
 }
+
 
 export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress) {
 
