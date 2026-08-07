@@ -10,6 +10,9 @@ const MOTS_ALEATOIRES = [
 
 let lettresUtiliseesCount = 0;
 let lectureNiveauActuel = "tous";
+let memoryChronoInterval = null;
+let memoryTempsDebut = null;
+let memoryTempsEcoule = 0;
 
 
 
@@ -680,6 +683,131 @@ function renderMemory() {
     });
 
 }
+
+function demarrerChronoMemory() {
+
+    memoryTempsDebut = Date.now();
+    memoryTempsEcoule = 0;
+
+    afficherChronoMemory();
+
+    memoryChronoInterval = setInterval(() => {
+
+        memoryTempsEcoule = Date.now() - memoryTempsDebut;
+        afficherChronoMemory();
+
+    }, 100);
+
+}
+
+function arreterChronoMemory() {
+
+    if (memoryChronoInterval) {
+        clearInterval(memoryChronoInterval);
+        memoryChronoInterval = null;
+    }
+
+}
+
+function afficherChronoMemory() {
+
+    const chronoEl = document.getElementById("memoryChrono");
+
+    if (!chronoEl)
+        return;
+
+    const totalSec = memoryTempsEcoule / 1000;
+    const minutes = Math.floor(totalSec / 60);
+    const secondes = (totalSec % 60).toFixed(1);
+
+    chronoEl.textContent = `⏱️ ${minutes}:${secondes.padStart(4, "0")}`;
+    chronoEl.style.color = "var(--color-primary)";
+
+}
+
+function formatTempsMemory(totalSec) {
+
+    const minutes = Math.floor(totalSec / 60);
+    const secondes = (totalSec % 60).toFixed(1);
+
+    return `${minutes}:${secondes.padStart(4, "0")}`;
+
+}
+
+function getClassementMemory(niveau) {
+
+    const cle = `envie_memory_classement_${niveau}`;
+    const data = localStorage.getItem(cle);
+
+    return data ? JSON.parse(data) : [];
+
+}
+
+function sauverClassementMemory(niveau, classement) {
+
+    const cle = `envie_memory_classement_${niveau}`;
+    localStorage.setItem(cle, JSON.stringify(classement));
+
+}
+
+function verifierTopMemory(tempsSec) {
+
+    const classement = getClassementMemory(memoryNiveauActuel);
+
+    const entreDansTop3 = classement.length < 3 || tempsSec < classement[classement.length - 1].temps;
+
+    if (!entreDansTop3) {
+        renderClassementMemory();
+        return;
+    }
+
+    setTimeout(() => {
+
+        const nom = prompt("🏆 Nouveau record ! Quel est ton prénom ?");
+
+        if (!nom?.trim()) {
+            renderClassementMemory();
+            return;
+        }
+
+        classement.push({ nom: nom.trim(), temps: tempsSec });
+        classement.sort((a, b) => a.temps - b.temps);
+
+        const top3 = classement.slice(0, 3);
+
+        sauverClassementMemory(memoryNiveauActuel, top3);
+
+        renderClassementMemory();
+
+    }, 300);
+
+}
+
+function renderClassementMemory() {
+
+    const container = document.getElementById("memoryClassement");
+
+    if (!container)
+        return;
+
+    const classement = getClassementMemory(memoryNiveauActuel);
+
+    if (classement.length === 0) {
+        container.innerHTML = `<p style="font-size:12px;color:var(--color-text-light);">Aucun record pour ce niveau.</p>`;
+        return;
+    }
+
+    const medailles = ["🥇", "🥈", "🥉"];
+
+    container.innerHTML = classement.map((entry, i) => `
+        <div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--color-border);">
+            <span>${medailles[i]} ${entry.nom}</span>
+            <span style="font-weight:700;">${formatTempsMemory(entry.temps)}</span>
+        </div>
+    `).join("");
+
+}
+
 
 function retournerCarteMemory(index) {
 
