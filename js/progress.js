@@ -13,7 +13,7 @@ export function computeContainerStatus(container) {
     const dureeJours = container.date?.start ? getDureeJours(container.date) : 1;
     const isMultiJour = dureeJours > 1;
 
-    if (isMultiJour) {
+    if (container.date?.start) {
 
         const start = new Date(container.date.start);
         const end = container.date.end ? new Date(container.date.end) : start;
@@ -27,11 +27,20 @@ export function computeContainerStatus(container) {
             return { statut: "termine", pourcentage: 100 };
         }
 
-        const total_ms = end - start;
-        const elapsed_ms = now - start;
-        const pourcentage = Math.round((elapsed_ms / total_ms) * 100);
+        if (isMultiJour) {
 
-        return { statut: "en_cours", pourcentage: Math.min(99, Math.max(1, pourcentage)) };
+            const total_ms = end - start;
+            const elapsed_ms = now - start;
+            const pourcentage = Math.round((elapsed_ms / total_ms) * 100);
+
+            return { statut: "en_cours", pourcentage: Math.min(99, Math.max(1, pourcentage)) };
+
+        }
+
+        const realises = enfants.filter(e => e.realise).length;
+        const pourcentage = Math.round((realises / total) * 100);
+
+        return { statut: "en_cours", pourcentage: Math.max(1, pourcentage) };
 
     }
 
@@ -49,6 +58,7 @@ export function computeContainerStatus(container) {
     return { statut: "en_cours", pourcentage };
 
 }
+
 
 export function formatStatutLabel(statut) {
 
