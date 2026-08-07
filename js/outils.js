@@ -658,31 +658,25 @@ function afficherChronoLimite() {
 
 
 
-function renderMemory() {
+    renderMemory();
+    renderClassementMemory();
 
-    const container = document.getElementById("memoryGrille");
+    memoryChronoDemarre = false;
 
-    if (!container)
-        return;
+    if (memoryModeActuel === "limite") {
 
-    container.innerHTML = "";
+        memoryTempsLimiteSec = parseInt(document.getElementById("memoryTempsLimiteInput")?.value, 10) || 60;
+        afficherChronoLimite();
 
-    memoryCartes.forEach((carte, index) => {
+    } else {
 
-        const cellule = document.createElement("button");
-        cellule.type = "button";
-        cellule.className = "memoryCarte" + (carte.trouvee ? " trouvee" : "");
-        cellule.textContent = carte.trouvee || memoryRetournees.includes(index) ? carte.symbole : "❓";
+        memoryTempsEcoule = 0;
+        afficherChronoMemory();
 
-        cellule.addEventListener("click", () => {
-            retournerCarteMemory(index);
-        });
-
-        container.appendChild(cellule);
-
-    });
+    }
 
 }
+
 
 function demarrerChronoMemory() {
 
