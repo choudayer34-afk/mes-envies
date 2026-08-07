@@ -69,6 +69,8 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     const query = `[out:json][timeout:15];(${filtreTags});out center 20;`;
 
+    console.log("Requête Overpass: " + query);
+
     try {
 
         const response = await fetch("https://overpass-api.de/api/interpreter", {
@@ -76,7 +78,11 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
             body: query
         });
 
+        console.log("Réponse Overpass status: " + response.status);
+
         const data = await response.json();
+
+        console.log("Nombre d'éléments trouvés: " + (data.elements?.length || 0));
 
         return (data.elements || []).map(el => ({
             nom: el.tags?.name || null,
