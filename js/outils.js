@@ -512,8 +512,12 @@ function initMemory() {
 
 function resetMemory() {
 
+    console.log("resetMemory appelée, niveau=" + memoryNiveauActuel);
+
     const nbPaires = memoryNiveauActuel / 2;
     const symbolesChoisis = MEMORY_SYMBOLES.slice(0, nbPaires);
+
+    console.log("nbPaires=" + nbPaires + " symbolesChoisis=" + JSON.stringify(symbolesChoisis));
 
     const paires = [...symbolesChoisis, ...symbolesChoisis];
 
@@ -521,12 +525,16 @@ function resetMemory() {
         .map(s => ({ symbole: s, trouvee: false }))
         .sort(() => Math.random() - 0.5);
 
+    console.log("memoryCartes.length=" + memoryCartes.length);
+
     memoryRetournees = [];
     memoryBloque = false;
 
     document.getElementById("memoryMessage").textContent = "Trouve toutes les paires !";
 
-        const grille = document.getElementById("memoryGrille");
+    const grille = document.getElementById("memoryGrille");
+
+    console.log("grille trouvée=" + !!grille);
 
     if (grille) {
 
@@ -540,10 +548,14 @@ function resetMemory() {
 
     }
 
+    console.log("Appel de renderMemory maintenant");
+
     renderMemory();
 
+    console.log("renderMemory terminée");
 
 }
+
 
 
 function renderMemory() {
