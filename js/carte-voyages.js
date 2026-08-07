@@ -103,10 +103,14 @@ function renderPins() {
             })
         }).addTo(carteVoyagesInstance);
 
+                const periodeLabel = formatMoisAnnee(voyage.date);
+
         marker.bindPopup(`
-            <strong>🧳 ${voyage.titre}</strong><br>
-            <button class="mapPopupButton" data-id="${voyage.id}">Ouvrir</button>
+            <strong>🧳 ${voyage.titre}</strong>
+            ${periodeLabel ? `<br><span style="color:#718096;font-size:12px;">${periodeLabel}</span>` : ""}
+            <br><button class="mapPopupButton" data-id="${voyage.id}">Ouvrir</button>
         `);
+
 
         marker.on("popupopen", () => {
 
@@ -132,3 +136,15 @@ function renderPins() {
     }
 
 }
+
+function formatMoisAnnee(date) {
+
+    if (!date?.start)
+        return "";
+
+    const d = new Date(date.start);
+
+    return d.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+
+}
+
