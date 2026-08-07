@@ -59,7 +59,8 @@ export function createEnvie({
     categorie = "general",
     lieu = {},
     date,
-    personnes = 1
+    personnes = 1,
+    voyageId = null
 }) {
 
     const id = crypto.randomUUID();
@@ -87,10 +88,10 @@ export function createEnvie({
 
         date: date || null,
         personnes,
-                jourGroupId: null,
+        jourGroupId: null,
         ordre: Date.now(),
 
-        voyageId: null,
+        voyageId,
         archived: false,
         statut: "inbox",
         createdAt: Date.now(),
@@ -98,8 +99,10 @@ export function createEnvie({
 
     }).catch(console.error);
 
-return id ;
+    return id;
+
 }
+
 
 function patchEnvie(id, fields) {
 
