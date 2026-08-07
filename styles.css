@@ -245,7 +245,8 @@ main{
 #outilsMenuModal, #pileOuFaceModal, #roueDecisionModal, #tirageNombreModal, #tirageLettreModal, #motAleatoireModal, #ardoiseModal, 
 #minuteurModal,
  #mapPickerModal,
-#etapeFinderModal
+#etapeFinderModal,
+#carteVoyagesModal
 {
     z-index:2100;
 }
