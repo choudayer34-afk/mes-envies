@@ -248,7 +248,8 @@ main{
 #etapeFinderModal,
  #morpionModal,
 #carteVoyagesModal,
- #lectureModal, #anglaisModal
+ #lectureModal, #anglaisModal,
+#albumPrepModal
 {
     z-index:2100;
 }
