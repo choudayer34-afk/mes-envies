@@ -1310,3 +1310,15 @@ export async function fusionnerCriteresVoyageParDefaut() {
     return manquants.length;
 
 }
+
+export async function supprimerVoyageEtContenu(voyageId) {
+
+    const enfants = enviesCache.filter(e => e.voyageId === voyageId);
+
+    for (const enfant of enfants) {
+        await deleteDoc(envieRef(enfant.id));
+    }
+
+    await deleteDoc(envieRef(voyageId));
+
+}
