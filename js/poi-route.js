@@ -1,49 +1,123 @@
 const CATEGORIES_POI = {
     village: { emoji: "🏘️", label: "Villages & bourgs", overpassTags: ['place=village', 'place=hamlet', 'place=town'] },
     tourisme: { emoji: "🏛️", label: "Tourisme", overpassTags: ['tourism=attraction', 'tourism=museum', 'tourism=viewpoint', 'historic=castle', 'historic=monument'] },
-    restauration: { emoji: "🍽️", label: "Restauration", overpassTags: ['amenity=restaurant', 'amenity=cafe'] },
     nature: { emoji: "🌳", label: "Nature", overpassTags: ['leisure=park', 'natural=water', 'waterway=waterfall'] },
+    restauration: { emoji: "🍽️", label: "Restauration", overpassTags: ['amenity=restaurant', 'amenity=cafe'] },
     services: { emoji: "⛽", label: "Services", overpassTags: ['amenity=fuel', 'highway=rest_area'] }
 };
 
-async function chercherVillagesAutourPoint(point, rayonKm) {
+async function chercherPoiAutourPoint(point, rayonM, tags) {
 
-    const deltaLat = rayonKm / 111;
-    const deltaLon = rayonKm / (111 * Math.cos(point.lat * Math.PI / 180));
+    const filtreTags = tags.map(t => {
+        const [cle, valeur] = t.split("=");
+        return `node[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});way[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});`;
+    }).join("");
 
-    const viewbox = [
-        point.lon - deltaLon, point.lat + deltaLat,
-        point.lon + deltaLon, point.lat - deltaLat
-    ].join(",");
+    const query = `[out:json][timeout:15];(${filtreTags});out center 20;`;
 
-    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&viewbox=${viewbox}&bounded=1&class=place&limit=10`;
+    const miroirs = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter"
+    ];
 
-    try {
+    for (const miroir of miroirs) {
 
-        const response = await fetch(url, { headers: { "Accept": "application/json" } });
-        const data = await response.json();
+        try {
 
-        console.log("Nominatim réponse: " + JSON.stringify(data).slice(0, 300));
+            const response = await fetch(miroir, {
+                method: "POST",
+                body: "data=" + encodeURIComponent(query)
+            });
 
-        if (!Array.isArray(data)) {
-            console.error("Nominatim n'a pas retourné un tableau");
-            return [];
+            if (!response.ok) {
+                console.error(`Miroir ${miroir} status: ${response.status}`);
+                continue;
+            }
+
+            const data = await response.json();
+
+            console.log(`Miroir ${miroir} OK, éléments=${data.elements?.length || 0}`);
+
+            return (data.elements || []).map(el => ({
+                nom: el.tags?.name || null,
+                lat: el.lat || el.center?.lat,
+                lon: el.lon || el.center?.lon,
+                type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
+            })).filter(p => p.nom && p.lat && p.lon);
+
+        } catch (err) {
+            console.error(`Erreur miroir ${miroir}: ${err.message}`);
         }
 
-        return data
-            .filter(el => ["village", "town", "hamlet"].includes(el.addresstype) || ["village", "town", "hamlet"].includes(el.type))
-            .map(el => ({
-                nom: el.display_name.split(",")[0],
-                lat: parseFloat(el.lat),
-                lon: parseFloat(el.lon),
-                type: el.type
-            }));
-
-    } catch (err) {
-        console.error("Erreur Nominatim villages: " + err.message);
-        return [];
     }
 
+    return [];
+
+}
+
+
+export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress) {
+
+    onProgress?.("Calcul de l'itinéraire...");
+
+    const trajet = await calculerItineraireOSRM(depart, arrivee);
+
+    if (!trajet) {
+        return { erreur: "Impossible de calculer l'itinéraire." };
+    }
+
+    const echantillons = echantillonnerTrajet(trajet, 8);
+
+    const resultatsParCategorie = {};
+    const dejaVus = new Set();
+
+    for (const catId of categoriesActives) {
+
+        const categorie = CATEGORIES_POI[catId];
+
+        if (!categorie)
+            continue;
+
+        resultatsParCategorie[catId] = [];
+
+        onProgress?.(`Recherche : ${categorie.label}...`);
+
+        for (const point of echantillons) {
+
+            const pois = await chercherPoiAutourPoint(point, rayonKm * 1000, categorie.overpassTags);
+
+            pois.forEach(poi => {
+
+                const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
+
+                if (dejaVus.has(cle))
+                    return;
+
+                dejaVus.add(cle);
+
+                const distanceMin = Math.min(...echantillons.map(e =>
+                    calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
+                ));
+
+                resultatsParCategorie[catId].push({ ...poi, distanceKm: distanceMin });
+
+            });
+
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+        }
+
+        resultatsParCategorie[catId].sort((a, b) => a.distanceKm - b.distanceKm);
+        resultatsParCategorie[catId] = resultatsParCategorie[catId].slice(0, 15);
+
+    }
+
+    return { trajet, resultatsParCategorie };
+
+}
+
+export function getCategoriesPoi() {
+    return CATEGORIES_POI;
 }
 
 async function calculerItineraireOSRM(depart, arrivee) {
