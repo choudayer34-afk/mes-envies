@@ -676,22 +676,6 @@ function demarrerChronoMemory() {
 
 
 
-function demarrerChronoMemory() {
-
-    memoryTempsDebut = Date.now();
-    memoryTempsEcoule = 0;
-
-    afficherChronoMemory();
-
-    memoryChronoInterval = setInterval(() => {
-
-        memoryTempsEcoule = Date.now() - memoryTempsDebut;
-        afficherChronoMemory();
-
-    }, 100);
-
-}
-
 function arreterChronoMemory() {
 
     if (memoryChronoInterval) {
