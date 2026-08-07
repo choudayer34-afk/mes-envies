@@ -1671,11 +1671,18 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="modal" style="text-align:center;">
         <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
         <h2>🧠 Memory</h2>
+        <div class="itemTypeToggle" style="margin-bottom:14px;flex-wrap:wrap;">
+            <button type="button" class="itemTypeChip memoryNiveauButton active" data-niveau="6">6 cartes</button>
+            <button type="button" class="itemTypeChip memoryNiveauButton" data-niveau="16">16 cartes</button>
+            <button type="button" class="itemTypeChip memoryNiveauButton" data-niveau="24">24 cartes</button>
+            <button type="button" class="itemTypeChip memoryNiveauButton" data-niveau="36">36 cartes</button>
+        </div>
         <p id="memoryMessage" style="font-size:14px;color:var(--color-text-light);margin:10px 0;">Trouve toutes les paires !</p>
-        <div id="memoryGrille" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin:16px 0;"></div>
+        <div id="memoryGrille" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;margin:16px 0;"></div>
         <button id="rejouerMemoryButton" class="primaryButton" style="width:100%;">🔄 Nouvelle partie</button>
     </div>
 </div>
+
 <div id="lectureModal" class="modal-overlay hidden">
     <div class="modal" style="text-align:center;">
         <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
