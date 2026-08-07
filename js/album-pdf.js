@@ -349,11 +349,10 @@ function dessinerPageContenu(doc, page, dataUrls, couleurP) {
         const yPetite1 = MARGE + hauteurMoyenne - 6;
 
         dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, xPetite1, yPetite1, largeurPetite1, hauteurPetite1);
-
         const largeurPetite2 = zoneLargeur * 0.24;
-        const hauteurPetite2 = hauteurDisponiblePhotos * 0.38;
-        const xPetite2 = MARGE + largeurPrincipale * 0.3;
-        const yPetite2 = MARGE + hauteurPrincipale - hauteurPetite2 + 6;
+        const hauteurPetite2 = hauteurDisponiblePhotos * 0.34;
+        const xPetite2 = MARGE + largeurPrincipale - largeurPetite2 * 0.35;
+        const yPetite2 = MARGE + hauteurPrincipale - hauteurPetite2 + 4;
 
         dessinerImageCouvrante(doc, dataUrls[3].dataUrl, dataUrls[3].dims, xPetite2, yPetite2, largeurPetite2, hauteurPetite2);
 
