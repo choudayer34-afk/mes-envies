@@ -2,10 +2,23 @@ import { getEnvies } from "./storage.js";
 import { getCategorieById } from "./envie.js";
 import { getGroupKey, formatDateLabel } from "./grouping.js";
 import { isLogementCategory } from "./envie.js";
+import { activerModeEditionVoyage } from "./voyage.js";
 
 export function renderCarnetVoyage(envie, container) {
 
     const enfants = getEnvies().filter(e => e.voyageId === envie.id && (e.realise || isLogementCategory(e.categorie)));
+
+    const editButton = document.createElement("button");
+    editButton.className = "secondaryButton";
+    editButton.textContent = "✏️ Modifier ce voyage";
+    editButton.style.width = "100%";
+    editButton.style.marginBottom = "16px";
+
+    editButton.addEventListener("click", () => {
+        activerModeEditionVoyage(envie);
+    });
+
+    container.appendChild(editButton);
 
     if (enfants.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune activité réalisée n'a encore été enregistrée pour ce voyage.</div>`;
