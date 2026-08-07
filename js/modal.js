@@ -36,7 +36,7 @@ export function initModal() {
         .addEventListener("click", saveCurrentEnvie);
         
      
-    document.getElementById("advancedModeButton").addEventListener("click", async () => {
+        document.getElementById("advancedModeButton").addEventListener("click", async () => {
 
         try {
 
@@ -46,16 +46,22 @@ export function initModal() {
             if (!titre)
                 return;
 
-            createEnvie({
+            const nouvelId = createEnvie({
                 titre,
                 categorie: currentCategorie,
                 lieu: getSelectedLieu(),
                 date: getSelectedPeriode()
             });
 
+            if (voyageContextId) {
+                updateEnvieVoyage(nouvelId, voyageContextId);
+            }
+
             resetSelectedLieu();
             resetSelectedPeriode();
-voyageContextId = null; 
+
+            voyageContextId = null;
+
             closeModal();
 
             setTimeout(() => {
@@ -75,6 +81,7 @@ voyageContextId = null;
         }
 
     });
+
 
 
 }
