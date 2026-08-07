@@ -13,6 +13,8 @@ let lectureNiveauActuel = "tous";
 let memoryChronoInterval = null;
 let memoryTempsDebut = null;
 let memoryTempsEcoule = 0;
+let memoryChronoDemarre = false;
+
 
 
 
