@@ -176,54 +176,6 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 
 
 
-export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress) {
-
-    onProgress?.("Calcul de l'itinéraire...");
-
-    const trajet = await calculerItineraireOSRM(depart, arrivee);
-
-    if (!trajet) {
-        return { erreur: "Impossible de calculer l'itinéraire." };
-    }
-
-    const echantillons = echantillonnerTrajet(trajet, 10);
-
-    const resultatsParCategorie = { village: [] };
-    const dejaVus = new Set();
-
-    onProgress?.("Recherche des villages le long du trajet...");
-
-    for (const point of echantillons) {
-
-        const villages = await chercherVillagesAutourPoint(point, rayonKm);
-
-        villages.forEach(v => {
-
-            const cle = `${v.nom}_${v.lat.toFixed(3)}_${v.lon.toFixed(3)}`;
-
-            if (dejaVus.has(cle))
-                return;
-
-            dejaVus.add(cle);
-
-            const distanceMin = Math.min(...echantillons.map(e =>
-                calculerDistanceKm(e.lat, e.lon, v.lat, v.lon)
-            ));
-
-            resultatsParCategorie.village.push({ ...v, distanceKm: distanceMin });
-
-        });
-
-        await new Promise(resolve => setTimeout(resolve, 1100));
-
-    }
-
-    resultatsParCategorie.village.sort((a, b) => a.distanceKm - b.distanceKm);
-    resultatsParCategorie.village = resultatsParCategorie.village.slice(0, 20);
-
-    return { trajet, resultatsParCategorie };
-
-}
 
 
 export function getCategoriesPoi() {
