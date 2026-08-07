@@ -730,14 +730,26 @@ function initLecture() {
         afficherLecture();
     });
 
-    document.getElementById("lectureEcouterButton")?.addEventListener("click", () => {
+      document.getElementById("lectureEcouterButton")?.addEventListener("click", () => {
+
+        console.log("Clic écouter, lectureOrdre.length=" + lectureOrdre.length + " lectureIndex=" + lectureIndex);
 
         const item = SYLLABES_LECTURE[lectureOrdre[lectureIndex]];
+
+        console.log("item=" + JSON.stringify(item));
+
+        if (!item) {
+            console.error("Aucun item trouvé, lecture jamais démarrée ?");
+            return;
+        }
+
         const utterance = new SpeechSynthesisUtterance(item.mot);
         utterance.lang = "fr-FR";
         utterance.rate = 0.8;
 
         speechSynthesis.speak(utterance);
+
+        console.log("speechSynthesis.speak appelé");
 
     });
 
