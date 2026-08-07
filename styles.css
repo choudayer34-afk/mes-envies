@@ -246,6 +246,7 @@ main{
 #minuteurModal,
  #mapPickerModal,
 #etapeFinderModal,
+ #morpionModal,
 #carteVoyagesModal
 {
     z-index:2100;
@@ -1784,5 +1785,22 @@ button {
     background:var(--color-card);
     z-index:1;
     margin-bottom:0;
+}
+
+.morpionCase:disabled{
+    opacity:.7;
+}
+
+.memoryCarte{
+    aspect-ratio:1;
+    font-size:28px;
+    border-radius:12px;
+    border:2px solid var(--color-border);
+    background:var(--color-card);
+}
+
+.memoryCarte.trouvee{
+    background:#D1FAE5;
+    border-color:#22c55e;
 }
 
