@@ -93,49 +93,6 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 }
 
 
-async function chercherPoiAutourPoint(point, rayonM, tags) {
-
-    const filtreTags = tags.map(t => {
-        const [cle, valeur] = t.split("=");
-        return `node[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});way[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});`;
-    }).join("");
-
-    const query = `[out:json][timeout:15];(${filtreTags});out center 20;`;
-
-    const miroirs = [
-        "https://overpass-api.de/api/interpreter",
-        "https://overpass.kumi.systems/api/interpreter"
-    ];
-
-    for (const miroir of miroirs) {
-
-        try {
-
-            const url = `${miroir}?data=${encodeURIComponent(query)}`;
-
-            const response = await fetch(url, { method: "GET" });
-
-            if (!response.ok) {
-                console.error(`Miroir ${miroir} status: ${response.status}`);
-                continue;
-            }
-
-            const data = await response.json();
-
-            console.log(`Miroir ${miroir} OK, éléments=${data.elements?.length || 0}`);
-
-            return (data.elements || []).map(el => ({
-                nom: el.tags?.name || null,
-                lat: el.lat || el.center?.lat,
-                lon: el.lon || el.center?.lon,
-                type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
-            })).filter(p => p.nom && p.lat && p.lon);
-
-        } catch (err) {
-            console.error(`Erreur miroir ${miroir}: ${err.message}`);
-        }
-
-    }
 
 export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress) {
 
