@@ -575,3 +575,176 @@ function retournerCarteMemory(index) {
 
 }
 
+/* ---------- Apprendre à lire ---------- */
+
+const SYLLABES_LECTURE = [
+    { syllabe: "MA", mot: "MAMAN", emoji: "👩" },
+    { syllabe: "PA", mot: "PAPA", emoji: "👨" },
+    { syllabe: "CHA", mot: "CHAT", emoji: "🐱" },
+    { syllabe: "TO", mot: "TOTO", emoji: "🐶" },
+    { syllabe: "LU", mot: "LUNE", emoji: "🌙" },
+    { syllabe: "SO", mot: "SOLEIL", emoji: "☀️" },
+    { syllabe: "BA", mot: "BALLON", emoji: "⚽" },
+    { syllabe: "PO", mot: "POMME", emoji: "🍎" },
+    { syllabe: "VE", mot: "VÉLO", emoji: "🚲" },
+    { syllabe: "MI", mot: "MIEL", emoji: "🍯" },
+    { syllabe: "RI", mot: "RIZ", emoji: "🍚" },
+    { syllabe: "FLE", mot: "FLEUR", emoji: "🌸" },
+    { syllabe: "TA", mot: "TABLE", emoji: "🪑" },
+    { syllabe: "LI", mot: "LIVRE", emoji: "📖" },
+    { syllabe: "NA", mot: "NAGE", emoji: "🏊" }
+];
+
+let lectureIndex = 0;
+let lectureOrdre = [];
+
+function initLecture() {
+
+    document.getElementById("btnOuvrirLecture")?.addEventListener("click", () => {
+        demarrerLecture();
+    });
+
+    document.getElementById("lectureSuivantButton")?.addEventListener("click", () => {
+        lectureIndex = (lectureIndex + 1) % lectureOrdre.length;
+        afficherLecture();
+    });
+
+    document.getElementById("lecturePrecedentButton")?.addEventListener("click", () => {
+        lectureIndex = (lectureIndex - 1 + lectureOrdre.length) % lectureOrdre.length;
+        afficherLecture();
+    });
+
+    document.getElementById("lectureEcouterButton")?.addEventListener("click", () => {
+
+        const item = SYLLABES_LECTURE[lectureOrdre[lectureIndex]];
+        const utterance = new SpeechSynthesisUtterance(item.mot);
+        utterance.lang = "fr-FR";
+        utterance.rate = 0.8;
+
+        speechSynthesis.speak(utterance);
+
+    });
+
+}
+
+function demarrerLecture() {
+
+    lectureOrdre = SYLLABES_LECTURE.map((_, i) => i).sort(() => Math.random() - 0.5);
+    lectureIndex = 0;
+
+    afficherLecture();
+
+}
+
+function afficherLecture() {
+
+    const item = SYLLABES_LECTURE[lectureOrdre[lectureIndex]];
+
+    document.getElementById("lectureSyllabe").textContent = item.syllabe;
+    document.getElementById("lectureEmoji").textContent = item.emoji;
+    document.getElementById("lectureMot").textContent = item.mot;
+    document.getElementById("lectureCompteur").textContent = `${lectureIndex + 1} / ${lectureOrdre.length}`;
+
+}
+
+/* ---------- Apprendre l'anglais ---------- */
+
+const VOCABULAIRE_ANGLAIS = [
+    { fr: "Chat", en: "Cat", emoji: "🐱" },
+    { fr: "Chien", en: "Dog", emoji: "🐶" },
+    { fr: "Maison", en: "House", emoji: "🏠" },
+    { fr: "Soleil", en: "Sun", emoji: "☀️" },
+    { fr: "Lune", en: "Moon", emoji: "🌙" },
+    { fr: "Pomme", en: "Apple", emoji: "🍎" },
+    { fr: "Eau", en: "Water", emoji: "💧" },
+    { fr: "Livre", en: "Book", emoji: "📖" },
+    { fr: "Voiture", en: "Car", emoji: "🚗" },
+    { fr: "Oiseau", en: "Bird", emoji: "🐦" },
+    { fr: "Poisson", en: "Fish", emoji: "🐟" },
+    { fr: "Fleur", en: "Flower", emoji: "🌸" },
+    { fr: "Ballon", en: "Ball", emoji: "⚽" },
+    { fr: "École", en: "School", emoji: "🏫" },
+    { fr: "Ami", en: "Friend", emoji: "🧑‍🤝‍🧑" },
+    { fr: "Rouge", en: "Red", emoji: "🔴" },
+    { fr: "Bleu", en: "Blue", emoji: "🔵" },
+    { fr: "Un", en: "One", emoji: "1️⃣" },
+    { fr: "Deux", en: "Two", emoji: "2️⃣" },
+    { fr: "Trois", en: "Three", emoji: "3️⃣" }
+];
+
+let anglaisMotActuel = null;
+let anglaisScore = 0;
+let anglaisTotal = 0;
+
+function initAnglais() {
+
+    document.getElementById("btnOuvrirAnglais")?.addEventListener("click", () => {
+        anglaisScore = 0;
+        anglaisTotal = 0;
+        nouvelleQuestionAnglais();
+    });
+
+}
+
+function nouvelleQuestionAnglais() {
+
+    document.getElementById("anglaisMessage").textContent = "";
+
+    const motCorrect = VOCABULAIRE_ANGLAIS[Math.floor(Math.random() * VOCABULAIRE_ANGLAIS.length)];
+    anglaisMotActuel = motCorrect;
+
+    const autresMots = VOCABULAIRE_ANGLAIS
+        .filter(m => m.en !== motCorrect.en)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 2);
+
+    const choix = [motCorrect, ...autresMots].sort(() => Math.random() - 0.5);
+
+    document.getElementById("anglaisEmoji").textContent = motCorrect.emoji;
+    document.getElementById("anglaisMotFr").textContent = motCorrect.fr;
+    document.getElementById("anglaisScore").textContent = `Score : ${anglaisScore} / ${anglaisTotal}`;
+
+    const container = document.getElementById("anglaisChoixContainer");
+    container.innerHTML = "";
+
+    choix.forEach(mot => {
+
+        const btn = document.createElement("button");
+        btn.className = "secondaryButton";
+        btn.textContent = mot.en;
+        btn.style.width = "100%";
+        btn.style.marginBottom = "8px";
+
+        btn.addEventListener("click", () => {
+            verifierReponseAnglais(mot.en === motCorrect.en, btn);
+        });
+
+        container.appendChild(btn);
+
+    });
+
+}
+
+function verifierReponseAnglais(estCorrect, btn) {
+
+    anglaisTotal++;
+
+    if (estCorrect) {
+
+        anglaisScore++;
+        btn.style.background = "#D1FAE5";
+        document.getElementById("anglaisMessage").textContent = "✓ Bravo !";
+
+    } else {
+
+        btn.style.background = "#FEE2E2";
+        document.getElementById("anglaisMessage").textContent = `❌ La bonne réponse était : ${anglaisMotActuel.en}`;
+
+    }
+
+    document.querySelectorAll("#anglaisChoixContainer button").forEach(b => b.disabled = true);
+
+    setTimeout(nouvelleQuestionAnglais, 1200);
+
+}
+
