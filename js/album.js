@@ -253,8 +253,11 @@ function creerPageCard(page, index) {
         <label class="fieldTitle">Titre de la page</label>
         <input type="text" class="albumTitrePageInput" data-page="${page.pageId}" value="${page.titrePrincipal}" style="width:100%;height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
 
-        <label class="fieldTitle">Lieu / titre de la page</label>
-        <input type="text" class="albumLieuInput" data-page="${page.pageId}" value="${page.lieuLabel}" style="width:100%;height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
+              <label class="fieldTitle">Lieu / titre de la page</label>
+        <div style="position:relative;margin-bottom:10px;">
+            <input type="text" class="albumLieuInput" data-page="${page.pageId}" value="${page.lieuLabel}" style="width:100%;height:40px;padding:0 36px 0 10px;border-radius:10px;border:1px solid var(--color-border);box-sizing:border-box;">
+            <button type="button" class="albumLieuClearButton" data-page="${page.pageId}" style="position:absolute;top:50%;right:8px;transform:translateY(-50%);background:none;border:none;color:#8A9BA5;font-size:16px;padding:4px;">✕</button>
+        </div>
 
         <label class="fieldTitle">Photos (max 4)</label>
         <div class="albumPhotosGrid">${photosHtml}</div>
@@ -268,6 +271,19 @@ function creerPageCard(page, index) {
 
     card.querySelector(".albumLieuInput").addEventListener("input", (e) => {
         page.lieuLabel = e.target.value;
+    });
+    card.querySelector(".albumLieuInput").addEventListener("input", (e) => {
+        page.lieuLabel = e.target.value;
+    });
+
+    card.querySelector(".albumLieuClearButton").addEventListener("click", () => {
+
+        page.lieuLabel = "";
+
+        const input = card.querySelector(".albumLieuInput");
+        input.value = "";
+        input.focus();
+
     });
 
     card.querySelector(".albumTexteInput").addEventListener("input", (e) => {
