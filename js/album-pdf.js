@@ -1,10 +1,24 @@
 const MM_LARGEUR = 297;
 const MM_HAUTEUR = 210;
-const MARGE = 12;
+const MARGE = 14;
 
-async function chargerImageEnDataUrl(url) {
+function hexToRgb(hex) {
 
-    const thumbUrl = url.replace("/upload/", "/upload/w_1600,q_auto/");
+    const clean = hex.replace("#", "");
+
+    return {
+        r: parseInt(clean.substring(0, 2), 16),
+        g: parseInt(clean.substring(2, 4), 16),
+        b: parseInt(clean.substring(4, 6), 16)
+    };
+
+}
+
+async function chargerImageEnDataUrl(url, pleinePage = false) {
+
+    const largeurCible = pleinePage ? 1400 : 900;
+
+    const thumbUrl = url.replace("/upload/", `/upload/w_${largeurCible},q_70,f_jpg/`);
 
     const response = await fetch(thumbUrl, { mode: "cors" });
     const blob = await response.blob();
@@ -70,46 +84,43 @@ function dessinerImageCouvrante(doc, dataUrl, dims, x, y, w, h) {
 
 }
 
-export async function genererPdfAlbum({ titre, moisAnnee, couvertureUrl, pages }, onProgress) {
+function dessinerFondTexture(doc, couleur) {
+
+    const { r, g, b } = hexToRgb(couleur);
+
+    doc.setFillColor(r, g, b);
+    doc.rect(0, 0, MM_LARGEUR, MM_HAUTEUR, "F");
+
+    // Texture discrète : quelques cercles très légers en transparence
+    doc.setGState(new doc.GState({ opacity: 0.06 }));
+    doc.setFillColor(255, 255, 255);
+
+    for (let i = 0; i < 5; i++) {
+
+        const cx = Math.random() * MM_LARGEUR;
+        const cy = Math.random() * MM_HAUTEUR;
+        const rayon = 20 + Math.random() * 40;
+
+        doc.circle(cx, cy, rayon, "F");
+
+    }
+
+    doc.setGState(new doc.GState({ opacity: 1 }));
+
+}
+
+export async function genererPdfAlbum({ titre, moisAnnee, couvertureUrl, couleurPrincipale, couleurAccent, pages }, onProgress) {
 
     const { jsPDF } = window.jspdf;
 
     const doc = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
 
-    onProgress?.("Chargement de la couverture...");
+    const couleurP = couleurPrincipale || "#B8283D";
+    const couleurA = couleurAccent || "#1A2740";
 
-    // ---------- COUVERTURE ----------
+    onProgress?.("Préparation de la couverture...");
 
-    if (couvertureUrl) {
-
-        const dataUrl = await chargerImageEnDataUrl(couvertureUrl);
-        const dims = await getDimensionsImage(dataUrl);
-
-        dessinerImageCouvrante(doc, dataUrl, dims, 0, 0, MM_LARGEUR, MM_HAUTEUR);
-
-    } else {
-
-        doc.setFillColor(111, 175, 196);
-        doc.rect(0, 0, MM_LARGEUR, MM_HAUTEUR, "F");
-
-    }
-
-    // Voile sombre en bas à gauche pour lisibilité du titre
-    doc.setFillColor(0, 0, 0);
-    doc.setGState(new doc.GState({ opacity: 0.35 }));
-    doc.rect(0, MM_HAUTEUR - 60, 160, 60, "F");
-    doc.setGState(new doc.GState({ opacity: 1 }));
-
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(28);
-    doc.text(titre || "Notre voyage", MARGE, MM_HAUTEUR - 34);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(14);
-    doc.text(moisAnnee || "", MARGE, MM_HAUTEUR - 22);
-
-    // ---------- PAGES INTÉRIEURES ----------
+    await dessinerCouverture(doc, { titre, moisAnnee, couvertureUrl, couleurP, couleurA, pages });
 
     for (let i = 0; i < pages.length; i++) {
 
@@ -136,7 +147,7 @@ export async function genererPdfAlbum({ titre, moisAnnee, couvertureUrl, pages }
 
         }
 
-        dessinerPageContenu(doc, page, dataUrls);
+        dessinerPageContenu(doc, page, dataUrls, couleurP);
 
     }
 
@@ -146,71 +157,191 @@ export async function genererPdfAlbum({ titre, moisAnnee, couvertureUrl, pages }
 
 }
 
-function dessinerPageContenu(doc, page, dataUrls) {
+async function dessinerCouverture(doc, { titre, moisAnnee, couvertureUrl, couleurP, couleurA, pages }) {
 
-    const zoneTexteHauteur = 32;
-    const zonePhotosY = MARGE + 14;
-    const zonePhotosHauteur = MM_HAUTEUR - zonePhotosY - zoneTexteHauteur - MARGE;
-    const zoneLargeur = MM_LARGEUR - MARGE * 2;
+    dessinerFondTexture(doc, couleurP);
 
-    // Titre du lieu
-    doc.setTextColor(40, 50, 60);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text(page.lieuLabel || "", MARGE, MARGE + 6);
+    // Bande d'accent verticale à gauche
+    const largeurBande = 16;
+    const { r, g, b } = hexToRgb(couleurA);
 
-    doc.setDrawColor(111, 175, 196);
-    doc.setLineWidth(0.8);
-    doc.line(MARGE, MARGE + 9, MARGE + 40, MARGE + 9);
+    doc.setFillColor(r, g, b);
+    doc.rect(0, 0, largeurBande, MM_HAUTEUR, "F");
 
-    const n = dataUrls.length;
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text((moisAnnee || "").toUpperCase(), largeurBande / 2, MM_HAUTEUR / 2, { angle: 90, align: "center" });
 
-    if (n === 0) {
-        // Rien à afficher, juste le texte
-    } else if (n === 1) {
+    // Fenêtre photo centrale (jusqu'à 3 photos juxtaposées)
+    const photosCouverture = [];
 
-        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, zonePhotosY, zoneLargeur, zonePhotosHauteur);
+    if (couvertureUrl) {
+        photosCouverture.push(couvertureUrl);
+    }
 
-    } else if (n === 2) {
+    for (const page of pages) {
 
-        const largeurCase = (zoneLargeur - 4) / 2;
+        if (photosCouverture.length >= 3) break;
 
-        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, zonePhotosY, largeurCase, zonePhotosHauteur);
-        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, MARGE + largeurCase + 4, zonePhotosY, largeurCase, zonePhotosHauteur);
+        const idsSelectionnes = Array.from(page.photosSelectionnees);
 
-    } else if (n === 3) {
+        for (const photoId of idsSelectionnes) {
 
-        const largeurGrande = zoneLargeur * 0.62;
-        const largeurPetite = zoneLargeur - largeurGrande - 4;
-        const hauteurPetite = (zonePhotosHauteur - 4) / 2;
+            if (photosCouverture.length >= 3) break;
 
-        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, zonePhotosY, largeurGrande, zonePhotosHauteur);
-        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, MARGE + largeurGrande + 4, zonePhotosY, largeurPetite, hauteurPetite);
-        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, MARGE + largeurGrande + 4, zonePhotosY + hauteurPetite + 4, largeurPetite, hauteurPetite);
+            const photo = page.photosDisponibles.find(p => p.id === photoId);
 
-    } else {
+            if (photo && !photosCouverture.includes(photo.url)) {
+                photosCouverture.push(photo.url);
+            }
 
-        const largeurCase = (zoneLargeur - 4) / 2;
-        const hauteurCase = (zonePhotosHauteur - 4) / 2;
-
-        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, zonePhotosY, largeurCase, hauteurCase);
-        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, MARGE + largeurCase + 4, zonePhotosY, largeurCase, hauteurCase);
-        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, MARGE, zonePhotosY + hauteurCase + 4, largeurCase, hauteurCase);
-        dessinerImageCouvrante(doc, dataUrls[3].dataUrl, dataUrls[3].dims, MARGE + largeurCase + 4, zonePhotosY + hauteurCase + 4, largeurCase, hauteurCase);
+        }
 
     }
 
-    // Texte du récit
+    const fenetreLargeur = MM_LARGEUR * 0.62;
+    const fenetreHauteur = MM_HAUTEUR * 0.64;
+    const fenetreX = largeurBande + (MM_LARGEUR - largeurBande - fenetreLargeur) / 2 - 8;
+    const fenetreY = (MM_HAUTEUR - fenetreHauteur) / 2;
+
+    const nbPhotos = Math.min(photosCouverture.length, 3);
+
+    if (nbPhotos > 0) {
+
+        const largeurPanneau = fenetreLargeur / nbPhotos;
+
+        for (let i = 0; i < nbPhotos; i++) {
+
+            try {
+
+                const dataUrl = await chargerImageEnDataUrl(photosCouverture[i], true);
+                const dims = await getDimensionsImage(dataUrl);
+
+                dessinerImageCouvrante(doc, dataUrl, dims, fenetreX + i * largeurPanneau, fenetreY, largeurPanneau, fenetreHauteur);
+
+            } catch (err) {
+                console.error("Erreur photo couverture: " + err.message);
+            }
+
+        }
+
+    } else {
+
+        doc.setFillColor(255, 255, 255);
+        doc.setGState(new doc.GState({ opacity: 0.15 }));
+        doc.rect(fenetreX, fenetreY, fenetreLargeur, fenetreHauteur, "F");
+        doc.setGState(new doc.GState({ opacity: 1 }));
+
+    }
+
+    // Titre en haut à droite de la fenêtre
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(30);
+
+    const titreDecoupe = doc.splitTextToSize(titre || "Notre voyage", MM_LARGEUR - fenetreX - fenetreLargeur - 20);
+    doc.text(titreDecoupe, fenetreX + fenetreLargeur + 12, fenetreY - 6, { align: "left" });
+
+}
+
+function dessinerPageContenu(doc, page, dataUrls, couleurP) {
+
+    dessinerFondTexture(doc, couleurP);
+
+    const zoneLargeur = MM_LARGEUR - MARGE * 2;
+    const n = dataUrls.length;
+
+    let zoneTexteX = MARGE;
+    let zoneTexteY = MM_HAUTEUR - 50;
+    let zoneTexteLargeur = zoneLargeur;
+
+    if (n === 0) {
+
+        // rien à afficher
+
+    } else if (n === 1) {
+
+        const largeurPhoto = zoneLargeur * 0.6;
+        const hauteurPhoto = MM_HAUTEUR - MARGE * 2;
+
+        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE + 10, MARGE, largeurPhoto, hauteurPhoto);
+
+        zoneTexteX = MARGE + 10 + largeurPhoto + 12;
+        zoneTexteY = MARGE + 20;
+        zoneTexteLargeur = MM_LARGEUR - zoneTexteX - MARGE;
+
+    } else if (n === 2) {
+
+        // Composition asymétrique : grande photo en haut, petite décalée en bas
+        const grandeLargeur = zoneLargeur * 0.5;
+        const grandeHauteur = MM_HAUTEUR * 0.5;
+        const grandeX = MARGE + 20;
+        const grandeY = MARGE;
+
+        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, grandeX, grandeY, grandeLargeur, grandeHauteur);
+
+        const petiteLargeur = zoneLargeur * 0.28;
+        const petiteHauteur = MM_HAUTEUR * 0.32;
+        const petiteX = grandeX + grandeLargeur + 18;
+        const petiteY = grandeY + grandeHauteur - petiteHauteur + 10;
+
+        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, petiteX, petiteY, petiteLargeur, petiteHauteur);
+
+        zoneTexteX = grandeX;
+        zoneTexteY = grandeY + grandeHauteur + 12;
+        zoneTexteLargeur = grandeLargeur;
+
+    } else if (n === 3) {
+
+        const largeurGrande = zoneLargeur * 0.45;
+        const hauteurGrande = MM_HAUTEUR - MARGE * 2;
+
+        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, MARGE, largeurGrande, hauteurGrande);
+
+        const largeurPetite = zoneLargeur - largeurGrande - 10;
+        const hauteurPetite = (hauteurGrande - 8) / 2;
+
+        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, MARGE + largeurGrande + 10, MARGE, largeurPetite, hauteurPetite);
+        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, MARGE + largeurGrande + 10, MARGE + hauteurPetite + 8, largeurPetite, hauteurPetite);
+
+        zoneTexteX = MARGE;
+        zoneTexteY = MM_HAUTEUR - 34;
+        zoneTexteLargeur = largeurGrande;
+
+    } else {
+
+        const largeurCase = (zoneLargeur - 8) / 2;
+        const hauteurCase = (MM_HAUTEUR - MARGE * 2 - 8) / 2;
+
+        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, MARGE, largeurCase, hauteurCase);
+        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, MARGE + largeurCase + 8, MARGE, largeurCase, hauteurCase);
+        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, MARGE, MARGE + hauteurCase + 8, largeurCase, hauteurCase);
+        dessinerImageCouvrante(doc, dataUrls[3].dataUrl, dataUrls[3].dims, MARGE + largeurCase + 8, MARGE + hauteurCase + 8, largeurCase, hauteurCase);
+
+        zoneTexteX = MARGE;
+        zoneTexteY = MM_HAUTEUR - 20;
+        zoneTexteLargeur = zoneLargeur;
+
+    }
+
+    // Titre de la page
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text(page.titrePrincipal || page.lieuLabel || "", zoneTexteX, zoneTexteY);
+
+    // Récit
     if (page.texte) {
 
-        doc.setTextColor(85, 95, 105);
-        doc.setFont("helvetica", "italic");
-        doc.setFontSize(10.5);
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(10);
+        doc.setGState(new doc.GState({ opacity: 0.85 }));
 
-        const texteDecoupe = doc.splitTextToSize(page.texte, zoneLargeur);
-        const texteAAfficher = texteDecoupe.slice(0, 4);
+        const texteDecoupe = doc.splitTextToSize(page.texte, zoneTexteLargeur);
+        doc.text(texteDecoupe.slice(0, 6), zoneTexteX, zoneTexteY + 8);
 
-        doc.text(texteAAfficher, MARGE, MM_HAUTEUR - zoneTexteHauteur + 8);
+        doc.setGState(new doc.GState({ opacity: 1 }));
 
     }
 
