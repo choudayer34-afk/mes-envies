@@ -73,28 +73,38 @@ function renderHomeSections() {
         !isContainer(e.categorie) && e.date?.start === today
     );
 
-    const enCoursItems = envies.filter(e => {
+        const enCoursItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
         const { statut } = computeContainerStatus(e);
         return statut === "en_cours";
+    }).sort((a, b) => {
+        const dateA = a.date?.start || "9999";
+        const dateB = b.date?.start || "9999";
+        return dateA.localeCompare(dateB);
     });
 
     const aVenirItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
         const { statut } = computeContainerStatus(e);
         return statut === "planifie" && !!e.date?.start;
-    });
-    const termineItems = envies.filter(e => {
-        if (!isContainer(e.categorie)) return false;
-        const { statut } = computeContainerStatus(e);
-        return statut === "termine";
-    });
+    }).sort((a, b) => a.date.start.localeCompare(b.date.start));
 
     const enProjetItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
         const { statut } = computeContainerStatus(e);
         return statut === "planifie" && !e.date?.start;
+    }).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+
+    const termineItems = envies.filter(e => {
+        if (!isContainer(e.categorie)) return false;
+        const { statut } = computeContainerStatus(e);
+        return statut === "termine";
+    }).sort((a, b) => {
+        const dateA = a.date?.start || "0000";
+        const dateB = b.date?.start || "0000";
+        return dateB.localeCompare(dateA);
     });
+
 
     renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
     renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
