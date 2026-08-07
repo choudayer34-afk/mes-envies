@@ -22,22 +22,24 @@ import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
 import { getFoyerId } from "./auth.js";
 
 const groupesOuverts = new Set();
+const voyagesForcesEnEdition = new Set();
 
 
 export function renderVoyageSection(envie) {
 
- const container = document.getElementById("ficheVoyageContent");
+    const container = document.getElementById("ficheVoyageContent");
 
     if (!container)
         return;
 
-    container.innerHTML = "";   // ← vérifie que celle-ci existe bien
+    container.innerHTML = "";
 
     if (isContainer(envie.categorie)) {
 
         const { statut } = computeContainerStatus(envie);
+        const forceEdition = voyagesForcesEnEdition.has(envie.id);
 
-        if (statut === "termine") {
+        if (statut === "termine" && !forceEdition) {
             renderCarnetVoyage(envie, container);
         } else {
             renderVoyageContenu(envie, container);
@@ -48,6 +50,7 @@ export function renderVoyageSection(envie) {
     }
 
 }
+
 
 function renderVoyageContenu(envie, container) {
 
