@@ -22,6 +22,27 @@ export function getFoyerId() {
 console.log("Fichier auth.js chargé");
 
 export function initAuth(onReady) {
+    let tapCount = 0;
+    let tapTimer = null;
+
+    document.querySelector(".authScreen .logo")?.addEventListener("click", () => {
+
+        tapCount++;
+
+        clearTimeout(tapTimer);
+
+        tapTimer = setTimeout(() => {
+            tapCount = 0;
+        }, 1500);
+
+        if (tapCount >= 7) {
+
+            tapCount = 0;
+            declencherEasterEggLogo();
+
+        }
+
+    });
 
     onReadyCallback = onReady;
 
@@ -236,5 +257,31 @@ function hideAuthScreens() {
 
 export function showFoyerCode() {
     alert(`Code de votre foyer : ${currentFoyerId}`);
+}
+
+function declencherEasterEggLogo() {
+
+    const logo = document.querySelector(".authScreen .logo");
+
+    if (!logo)
+        return;
+
+    logo.style.transition = "transform 0.6s ease";
+    logo.style.transform = "scale(2.5) rotate(15deg)";
+
+    setTimeout(() => {
+
+        logo.style.transform = "scale(1) rotate(0deg)";
+
+        const message = document.createElement("div");
+        message.textContent = "🌱 Tu as trouvé le jardin secret !";
+        message.style = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--color-primary);color:white;padding:16px 24px;border-radius:16px;font-weight:700;z-index:99999;box-shadow:0 8px 24px rgba(0,0,0,.3);text-align:center;";
+
+        document.body.appendChild(message);
+
+        setTimeout(() => message.remove(), 2500);
+
+    }, 600);
+
 }
 
