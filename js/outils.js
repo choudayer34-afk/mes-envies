@@ -492,8 +492,11 @@ let memoryBloque = false;
 const MEMORY_SYMBOLES = [
     "🐶","🐱","🦁","🐸","🦊","🐼","🐵","🦄",
     "🐰","🐨","🐷","🐮","🐺","🦉","🐧","🦋",
-    "🐢","🦖","🐙","🐝"
+    "🐢","🦖","🐙","🐝","🦀","🐳","🦒","🐫"
 ];
+
+let memoryModeActuel = "libre";
+let memoryTempsLimiteSec = 0;
 
 let memoryNiveauActuel = 6;
 
@@ -501,6 +504,7 @@ function initMemory() {
 
     document.getElementById("btnOuvrirMemory")?.addEventListener("click", () => {
         document.querySelector('[data-modal="memoryModal"]').click();
+        resetMemory();
     });
 
     document.querySelectorAll(".memoryNiveauButton").forEach(btn => {
@@ -518,18 +522,42 @@ function initMemory() {
 
     });
 
+    document.querySelectorAll(".memoryModeButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            document.querySelectorAll(".memoryModeButton").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            memoryModeActuel = btn.dataset.mode;
+
+            document.getElementById("memoryTempsLimiteField").classList.toggle("hidden", memoryModeActuel !== "limite");
+
+            resetMemory();
+
+        });
+
+    });
+
+    document.getElementById("memoryTempsLimiteInput")?.addEventListener("change", (e) => {
+
+        memoryTempsLimiteSec = (parseInt(e.target.value, 10) || 60);
+
+        resetMemory();
+
+    });
+
     document.getElementById("rejouerMemoryButton")?.addEventListener("click", resetMemory);
 
 }
 
+
 function resetMemory() {
 
-    console.log("resetMemory appelée, niveau=" + memoryNiveauActuel);
+    arreterChronoMemory();
 
     const nbPaires = memoryNiveauActuel / 2;
     const symbolesChoisis = MEMORY_SYMBOLES.slice(0, nbPaires);
-
-    console.log("nbPaires=" + nbPaires + " symbolesChoisis=" + JSON.stringify(symbolesChoisis));
 
     const paires = [...symbolesChoisis, ...symbolesChoisis];
 
@@ -537,16 +565,15 @@ function resetMemory() {
         .map(s => ({ symbole: s, trouvee: false }))
         .sort(() => Math.random() - 0.5);
 
-    console.log("memoryCartes.length=" + memoryCartes.length);
-
     memoryRetournees = [];
     memoryBloque = false;
 
-    document.getElementById("memoryMessage").textContent = "Trouve toutes les paires !";
+    document.getElementById("memoryMessage").textContent =
+        memoryModeActuel === "limite"
+            ? `Trouve toutes les paires avant la fin du temps !`
+            : "Trouve toutes les paires !";
 
     const grille = document.getElementById("memoryGrille");
-
-    console.log("grille trouvée=" + !!grille);
 
     if (grille) {
 
@@ -554,19 +581,77 @@ function resetMemory() {
             grille.style.gridTemplateColumns = "repeat(4, 1fr)";
         } else if (memoryNiveauActuel <= 24) {
             grille.style.gridTemplateColumns = "repeat(5, 1fr)";
+        } else if (memoryNiveauActuel <= 36) {
+            grille.style.gridTemplateColumns = "repeat(6, 1fr)";
         } else {
             grille.style.gridTemplateColumns = "repeat(6, 1fr)";
         }
 
     }
 
-    console.log("Appel de renderMemory maintenant");
-
     renderMemory();
+    renderClassementMemory();
 
-    console.log("renderMemory terminée");
+    if (memoryModeActuel === "limite") {
+        demarrerChronoLimite();
+    } else {
+        demarrerChronoMemory();
+    }
 
 }
+
+function demarrerChronoLimite() {
+
+    const tempsInput = document.getElementById("memoryTempsLimiteInput");
+    memoryTempsLimiteSec = parseInt(tempsInput?.value, 10) || 60;
+
+    memoryTempsDebut = Date.now();
+    memoryTempsEcoule = 0;
+
+    afficherChronoLimite();
+
+    memoryChronoInterval = setInterval(() => {
+
+        memoryTempsEcoule = Date.now() - memoryTempsDebut;
+
+        const tempsRestant = memoryTempsLimiteSec - memoryTempsEcoule / 1000;
+
+        if (tempsRestant <= 0) {
+
+            arreterChronoMemory();
+
+            document.getElementById("memoryChrono").textContent = "⏱️ 0:00.0";
+            document.getElementById("memoryMessage").textContent = "⏰ Temps écoulé ! Perdu, réessaie.";
+
+            document.querySelectorAll(".memoryCarte").forEach(c => c.disabled = true);
+
+            return;
+
+        }
+
+        afficherChronoLimite();
+
+    }, 100);
+
+}
+
+function afficherChronoLimite() {
+
+    const chronoEl = document.getElementById("memoryChrono");
+
+    if (!chronoEl)
+        return;
+
+    const tempsRestant = Math.max(0, memoryTempsLimiteSec - memoryTempsEcoule / 1000);
+
+    const minutes = Math.floor(tempsRestant / 60);
+    const secondes = (tempsRestant % 60).toFixed(1);
+
+    chronoEl.textContent = `⏱️ ${minutes}:${secondes.padStart(4, "0")}`;
+    chronoEl.style.color = tempsRestant < 10 ? "#DC2626" : "var(--color-primary)";
+
+}
+
 
 
 
@@ -601,6 +686,9 @@ function retournerCarteMemory(index) {
     if (memoryBloque || memoryRetournees.includes(index) || memoryCartes[index].trouvee)
         return;
 
+    if (memoryModeActuel === "limite" && memoryTempsLimiteSec - memoryTempsEcoule / 1000 <= 0)
+        return;
+
     memoryRetournees.push(index);
     renderMemory();
 
@@ -620,7 +708,24 @@ function retournerCarteMemory(index) {
             renderMemory();
 
             if (memoryCartes.every(c => c.trouvee)) {
-                document.getElementById("memoryMessage").textContent = "🎉 Bravo, toutes les paires trouvées !";
+
+                arreterChronoMemory();
+
+                if (memoryModeActuel === "limite") {
+
+                    const tempsRestant = memoryTempsLimiteSec - memoryTempsEcoule / 1000;
+                    document.getElementById("memoryMessage").textContent = `🎉 Gagné avec ${tempsRestant.toFixed(1)}s restantes !`;
+
+                } else {
+
+                    const tempsFinalSec = memoryTempsEcoule / 1000;
+
+                    document.getElementById("memoryMessage").textContent = `🎉 Bravo, toutes les paires trouvées en ${formatTempsMemory(tempsFinalSec)} !`;
+
+                    verifierTopMemory(tempsFinalSec);
+
+                }
+
             }
 
         } else {
@@ -638,6 +743,7 @@ function retournerCarteMemory(index) {
     }
 
 }
+
 
 /* ---------- Apprendre à lire ---------- */
 
