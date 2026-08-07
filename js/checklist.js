@@ -54,9 +54,22 @@ function renderByCategorie(items, envie, checklist) {
 
         }
 
-        group.items.forEach(item => {
+        const itemsTries = trierItemsChecklist(group.items);
+
+        itemsTries.forEach(item => {
             checklist.appendChild(createChecklistRow(item, envie));
         });
+
+    });
+
+}
+
+function trierItemsChecklist(items) {
+
+    return [...items].sort((a, b) => {
+
+        if (a.checked === b.checked) return 0;
+        return a.checked ? 1 : -1;
 
     });
 
