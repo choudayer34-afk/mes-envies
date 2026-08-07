@@ -3,6 +3,8 @@ import { getCategorieById } from "./envie.js";
 import { getGroupKey, formatDateLabel } from "./grouping.js";
 import { isLogementCategory } from "./envie.js";
 import { activerModeEditionVoyage } from "./voyage.js";
+import { updateEnvieVoyage, deleteEnvie } from "./storage.js";
+import { showToast } from "./toast.js";
 
 export function renderCarnetVoyage(envie, container) {
 
@@ -19,6 +21,60 @@ export function renderCarnetVoyage(envie, container) {
     });
 
     container.appendChild(editButton);
+
+    const tousLesEnfants = getEnvies().filter(e => e.voyageId === envie.id);
+    const nonRealisees = tousLesEnfants.filter(e => !e.realise && !isLogementCategory(e.categorie));
+
+    if (nonRealisees.length > 0) {
+
+        const bloc = document.createElement("div");
+        bloc.className = "containerStatutBox";
+        bloc.style.marginBottom = "20px";
+
+        bloc.innerHTML = `
+            <div class="containerStatutLabel">📋 ${nonRealisees.length} idée${nonRealisees.length > 1 ? "s" : ""} jamais réalisée${nonRealisees.length > 1 ? "s" : ""}</div>
+            <p style="font-size:13px;color:var(--color-text-light);margin:8px 0 12px;">Que veux-tu en faire ?</p>
+        `;
+
+        nonRealisees.forEach(idee => {
+
+            const row = document.createElement("div");
+            row.className = "templateRow";
+
+            row.innerHTML = `
+                <div class="templateRowNom">${idee.titre}</div>
+                <div class="templateRowActions">
+                    <button class="actionButton libererButton" title="Remettre dans le catalogue">📚</button>
+                    <button class="actionButton deleteButton" title="Supprimer">🗑️</button>
+                </div>
+            `;
+
+            row.querySelector(".libererButton").addEventListener("click", () => {
+
+                updateEnvieVoyage(idee.id, null);
+                showToast(`✓ "${idee.titre}" remise dans le catalogue`);
+                renderCarnetVoyage(envie, container.parentElement || container);
+
+            });
+
+            row.querySelector(".deleteButton").addEventListener("click", () => {
+
+                if (!window.confirm(`Supprimer "${idee.titre}" définitivement ?`))
+                    return;
+
+                deleteEnvie(idee.id);
+                showToast("✓ Idée supprimée");
+
+            });
+
+            bloc.appendChild(row);
+
+        });
+
+        container.appendChild(bloc);
+
+    }
+
 
     if (enfants.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune activité réalisée n'a encore été enregistrée pour ce voyage.</div>`;
