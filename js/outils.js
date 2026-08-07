@@ -607,9 +607,6 @@ function resetMemory() {
 
 function demarrerChronoLimite() {
 
-    const tempsInput = document.getElementById("memoryTempsLimiteInput");
-    memoryTempsLimiteSec = parseInt(tempsInput?.value, 10) || 60;
-
     memoryTempsDebut = Date.now();
     memoryTempsEcoule = 0;
 
@@ -639,6 +636,7 @@ function demarrerChronoLimite() {
     }, 100);
 
 }
+
 
 function afficherChronoLimite() {
 
@@ -813,8 +811,21 @@ function retournerCarteMemory(index) {
     if (memoryModeActuel === "limite" && memoryTempsLimiteSec - memoryTempsEcoule / 1000 <= 0)
         return;
 
+    if (!memoryChronoDemarre) {
+
+        memoryChronoDemarre = true;
+
+        if (memoryModeActuel === "limite") {
+            demarrerChronoLimite();
+        } else {
+            demarrerChronoMemory();
+        }
+
+    }
+
     memoryRetournees.push(index);
     renderMemory();
+
 
     if (memoryRetournees.length === 2) {
 
