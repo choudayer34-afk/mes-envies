@@ -1267,6 +1267,20 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="fieldTitle">Mois et année (couverture)</label>
         <input id="albumMoisAnneeInput" type="text" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
 
+<label class="fieldTitle">Couleur d'ambiance</label>
+<div style="display:flex;gap:10px;margin-bottom:8px;">
+    <input id="albumCouleurInput" type="color" value="#B8283D" style="width:56px;height:44px;border:none;border-radius:10px;">
+    <input id="albumCouleurAccentInput" type="color" value="#1A2740" style="width:56px;height:44px;border:none;border-radius:10px;">
+    <span style="font-size:12px;color:var(--color-text-light);align-self:center;">Principale + accent</span>
+</div>
+<div style="display:flex;gap:6px;margin-bottom:16px;flex-wrap:wrap;">
+    <button type="button" class="paletteButton" data-p="#B8283D" data-a="#1A2740" style="width:32px;height:32px;border-radius:8px;border:2px solid white;background:#B8283D;"></button>
+    <button type="button" class="paletteButton" data-p="#1E5F5F" data-a="#F2C94C" style="width:32px;height:32px;border-radius:8px;border:2px solid white;background:#1E5F5F;"></button>
+    <button type="button" class="paletteButton" data-p="#2C3E6B" data-a="#E8A87C" style="width:32px;height:32px;border-radius:8px;border:2px solid white;background:#2C3E6B;"></button>
+    <button type="button" class="paletteButton" data-p="#6B4226" data-a="#D9A441" style="width:32px;height:32px;border-radius:8px;border:2px solid white;background:#6B4226;"></button>
+    <button type="button" class="paletteButton" data-p="#3D5A40" data-a="#E8DCC8" style="width:32px;height:32px;border-radius:8px;border:2px solid white;background:#3D5A40;"></button>
+</div>
+
         <label class="fieldTitle">Photo de couverture</label>
         <select id="albumCouvertureSelect" style="width:100%;height:44px;border-radius:12px;border:1px solid var(--color-border);padding:0 10px;margin-bottom:16px;"></select>
 
