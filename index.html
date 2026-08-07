@@ -1554,6 +1554,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="secondaryButton outilOuvrirButton" data-modal="motAleatoireModal" style="width:100%;margin-bottom:10px;">🔤 Mot aléatoire</button>
         <button class="secondaryButton outilOuvrirButton" data-modal="ardoiseModal" id="btnOuvrirArdoise" style="width:100%;margin-bottom:10px;">🎨 Ardoise de dessin</button>
         <button class="secondaryButton outilOuvrirButton" data-modal="minuteurModal" style="width:100%;">⏱️ Minuteur</button>
+    <button class="secondaryButton outilOuvrirButton" data-modal="morpionModal" id="btnOuvrirMorpion" style="width:100%;margin-bottom:10px;">⭕ Morpion (vs ordinateur)</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="memoryModal" id="btnOuvrirMemory" style="width:100%;margin-bottom:10px;">🧠 Memory</button>
+
+    
     </div>
 </div>
 
@@ -1640,6 +1644,37 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="arreterMinuteurButton" class="secondaryButton" style="width:100%;">⏹️ Arrêter</button>
     </div>
 </div>
+
+<div id="morpionModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>⭕ Morpion</h2>
+        <p id="morpionMessage" style="font-size:15px;font-weight:600;margin:14px 0;">À toi de jouer (❌)</p>
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;max-width:280px;margin:0 auto 20px;">
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+            <button class="morpionCase" style="aspect-ratio:1;font-size:32px;border-radius:12px;border:2px solid var(--color-border);background:var(--color-card);"></button>
+        </div>
+        <button id="rejouerMorpionButton" class="primaryButton" style="width:100%;">🔄 Nouvelle partie</button>
+    </div>
+</div>
+
+<div id="memoryModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🧠 Memory</h2>
+        <p id="memoryMessage" style="font-size:14px;color:var(--color-text-light);margin:10px 0;">Trouve toutes les paires !</p>
+        <div id="memoryGrille" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin:16px 0;"></div>
+        <button id="rejouerMemoryButton" class="primaryButton" style="width:100%;">🔄 Nouvelle partie</button>
+    </div>
+</div>
+
 
 <div id="survieModal" class="modal-overlay hidden">
 
