@@ -787,6 +787,10 @@ export function initPoiRoute() {
             resultEl.innerHTML = `<div class="emptyState">🔍 ${msg}</div>`;
         });
 
+        
+
+        renderResultatsPoi(resultat.resultatsParCategorie, resultat.trajet);
+
         if (resultat.erreur) {
             resultEl.innerHTML = `<div class="emptyState">❌ ${resultat.erreur}</div>`;
             return;
@@ -798,14 +802,15 @@ export function initPoiRoute() {
 
 }
 
-function renderResultatsPoi(resultatsParCategorie) {
+function renderResultatsPoi(resultatsParCategorie, trajet) {
 
     const resultEl = document.getElementById("poiResultat");
     const categories = getCategoriesPoi();
 
-    resultEl.innerHTML = "";
+    resultEl.innerHTML = `<div id="poiMapContainer" style="height:250px;border-radius:16px;margin-bottom:16px;"></div>`;
 
     let totalTrouve = 0;
+    const tousLesPois = [];
 
     Object.entries(resultatsParCategorie).forEach(([catId, pois]) => {
 
@@ -815,6 +820,8 @@ function renderResultatsPoi(resultatsParCategorie) {
         totalTrouve += pois.length;
 
         const categorie = categories[catId];
+
+        pois.forEach(poi => tousLesPois.push({ ...poi, catId, categorie }));
 
         const header = document.createElement("div");
         header.className = "checklistCategorieHeader";
@@ -843,8 +850,69 @@ function renderResultatsPoi(resultatsParCategorie) {
     });
 
     if (totalTrouve === 0) {
-        resultEl.innerHTML = `<div class="emptyState">Rien trouvé dans ce rayon sur cet itinéraire.</div>`;
+        resultEl.innerHTML += `<div class="emptyState">Rien trouvé dans ce rayon sur cet itinéraire.</div>`;
     }
 
+    setTimeout(() => initCartePoi(trajet, tousLesPois), 100);
+
 }
+
+const COULEURS_CATEGORIES = {
+    village: "#F5A623",
+    tourisme: "#6FAFC4",
+    nature: "#7ED6A5",
+    restauration: "#E85D75",
+    services: "#9B7EDE"
+};
+
+let cartePoiInstance = null;
+
+function initCartePoi(trajet, pois) {
+
+    const mapEl = document.getElementById("poiMapContainer");
+
+    if (!mapEl || typeof L === "undefined" || !trajet)
+        return;
+
+    if (cartePoiInstance) {
+        cartePoiInstance.remove();
+        cartePoiInstance = null;
+    }
+
+    cartePoiInstance = L.map("poiMapContainer");
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
+    }).addTo(cartePoiInstance);
+
+    const coordsTrajet = trajet.map(p => [p.lat, p.lon]);
+
+    L.polyline(coordsTrajet, { color: "#4B5B66", weight: 4, opacity: 0.8 }).addTo(cartePoiInstance);
+
+    const bounds = [...coordsTrajet];
+
+    pois.forEach(poi => {
+
+        const couleur = COULEURS_CATEGORIES[poi.catId] || "#6FAFC4";
+
+        const marker = L.marker([poi.lat, poi.lon], {
+            icon: L.divIcon({
+                className: "custom-map-pin",
+                html: `<div style="background:${couleur};width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.3);border:2px solid white;"><span style="transform:rotate(45deg);font-size:12px;">${poi.categorie.emoji}</span></div>`,
+                iconSize: [26, 26],
+                iconAnchor: [13, 26]
+            })
+        }).addTo(cartePoiInstance);
+
+        marker.bindPopup(`<strong>${poi.categorie.emoji} ${poi.nom}</strong><br>${poi.distanceKm.toFixed(1)} km de la route`);
+
+        bounds.push([poi.lat, poi.lon]);
+
+    });
+
+    cartePoiInstance.fitBounds(bounds, { padding: [30, 30] });
+
+}
+
 
