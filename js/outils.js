@@ -477,15 +477,33 @@ function verifierFinMorpion(joueur) {
 
 /* ---------- Memory ---------- */
 
-const MEMORY_SYMBOLES = ["🐶","🐱","🦁","🐸","🦊","🐼","🐵","🦄"];
-let memoryCartes = [];
-let memoryRetournees = [];
-let memoryBloque = false;
+const MEMORY_SYMBOLES = [
+    "🐶","🐱","🦁","🐸","🦊","🐼","🐵","🦄",
+    "🐰","🐨","🐷","🐮","🐺","🦉","🐧","🦋",
+    "🐢","🦖","🐙","🐝"
+];
+
+let memoryNiveauActuel = 6;
 
 function initMemory() {
 
     document.getElementById("btnOuvrirMemory")?.addEventListener("click", () => {
-        resetMemory();
+        document.querySelector('[data-modal="memoryModal"]').click();
+    });
+
+    document.querySelectorAll(".memoryNiveauButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            document.querySelectorAll(".memoryNiveauButton").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            memoryNiveauActuel = parseInt(btn.dataset.niveau, 10);
+
+            resetMemory();
+
+        });
+
     });
 
     document.getElementById("rejouerMemoryButton")?.addEventListener("click", resetMemory);
@@ -494,7 +512,10 @@ function initMemory() {
 
 function resetMemory() {
 
-    const paires = [...MEMORY_SYMBOLES, ...MEMORY_SYMBOLES];
+    const nbPaires = memoryNiveauActuel / 2;
+    const symbolesChoisis = MEMORY_SYMBOLES.slice(0, nbPaires);
+
+    const paires = [...symbolesChoisis, ...symbolesChoisis];
 
     memoryCartes = paires
         .map(s => ({ symbole: s, trouvee: false }))
@@ -505,9 +526,20 @@ function resetMemory() {
 
     document.getElementById("memoryMessage").textContent = "Trouve toutes les paires !";
 
+    const grille = document.getElementById("memoryGrille");
+
+    if (memoryNiveauActuel <= 12) {
+        grille.style.gridTemplateColumns = "repeat(4, 1fr)";
+    } else if (memoryNiveauActuel <= 24) {
+        grille.style.gridTemplateColumns = "repeat(5, 1fr)";
+    } else {
+        grille.style.gridTemplateColumns = "repeat(6, 1fr)";
+    }
+
     renderMemory();
 
 }
+
 
 function renderMemory() {
 
