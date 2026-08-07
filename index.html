@@ -1680,6 +1680,14 @@ document.addEventListener("DOMContentLoaded", () => {
     <div class="modal" style="text-align:center;">
         <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
         <h2>🔤 Apprendre à lire</h2>
+        <div class="itemTypeToggle" style="margin-bottom:14px;flex-wrap:wrap;">
+    <button type="button" class="itemTypeChip lectureNiveauButton active" data-niveau="tous">Tous</button>
+    <button type="button" class="itemTypeChip lectureNiveauButton" data-niveau="1">Niveau 1</button>
+    <button type="button" class="itemTypeChip lectureNiveauButton" data-niveau="2">Niveau 2</button>
+    <button type="button" class="itemTypeChip lectureNiveauButton" data-niveau="3">Niveau 3</button>
+    <button type="button" class="itemTypeChip lectureNiveauButton" data-niveau="4">Niveau 4</button>
+</div>
+
         <p id="lectureCompteur" style="font-size:12px;color:var(--color-text-light);margin-bottom:16px;"></p>
         <div id="lectureEmoji" style="font-size:60px;margin-bottom:10px;"></div>
         <div id="lectureSyllabe" style="font-size:48px;font-weight:800;color:var(--color-primary);margin-bottom:10px;"></div>
