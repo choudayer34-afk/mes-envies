@@ -13,19 +13,24 @@ export function computeContainerStatus(container) {
     const dureeJours = container.date?.start ? getDureeJours(container.date) : 1;
     const isMultiJour = dureeJours > 1;
 
-    if (container.date?.start) {
+        if (container.date?.start) {
 
         const start = new Date(container.date.start);
         const end = container.date.end ? new Date(container.date.end) : start;
+
+        const finJournee = new Date(end);
+        finJournee.setHours(23, 59, 59, 999);
+
         const now = new Date();
 
         if (now < start) {
             return { statut: "planifie", pourcentage: 0 };
         }
 
-        if (now > end) {
+        if (now > finJournee) {
             return { statut: "termine", pourcentage: 100 };
         }
+
 
         if (isMultiJour) {
 
