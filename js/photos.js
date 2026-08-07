@@ -53,13 +53,14 @@ export function initPhotos() {
 
         showToast("📤 Envoi en cours...");
 
-        const nouvellesPhotos = [];
+                const nouvellesPhotos = [];
 
         for (const file of files) {
 
             try {
 
-                const result = await uploadToCloudinary(file);
+                const fichierCompresse = await compresserImageAvantEnvoi(file);
+                const result = await uploadToCloudinary(fichierCompresse);
 
                 nouvellesPhotos.push({
                     id: crypto.randomUUID(),
@@ -72,6 +73,7 @@ export function initPhotos() {
             }
 
         }
+
 
         const toutesPhotos = [...(envie.photos || []), ...nouvellesPhotos];
 
@@ -313,9 +315,10 @@ export function initPhotoCouverture() {
 
         showToast("📤 Envoi en cours...");
 
-        try {
+             try {
 
-            const result = await uploadToCloudinary(file);
+            const fichierCompresse = await compresserImageAvantEnvoi(file);
+            const result = await uploadToCloudinary(fichierCompresse);
 
             updateEnviePhotoCouverture(envieId, result.secure_url);
 
@@ -333,3 +336,43 @@ export function initPhotoCouverture() {
     });
 
 }
+
+function compresserImageAvantEnvoi(file, maxLargeur = 1600, qualite = 0.75) {
+
+    return new Promise((resolve, reject) => {
+
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = (e) => { img.src = e.target.result; };
+        reader.onerror = reject;
+
+        img.onload = () => {
+
+            let { width, height } = img;
+
+            if (width > maxLargeur) {
+                height = Math.round(height * (maxLargeur / width));
+                width = maxLargeur;
+            }
+
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+
+            canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+
+            canvas.toBlob(
+                (blob) => resolve(blob),
+                "image/jpeg",
+                qualite
+            );
+
+        };
+
+        reader.readAsDataURL(file);
+
+    });
+
+}
+
