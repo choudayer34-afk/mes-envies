@@ -263,10 +263,13 @@ function dessinerPageContenu(doc, page, dataUrls, couleurP) {
     dessinerFondTexture(doc, couleurP);
 
     const zoneLargeur = MM_LARGEUR - MARGE * 2;
+    const zoneTexteHauteur = 40;
+    const hauteurDisponiblePhotos = MM_HAUTEUR - MARGE * 2 - zoneTexteHauteur;
+
     const n = dataUrls.length;
 
     let zoneTexteX = MARGE;
-    let zoneTexteY = MM_HAUTEUR - 50;
+    let zoneTexteY = MM_HAUTEUR - zoneTexteHauteur + 10;
     let zoneTexteLargeur = zoneLargeur;
 
     if (n === 0) {
@@ -275,75 +278,106 @@ function dessinerPageContenu(doc, page, dataUrls, couleurP) {
 
     } else if (n === 1) {
 
-        const largeurPhoto = zoneLargeur * 0.6;
-        const hauteurPhoto = MM_HAUTEUR - MARGE * 2;
+        const largeurPhoto = zoneLargeur * 0.62;
 
-        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE + 10, MARGE, largeurPhoto, hauteurPhoto);
+        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE + 8, MARGE, largeurPhoto, hauteurDisponiblePhotos);
 
-        zoneTexteX = MARGE + 10 + largeurPhoto + 12;
+        zoneTexteX = MARGE + 8 + largeurPhoto + 12;
         zoneTexteY = MARGE + 20;
         zoneTexteLargeur = MM_LARGEUR - zoneTexteX - MARGE;
 
     } else if (n === 2) {
 
-        // Composition asymétrique : grande photo en haut, petite décalée en bas
-        const grandeLargeur = zoneLargeur * 0.5;
-        const grandeHauteur = MM_HAUTEUR * 0.5;
-        const grandeX = MARGE + 20;
+        const grandeLargeur = zoneLargeur * 0.48;
+        const grandeHauteur = hauteurDisponiblePhotos * 0.72;
+        const grandeX = MARGE + 15;
         const grandeY = MARGE;
 
         dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, grandeX, grandeY, grandeLargeur, grandeHauteur);
 
-        const petiteLargeur = zoneLargeur * 0.28;
-        const petiteHauteur = MM_HAUTEUR * 0.32;
-        const petiteX = grandeX + grandeLargeur + 18;
-        const petiteY = grandeY + grandeHauteur - petiteHauteur + 10;
+        const petiteLargeur = zoneLargeur * 0.3;
+        const petiteHauteur = hauteurDisponiblePhotos * 0.42;
+        const petiteX = grandeX + grandeLargeur - 20;
+        const petiteY = grandeY + grandeHauteur - 8;
 
         dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, petiteX, petiteY, petiteLargeur, petiteHauteur);
 
-        zoneTexteX = grandeX;
-        zoneTexteY = grandeY + grandeHauteur + 12;
-        zoneTexteLargeur = grandeLargeur;
+        zoneTexteX = MARGE;
+        zoneTexteLargeur = zoneLargeur;
 
     } else if (n === 3) {
 
-        const largeurGrande = zoneLargeur * 0.45;
-        const hauteurGrande = MM_HAUTEUR - MARGE * 2;
+        // Collage : une grande à gauche, deux petites empilées à droite avec léger chevauchement
+        const largeurGrande = zoneLargeur * 0.5;
+        const hauteurGrande = hauteurDisponiblePhotos;
 
         dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, MARGE, largeurGrande, hauteurGrande);
 
-        const largeurPetite = zoneLargeur - largeurGrande - 10;
-        const hauteurPetite = (hauteurGrande - 8) / 2;
+        const largeurPetite1 = zoneLargeur * 0.4;
+        const hauteurPetite1 = hauteurDisponiblePhotos * 0.5;
+        const x2 = MARGE + largeurGrande + 6;
 
-        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, MARGE + largeurGrande + 10, MARGE, largeurPetite, hauteurPetite);
-        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, MARGE + largeurGrande + 10, MARGE + hauteurPetite + 8, largeurPetite, hauteurPetite);
+        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, x2, MARGE, largeurPetite1, hauteurPetite1);
+
+        const largeurPetite2 = zoneLargeur * 0.34;
+        const hauteurPetite2 = hauteurDisponiblePhotos * 0.46;
+        const x3 = x2 + 10;
+        const y3 = MARGE + hauteurPetite1 - 4;
+
+        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, x3, y3, largeurPetite2, hauteurPetite2);
 
         zoneTexteX = MARGE;
-        zoneTexteY = MM_HAUTEUR - 34;
-        zoneTexteLargeur = largeurGrande;
+        zoneTexteLargeur = zoneLargeur;
 
     } else {
 
-        const largeurCase = (zoneLargeur - 8) / 2;
-        const hauteurCase = (MM_HAUTEUR - MARGE * 2 - 8) / 2;
+        // 4 photos : collage asymétrique avec tailles variées et léger chevauchement
+        const largeurPrincipale = zoneLargeur * 0.42;
+        const hauteurPrincipale = hauteurDisponiblePhotos * 0.85;
 
-        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, MARGE, largeurCase, hauteurCase);
-        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, MARGE + largeurCase + 8, MARGE, largeurCase, hauteurCase);
-        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, MARGE, MARGE + hauteurCase + 8, largeurCase, hauteurCase);
-        dessinerImageCouvrante(doc, dataUrls[3].dataUrl, dataUrls[3].dims, MARGE + largeurCase + 8, MARGE + hauteurCase + 8, largeurCase, hauteurCase);
+        dessinerImageCouvrante(doc, dataUrls[0].dataUrl, dataUrls[0].dims, MARGE, MARGE, largeurPrincipale, hauteurPrincipale);
+
+        const largeurMoyenne = zoneLargeur * 0.32;
+        const hauteurMoyenne = hauteurDisponiblePhotos * 0.55;
+        const xMoyenne = MARGE + largeurPrincipale + 4;
+
+        dessinerImageCouvrante(doc, dataUrls[1].dataUrl, dataUrls[1].dims, xMoyenne, MARGE, largeurMoyenne, hauteurMoyenne);
+
+        const largeurPetite1 = zoneLargeur * 0.22;
+        const hauteurPetite1 = hauteurDisponiblePhotos * 0.42;
+        const xPetite1 = xMoyenne + largeurMoyenne - 6;
+        const yPetite1 = MARGE + hauteurMoyenne - 6;
+
+        dessinerImageCouvrante(doc, dataUrls[2].dataUrl, dataUrls[2].dims, xPetite1, yPetite1, largeurPetite1, hauteurPetite1);
+
+        const largeurPetite2 = zoneLargeur * 0.24;
+        const hauteurPetite2 = hauteurDisponiblePhotos * 0.38;
+        const xPetite2 = MARGE + largeurPrincipale * 0.3;
+        const yPetite2 = MARGE + hauteurPrincipale - hauteurPetite2 + 6;
+
+        dessinerImageCouvrante(doc, dataUrls[3].dataUrl, dataUrls[3].dims, xPetite2, yPetite2, largeurPetite2, hauteurPetite2);
 
         zoneTexteX = MARGE;
-        zoneTexteY = MM_HAUTEUR - 20;
         zoneTexteLargeur = zoneLargeur;
 
     }
 
-        // Titre de la page
+    // Titre de la page — taille réduite automatiquement si trop long
     const clairPage = estCouleurClaire(couleurP);
     doc.setTextColor(clairPage ? 30 : 255, clairPage ? 30 : 255, clairPage ? 30 : 255);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.text(page.titrePrincipal || page.lieuLabel || "", zoneTexteX, zoneTexteY);
+
+    const titrePage = page.titrePrincipal || page.lieuLabel || "";
+    let tailleTitre = 16;
+
+    doc.setFontSize(tailleTitre);
+
+    while (doc.getTextWidth(titrePage) > zoneTexteLargeur && tailleTitre > 9) {
+        tailleTitre -= 1;
+        doc.setFontSize(tailleTitre);
+    }
+
+    doc.text(titrePage, zoneTexteX, zoneTexteY);
 
     // Récit
     if (page.texte) {
@@ -353,7 +387,7 @@ function dessinerPageContenu(doc, page, dataUrls, couleurP) {
         doc.setGState(new doc.GState({ opacity: 0.85 }));
 
         const texteDecoupe = doc.splitTextToSize(page.texte, zoneTexteLargeur);
-        doc.text(texteDecoupe.slice(0, 6), zoneTexteX, zoneTexteY + 8);
+        doc.text(texteDecoupe.slice(0, 5), zoneTexteX, zoneTexteY + 8);
 
         doc.setGState(new doc.GState({ opacity: 1 }));
 
