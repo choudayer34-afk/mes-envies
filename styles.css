@@ -247,7 +247,8 @@ main{
  #mapPickerModal,
 #etapeFinderModal,
  #morpionModal,
-#carteVoyagesModal
+#carteVoyagesModal,
+ #lectureModal, #anglaisModal
 {
     z-index:2100;
 }
