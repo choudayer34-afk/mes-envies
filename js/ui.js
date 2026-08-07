@@ -84,6 +84,11 @@ function renderHomeSections() {
         const { statut } = computeContainerStatus(e);
         return statut === "planifie" && !!e.date?.start;
     });
+    const termineItems = envies.filter(e => {
+        if (!isContainer(e.categorie)) return false;
+        const { statut } = computeContainerStatus(e);
+        return statut === "termine";
+    });
 
     const enProjetItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
@@ -95,6 +100,7 @@ function renderHomeSections() {
     renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
     renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
     renderCollapsibleSection("projetSection", "projetContainer", "🛠️ En projet", enProjetItems, createEnvieCard);
+    renderCollapsibleSection("termineSection", "termineContainer", "✅ Terminés", termineItems, createEnvieCard);
 
 }
 
