@@ -783,6 +783,31 @@ function renderClassementMemory() {
     `).join("");
 
 }
+function renderMemory() {
+
+    const container = document.getElementById("memoryGrille");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    memoryCartes.forEach((carte, index) => {
+
+        const cellule = document.createElement("button");
+        cellule.type = "button";
+        cellule.className = "memoryCarte" + (carte.trouvee ? " trouvee" : "");
+        cellule.textContent = carte.trouvee || memoryRetournees.includes(index) ? carte.symbole : "❓";
+
+        cellule.addEventListener("click", () => {
+            retournerCarteMemory(index);
+        });
+
+        container.appendChild(cellule);
+
+    });
+
+}
 
 
 function retournerCarteMemory(index) {
