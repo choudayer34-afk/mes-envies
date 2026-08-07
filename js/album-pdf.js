@@ -14,6 +14,16 @@ function hexToRgb(hex) {
 
 }
 
+function estCouleurClaire(hex) {
+
+    const { r, g, b } = hexToRgb(hex);
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    return luminance > 0.6;
+
+}
+
+
 async function chargerImageEnDataUrl(url, pleinePage = false) {
 
     const largeurCible = pleinePage ? 1400 : 900;
@@ -87,13 +97,13 @@ function dessinerImageCouvrante(doc, dataUrl, dims, x, y, w, h) {
 function dessinerFondTexture(doc, couleur) {
 
     const { r, g, b } = hexToRgb(couleur);
+    const clair = estCouleurClaire(couleur);
 
     doc.setFillColor(r, g, b);
     doc.rect(0, 0, MM_LARGEUR, MM_HAUTEUR, "F");
 
-    // Texture discrète : quelques cercles très légers en transparence
-    doc.setGState(new doc.GState({ opacity: 0.06 }));
-    doc.setFillColor(255, 255, 255);
+    doc.setGState(new doc.GState({ opacity: clair ? 0.04 : 0.06 }));
+    doc.setFillColor(clair ? 0 : 255, clair ? 0 : 255, clair ? 0 : 255);
 
     for (let i = 0; i < 5; i++) {
 
@@ -108,6 +118,7 @@ function dessinerFondTexture(doc, couleur) {
     doc.setGState(new doc.GState({ opacity: 1 }));
 
 }
+
 
 export async function genererPdfAlbum({ titre, moisAnnee, couvertureUrl, couleurPrincipale, couleurAccent, pages }, onProgress) {
 
@@ -168,7 +179,8 @@ async function dessinerCouverture(doc, { titre, moisAnnee, couvertureUrl, couleu
     doc.setFillColor(r, g, b);
     doc.rect(0, 0, largeurBande, MM_HAUTEUR, "F");
 
-    doc.setTextColor(255, 255, 255);
+        const texteAccentClair = estCouleurClaire(couleurA);
+    doc.setTextColor(texteAccentClair ? 30 : 255, texteAccentClair ? 30 : 255, texteAccentClair ? 30 : 255);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.text((moisAnnee || "").toUpperCase(), largeurBande / 2, MM_HAUTEUR / 2, { angle: 90, align: "center" });
@@ -236,7 +248,8 @@ async function dessinerCouverture(doc, { titre, moisAnnee, couvertureUrl, couleu
     }
 
     // Titre en haut à droite de la fenêtre
-    doc.setTextColor(255, 255, 255);
+      const clairPrincipal = estCouleurClaire(couleurP);
+    doc.setTextColor(clairPrincipal ? 30 : 255, clairPrincipal ? 30 : 255, clairPrincipal ? 30 : 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(30);
 
@@ -325,8 +338,9 @@ function dessinerPageContenu(doc, page, dataUrls, couleurP) {
 
     }
 
-    // Titre de la page
-    doc.setTextColor(255, 255, 255);
+        // Titre de la page
+    const clairPage = estCouleurClaire(couleurP);
+    doc.setTextColor(clairPage ? 30 : 255, clairPage ? 30 : 255, clairPage ? 30 : 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(16);
     doc.text(page.titrePrincipal || page.lieuLabel || "", zoneTexteX, zoneTexteY);
