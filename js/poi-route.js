@@ -177,7 +177,3 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 
 
 
-
-export function getCategoriesPoi() {
-    return CATEGORIES_POI;
-}
