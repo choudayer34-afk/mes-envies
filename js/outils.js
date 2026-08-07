@@ -37,6 +37,8 @@ export function initOutils() {
         });
 
     });
+    initMorpion();
+    initMemory();
 
     initPileOuFace();
     initRoueDecision();
