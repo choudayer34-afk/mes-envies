@@ -5,8 +5,8 @@ import { searchLocation, useCurrentLocation } from "./location.js";
 import { renderMultiSelectCollapsible } from "./multiselect.js";
 import { renderVoyageursWidget, getVoyageursData, formatVoyageursTexte, formatVoyageursCozycozy } from "./voyageurs.js";
 import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
+import { trouverPoiSurItineraire, getCategoriesPoi, annulerRecherchePoi, rechercheAnnuleeReset } from "./poi-route.js";
 
-import { trouverPoiSurItineraire, getCategoriesPoi, annulerRecherchePoi } from "./poi-route.js";
 let etapesTrouvees = [];
 let miniMap = null;
 let lieuDepart = null;
@@ -920,6 +920,10 @@ function initCartePoi(trajet, pois) {
 
     cartePoiInstance.fitBounds(bounds, { padding: [30, 30] });
 
+}
+
+export function rechercheAnnuleeReset() {
+    rechercheAnnulee = false;
 }
 
 
