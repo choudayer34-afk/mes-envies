@@ -1718,6 +1718,7 @@ document.addEventListener("DOMContentLoaded", () => {
     <button type="button" class="itemTypeChip memoryNiveauButton" data-niveau="36">36 cartes</button>
     <button type="button" class="itemTypeChip memoryNiveauButton" data-niveau="48">48 cartes</button>
 </div>
+<div id="memoryChrono" style="font-size:24px;font-weight:800;color:var(--color-primary);margin-bottom:8px;">⏱️ 0:00.0</div>
 
 <div class="itemTypeToggle" style="margin-bottom:10px;">
     <button type="button" class="itemTypeChip memoryModeButton active" data-mode="libre">⏱️ Chrono libre</button>
@@ -1757,6 +1758,12 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="lectureSuivantButton" class="primaryButton" style="flex:1;">Suivant →</button>
         </div>
     </div>
+    
+    <div style="text-align:left;">
+    <div class="checklistCategorieHeader">🏆 Meilleurs temps (ce niveau)</div>
+    <div id="memoryClassement"></div>
+</div>
+
 </div>
 
 <div id="anglaisModal" class="modal-overlay hidden">
