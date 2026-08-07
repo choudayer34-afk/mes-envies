@@ -476,6 +476,9 @@ function verifierFinMorpion(joueur) {
 }
 
 /* ---------- Memory ---------- */
+let memoryCartes = [];
+let memoryRetournees = [];
+let memoryBloque = false;
 
 const MEMORY_SYMBOLES = [
     "🐶","🐱","🦁","🐸","🦊","🐼","🐵","🦄",
