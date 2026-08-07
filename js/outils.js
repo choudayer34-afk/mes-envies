@@ -335,3 +335,241 @@ function afficherMinuteur() {
         `${minutes}:${secondes.toString().padStart(2, "0")}`;
 
 }
+
+/* ---------- Morpion contre l'ordinateur ---------- */
+
+let morpionGrille = Array(9).fill(null);
+let morpionTermine = false;
+
+function initMorpion() {
+
+    document.getElementById("btnOuvrirMorpion")?.addEventListener("click", () => {
+        resetMorpion();
+    });
+
+    document.querySelectorAll(".morpionCase").forEach((cell, index) => {
+
+        cell.addEventListener("click", () => {
+            jouerCoupMorpion(index);
+        });
+
+    });
+
+    document.getElementById("rejouerMorpionButton")?.addEventListener("click", resetMorpion);
+
+}
+
+function resetMorpion() {
+
+    morpionGrille = Array(9).fill(null);
+    morpionTermine = false;
+
+    document.getElementById("morpionMessage").textContent = "À toi de jouer (❌)";
+
+    document.querySelectorAll(".morpionCase").forEach(cell => {
+        cell.textContent = "";
+        cell.disabled = false;
+    });
+
+}
+
+function jouerCoupMorpion(index) {
+
+    if (morpionTermine || morpionGrille[index])
+        return;
+
+    morpionGrille[index] = "❌";
+    document.querySelectorAll(".morpionCase")[index].textContent = "❌";
+
+    if (verifierFinMorpion("❌"))
+        return;
+
+    if (morpionGrille.every(c => c)) {
+        document.getElementById("morpionMessage").textContent = "Match nul !";
+        morpionTermine = true;
+        return;
+    }
+
+    setTimeout(() => {
+
+        const coupOrdi = choisirCoupOrdinateur();
+
+        if (coupOrdi !== -1) {
+
+            morpionGrille[coupOrdi] = "⭕";
+            document.querySelectorAll(".morpionCase")[coupOrdi].textContent = "⭕";
+
+            if (verifierFinMorpion("⭕"))
+                return;
+
+            if (morpionGrille.every(c => c)) {
+                document.getElementById("morpionMessage").textContent = "Match nul !";
+                morpionTermine = true;
+            }
+
+        }
+
+    }, 400);
+
+}
+
+function choisirCoupOrdinateur() {
+
+    const casesLibres = morpionGrille.map((c, i) => c === null ? i : null).filter(i => i !== null);
+
+    for (const i of casesLibres) {
+        const test = [...morpionGrille];
+        test[i] = "⭕";
+        if (verifierGagnant(test) === "⭕") return i;
+    }
+
+    for (const i of casesLibres) {
+        const test = [...morpionGrille];
+        test[i] = "❌";
+        if (verifierGagnant(test) === "❌") return i;
+    }
+
+    if (casesLibres.includes(4)) return 4;
+
+    return casesLibres.length > 0 ? casesLibres[Math.floor(Math.random() * casesLibres.length)] : -1;
+
+}
+
+function verifierGagnant(grille) {
+
+    const lignes = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+    ];
+
+    for (const [a,b,c] of lignes) {
+        if (grille[a] && grille[a] === grille[b] && grille[a] === grille[c]) {
+            return grille[a];
+        }
+    }
+
+    return null;
+
+}
+
+function verifierFinMorpion(joueur) {
+
+    if (verifierGagnant(morpionGrille) === joueur) {
+
+        document.getElementById("morpionMessage").textContent = joueur === "❌" ? "🎉 Tu as gagné !" : "😅 L'ordinateur gagne !";
+        morpionTermine = true;
+
+        document.querySelectorAll(".morpionCase").forEach(cell => cell.disabled = true);
+
+        return true;
+
+    }
+
+    return false;
+
+}
+
+/* ---------- Memory ---------- */
+
+const MEMORY_SYMBOLES = ["🐶","🐱","🦁","🐸","🦊","🐼","🐵","🦄"];
+let memoryCartes = [];
+let memoryRetournees = [];
+let memoryBloque = false;
+
+function initMemory() {
+
+    document.getElementById("btnOuvrirMemory")?.addEventListener("click", () => {
+        resetMemory();
+    });
+
+    document.getElementById("rejouerMemoryButton")?.addEventListener("click", resetMemory);
+
+}
+
+function resetMemory() {
+
+    const paires = [...MEMORY_SYMBOLES, ...MEMORY_SYMBOLES];
+
+    memoryCartes = paires
+        .map(s => ({ symbole: s, trouvee: false }))
+        .sort(() => Math.random() - 0.5);
+
+    memoryRetournees = [];
+    memoryBloque = false;
+
+    document.getElementById("memoryMessage").textContent = "Trouve toutes les paires !";
+
+    renderMemory();
+
+}
+
+function renderMemory() {
+
+    const container = document.getElementById("memoryGrille");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    memoryCartes.forEach((carte, index) => {
+
+        const cellule = document.createElement("button");
+        cellule.type = "button";
+        cellule.className = "memoryCarte" + (carte.trouvee ? " trouvee" : "");
+        cellule.textContent = carte.trouvee || memoryRetournees.includes(index) ? carte.symbole : "❓";
+
+        cellule.addEventListener("click", () => {
+            retournerCarteMemory(index);
+        });
+
+        container.appendChild(cellule);
+
+    });
+
+}
+
+function retournerCarteMemory(index) {
+
+    if (memoryBloque || memoryRetournees.includes(index) || memoryCartes[index].trouvee)
+        return;
+
+    memoryRetournees.push(index);
+    renderMemory();
+
+    if (memoryRetournees.length === 2) {
+
+        memoryBloque = true;
+
+        const [i1, i2] = memoryRetournees;
+
+        if (memoryCartes[i1].symbole === memoryCartes[i2].symbole) {
+
+            memoryCartes[i1].trouvee = true;
+            memoryCartes[i2].trouvee = true;
+            memoryRetournees = [];
+            memoryBloque = false;
+
+            renderMemory();
+
+            if (memoryCartes.every(c => c.trouvee)) {
+                document.getElementById("memoryMessage").textContent = "🎉 Bravo, toutes les paires trouvées !";
+            }
+
+        } else {
+
+            setTimeout(() => {
+
+                memoryRetournees = [];
+                memoryBloque = false;
+                renderMemory();
+
+            }, 800);
+
+        }
+
+    }
+
+}
+
