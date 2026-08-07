@@ -5,6 +5,7 @@ import { searchLocation, useCurrentLocation } from "./location.js";
 import { renderMultiSelectCollapsible } from "./multiselect.js";
 import { renderVoyageursWidget, getVoyageursData, formatVoyageursTexte, formatVoyageursCozycozy } from "./voyageurs.js";
 import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
+import { trouverPoiSurItineraire, getCategoriesPoi } from "./poi-route.js";
 
 let etapesTrouvees = [];
 let miniMap = null;
@@ -759,3 +760,91 @@ function ouvrirGoogleMapsEtape(etape) {
     }
 
 }
+
+export function initPoiRoute() {
+
+    document.getElementById("chercherPoiRouteButton")?.addEventListener("click", async () => {
+
+        if (!lieuDepart?.latitude || !lieuArrivee?.latitude) {
+            showToast("Choisis un départ et une arrivée avec autocomplétion d'abord");
+            return;
+        }
+
+        const rayonKm = parseFloat(document.getElementById("poiRayonInput")?.value) || 1;
+
+        const categoriesActives = Array.from(document.querySelectorAll(".poiCategorieCheckbox:checked"))
+            .map(cb => cb.value);
+
+        if (categoriesActives.length === 0) {
+            showToast("Coche au moins une catégorie");
+            return;
+        }
+
+        const resultEl = document.getElementById("poiResultat");
+        resultEl.innerHTML = `<div class="emptyState">🔍 Recherche en cours, ça peut prendre 1-2 minutes...</div>`;
+
+        const resultat = await trouverPoiSurItineraire(lieuDepart, lieuArrivee, rayonKm, categoriesActives, (msg) => {
+            resultEl.innerHTML = `<div class="emptyState">🔍 ${msg}</div>`;
+        });
+
+        if (resultat.erreur) {
+            resultEl.innerHTML = `<div class="emptyState">❌ ${resultat.erreur}</div>`;
+            return;
+        }
+
+        renderResultatsPoi(resultat.resultatsParCategorie);
+
+    });
+
+}
+
+function renderResultatsPoi(resultatsParCategorie) {
+
+    const resultEl = document.getElementById("poiResultat");
+    const categories = getCategoriesPoi();
+
+    resultEl.innerHTML = "";
+
+    let totalTrouve = 0;
+
+    Object.entries(resultatsParCategorie).forEach(([catId, pois]) => {
+
+        if (pois.length === 0)
+            return;
+
+        totalTrouve += pois.length;
+
+        const categorie = categories[catId];
+
+        const header = document.createElement("div");
+        header.className = "checklistCategorieHeader";
+        header.textContent = `${categorie.emoji} ${categorie.label} (${pois.length})`;
+        resultEl.appendChild(header);
+
+        pois.forEach(poi => {
+
+            const row = document.createElement("div");
+            row.className = "templateRow";
+
+            row.innerHTML = `
+                <div class="templateRowNom">
+                    ${poi.nom}
+                    <small>${poi.distanceKm.toFixed(1)} km de la route</small>
+                </div>
+                <div class="templateRowActions">
+                    <a href="https://www.google.com/maps/search/?api=1&query=${poi.lat},${poi.lon}" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">🗺️</a>
+                </div>
+            `;
+
+            resultEl.appendChild(row);
+
+        });
+
+    });
+
+    if (totalTrouve === 0) {
+        resultEl.innerHTML = `<div class="emptyState">Rien trouvé dans ce rayon sur cet itinéraire.</div>`;
+    }
+
+}
+
