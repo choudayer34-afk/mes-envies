@@ -5,6 +5,7 @@ const CATEGORIES_POI = {
     nature: { emoji: "🌳", label: "Nature", overpassTags: ['leisure=park', 'natural=water', 'waterway=waterfall'] },
     services: { emoji: "⛽", label: "Services", overpassTags: ['amenity=fuel', 'highway=rest_area'] }
 };
+
 async function chercherVillagesAutourPoint(point, rayonKm) {
 
     const deltaLat = rayonKm / 111;
@@ -22,7 +23,14 @@ async function chercherVillagesAutourPoint(point, rayonKm) {
         const response = await fetch(url, { headers: { "Accept": "application/json" } });
         const data = await response.json();
 
-        return (data || [])
+        console.log("Nominatim réponse: " + JSON.stringify(data).slice(0, 300));
+
+        if (!Array.isArray(data)) {
+            console.error("Nominatim n'a pas retourné un tableau");
+            return [];
+        }
+
+        return data
             .filter(el => ["village", "town", "hamlet"].includes(el.addresstype) || ["village", "town", "hamlet"].includes(el.type))
             .map(el => ({
                 nom: el.display_name.split(",")[0],
