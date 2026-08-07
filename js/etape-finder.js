@@ -7,6 +7,7 @@ import { renderVoyageursWidget, getVoyageursData, formatVoyageursTexte, formatVo
 import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
 import { trouverPoiSurItineraire, getCategoriesPoi, annulerRecherchePoi, rechercheAnnuleeReset } from "./poi-route.js";
 
+
 let etapesTrouvees = [];
 let miniMap = null;
 let lieuDepart = null;
@@ -916,10 +917,7 @@ function initCartePoi(trajet, pois) {
 
     cartePoiInstance.fitBounds(bounds, { padding: [30, 30] });
 
-}
 
-export function rechercheAnnuleeReset() {
-    rechercheAnnulee = false;
 }
 
 
