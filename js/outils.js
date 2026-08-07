@@ -658,24 +658,22 @@ function afficherChronoLimite() {
 
 
 
-    renderMemory();
-    renderClassementMemory();
+function demarrerChronoMemory() {
 
-    memoryChronoDemarre = false;
+    memoryTempsDebut = Date.now();
+    memoryTempsEcoule = 0;
 
-    if (memoryModeActuel === "limite") {
+    afficherChronoMemory();
 
-        memoryTempsLimiteSec = parseInt(document.getElementById("memoryTempsLimiteInput")?.value, 10) || 60;
-        afficherChronoLimite();
+    memoryChronoInterval = setInterval(() => {
 
-    } else {
-
-        memoryTempsEcoule = 0;
+        memoryTempsEcoule = Date.now() - memoryTempsDebut;
         afficherChronoMemory();
 
-    }
+    }, 100);
 
 }
+
 
 
 function demarrerChronoMemory() {
