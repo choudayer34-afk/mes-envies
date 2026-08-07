@@ -1556,6 +1556,8 @@ document.addEventListener("DOMContentLoaded", () => {
         <button class="secondaryButton outilOuvrirButton" data-modal="minuteurModal" style="width:100%;">⏱️ Minuteur</button>
     <button class="secondaryButton outilOuvrirButton" data-modal="morpionModal" id="btnOuvrirMorpion" style="width:100%;margin-bottom:10px;">⭕ Morpion (vs ordinateur)</button>
 <button class="secondaryButton outilOuvrirButton" data-modal="memoryModal" id="btnOuvrirMemory" style="width:100%;margin-bottom:10px;">🧠 Memory</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="lectureModal" id="btnOuvrirLecture" style="width:100%;margin-bottom:10px;">🔤 Apprendre à lire</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="anglaisModal" id="btnOuvrirAnglais" style="width:100%;margin-bottom:10px;">🇬🇧 Apprendre l'anglais</button>
 
     
     </div>
@@ -1672,6 +1674,33 @@ document.addEventListener("DOMContentLoaded", () => {
         <p id="memoryMessage" style="font-size:14px;color:var(--color-text-light);margin:10px 0;">Trouve toutes les paires !</p>
         <div id="memoryGrille" style="display:grid;grid-template-columns:repeat(4, 1fr);gap:8px;margin:16px 0;"></div>
         <button id="rejouerMemoryButton" class="primaryButton" style="width:100%;">🔄 Nouvelle partie</button>
+    </div>
+</div>
+<div id="lectureModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🔤 Apprendre à lire</h2>
+        <p id="lectureCompteur" style="font-size:12px;color:var(--color-text-light);margin-bottom:16px;"></p>
+        <div id="lectureEmoji" style="font-size:60px;margin-bottom:10px;"></div>
+        <div id="lectureSyllabe" style="font-size:48px;font-weight:800;color:var(--color-primary);margin-bottom:10px;"></div>
+        <div id="lectureMot" style="font-size:24px;font-weight:700;margin-bottom:20px;"></div>
+        <button id="lectureEcouterButton" class="secondaryButton" style="width:100%;margin-bottom:16px;">🔊 Écouter</button>
+        <div style="display:flex;gap:10px;">
+            <button id="lecturePrecedentButton" class="secondaryButton" style="flex:1;">← Précédent</button>
+            <button id="lectureSuivantButton" class="primaryButton" style="flex:1;">Suivant →</button>
+        </div>
+    </div>
+</div>
+
+<div id="anglaisModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🇬🇧 Apprendre l'anglais</h2>
+        <p id="anglaisScore" style="font-size:13px;color:var(--color-text-light);margin-bottom:16px;"></p>
+        <div id="anglaisEmoji" style="font-size:60px;margin-bottom:10px;"></div>
+        <div id="anglaisMotFr" style="font-size:28px;font-weight:800;margin-bottom:20px;"></div>
+        <div id="anglaisChoixContainer"></div>
+        <p id="anglaisMessage" style="font-size:15px;font-weight:600;margin-top:10px;min-height:20px;"></p>
     </div>
 </div>
 
