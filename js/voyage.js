@@ -56,6 +56,25 @@ function renderVoyageContenu(envie, container) {
 
     container.innerHTML = "";
 
+    const { statut: statutActuel } = computeContainerStatus(envie);
+
+    if (statutActuel === "termine") {
+
+        const retourCarnetButton = document.createElement("button");
+        retourCarnetButton.className = "secondaryButton";
+        retourCarnetButton.textContent = "📖 Revenir au carnet";
+        retourCarnetButton.style.width = "100%";
+        retourCarnetButton.style.marginBottom = "16px";
+
+        retourCarnetButton.addEventListener("click", () => {
+            voyagesForcesEnEdition.delete(envie.id);
+            renderVoyageSection(envie);
+        });
+
+        container.appendChild(retourCarnetButton);
+
+    }
+
     const couvertureRow = document.createElement("div");
     couvertureRow.className = "voyageCouvertureRow";
 
@@ -920,3 +939,9 @@ export function initVoyage() {
 
 
 }
+
+export function activerModeEditionVoyage(envie) {
+    voyagesForcesEnEdition.add(envie.id);
+    renderVoyageSection(envie);
+}
+
