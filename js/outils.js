@@ -952,14 +952,19 @@ let anglaisTotal = 0;
 
 function initAnglais() {
 
-    document.getElementById("btnOuvrirAnglais")?.addEventListener("click", () => {
+        document.getElementById("btnOuvrirAnglais")?.addEventListener("click", () => {
+
+        console.log("Clic sur btnOuvrirAnglais détecté");
 
         anglaisScore = 0;
         anglaisTotal = 0;
 
         nouvelleQuestionAnglais();
 
+        console.log("nouvelleQuestionAnglais appelée");
+
     });
+
 
 }
 
