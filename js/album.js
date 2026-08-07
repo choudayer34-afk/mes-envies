@@ -74,6 +74,16 @@ export function initAlbum() {
     document.getElementById("albumCouvertureSelect")?.addEventListener("change", (e) => {
         albumCouverturePhotoUrl = e.target.value;
     });
+    
+        document.querySelectorAll(".paletteButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+            document.getElementById("albumCouleurInput").value = btn.dataset.p;
+            document.getElementById("albumCouleurAccentInput").value = btn.dataset.a;
+        });
+
+    });
+
 
 }
 
