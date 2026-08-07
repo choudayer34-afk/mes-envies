@@ -5,6 +5,38 @@ const CATEGORIES_POI = {
     nature: { emoji: "🌳", label: "Nature", overpassTags: ['leisure=park', 'natural=water', 'waterway=waterfall'] },
     services: { emoji: "⛽", label: "Services", overpassTags: ['amenity=fuel', 'highway=rest_area'] }
 };
+async function chercherVillagesAutourPoint(point, rayonKm) {
+
+    const deltaLat = rayonKm / 111;
+    const deltaLon = rayonKm / (111 * Math.cos(point.lat * Math.PI / 180));
+
+    const viewbox = [
+        point.lon - deltaLon, point.lat + deltaLat,
+        point.lon + deltaLon, point.lat - deltaLat
+    ].join(",");
+
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&viewbox=${viewbox}&bounded=1&class=place&limit=10`;
+
+    try {
+
+        const response = await fetch(url, { headers: { "Accept": "application/json" } });
+        const data = await response.json();
+
+        return (data || [])
+            .filter(el => ["village", "town", "hamlet"].includes(el.addresstype) || ["village", "town", "hamlet"].includes(el.type))
+            .map(el => ({
+                nom: el.display_name.split(",")[0],
+                lat: parseFloat(el.lat),
+                lon: parseFloat(el.lon),
+                type: el.type
+            }));
+
+    } catch (err) {
+        console.error("Erreur Nominatim villages: " + err.message);
+        return [];
+    }
+
+}
 
 async function calculerItineraireOSRM(depart, arrivee) {
 
@@ -105,10 +137,6 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     }
 
-    return [];
-
-}
-
 export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress) {
 
     onProgress?.("Calcul de l'itinéraire...");
@@ -119,55 +147,45 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
         return { erreur: "Impossible de calculer l'itinéraire." };
     }
 
-    const echantillons = echantillonnerTrajet(trajet, 8);
+    const echantillons = echantillonnerTrajet(trajet, 10);
 
-    const resultatsParCategorie = {};
+    const resultatsParCategorie = { village: [] };
     const dejaVus = new Set();
 
-    for (const catId of categoriesActives) {
+    onProgress?.("Recherche des villages le long du trajet...");
 
-        const categorie = CATEGORIES_POI[catId];
+    for (const point of echantillons) {
 
-        if (!categorie)
-            continue;
+        const villages = await chercherVillagesAutourPoint(point, rayonKm);
 
-        resultatsParCategorie[catId] = [];
+        villages.forEach(v => {
 
-        onProgress?.(`Recherche : ${categorie.label}...`);
+            const cle = `${v.nom}_${v.lat.toFixed(3)}_${v.lon.toFixed(3)}`;
 
-        for (const point of echantillons) {
+            if (dejaVus.has(cle))
+                return;
 
-            const pois = await chercherPoiAutourPoint(point, rayonKm * 1000, categorie.overpassTags);
+            dejaVus.add(cle);
 
-            pois.forEach(poi => {
+            const distanceMin = Math.min(...echantillons.map(e =>
+                calculerDistanceKm(e.lat, e.lon, v.lat, v.lon)
+            ));
 
-                const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
+            resultatsParCategorie.village.push({ ...v, distanceKm: distanceMin });
 
-                if (dejaVus.has(cle))
-                    return;
+        });
 
-                dejaVus.add(cle);
-
-                const distanceMin = Math.min(...echantillons.map(e =>
-                    calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
-                ));
-
-                resultatsParCategorie[catId].push({ ...poi, distanceKm: distanceMin });
-
-            });
-
-            await new Promise(resolve => setTimeout(resolve, 300));
-
-        }
-
-        resultatsParCategorie[catId].sort((a, b) => a.distanceKm - b.distanceKm);
-        resultatsParCategorie[catId] = resultatsParCategorie[catId].slice(0, 15);
+        await new Promise(resolve => setTimeout(resolve, 1100));
 
     }
+
+    resultatsParCategorie.village.sort((a, b) => a.distanceKm - b.distanceKm);
+    resultatsParCategorie.village = resultatsParCategorie.village.slice(0, 20);
 
     return { trajet, resultatsParCategorie };
 
 }
+
 
 export function getCategoriesPoi() {
     return CATEGORIES_POI;
