@@ -6,6 +6,7 @@ import { activerModeEditionVoyage } from "./voyage.js";
 import { updateEnvieVoyage, deleteEnvie } from "./storage.js";
 import { showToast } from "./toast.js";
 import { isContainer } from "./envie.js";
+import { ouvrirPreparationAlbum } from "./album.js";
 
 export function renderCarnetVoyage(envie, container) {
 
@@ -22,6 +23,19 @@ export function renderCarnetVoyage(envie, container) {
     });
 
     container.appendChild(editButton);
+
+
+    const albumButton = document.createElement("button");
+    albumButton.className = "secondaryButton";
+    albumButton.textContent = "📸 Préparer l'album";
+    albumButton.style.width = "100%";
+    albumButton.style.marginBottom = "16px";
+
+    albumButton.addEventListener("click", () => {
+        ouvrirPreparationAlbum(envie);
+    });
+
+    container.appendChild(albumButton);
 
     const tousLesEnfants = getEnvies().filter(e => e.voyageId === envie.id);
     const nonRealisees = tousLesEnfants.filter(e => !e.realise && !isLogementCategory(e.categorie));
