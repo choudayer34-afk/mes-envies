@@ -7,6 +7,7 @@ import { searchLocation } from "./location.js";
 import { supprimerVoyageEtContenu } from "./storage.js";
 import { closeFiche } from "./envie.js";
 
+import { openModalVoyageContext } from "./modal.js";
 
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp, calculerDistancesEtapes } from "./itineraire.js";
 
@@ -222,6 +223,17 @@ function renderVoyageContenu(envie, container) {
     });
 
     container.appendChild(addButton);
+
+    const creerNouvelleButton = document.createElement("button");
+    creerNouvelleButton.className = "primaryButton";
+    creerNouvelleButton.textContent = "💡 Créer une nouvelle idée ici";
+    creerNouvelleButton.style.marginTop = "10px";
+
+    creerNouvelleButton.addEventListener("click", () => {
+        openModalVoyageContext(envie.id);
+    });
+
+    container.appendChild(creerNouvelleButton);
 
     const supprimerVoyageButton = document.createElement("button");
     supprimerVoyageButton.className = "secondaryButton";
