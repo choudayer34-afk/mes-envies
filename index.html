@@ -483,6 +483,24 @@ document.addEventListener("DOMContentLoaded", () => {
     <label class="fieldTitle">Point d'arrivée</label>
     <input id="etapeArrivee" type="text" placeholder="Ex : Montpellier" autocomplete="off" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:6px;box-sizing:border-box;">
     <div id="etapeArriveeSuggestions" class="lieuSuggestions" style="margin-bottom:10px;"></div>
+<div class="checklistCategorieHeader">🗺️ Points d'intérêt sur la route (facultatif)</div>
+
+<label class="fieldTitle">Rayon autour de la route</label>
+<input id="poiRayonInput" type="number" value="1" step="0.5" min="0.5" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
+
+<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="poiCategorieCheckbox" value="village" checked> 🏘️ Villages & bourgs</label>
+    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="poiCategorieCheckbox" value="tourisme" checked> 🏛️ Tourisme</label>
+    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="poiCategorieCheckbox" value="nature" checked> 🌳 Nature</label>
+    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="poiCategorieCheckbox" value="restauration"> 🍽️ Restauration</label>
+    <label style="display:flex;align-items:center;gap:8px;"><input type="checkbox" class="poiCategorieCheckbox" value="services"> ⛽ Services</label>
+</div>
+
+<button id="chercherPoiRouteButton" class="secondaryButton" style="width:100%;margin-bottom:16px;">
+    🔍 Chercher sur cet itinéraire
+</button>
+
+<div id="poiResultat" style="margin-bottom:16px;"></div>
 
    <label class="fieldTitle">Dates du stop</label>
 <div class="dateButtonRow" style="margin-bottom:10px;">
