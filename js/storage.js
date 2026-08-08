@@ -1346,3 +1346,113 @@ export function grouperEnviesParNumeroJour(idsEtNumeros) {
 
 }
 
+const DEFAULT_ENVIRONNEMENTS = [
+    { label: "Montagne", emoji: "🏔️" }, { label: "Mer / océan", emoji: "🌊" },
+    { label: "Lac", emoji: "🏞️" }, { label: "Forêt", emoji: "🌲" },
+    { label: "Campagne", emoji: "🌿" }, { label: "Villages", emoji: "🏘️" },
+    { label: "Ville", emoji: "🏙️" }, { label: "Patrimoine", emoji: "🏰" },
+    { label: "Île", emoji: "🏝️" }, { label: "Paysages spectaculaires", emoji: "🌋" }
+];
+
+const DEFAULT_AMBIANCES = [
+    { label: "Calme", emoji: "😌" }, { label: "Nature", emoji: "🌿" },
+    { label: "Découverte", emoji: "🧭" }, { label: "Familiale", emoji: "👨‍👩‍👧‍👦" },
+    { label: "Romantique", emoji: "💑" }, { label: "Animée", emoji: "🎉" },
+    { label: "Insolite", emoji: "✨" }, { label: "Photogénique", emoji: "📸" },
+    { label: "Repos", emoji: "🧘" }
+];
+
+const DEFAULT_ACTIVITES_VOYAGE = [
+    { label: "Randonnée", emoji: "🚶" }, { label: "Cascade", emoji: "💦" },
+    { label: "Gorges", emoji: "🏞️" }, { label: "Point de vue", emoji: "🌅" },
+    { label: "Baignade", emoji: "🏊" }, { label: "Canoë", emoji: "🛶" },
+    { label: "Vélo", emoji: "🚲" }, { label: "Villages", emoji: "🏘️" },
+    { label: "Châteaux", emoji: "🏰" }, { label: "Musées", emoji: "🖼️" },
+    { label: "Grottes", emoji: "🕳️" }, { label: "Sites historiques", emoji: "🏺" },
+    { label: "Marchés", emoji: "🛍️" }, { label: "Animaux", emoji: "🐐" },
+    { label: "Parc de loisirs", emoji: "🎢" }, { label: "Activités enfants", emoji: "🧒" },
+    { label: "Spa / bien-être", emoji: "🧘" }, { label: "Gastronomie", emoji: "🍽️" },
+    { label: "Vignobles", emoji: "🍷" }, { label: "Plage", emoji: "🏖️" }
+];
+
+const DEFAULT_CONTRAINTES_VOYAGE = [
+    { label: "Forte chaleur", emoji: "🥵" }, { label: "Foule", emoji: "👥" },
+    { label: "Longs trajets", emoji: "🚗" }, { label: "Randonnées difficiles", emoji: "🥾" },
+    { label: "Fort dénivelé", emoji: "📈" }, { label: "Grandes villes", emoji: "🏙️" },
+    { label: "Stations balnéaires", emoji: "🏖️" }, { label: "Lieux très touristiques", emoji: "🎢" },
+    { label: "Prix élevés", emoji: "💰" }, { label: "Moustiques", emoji: "🦟" },
+    { label: "Bruit", emoji: "🔊" }, { label: "Mauvais temps", emoji: "🌧️" }
+];
+
+const DEFAULT_HEBERGEMENT_TYPES = [
+    { label: "Gîte / maison", emoji: "🏡" }, { label: "Hôtel", emoji: "🏨" },
+    { label: "Camping", emoji: "🏕️" }, { label: "Hébergement insolite", emoji: "🌳" },
+    { label: "Location", emoji: "🏠" }
+];
+
+const DEFAULT_HEBERGEMENT_EQUIPEMENTS = [
+    { label: "Piscine", emoji: "🏊" }, { label: "Climatisation", emoji: "❄️" },
+    { label: "Jardin", emoji: "🌳" }, { label: "Cuisine", emoji: "🍳" },
+    { label: "Chambres séparées", emoji: "🛏️" }, { label: "Parking", emoji: "🚗" },
+    { label: "Équipement bébé", emoji: "👶" }, { label: "Animaux acceptés", emoji: "🐕" }
+];
+
+const DEFAULT_FAMILLE_IMPORTANT = [
+    { label: "Poussette", emoji: "🚼" }, { label: "Équipements bébé", emoji: "🍼" },
+    { label: "Jeux pour enfants", emoji: "🛝" }, { label: "Baignade facile", emoji: "🏊" },
+    { label: "Restaurants adaptés enfants", emoji: "🍽️" }, { label: "Peu de trajets", emoji: "🚗" },
+    { label: "Espaces ombragés", emoji: "🌳" }
+];
+
+function creerCollectionSimple(nomCollection, defaultData) {
+
+    let cache = [];
+
+    return {
+        get: () => [...cache],
+        init: (onChange) => {
+
+            const foyerId = getFoyerId();
+
+            onSnapshot(collection(db, "foyers", foyerId, nomCollection), async (snap) => {
+
+                if (snap.empty && cache.length === 0) {
+                    for (const item of defaultData) {
+                        await setDoc(doc(collection(db, "foyers", foyerId, nomCollection)), item);
+                    }
+                    return;
+                }
+
+                cache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                onChange();
+
+            });
+
+        }
+    };
+
+}
+
+const environnementsStore = creerCollectionSimple("environnementsVoyage", DEFAULT_ENVIRONNEMENTS);
+const ambiancesStore = creerCollectionSimple("ambiancesVoyage", DEFAULT_AMBIANCES);
+const activitesVoyageStore = creerCollectionSimple("activitesVoyageAssistant", DEFAULT_ACTIVITES_VOYAGE);
+const contraintesVoyageStore = creerCollectionSimple("contraintesVoyage", DEFAULT_CONTRAINTES_VOYAGE);
+const hebergementTypesStore = creerCollectionSimple("hebergementTypes", DEFAULT_HEBERGEMENT_TYPES);
+const hebergementEquipStore = creerCollectionSimple("hebergementEquipements", DEFAULT_HEBERGEMENT_EQUIPEMENTS);
+const familleImportantStore = creerCollectionSimple("familleImportant", DEFAULT_FAMILLE_IMPORTANT);
+
+export const getEnvironnements = environnementsStore.get;
+export const initEnvironnementsSync = environnementsStore.init;
+export const getAmbiances = ambiancesStore.get;
+export const initAmbiancesSync = ambiancesStore.init;
+export const getActivitesVoyageAssistant = activitesVoyageStore.get;
+export const initActivitesVoyageAssistantSync = activitesVoyageStore.init;
+export const getContraintesVoyage = contraintesVoyageStore.get;
+export const initContraintesVoyageSync = contraintesVoyageStore.init;
+export const getHebergementTypes = hebergementTypesStore.get;
+export const initHebergementTypesSync = hebergementTypesStore.init;
+export const getHebergementEquipements = hebergementEquipStore.get;
+export const initHebergementEquipementsSync = hebergementEquipStore.init;
+export const getFamilleImportant = familleImportantStore.get;
+export const initFamilleImportantSync = familleImportantStore.init;
+
