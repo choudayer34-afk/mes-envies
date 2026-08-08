@@ -90,7 +90,7 @@ function init() {
     initAlbum();
     initPoiRoute();
     initTableauSaisie();
-    initIdeesMenu();
+    
 
         initSurvie();
     initSurvieImport();
