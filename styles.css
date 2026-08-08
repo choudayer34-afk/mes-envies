@@ -1858,3 +1858,17 @@ button {
     height:20px;
 }
 
+.memoryDemonActif .modal{
+    border:3px solid #7c2d12;
+    box-shadow:0 0 30px rgba(220,38,38,.4);
+}
+
+.memoryDemonActif #memoryChrono{
+    color:#dc2626;
+}
+
+.memoryDemonActif #verrouillageButton,
+.memoryDemonActif .verrouillageButton{
+    filter:drop-shadow(0 0 4px #dc2626);
+}
+
