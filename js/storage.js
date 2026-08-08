@@ -949,7 +949,7 @@ Durée : {{duree}}
 Personnes : {{personnes}}
 Ce que je recherche : {{activites}}
 
-Génère une liste d'idées concrètes au format JSON strict suivant, sans aucun texte avant ou après :
+Génère une liste de 30 a 50 idées concrètes au format JSON strict suivant, sans aucun texte avant ou après :
 
 {
   "idees": [
