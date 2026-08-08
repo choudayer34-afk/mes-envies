@@ -1637,6 +1637,9 @@ document.addEventListener("DOMContentLoaded", () => {
 <button class="secondaryButton outilOuvrirButton" data-modal="memoryModal" id="btnOuvrirMemory" style="width:100%;margin-bottom:10px;">🧠 Memory</button>
 <button class="secondaryButton outilOuvrirButton" data-modal="lectureModal" id="btnOuvrirLecture" style="width:100%;margin-bottom:10px;">🔤 Apprendre à lire</button>
 <button class="secondaryButton outilOuvrirButton" data-modal="anglaisModal" id="btnOuvrirAnglais" style="width:100%;margin-bottom:10px;">🇬🇧 Apprendre l'anglais</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="simonModal" id="btnOuvrirSimon" style="width:100%;margin-bottom:10px;">🌈 Simon</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="cibleModal" id="btnOuvrirCible" style="width:100%;margin-bottom:10px;">🎯 Tir à la cible</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="suiteModal" id="btnOuvrirSuite" style="width:100%;margin-bottom:10px;">🧠 Suite logique</button>
 
     
     </div>
@@ -1782,6 +1785,46 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 </div>
 
+<div id="simonModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🌈 Simon</h2>
+        <p id="simonNiveau" style="font-size:14px;font-weight:700;margin-bottom:6px;">Niveau 0</p>
+        <p id="simonMessage" style="font-size:14px;color:var(--color-text-light);margin-bottom:16px;">Tape sur "Nouvelle partie"</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:260px;margin:0 auto 20px;">
+            <button class="simonZone" data-couleur="rouge" style="aspect-ratio:1;border-radius:16px;border:none;background:#ef4444;"></button>
+            <button class="simonZone" data-couleur="bleu" style="aspect-ratio:1;border-radius:16px;border:none;background:#3b82f6;"></button>
+            <button class="simonZone" data-couleur="vert" style="aspect-ratio:1;border-radius:16px;border:none;background:#22c55e;"></button>
+            <button class="simonZone" data-couleur="jaune" style="aspect-ratio:1;border-radius:16px;border:none;background:#eab308;"></button>
+        </div>
+        <button id="rejouerSimonButton" class="primaryButton" style="width:100%;">🔄 Nouvelle partie</button>
+    </div>
+</div>
+
+<div id="cibleModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🎯 Tir à la cible</h2>
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+            <span id="cibleScore" style="font-weight:700;">Score : 0</span>
+            <span id="cibleTemps" style="font-weight:700;">⏱️ 30s</span>
+        </div>
+        <p id="cibleMessage" style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;"></p>
+        <div id="cibleZone" style="position:relative;height:320px;background:#F5F8F9;border-radius:16px;overflow:hidden;margin-bottom:16px;"></div>
+        <button id="rejouerCibleButton" class="primaryButton" style="width:100%;">🔄 Nouvelle partie</button>
+    </div>
+</div>
+
+<div id="suiteModal" class="modal-overlay hidden">
+    <div class="modal" style="text-align:center;">
+        <button class="backButton outilFermerButton" style="align-self:flex-start;">← Retour</button>
+        <h2>🧠 Suite logique</h2>
+        <p id="suiteScore" style="font-size:13px;color:var(--color-text-light);margin-bottom:16px;"></p>
+        <div id="suiteAffichage" style="font-size:26px;font-weight:800;margin-bottom:20px;"></div>
+        <div id="suiteChoixContainer"></div>
+        <div id="suiteExplication" class="hidden" style="font-size:13px;margin-top:12px;padding:10px;border-radius:12px;background:#F5F8F9;text-align:left;"></div>
+    </div>
+</div>
 
 <div id="lectureModal" class="modal-overlay hidden">
     <div class="modal" style="text-align:center;">
