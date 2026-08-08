@@ -36,6 +36,11 @@ import { initCarteVoyages } from "./js/carte-voyages.js";
 import { initAlbum } from "./js/album.js";
 import { initPoiRoute } from "./js/etape-finder.js";
 import { initTableauSaisie } from "./js/tableau-saisie.js";
+import {
+    initEnvironnementsSync, initAmbiancesSync, initActivitesVoyageAssistantSync,
+    initContraintesVoyageSync, initHebergementTypesSync, initHebergementEquipementsSync,
+    initFamilleImportantSync
+} from "./js/storage.js";
 
 import { initIdeesMenu } from "./js/ideesmenu.js";
 
@@ -94,6 +99,13 @@ function init() {
     console.error ("1");
         initIdeesMenu();
 
+    initEnvironnementsSync(() => {});
+    initAmbiancesSync(() => {});
+    initActivitesVoyageAssistantSync(() => {});
+    initContraintesVoyageSync(() => {});
+    initHebergementTypesSync(() => {});
+    initHebergementEquipementsSync(() => {});
+    initFamilleImportantSync(() => {});
 
         initSurvie();
     initSurvieImport();
