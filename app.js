@@ -36,7 +36,7 @@ import { initCarteVoyages } from "./js/carte-voyages.js";
 import { initAlbum } from "./js/album.js";
 import { initPoiRoute } from "./js/etape-finder.js";
 import { initTableauSaisie } from "./js/tableau-saisie.js";
-import { initIdeesMenu } from "./js/ideesmenu.js";
+
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
