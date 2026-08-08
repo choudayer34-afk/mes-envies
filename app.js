@@ -36,6 +36,7 @@ import { initCarteVoyages } from "./js/carte-voyages.js";
 import { initAlbum } from "./js/album.js";
 import { initPoiRoute } from "./js/etape-finder.js";
 import { initTableauSaisie } from "./js/tableau-saisie.js";
+import { initIdeesMenu } from "./js/ideesmenu.js";
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -62,7 +63,7 @@ import { initLocation } from "./js/location.js";
 import { closeFiche, initAccordions } from "./js/envie.js";
 import { initAdmin } from "./js/admin.js";
 import { initFicheDelete } from "./js/envie.js";
-
+    
 const APP = {
     name: "EnVie",
     version: "0.3.0",
@@ -89,6 +90,7 @@ function init() {
     initAlbum();
     initPoiRoute();
     initTableauSaisie();
+    initIdeesMenu();
 
         initSurvie();
     initSurvieImport();
