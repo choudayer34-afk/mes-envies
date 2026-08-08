@@ -360,7 +360,7 @@ export function ouvrirTableauSaisie(voyageId) {
 
 }
 
-function renderSourcesRecherche(voyageId) {
+async function renderSourcesRecherche(voyageId) {
 
     const container = document.getElementById("tableauSourcesRecherche");
 
@@ -368,24 +368,36 @@ function renderSourcesRecherche(voyageId) {
         return;
 
     const voyage = getEnvies().find(e => e.id === voyageId);
-    const lieuNom = voyage?.lieu?.nom || "";
 
-    if (!lieuNom) {
+    if (!voyage?.lieu?.latitude) {
 
-        container.innerHTML = `<p style="font-size:12px;color:var(--color-text-light);">Renseigne d'abord un lieu de base pour ce voyage afin de générer les liens de recherche.</p>`;
+        container.innerHTML = `<p style="font-size:12px;color:var(--color-text-light);">Renseigne d'abord un lieu de base (avec coordonnées) pour ce voyage afin de générer les liens de recherche.</p>`;
         return;
 
     }
 
-    const rechercheBase = encodeURIComponent(lieuNom);
+    container.innerHTML = `<p style="font-size:12px;color:var(--color-text-light);">Recherche du nom de ville...</p>`;
+
+    const { getVilleDepuisCoordonnees } = await import("./location.js");
+
+    const ville = await getVilleDepuisCoordonnees(voyage.lieu.latitude, voyage.lieu.longitude);
+
+    if (!ville) {
+        container.innerHTML = `<p style="font-size:12px;color:var(--color-text-light);">Impossible de déterminer une ville pour ce lieu.</p>`;
+        return;
+    }
+
+    const rechercheVille = encodeURIComponent(ville);
+    const lat = voyage.lieu.latitude;
+    const lon = voyage.lieu.longitude;
 
     container.innerHTML = `
-        <a href="https://www.google.com/maps/search/choses+à+faire+tourisme/@,${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🗺️ Carte touristique</a>
-        <a href="https://www.tripadvisor.fr/Search?q=${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">⭐ TripAdvisor</a>
-        <a href="https://www.google.com/search?q=site:openagenda.com+${rechercheBase}+événements" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">📅 OpenAgenda (événements)</a>
-        <a href="https://www.google.com/search?q=office+de+tourisme+${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🏛️ Office de tourisme</a>
-        <a href="https://www.visorando.com/rechercher.php?q=${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🥾 Visorando</a>
-        <a href="https://www.google.com/search?q=agenda+culturel+événements+autour+de+${rechercheBase}+40km" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🎭 Agenda culturel régional</a>
+        <a href="https://www.google.com/maps/search/choses+à+faire+tourisme/@${lat},${lon},13z" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🗺️ Carte touristique (${ville})</a>
+        <a href="https://www.tripadvisor.fr/Search?q=${rechercheVille}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">⭐ TripAdvisor</a>
+        <a href="https://www.google.com/search?q=événements+agenda+culturel+${rechercheVille}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">📅 Événements (${ville})</a>
+        <a href="https://www.google.com/search?q=office+de+tourisme+${rechercheVille}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🏛️ Office de tourisme</a>
+        <a href="https://www.visorando.com/rechercher.php?q=${rechercheVille}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🥾 Visorando</a>
+        <a href="https://www.google.com/search?q=agenda+culturel+département+autour+de+${rechercheVille}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🎭 Agenda régional</a>
     `;
 
 }
