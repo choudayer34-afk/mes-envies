@@ -111,7 +111,7 @@ console.error ("2");
     
     initPromptRegionAdmin();
     initPromptRegionSync(() => {});
-    document.getElementById("btnCreerVoyage").addEventListener("click", openModalVoyage);
+    document.getElementById("btnCreerVoyage")?.addEventListener("click", openModalVoyage);
     initVoyageImport();
 console.error ("4");
     initAdmin();
