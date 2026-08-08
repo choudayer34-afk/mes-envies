@@ -102,6 +102,7 @@ function init() {
     initPromptEtapeSync(() => {});
 console.error ("2");
     initCatalogue();
+       console.error ("2b");
     initRegionFinder();
     console.error ("3");
         initActiviteTypesSync(() => {});
