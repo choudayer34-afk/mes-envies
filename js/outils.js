@@ -48,6 +48,9 @@ export function initOutils() {
     });
     initMorpion();
     initMemory();
+    initSimon();
+    initTirCible();
+    initSuiteLogique();
 
     initPileOuFace();
     initRoueDecision();
@@ -1385,4 +1388,384 @@ function verifierReponseAnglais(estCorrect, btn) {
     setTimeout(nouvelleQuestionAnglais, 1200);
 
 }
+
+/* ---------- Simon ---------- */
+
+const SIMON_COULEURS = ["rouge", "bleu", "vert", "jaune"];
+let simonSequence = [];
+let simonSequenceJoueur = [];
+let simonNiveau = 0;
+let simonEnCours = false;
+let simonAccepteClic = false;
+
+function initSimon() {
+
+    document.getElementById("btnOuvrirSimon")?.addEventListener("click", () => {
+        demarrerSimon();
+    });
+
+    document.querySelectorAll(".simonZone").forEach(zone => {
+
+        zone.addEventListener("click", () => {
+
+            if (!simonAccepteClic)
+                return;
+
+            const couleur = zone.dataset.couleur;
+            jouerCouleurSimon(couleur, true);
+
+            simonSequenceJoueur.push(couleur);
+
+            verifierSequenceSimon();
+
+        });
+
+    });
+
+    document.getElementById("rejouerSimonButton")?.addEventListener("click", demarrerSimon);
+
+}
+
+function demarrerSimon() {
+
+    simonSequence = [];
+    simonSequenceJoueur = [];
+    simonNiveau = 0;
+    simonEnCours = true;
+
+    document.getElementById("simonMessage").textContent = "Regarde bien la séquence...";
+    document.getElementById("simonNiveau").textContent = "Niveau 0";
+
+    setTimeout(ajouterEtapeSimon, 800);
+
+}
+
+function ajouterEtapeSimon() {
+
+    simonNiveau++;
+    simonSequenceJoueur = [];
+    simonAccepteClic = false;
+
+    document.getElementById("simonNiveau").textContent = `Niveau ${simonNiveau}`;
+    document.getElementById("simonMessage").textContent = "Regarde bien...";
+
+    const couleur = SIMON_COULEURS[Math.floor(Math.random() * SIMON_COULEURS.length)];
+    simonSequence.push(couleur);
+
+    jouerSequenceSimon();
+
+}
+
+async function jouerSequenceSimon() {
+
+    for (const couleur of simonSequence) {
+
+        await new Promise(resolve => setTimeout(resolve, 500));
+        jouerCouleurSimon(couleur, false);
+        await new Promise(resolve => setTimeout(resolve, 400));
+
+    }
+
+    simonAccepteClic = true;
+    document.getElementById("simonMessage").textContent = "À toi de jouer !";
+
+}
+
+function jouerCouleurSimon(couleur, cliqueParJoueur) {
+
+    const zone = document.querySelector(`.simonZone[data-couleur="${couleur}"]`);
+
+    if (!zone)
+        return;
+
+    zone.classList.add("simonActive");
+
+    setTimeout(() => {
+        zone.classList.remove("simonActive");
+    }, 300);
+
+}
+
+function verifierSequenceSimon() {
+
+    const index = simonSequenceJoueur.length - 1;
+
+    if (simonSequenceJoueur[index] !== simonSequence[index]) {
+
+        simonAccepteClic = false;
+        simonEnCours = false;
+
+        document.getElementById("simonMessage").textContent = `❌ Perdu ! Tu as atteint le niveau ${simonNiveau - 1}.`;
+
+        return;
+
+    }
+
+    if (simonSequenceJoueur.length === simonSequence.length) {
+
+        simonAccepteClic = false;
+        document.getElementById("simonMessage").textContent = "✓ Bravo !";
+
+        setTimeout(ajouterEtapeSimon, 1000);
+
+    }
+
+}
+
+/* ---------- Tir à la cible ---------- */
+
+let cibleScore = 0;
+let cibleTempsRestant = 30;
+let cibleInterval = null;
+let cibleApparitionTimeout = null;
+let cibleEnCours = false;
+
+function initTirCible() {
+
+    document.getElementById("btnOuvrirCible")?.addEventListener("click", () => {
+        demarrerTirCible();
+    });
+
+    document.getElementById("rejouerCibleButton")?.addEventListener("click", demarrerTirCible);
+
+}
+
+function demarrerTirCible() {
+
+    arreterTirCible();
+
+    cibleScore = 0;
+    cibleTempsRestant = 30;
+    cibleEnCours = true;
+
+    document.getElementById("cibleScore").textContent = `Score : ${cibleScore}`;
+    document.getElementById("cibleTemps").textContent = `⏱️ ${cibleTempsRestant}s`;
+    document.getElementById("cibleMessage").textContent = "Tape sur les cibles !";
+
+    const zone = document.getElementById("cibleZone");
+    zone.innerHTML = "";
+
+    cibleInterval = setInterval(() => {
+
+        cibleTempsRestant--;
+        document.getElementById("cibleTemps").textContent = `⏱️ ${cibleTempsRestant}s`;
+
+        if (cibleTempsRestant <= 0) {
+
+            arreterTirCible();
+            document.getElementById("cibleMessage").textContent = `🏁 Terminé ! Score final : ${cibleScore}`;
+
+        }
+
+    }, 1000);
+
+    faireApparaitreCible();
+
+}
+
+function arreterTirCible() {
+
+    cibleEnCours = false;
+
+    if (cibleInterval) {
+        clearInterval(cibleInterval);
+        cibleInterval = null;
+    }
+
+    if (cibleApparitionTimeout) {
+        clearTimeout(cibleApparitionTimeout);
+        cibleApparitionTimeout = null;
+    }
+
+    const zone = document.getElementById("cibleZone");
+    if (zone) zone.innerHTML = "";
+
+}
+
+function faireApparaitreCible() {
+
+    if (!cibleEnCours)
+        return;
+
+    const zone = document.getElementById("cibleZone");
+    zone.innerHTML = "";
+
+    const cible = document.createElement("button");
+    cible.type = "button";
+    cible.className = "cibleButton";
+    cible.textContent = "🎯";
+
+    const maxX = zone.offsetWidth - 50;
+    const maxY = zone.offsetHeight - 50;
+
+    cible.style.left = Math.max(0, Math.random() * maxX) + "px";
+    cible.style.top = Math.max(0, Math.random() * maxY) + "px";
+
+    cible.addEventListener("click", () => {
+
+        cibleScore++;
+        document.getElementById("cibleScore").textContent = `Score : ${cibleScore}`;
+
+        faireApparaitreCible();
+
+    });
+
+    zone.appendChild(cible);
+
+    const dureeAffichage = Math.max(600, 1600 - cibleScore * 30);
+
+    cibleApparitionTimeout = setTimeout(() => {
+
+        if (cibleEnCours) {
+            faireApparaitreCible();
+        }
+
+    }, dureeAffichage);
+
+}
+
+/* ---------- Suite logique ---------- */
+
+function genererSuiteLogique() {
+
+    const types = ["arithmetique", "couleurs", "formes"];
+    const type = types[Math.floor(Math.random() * types.length)];
+
+    if (type === "arithmetique") {
+
+        const depart = Math.floor(Math.random() * 5) + 1;
+        const pas = Math.floor(Math.random() * 4) + 2;
+
+        const suite = [depart, depart + pas, depart + pas * 2, depart + pas * 3];
+        const reponse = depart + pas * 4;
+
+        const choix = [reponse, reponse + pas, reponse - 1, reponse + 2].sort(() => Math.random() - 0.5);
+
+        return {
+            suite: suite.map(n => n.toString()),
+            reponse: reponse.toString(),
+            choix: choix.map(n => n.toString()),
+            explication: `La suite avance de ${pas} en ${pas} : ${suite.join(", ")}, donc le prochain nombre est ${suite[suite.length - 1]} + ${pas} = ${reponse}.`
+        };
+
+    }
+
+    if (type === "couleurs") {
+
+        const couleurs = ["🔴", "🔵", "🟢", "🟡"];
+        const c1 = couleurs[Math.floor(Math.random() * couleurs.length)];
+        const c2 = couleurs.filter(c => c !== c1)[Math.floor(Math.random() * 3)];
+
+        const suite = [c1, c2, c1, c2, c1];
+        const reponse = c2;
+
+        const autresChoix = couleurs.filter(c => c !== reponse).sort(() => Math.random() - 0.5).slice(0, 2);
+        const choix = [reponse, ...autresChoix].sort(() => Math.random() - 0.5);
+
+        return {
+            suite,
+            reponse,
+            choix,
+            explication: `Le motif alterne toujours entre ${c1} et ${c2}. Après ${suite[suite.length - 1]}, on attend donc ${reponse}.`
+        };
+
+    }
+
+    // formes
+    const formes = ["⭐", "⬛", "🔺", "⚫"];
+    const f1 = formes[Math.floor(Math.random() * formes.length)];
+    const f2 = formes.filter(f => f !== f1)[Math.floor(Math.random() * 3)];
+    const f3 = formes.filter(f => f !== f1 && f !== f2)[Math.floor(Math.random() * 2)];
+
+    const suite = [f1, f2, f3, f1, f2];
+    const reponse = f3;
+
+    const autresChoix = formes.filter(f => f !== reponse).sort(() => Math.random() - 0.5).slice(0, 2);
+    const choix = [reponse, ...autresChoix].sort(() => Math.random() - 0.5);
+
+    return {
+        suite,
+        reponse,
+        choix,
+        explication: `Le motif se répète par groupes de 3 : ${f1}, ${f2}, ${f3}, puis ça recommence. Après ${suite[suite.length - 1]}, on attend donc ${reponse}.`
+    };
+
+}
+
+let suiteActuelle = null;
+let suiteScore = 0;
+let suiteTotal = 0;
+
+function initSuiteLogique() {
+
+    document.getElementById("btnOuvrirSuite")?.addEventListener("click", () => {
+        suiteScore = 0;
+        suiteTotal = 0;
+        nouvelleSuiteLogique();
+    });
+
+}
+
+function nouvelleSuiteLogique() {
+
+    document.getElementById("suiteExplication").innerHTML = "";
+    document.getElementById("suiteExplication").classList.add("hidden");
+
+    suiteActuelle = genererSuiteLogique();
+
+    document.getElementById("suiteScore").textContent = `Score : ${suiteScore} / ${suiteTotal}`;
+    document.getElementById("suiteAffichage").textContent = suiteActuelle.suite.join("   ") + "   ?";
+
+    const container = document.getElementById("suiteChoixContainer");
+    container.innerHTML = "";
+
+    suiteActuelle.choix.forEach(val => {
+
+        const btn = document.createElement("button");
+        btn.className = "secondaryButton";
+        btn.textContent = val;
+        btn.style.width = "100%";
+        btn.style.marginBottom = "8px";
+
+        btn.addEventListener("click", () => {
+            repondreSuiteLogique(val, btn);
+        });
+
+        container.appendChild(btn);
+
+    });
+
+}
+
+function repondreSuiteLogique(reponseChoisie, btn) {
+
+    suiteTotal++;
+
+    const explicationEl = document.getElementById("suiteExplication");
+
+    if (reponseChoisie === suiteActuelle.reponse) {
+
+        suiteScore++;
+        btn.style.background = "#D1FAE5";
+
+        explicationEl.innerHTML = `✓ Bravo ! ${suiteActuelle.explication}`;
+        explicationEl.style.color = "#065F46";
+
+    } else {
+
+        btn.style.background = "#FEE2E2";
+
+        explicationEl.innerHTML = `❌ Pas tout à fait. ${suiteActuelle.explication}`;
+        explicationEl.style.color = "#DC2626";
+
+    }
+
+    explicationEl.classList.remove("hidden");
+
+    document.querySelectorAll("#suiteChoixContainer button").forEach(b => b.disabled = true);
+
+    setTimeout(nouvelleSuiteLogique, 3500);
+
+}
+
 
