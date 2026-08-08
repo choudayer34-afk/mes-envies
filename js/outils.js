@@ -497,8 +497,13 @@ let memoryBloque = false;
 const MEMORY_SYMBOLES = [
     "🐶","🐱","🦁","🐸","🦊","🐼","🐵","🦄",
     "🐰","🐨","🐷","🐮","🐺","🦉","🐧","🦋",
-    "🐢","🦖","🐙","🐝","🦀","🐳","🦒","🐫"
+    "🐢","🦖","🐙","🐝","🦀","🐳","🦒","🐫",
+    "👹","👺","🎃","💀","👻","🕷️","🦇","🐉","🔥"
 ];
+
+let demonClickCount = 0;
+let demonClickTimer = null;
+let memoryModeDemon = false;
 
 let memoryModeActuel = "libre";
 let memoryTempsLimiteSec = 0;
@@ -554,6 +559,9 @@ function initMemory() {
 
     document.getElementById("rejouerMemoryButton")?.addEventListener("click", resetMemory);
 
+     document.getElementById("memoryDemonBackButton")?.addEventListener("click", desactiverModeDemon);
+
+
 }
 
 
@@ -580,7 +588,7 @@ function resetMemory() {
 
     const grille = document.getElementById("memoryGrille");
 
-    if (grille) {
+     if (grille) {
 
         if (memoryNiveauActuel <= 12) {
             grille.style.gridTemplateColumns = "repeat(4, 1fr)";
@@ -588,11 +596,14 @@ function resetMemory() {
             grille.style.gridTemplateColumns = "repeat(5, 1fr)";
         } else if (memoryNiveauActuel <= 36) {
             grille.style.gridTemplateColumns = "repeat(6, 1fr)";
+        } else if (memoryNiveauActuel <= 48) {
+            grille.style.gridTemplateColumns = "repeat(6, 1fr)";
         } else {
             grille.style.gridTemplateColumns = "repeat(6, 1fr)";
         }
 
     }
+
 
     renderMemory();
     renderClassementMemory();
@@ -809,12 +820,77 @@ function renderMemory() {
         cellule.textContent = carte.trouvee || memoryRetournees.includes(index) ? carte.symbole : "❓";
 
         cellule.addEventListener("click", () => {
+
+            if (index === 0 && !memoryModeDemon) {
+
+                demonClickCount++;
+
+                clearTimeout(demonClickTimer);
+
+                demonClickTimer = setTimeout(() => {
+                    demonClickCount = 0;
+                }, 1000);
+
+                if (demonClickCount >= 4) {
+
+                    demonClickCount = 0;
+                    activerModeDemon();
+                    return;
+
+                }
+
+            }
+
             retournerCarteMemory(index);
+
         });
 
         container.appendChild(cellule);
 
     });
+
+}
+
+function activerModeDemon() {
+
+    memoryModeDemon = true;
+    memoryNiveauActuel = 66;
+
+    document.getElementById("memoryNiveauSelector")?.classList.add("hidden");
+    document.getElementById("memoryDemonBackButton")?.classList.remove("hidden");
+
+    const titre = document.getElementById("memoryModalTitre");
+
+    if (titre) {
+        titre.innerHTML = "👹🔥 Mode démon activé 🔥👹";
+    }
+
+    document.getElementById("memoryModal")?.classList.add("memoryDemonActif");
+
+    resetMemory();
+
+}
+
+function desactiverModeDemon() {
+
+    memoryModeDemon = false;
+    memoryNiveauActuel = 16;
+
+    document.getElementById("memoryNiveauSelector")?.classList.remove("hidden");
+    document.getElementById("memoryDemonBackButton")?.classList.add("hidden");
+
+    const titre = document.getElementById("memoryModalTitre");
+
+    if (titre) {
+        titre.innerHTML = "🧠 Memory";
+    }
+
+    document.getElementById("memoryModal")?.classList.remove("memoryDemonActif");
+
+    document.querySelectorAll(".memoryNiveauButton").forEach(b => b.classList.remove("active"));
+    document.querySelector('.memoryNiveauButton[data-niveau="16"]')?.classList.add("active");
+
+    resetMemory();
 
 }
 
