@@ -3,14 +3,14 @@ import { updatePromptRegion, resetPromptRegion, getPromptRegion } from "./storag
 
 export function initRegionFinder() {
 
-    document.getElementById("btnRegionFinder").addEventListener("click", openRegionFinder);
-    document.getElementById("closeRegionFinder").addEventListener("click", closeRegionFinder);
+    document.getElementById("btnRegionFinder")?.addEventListener("click", openRegionFinder);
+    document.getElementById("closeRegionFinder")?.addEventListener("click", closeRegionFinder);
 
-    document.getElementById("regionAvecEnfants").addEventListener("change", (event) => {
+    document.getElementById("regionAvecEnfants")?.addEventListener("change", (event) => {
         document.getElementById("regionAgesEnfantsField").classList.toggle("hidden", !event.target.checked);
     });
 
-    document.getElementById("generateRegionPromptButton").addEventListener("click", () => {
+    document.getElementById("generateRegionPromptButton")?.addEventListener("click", () => {
 
         const criteres = {
             zoneDepart: document.getElementById("regionZoneDepart").value.trim(),
