@@ -1552,6 +1552,50 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div id="tableauSaisieModal" class="modal-overlay hidden">
+
+    <div class="modal" style="max-width:95vw;width:1400px;">
+
+        <button id="closeTableauSaisie" class="backButton">← Retour</button>
+
+        <h2>📊 Tableau de saisie en masse</h2>
+
+        <div style="display:flex;gap:10px;margin-bottom:14px;">
+            <button id="ajouterLigneButton" class="secondaryButton">➕ Ajouter une ligne</button>
+            <button id="collerJsonTableauButton" class="secondaryButton">📋 Coller un JSON</button>
+        </div>
+
+        <div id="tableauJsonZone" class="hidden" style="margin-bottom:16px;">
+            <textarea id="tableauJsonInput" rows="6" placeholder='{"idees": [...]}' style="width:100%;padding:12px;border-radius:12px;border:2px solid #D9E6EC;font-family:monospace;font-size:12px;box-sizing:border-box;"></textarea>
+            <button id="analyserJsonTableauButton" class="primaryButton" style="margin-top:8px;">🔍 Remplir le tableau depuis ce JSON</button>
+        </div>
+
+        <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                <thead>
+                    <tr style="background:#F5F8F9;text-align:left;">
+                        <th style="padding:8px;">Jour</th>
+                        <th style="padding:8px;">Titre</th>
+                        <th style="padding:8px;">Type</th>
+                        <th style="padding:8px;">Lieu</th>
+                        <th style="padding:8px;">Date début</th>
+                        <th style="padding:8px;">Date fin</th>
+                        <th style="padding:8px;">Description</th>
+                        <th style="padding:8px;">URL</th>
+                        <th style="padding:8px;"></th>
+                    </tr>
+                </thead>
+                <tbody id="tableauSaisieBody"></tbody>
+            </table>
+        </div>
+
+        <button id="importerTableauButton" class="primaryButton" style="width:100%;margin-top:20px;">
+            ✅ Importer toutes les lignes dans le voyage
+        </button>
+
+    </div>
+
+</div>
 
 
 <div id="jeuxModal" class="modal-overlay hidden">
