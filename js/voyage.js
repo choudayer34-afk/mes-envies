@@ -1,6 +1,7 @@
 import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour } from "./storage.js";
+import { ouvrirTableauSaisie } from "./tableau-saisie.js";
 
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
@@ -171,6 +172,18 @@ function renderVoyageContenu(envie, container) {
     });
 
     container.appendChild(importButton);
+    
+    const tableauButton = document.createElement("button");
+    tableauButton.className = "secondaryButton";
+    tableauButton.textContent = "📊 Tableau de saisie (PC)";
+    tableauButton.style.marginTop = "10px";
+
+    tableauButton.addEventListener("click", () => {
+        ouvrirTableauSaisie(envie.id);
+    });
+
+    container.appendChild(tableauButton);
+
 
     const partageButton = document.createElement("button");
     partageButton.className = "secondaryButton";
