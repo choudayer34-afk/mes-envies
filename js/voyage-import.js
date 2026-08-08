@@ -75,7 +75,7 @@ function formatCategoriesParDefaut() {
     if (categories.length === 0)
         return "";
 
-    return `Activités variées dans ces catégories : ${categories.join(", ")}, évènement, ainsi que toute autre idée pertinente pour ce voyage. tu peux t'appuyer sur les cartes touristiques de la region, les carte touristiques de google autour de ce lieu, tripadvisor, l'office du tourisme du lieu, visorando, komoot, l'agenda regional ou departemental, les evenements sur les agenda du lieu ou des villes aux alentours dans un rayon de 20km.`;
+    return `Activités variées dans ces catégories : ${categories.join(", ")}, évènements quinont lieu sur la ville ou les environs sur la periode dans un rayon de 20km, ainsi que toute autre idée pertinente pour ce voyage. tu peux t'appuyer sur les cartes touristiques de la region, les carte touristiques de google autour de ce lieu, tripadvisor, l'office du tourisme du lieu, visorando, komoot, l'agenda regional ou departemental, les evenements sur les agenda du lieu ou des villes aux alentours dans un rayon de 20km.`;
 
 }
 
