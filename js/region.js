@@ -32,7 +32,7 @@ export function initRegionFinder() {
 
 }
 
-function openRegionFinder() {
+export function openRegionFinder() {
     document.getElementById("regionFinderModal").classList.remove("hidden");
 }
 
