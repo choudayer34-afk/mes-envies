@@ -250,7 +250,8 @@ main{
 #carteVoyagesModal,
  #lectureModal, #anglaisModal,
 #albumPrepModal, 
-#simonModal, #cibleModal, #suiteModal
+#simonModal, #cibleModal, #suiteModal,
+#tableauSaisieModal
 {
     z-index:2100;
 }
