@@ -19,28 +19,8 @@ const criteresSelectionnes = new Set();
 
 export function initEtapeFinder() {
 
-    document.getElementById("btnEtapeFinder")?.addEventListener("click", () => {
-        renderVoyageursWidget("etapeVoyageursContainer");
+        document.getElementById("btnEtapeFinder")?.addEventListener("click", ouvrirEtapeFinder);
 
-        etapePeriodeChoisie = null;
-        document.getElementById("etapeDateLabel").textContent = "Choisir...";
-
-        activitesSelectionnees.clear();
-        criteresSelectionnes.clear();
-        lieuDepart = null;
-        lieuArrivee = null;
-
-        renderMultiSelectCollapsible("etapeActivitesContainer", getActiviteTypes(), activitesSelectionnees, () => {});
-        renderMultiSelectCollapsible("etapeCriteresContainer", getCriteresVoyage(), criteresSelectionnes, () => {});
-
-        setupAutocompleteChamp("etapeDepart", "etapeDepartSuggestions", (place) => { lieuDepart = place; });
-        setupAutocompleteChamp("etapeArrivee", "etapeArriveeSuggestions", (place) => { lieuArrivee = place; });
-
-        document.getElementById("etapeFinderJsonStep").classList.add("hidden");
-        document.getElementById("etapeFinderFormStep").classList.remove("hidden");
-        document.getElementById("etapeFinderModal").classList.remove("hidden");
-
-    });
     document.getElementById("clearEtapeJsonInput")?.addEventListener("click", () => {
 
         document.getElementById("etapeJsonInput").value = "";
@@ -103,6 +83,25 @@ export function initEtapeFinder() {
     });
 
     document.getElementById("etapeAnalyserButton")?.addEventListener("click", analyserEtapes);
+
+}
+
+export function ouvrirEtapeFinder() {
+
+    activitesSelectionnees.clear();
+    criteresSelectionnes.clear();
+    lieuDepart = null;
+    lieuArrivee = null;
+
+    renderMultiSelectCollapsible("etapeActivitesContainer", getActiviteTypes(), activitesSelectionnees, () => {});
+    renderMultiSelectCollapsible("etapeCriteresContainer", getCriteresVoyage(), criteresSelectionnes, () => {});
+
+    setupAutocompleteChamp("etapeDepart", "etapeDepartSuggestions", (place) => { lieuDepart = place; });
+    setupAutocompleteChamp("etapeArrivee", "etapeArriveeSuggestions", (place) => { lieuArrivee = place; });
+
+    document.getElementById("etapeFinderJsonStep").classList.add("hidden");
+    document.getElementById("etapeFinderFormStep").classList.remove("hidden");
+    document.getElementById("etapeFinderModal").classList.remove("hidden");
 
 }
 
