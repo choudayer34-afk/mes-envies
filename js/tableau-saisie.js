@@ -293,6 +293,9 @@ async function importerToutesLesLignes() {
     btn.disabled = true;
 
     const categories = getEnvieCategories();
+    const { updateEnvieDate, grouperEnviesParNumeroJour } = await import("./storage.js");
+
+    const idsEtNumeros = [];
 
     for (const ligne of lignesValides) {
 
@@ -315,18 +318,6 @@ async function importerToutesLesLignes() {
 
         }
 
-        let date = null;
-
-        if (ligne.dateDebut) {
-
-            date = {
-                type: ligne.dateFin && ligne.dateFin !== ligne.dateDebut ? "range" : "single",
-                start: ligne.dateDebut,
-                end: ligne.dateFin || null
-            };
-
-        }
-
         const nouvelId = creerEnvieDansVoyage(voyageIdActuel, {
             titre: ligne.titre,
             categorieId: categorieTrouvee?.id || null,
@@ -335,23 +326,24 @@ async function importerToutesLesLignes() {
             url: ligne.url
         });
 
-        if (date) {
+        if (ligne.jour) {
+            idsEtNumeros.push({ id: nouvelId, numero: ligne.jour });
+        } else if (ligne.dateDebut) {
 
-            const { updateEnvieDate } = await import("./storage.js");
+            const date = {
+                type: ligne.dateFin && ligne.dateFin !== ligne.dateDebut ? "range" : "single",
+                start: ligne.dateDebut,
+                end: ligne.dateFin || null
+            };
+
             updateEnvieDate(nouvelId, date);
 
         }
 
-        if (ligne.jour) {
+    }
 
-            const { groupEnvieWithJourNumero } = await import("./storage.js");
-
-            if (groupEnvieWithJourNumero) {
-                groupEnvieWithJourNumero(nouvelId, ligne.jour);
-            }
-
-        }
-
+    if (idsEtNumeros.length > 0) {
+        grouperEnviesParNumeroJour(idsEtNumeros);
     }
 
     showToast(`✓ ${lignesValides.length} idée${lignesValides.length > 1 ? "s" : ""} importée${lignesValides.length > 1 ? "s" : ""}`);
@@ -360,5 +352,8 @@ async function importerToutesLesLignes() {
     btn.disabled = false;
 
     document.getElementById("tableauSaisieModal").classList.add("hidden");
+
+}
+
 
 }
