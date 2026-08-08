@@ -21,12 +21,15 @@ export function initIdeesMenu() {
 
     });
 
-    document.getElementById("ideesMenuBtnEtape")?.addEventListener("click", () => {
+        document.getElementById("ideesMenuBtnEtape")?.addEventListener("click", async () => {
 
         document.getElementById("ideesMenuModal").classList.add("hidden");
-        document.getElementById("btnEtapeFinder")?.click();
+
+        const { ouvrirEtapeFinder } = await import("./etape-finder.js");
+        ouvrirEtapeFinder();
 
     });
+
 
     document.getElementById("ideesMenuBtnImport")?.addEventListener("click", () => {
         ouvrirSelecteurVoyagePourImport();
