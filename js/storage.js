@@ -966,6 +966,8 @@ Génère une liste d'idées concrètes au format JSON strict suivant, sans aucun
   ]
 }
 
+Pour trouver ces idées, base-toi notamment sur : les offices de tourisme locaux, TripAdvisor, la carte touristique officielle de la zone, et OpenAgenda (agrégateur d'événements français utilisé par de nombreuses mairies et départements) pour les événements locaux (marchés, fêtes, concerts, expositions) se déroulant dans un rayon de 40 km autour de la destination, y compris les événements organisés au niveau du département si leur lieu précis reste dans ce rayon.
+
 Génère entre 15 et 25 idées variées (activités, randonnées, restaurants, visites, logement si pertinent).
 Ne jamais inclure de markdown, de backticks, ni aucun texte d'accompagnement — uniquement le JSON brut valide.
 Utiliser exclusivement des guillemets droits standards (") pour tout le JSON.
