@@ -27,21 +27,8 @@ export function initTableauSaisie() {
 
 }
 
-export function ouvrirTableauSaisie(voyageId) {
 
-    voyageIdActuel = voyageId;
-    lignes = [];
 
-    ajouterLigne();
-
-    document.getElementById("tableauJsonInput").value = "";
-    document.getElementById("tableauJsonZone").classList.add("hidden");
-
-    renderTableau();
-
-    document.getElementById("tableauSaisieModal").classList.remove("hidden");
-
-}
 
 function ajouterLigne(data = {}) {
 
