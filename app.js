@@ -103,7 +103,7 @@ function init() {
 console.error ("2");
     initCatalogue();
     initRegionFinder();
-    
+    console.error ("3");
         initActiviteTypesSync(() => {});
     initCriteresVoyageSync(() => {});
 
@@ -112,7 +112,7 @@ console.error ("2");
     initPromptRegionSync(() => {});
     document.getElementById("btnCreerVoyage").addEventListener("click", openModalVoyage);
     initVoyageImport();
-
+console.error ("4");
     initAdmin();
         initVoyage();
         
@@ -124,7 +124,7 @@ console.error ("2");
     initJeux();
     
     initPhotoDescription();
-    
+    console.error ("5");
 initPlus();
 
     initFicheTitre();
@@ -134,7 +134,7 @@ initPlus();
       initEnviesSync(() => {
 
         renderEnvies();
-
+console.error ("6");
         const ficheOverlay = document.getElementById("ficheOverlay");
 
         if (ficheOverlay && !ficheOverlay.classList.contains("hidden")) {
