@@ -251,7 +251,8 @@ main{
  #lectureModal, #anglaisModal,
 #albumPrepModal, 
 #simonModal, #cibleModal, #suiteModal,
-#tableauSaisieModal, #ideesMenuModal
+#tableauSaisieModal, #ideesMenuModal,
+#voyagePourImportModal
 {
     z-index:2100;
 }
