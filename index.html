@@ -247,15 +247,10 @@ document.addEventListener("DOMContentLoaded", () => {
             <button id="btnCatalogue" class="iconButtonRow" title="Catalogue d'idées" aria-label="Catalogue d'idées">
                 📚
             </button>
-            <button id="btnCreerVoyage" class="iconButtonRow" title="Créer un voyage" aria-label="Créer un voyage">
-                🧳
-            </button>
-            <button id="btnRegionFinder" class="iconButtonRow" title="Trouver une région" aria-label="Trouver une région">
-                🧭
-            </button>
-            <button id="btnEtapeFinder" class="iconButtonRow" title="Trouver une étape" aria-label="Trouver une étape">
-    🛣️
+   <button id="btnIdeesMenu" class="iconButtonRow" title="Trouver des idées" aria-label="Trouver des idées">
+    🔎
 </button>
+
 <button id="btnCarteVoyages" class="iconButtonRow" title="Carte des voyages" aria-label="Carte des voyages">
     🌍
 </button>
@@ -1403,6 +1398,31 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+
+<div id="ideesMenuModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeIdeesMenu" class="backButton">← Retour</button>
+
+        <h2>🔎 Trouver des idées</h2>
+
+        <button id="ideesMenuBtnRegion" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            🧭 Trouver une région
+        </button>
+
+        <button id="ideesMenuBtnImport" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            📥 Importer des idées via IA
+        </button>
+
+        <button id="ideesMenuBtnEtape" class="secondaryButton" style="width:100%;">
+            🛣️ Trouver une étape sur la route
+        </button>
+
+    </div>
+
+</div>
+
 <div id="catalogueModal" class="modal-overlay hidden">
 
     <div class="modal">
