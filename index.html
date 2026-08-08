@@ -421,40 +421,97 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <button id="closeRegionFinder" class="backButton">← Retour</button>
 
-        <h2>🧭 Trouver une région</h2>
-
-        <label class="fieldTitle">Point de départ</label>
-        <input id="regionZoneDepart" type="text" placeholder="Ex : Toulouse" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
-
-        <label class="fieldTitle">Durée envisagée</label>
-        <input id="regionDuree" type="text" placeholder="Ex : 1 semaine" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
-
-        <label class="fieldTitle">Budget global approximatif</label>
-        <input id="regionBudget" type="text" placeholder="Ex : 1500€" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
-
-        <label class="fieldTitle">Type d'activités recherchées</label>
-        <input id="regionTypeActivites" type="text" placeholder="Ex : nature, randonnée, plage" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
-
-        <label class="fieldTitle" style="display:flex;align-items:center;gap:10px;">
-            <input id="regionAvecEnfants" type="checkbox" style="width:20px;height:20px;">
-            Enfants présents
-        </label>
-
-        <div id="regionAgesEnfantsField" class="field hidden">
-            <label class="fieldTitle">Âges des enfants</label>
-            <input id="regionAgesEnfants" type="text" placeholder="Ex : 4 et 7 ans" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+            <h2 style="margin:0;">🧭 Le voyage idéal</h2>
+            <span id="regionEtapeCompteur" style="font-size:12px;color:var(--color-text-light);"></span>
         </div>
 
-        <label class="fieldTitle" style="margin-top:10px;">Distance/temps de trajet max accepté</label>
-        <input id="regionDistanceMax" type="text" placeholder="Ex : 3h de route" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:16px;box-sizing:border-box;">
+        <div id="regionEtape1" class="regionEtapeContenu">
+            <label class="fieldTitle">📍 Destination / zone (facultatif)</label>
+            <input id="regionDestination" type="text" placeholder="Ex : Sud de la France, ou laisse vide" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:16px;box-sizing:border-box;">
 
-        <button id="generateRegionPromptButton" class="primaryButton" style="width:100%;">
-            🔎 Générer le prompt
-        </button>
+            <label class="fieldTitle">⏱️ Durée</label>
+            <div id="regionDureeContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">👥 Voyageurs</label>
+            <div id="regionVoyageursContainer"></div>
+        </div>
+
+        <div id="regionEtape2" class="regionEtapeContenu hidden">
+            <label class="fieldTitle">🌍 Quel environnement vous attire ?</label>
+            <div id="regionEnvironnementsContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">✨ Quelle ambiance recherchez-vous ?</label>
+            <div id="regionAmbiancesContainer"></div>
+        </div>
+
+        <div id="regionEtape3" class="regionEtapeContenu hidden">
+            <label class="fieldTitle">🌡️ Quel climat préférez-vous ?</label>
+            <div id="regionMeteoContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">En cas de chaleur, qu'est-ce qui est important ?</label>
+            <div id="regionMeteoImportantContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">Température maximale souhaitée</label>
+            <div id="regionTempMaxContainer"></div>
+        </div>
+
+        <div id="regionEtape4" class="regionEtapeContenu hidden">
+            <label class="fieldTitle">🥾 Qu'avez-vous envie de faire ?</label>
+            <div id="regionActivitesContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">Niveau de randonnée souhaité</label>
+            <div id="regionNiveauRandoContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">Avec les enfants, quel niveau ?</label>
+            <div id="regionNiveauEnfantsContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">👨‍👩‍👧‍👦 Important pour la famille</label>
+            <div id="regionFamilleContainer"></div>
+        </div>
+
+        <div id="regionEtape5" class="regionEtapeContenu hidden">
+            <label class="fieldTitle">🚗 Temps de trajet max pour une activité</label>
+            <div id="regionTempsTrajetContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">Style de mobilité</label>
+            <div id="regionStyleMobiliteContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">👥 Niveau de fréquentation accepté</label>
+            <div id="regionFouleContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">💰 Budget global</label>
+            <div id="regionBudgetContainer" style="margin-bottom:8px;"></div>
+            <input id="regionBudgetMax" type="number" placeholder="Budget max en € (facultatif)" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:16px;box-sizing:border-box;">
+
+            <label class="fieldTitle">🏡 Type d'hébergement</label>
+            <div id="regionHebergementTypeContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">Équipements importants</label>
+            <div id="regionHebergementEquipContainer" style="margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">🚫 Qu'est-ce que vous voulez éviter ?</label>
+            <div id="regionAEviterContainer" style="margin-bottom:8px;"></div>
+            <input id="regionAEviterAutre" type="text" placeholder="Autre chose à éviter (facultatif)" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+        </div>
+
+        <div id="regionEtape6" class="regionEtapeContenu hidden">
+            <label class="fieldTitle">⭐ Choisis tes 3 priorités absolues (tape sur celles qui comptent le plus)</label>
+            <div id="regionPrioritesContainer" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;"></div>
+
+            <label class="fieldTitle">🪄 Décris ton voyage idéal en quelques mots</label>
+            <textarea id="regionDescriptionLibre" rows="3" placeholder="Ex : Une semaine en famille, au frais, avec de belles randonnées faciles..." style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;"></textarea>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:20px;">
+            <button id="regionPrecedentButton" class="secondaryButton" style="flex:1;">← Précédent</button>
+            <button id="regionSuivantButton" class="primaryButton" style="flex:2;">Suivant →</button>
+        </div>
 
     </div>
 
 </div>
+
 
 <div id="etapeFinderModal" class="modal-overlay hidden">
 
