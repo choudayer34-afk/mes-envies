@@ -95,6 +95,7 @@ export function ouvrirEtapeFinder() {
 
     renderMultiSelectCollapsible("etapeActivitesContainer", getActiviteTypes(), activitesSelectionnees, () => {});
     renderMultiSelectCollapsible("etapeCriteresContainer", getCriteresVoyage(), criteresSelectionnes, () => {});
+    renderVoyageursWidget("etapeVoyageursContainer");
 
     setupAutocompleteChamp("etapeDepart", "etapeDepartSuggestions", (place) => { lieuDepart = place; });
     setupAutocompleteChamp("etapeArrivee", "etapeArriveeSuggestions", (place) => { lieuArrivee = place; });
@@ -104,6 +105,7 @@ export function ouvrirEtapeFinder() {
     document.getElementById("etapeFinderModal").classList.remove("hidden");
 
 }
+
 
 function setupAutocompleteChamp(inputId, suggestionsId, onSelect) {
 
