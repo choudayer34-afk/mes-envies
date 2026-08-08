@@ -91,6 +91,7 @@ function init() {
     initAlbum();
     initPoiRoute();
     initTableauSaisie();
+    console.error ("1");
         initIdeesMenu();
 
 
@@ -99,7 +100,7 @@ function init() {
     initPhotoViewer();
         initEtapeFinder();
     initPromptEtapeSync(() => {});
-
+console.error ("2");
     initCatalogue();
     initRegionFinder();
     
