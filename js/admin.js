@@ -6,7 +6,7 @@ import { fusionnerActiviteTypesParDefaut, fusionnerCriteresVoyageParDefaut } fro
 
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
-import { renderPromptRegionAdmin } from "./region.js";
+
 import {
     getActiviteTypes, createActiviteType, updateActiviteType, deleteActiviteType, moveActiviteType,
     getCriteresVoyage, createCritereVoyage, updateCritereVoyage, deleteCritereVoyage, moveCritereVoyage
@@ -120,8 +120,7 @@ export function initAdmin() {
             if (target === "activiteTypes") renderActiviteTypesList();
             if (target === "criteresVoyage") renderCriteresVoyageList();
 
-            if (target === "promptRegion")
-                renderPromptRegionAdmin();
+            
 
             document.getElementById("adminChecklistCategories")
                 .classList.toggle("hidden", target !== "categories");
