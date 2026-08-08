@@ -1328,3 +1328,21 @@ export async function supprimerVoyageEtContenu(voyageId) {
     await deleteDoc(envieRef(voyageId));
 
 }
+
+export function grouperEnviesParNumeroJour(idsEtNumeros) {
+
+    const groupesParNumero = {};
+
+    idsEtNumeros.forEach(({ id, numero }) => {
+
+        if (!numero)
+            return;
+
+        groupesParNumero[numero] ??= crypto.randomUUID();
+
+        patchEnvie(id, { jourGroupId: groupesParNumero[numero], date: null });
+
+    });
+
+}
+
