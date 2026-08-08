@@ -1104,21 +1104,7 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
-<div id="adminPromptRegion" class="adminSection hidden">
 
-    <label class="fieldTitle">Modèle du prompt "Trouver une région"</label>
-    <p style="font-size:12px;color:var(--color-text-light);margin-bottom:8px;">
-        Variables disponibles : {{zoneDepart}}, {{duree}}, {{budget}}, {{typeActivites}}, {{enfants}}, {{distanceMax}}
-    </p>
-
-    <textarea id="promptRegionAdminTextarea" rows="12" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--color-border);font-size:13px;font-family:monospace;margin-bottom:12px;box-sizing:border-box;"></textarea>
-
-    <div class="modal-actions">
-        <button id="resetPromptRegionButton" class="secondaryButton">Réinitialiser</button>
-        <button id="savePromptRegionButton" class="primaryButton">Enregistrer</button>
-    </div>
-
-</div>
 <div id="adminActiviteTypes" class="adminSection hidden">
     <div id="activiteTypesList"></div>
     <button id="fusionnerActiviteTypesButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
