@@ -356,4 +356,52 @@ async function importerToutesLesLignes() {
 }
 
 
+export function ouvrirTableauSaisie(voyageId) {
+
+    voyageIdActuel = voyageId;
+    lignes = [];
+
+    ajouterLigne();
+
+    document.getElementById("tableauJsonInput").value = "";
+    document.getElementById("tableauJsonZone").classList.add("hidden");
+
+    renderTableau();
+    renderSourcesRecherche(voyageId);
+
+    document.getElementById("tableauSaisieModal").classList.remove("hidden");
+
 }
+
+function renderSourcesRecherche(voyageId) {
+
+    const container = document.getElementById("tableauSourcesRecherche");
+
+    if (!container)
+        return;
+
+    const voyage = getEnvies().find(e => e.id === voyageId);
+    const lieuNom = voyage?.lieu?.nom || "";
+
+    if (!lieuNom) {
+
+        container.innerHTML = `<p style="font-size:12px;color:var(--color-text-light);">Renseigne d'abord un lieu de base pour ce voyage afin de générer les liens de recherche.</p>`;
+        return;
+
+    }
+
+    const rechercheBase = encodeURIComponent(lieuNom);
+
+    container.innerHTML = `
+        <a href="https://www.google.com/maps/search/choses+à+faire+tourisme/@,${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🗺️ Carte touristique</a>
+        <a href="https://www.tripadvisor.fr/Search?q=${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">⭐ TripAdvisor</a>
+        <a href="https://www.google.com/search?q=site:openagenda.com+${rechercheBase}+événements" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">📅 OpenAgenda (événements)</a>
+        <a href="https://www.google.com/search?q=office+de+tourisme+${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🏛️ Office de tourisme</a>
+        <a href="https://www.visorando.com/rechercher.php?q=${rechercheBase}" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🥾 Visorando</a>
+        <a href="https://www.google.com/search?q=agenda+culturel+événements+autour+de+${rechercheBase}+40km" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🎭 Agenda culturel régional</a>
+    `;
+
+}
+
+
+
