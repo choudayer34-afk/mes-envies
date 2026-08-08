@@ -22,7 +22,7 @@ import { initPhotoDescription } from "./js/photos.js";
 import { initPhotoViewer } from "./js/photos.js";
 import { initPlus } from "./js/plus.js";
 import { initCatalogue } from "./js/catalogue.js";
-import { initRegionFinder, initPromptRegionAdmin } from "./js/region.js";
+import { initRegionFinder } from "./js/region.js";
 import { initPromptRegionSync } from "./js/storage.js";
 import { openModalVoyage } from "./js/modal.js";
 import { initVoyageImport } from "./js/voyage-import.js";
@@ -121,7 +121,7 @@ console.error ("2");
     initCriteresVoyageSync(() => {});
 
     
-    initPromptRegionAdmin();
+    ;
     initPromptRegionSync(() => {});
     document.getElementById("btnCreerVoyage")?.addEventListener("click", openModalVoyage);
     initVoyageImport();
