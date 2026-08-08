@@ -161,11 +161,33 @@ function renderEtape1() {
     document.getElementById("regionDestination").value = profil.destination;
     document.getElementById("regionDestination").oninput = (e) => profil.destination = e.target.value;
 
+    renderGroupeSimple("regionDatesTypeContainer", ["Dates précises", "Mois / saison", "Flexible"], profil.datesType === "precises" ? "Dates précises" : profil.datesType === "mois" ? "Mois / saison" : "Flexible", false, (v) => {
+
+        profil.datesType = v === "Dates précises" ? "precises" : v === "Mois / saison" ? "mois" : "flexible";
+
+        document.getElementById("regionDatesPrecisesField").classList.toggle("hidden", profil.datesType !== "precises");
+        document.getElementById("regionDatesMoisField").classList.toggle("hidden", profil.datesType !== "mois");
+
+    });
+
+    document.getElementById("regionDatesPrecisesField").classList.toggle("hidden", profil.datesType !== "precises");
+    document.getElementById("regionDatesMoisField").classList.toggle("hidden", profil.datesType !== "mois");
+
+    document.getElementById("regionDateDebut").value = profil.dateDebut;
+    document.getElementById("regionDateDebut").oninput = (e) => profil.dateDebut = e.target.value;
+
+    document.getElementById("regionDateFin").value = profil.dateFin;
+    document.getElementById("regionDateFin").oninput = (e) => profil.dateFin = e.target.value;
+
+    document.getElementById("regionMois").value = profil.mois;
+    document.getElementById("regionMois").oninput = (e) => profil.mois = e.target.value;
+
     renderGroupeSimple("regionDureeContainer", ["1 jour", "Week-end", "3-4 jours", "1 semaine", "2 semaines+"], profil.duree, false, (v) => profil.duree = v);
 
     renderVoyageursWidget("regionVoyageursContainer");
 
 }
+
 
 function renderEtape2() {
 
@@ -268,6 +290,14 @@ function construirePrompt() {
     let texte = `Tu es un expert en voyage et tourisme. Voici le profil détaillé d'un voyage idéal à me proposer.\n\n`;
 
     texte += `📍 Destination : ${profil.destination || "Pas d'idée précise, à toi de proposer"}\n`;
+        if (profil.datesType === "precises" && profil.dateDebut) {
+        texte += `📅 Dates : du ${profil.dateDebut}${profil.dateFin ? ` au ${profil.dateFin}` : ""}\n`;
+    } else if (profil.datesType === "mois" && profil.mois) {
+        texte += `📅 Période : ${profil.mois}\n`;
+    } else {
+        texte += `📅 Dates : flexibles\n`;
+    }
+
     texte += `⏱️ Durée : ${profil.duree || "non précisée"}\n`;
     texte += `👥 Voyageurs : ${voyageursTexte}\n\n`;
 
@@ -308,12 +338,39 @@ function construirePrompt() {
 
 }
 
-function genererResultatFinal() {
+async function genererResultatFinal() {
 
     const texte = construirePrompt();
 
-    document.getElementById("promptModalContent").value = texte;
+    try {
+        await navigator.clipboard.writeText(texte);
+    } catch {}
+
     closeRegionFinder();
+
+    document.getElementById("promptModalContent").value = texte;
     document.getElementById("promptModal").classList.remove("hidden");
+
+    afficherChoixIARegion(texte);
+
+}
+
+function afficherChoixIARegion(texte) {
+
+    const zone = document.getElementById("regionChoixIAZone");
+
+    if (!zone)
+        return;
+
+    const encode = encodeURIComponent(texte);
+
+    zone.innerHTML = `
+        <p style="font-size:13px;color:var(--color-text-light);margin:14px 0 8px;">Prompt copié ! Ouvrir directement dans :</p>
+        <div style="display:flex;gap:8px;">
+            <a href="https://chatgpt.com/?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">💬 ChatGPT</a>
+            <a href="https://www.perplexity.ai/search?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">🔍 Perplexity</a>
+            <a href="https://gemini.google.com/app?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">✨ Gemini</a>
+        </div>
+    `;
 
 }
