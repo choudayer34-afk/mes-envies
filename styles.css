@@ -1891,3 +1891,7 @@ button {
     background:none;
     border:none;
 }
+
+* {
+    touch-action: manipulation;
+}
