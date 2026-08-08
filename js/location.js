@@ -560,3 +560,27 @@ export function initMapPicker() {
     document.getElementById("recentrerPositionButton")?.addEventListener("click", centrerSurPositionActuelle);
 
 }
+
+export async function getVilleDepuisCoordonnees(latitude, longitude) {
+
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}&addressdetails=1`;
+
+    try {
+
+        const response = await fetch(url, { headers: { "Accept": "application/json" } });
+        const data = await response.json();
+
+        return data.address?.city
+            || data.address?.town
+            || data.address?.village
+            || data.address?.municipality
+            || data.display_name?.split(",")[0]
+            || "";
+
+    } catch (err) {
+        console.error("Erreur récupération ville: " + err.message);
+        return "";
+    }
+
+}
+
