@@ -44,6 +44,7 @@ import {
 import { initModeSync } from "./js/storage.js";
 
 import { initIdeesMenu } from "./js/ideesmenu.js";
+import { initModeBascule } from "./js/ui.js";
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -99,6 +100,7 @@ function init() {
     initTableauSaisie();
     console.error ("1");
         initIdeesMenu();
+    initModeBascule();
 
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
