@@ -44,7 +44,8 @@ import {
 import { initModeSync } from "./js/storage.js";
 
 import { initIdeesMenu } from "./js/ideesmenu.js";
-import { initModeBascule } from "./js/ui.js";
+import { initModeBascule, appliquerAffichageMode } from "./js/ui.js";
+
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
