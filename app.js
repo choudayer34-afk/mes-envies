@@ -64,7 +64,7 @@ import { initAuth } from "./js/auth.js";
 import { initVoyage } from "./js/voyage.js";
 import { initCarte } from "./js/carte.js";
 import { initEnviesSync } from "./js/storage.js";
-
+import { openModalConteneurSelonMode } from "./js/modal.js";
 import { initChecklistModal } from "./js/checklist.js";
 import { initUrlModal } from "./js/urls.js";
 import { initLocation } from "./js/location.js";
@@ -129,7 +129,9 @@ console.error ("2");
     
     ;
     initPromptRegionSync(() => {});
-    document.getElementById("btnCreerVoyage")?.addEventListener("click", openModalVoyage);
+    
+document.getElementById("btnCreerVoyage")?.addEventListener("click", openModalConteneurSelonMode);
+
     initVoyageImport();
 console.error ("4");
     initAdmin();
