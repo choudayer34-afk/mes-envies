@@ -28,8 +28,9 @@ export function renderChecklist(envie) {
     if (toggleVue) {
         toggleVue.style.display = envie.contexte === "maison" ? "none" : "flex";
     }
-    if (envie.contexte === "maison" && vueActuelle === "personne") {
-        vueActuelle = "categorie";
+
+    if (envie.contexte === "maison" && viewMode === "personne") {
+        viewMode = "categorie";
     }
 
     const checklist = document.getElementById("checklistContainer");
@@ -42,6 +43,7 @@ export function renderChecklist(envie) {
     } else {
         renderByCategorie(items, envie, checklist);
     }
+
 
 }
 
