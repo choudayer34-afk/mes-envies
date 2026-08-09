@@ -77,6 +77,9 @@ function renderVoyageContenu(envie, container) {
 
     container.innerHTML = "";
 
+    const estMaison = estContexteMaison(envie);
+
+
     const { statut: statutActuel } = computeContainerStatus(envie);
 
     if (statutActuel === "termine") {
@@ -150,9 +153,7 @@ function renderVoyageContenu(envie, container) {
 
     }
 
-    if (enfants.length === 0) {
-            const estMaison = estContexteMaison(envie);         container.innerHTML += `<div class="emptyState">Ce${estMaison ? " projet" : (envie.categorie === "projet" ? " projet" : " voyage")} ne contient aucune ${estMaison ? "tâche" : "envie"} pour l'instant.</div>`; 
-    }
+    
 
     const enfantsRestants = enfants.filter(e =>
         e.date?.start !== today && !isLogementCategoryLocal(e.categorie)
@@ -246,7 +247,7 @@ if (!estMaison) {
     }
 
 
-        const estMaison = estContexteMaison(envie);
+        
 
     const addButton = document.createElement("button");
     addButton.className = "secondaryButton";
