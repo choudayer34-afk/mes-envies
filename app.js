@@ -191,7 +191,7 @@ initPlus();
     initFoyerDataSync(() => {});
 initModal();
 
-    renderEnvies();
+    
 
     
     initDeleteModal();
