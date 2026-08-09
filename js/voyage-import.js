@@ -309,7 +309,13 @@ function renderRapportImport() {
                     <span>
                         <div class="templateRowNom">${idee.titre}</div>
                         <small style="color:var(--color-text-light);">${idee.categorie || ""}${idee.description ? ` · ${idee.description}` : ""}${distanceLabel}</small>
-                        ${idee.url ? `<div style="margin-top:4px;"><a href="${idee.url}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;">🔗 Lien suggéré par l'IA</a></div>` : ""}
+                                               ${(idee.urls?.length > 0 || idee.url) ? `
+                            <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px;">
+                                ${(idee.urls || []).map(u => `<a href="${u}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;">🔗 ${u.toLowerCase().includes(".pdf") ? "Document PDF" : "Lien suggéré par l'IA"}</a>`).join("")}
+                                ${idee.url ? `<a href="${idee.url}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;">🔗 Lien suggéré par l'IA</a>` : ""}
+                            </div>
+                        ` : ""}
+
                         <div style="margin-top:6px;display:flex;gap:8px;flex-wrap:wrap;">${liensHtml}</div>
                     </span>
                 </label>
@@ -503,13 +509,15 @@ async function confirmerImportVoyage() {
 
         }
 
-        creerEnvieDansVoyage(voyageIdActuel, {
+                creerEnvieDansVoyage(voyageIdActuel, {
             titre: idee.titre,
             categorieId: trouverCategorieId(idee.categorie),
             description: idee.description || "",
             lieu,
+            urls: idee.urls || [],
             url: idee.url || ""
         });
+
 
         if (!coordonneesIAValides && idee.lieu) {
             await new Promise(resolve => setTimeout(resolve, 1100));
