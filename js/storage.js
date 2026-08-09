@@ -205,6 +205,10 @@ export function updateEnvieDate(id, date) {
     patchEnvie(id, { date });
 }
 
+export function updateEnviePeinture(id, peinture) {
+    patchEnvie(id, { peinture });
+}
+
 export function updateEnvieCategorie(id, categorie) {
     patchEnvie(id, { categorie });
 }
