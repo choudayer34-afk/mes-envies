@@ -204,13 +204,15 @@ function saveCurrentEnvie() {
 
               } else {
 
-            const nouvelId = createEnvie({
+               const nouvelId = createEnvie({
                 titre,
                 categorie: currentCategorie,
                 lieu: getSelectedLieu(),
                 date: getSelectedPeriode(),
-                voyageId: voyageContextId || null
+                voyageId: voyageContextId || null,
+                contexte: getModeActif()
             });
+
 
             resetSelectedLieu();
             resetSelectedPeriode();
