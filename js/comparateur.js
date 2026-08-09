@@ -1,7 +1,8 @@
 import { getCurrentEnvieId } from "./envie.js";
-import { getEnvies, updateEnvieComparateur } from "./storage.js";
+
 import { showToast } from "./toast.js";
 import { uploadToCloudinary, compresserImageAvantEnvoi } from "./photos.js";
+import { getEnvies, updateEnvieComparateur, getMagasins, rememberMagasin } from "./storage.js";
 
 let avisEnCours = 0;
 let photoUrlEnCours = null;
@@ -154,6 +155,43 @@ function creerCarteProduit(envie, comparateur, produit) {
 
 }
 
+function renderSuggestionsMagasin(filtre) {
+
+    const container = document.getElementById("comparateurMagasinSuggestions");
+
+    if (!container)
+        return;
+
+    const requete = filtre.trim().toLowerCase();
+
+    const resultats = getMagasins()
+        .filter(m => !requete || m.nom.toLowerCase().includes(requete))
+        .slice(0, 20);
+
+    if (resultats.length === 0) {
+        container.classList.add("hidden");
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML = resultats.map(m => `<div class="autocompleteItem">${m.nom}</div>`).join("");
+    container.classList.remove("hidden");
+
+    container.querySelectorAll(".autocompleteItem").forEach((item, i) => {
+
+        item.addEventListener("mousedown", (event) => {
+
+            event.preventDefault();
+
+            document.getElementById("comparateurMagasin").value = resultats[i].nom;
+            container.classList.add("hidden");
+
+        });
+
+    });
+
+}
+
 function renderAvisStars() {
 
     const container = document.getElementById("comparateurAvisStars");
@@ -209,8 +247,24 @@ export function initComparateur() {
     document.getElementById("comparateurPhotoButton")?.addEventListener("click", () => {
         document.getElementById("comparateurPhotoInput")?.click();
     });
+    
+    const magasinInput = document.getElementById("comparateurMagasin");
+
+    magasinInput?.addEventListener("input", () => {
+        renderSuggestionsMagasin(magasinInput.value);
+    });
+
+    magasinInput?.addEventListener("focus", () => {
+        renderSuggestionsMagasin(magasinInput.value);
+    });
+
+    magasinInput?.addEventListener("blur", () => {
+        document.getElementById("comparateurMagasinSuggestions")?.classList.add("hidden");
+    });
 
     document.getElementById("comparateurPhotoInput")?.addEventListener("change", async (event) => {
+
+    
 
         const file = event.target.files[0];
 
@@ -272,6 +326,8 @@ export function initComparateur() {
         };
 
         const nouveauComparateur = { ...comparateur, produits: [...comparateur.produits, nouveauProduit] };
+
+        rememberMagasin(document.getElementById("comparateurMagasin").value);
 
         updateEnvieComparateur(envie.id, nouveauComparateur);
 
