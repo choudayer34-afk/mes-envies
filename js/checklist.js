@@ -23,7 +23,7 @@ let currentBulkCategorieId = null;
 
 export function renderChecklist(envie) {
 
-    const toggleVue = document.getElementById("checklistVueToggle");
+    const toggleVue = document.getElementById("checklistViewToggle"); 
 
     if (toggleVue) {
         toggleVue.style.display = envie.contexte === "maison" ? "none" : "flex";
