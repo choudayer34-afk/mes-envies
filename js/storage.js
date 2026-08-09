@@ -1512,3 +1512,23 @@ export function basculerMode(nouveauMode) {
     updateDoc(doc(db, "foyers", getFoyerId()), { modeActif: nouveauMode }).catch(console.error);
 
 }
+
+export async function assurerCategorieProjetMaison() {
+
+    const existe = getEnvieCategories().find(c => c.label === "Projet maison");
+
+    if (existe)
+        return;
+
+    const foyerId = getFoyerId();
+    const maxOrdre = Math.max(-1, ...getEnvieCategories().map(c => c.ordre || 0));
+
+    await setDoc(doc(collection(db, "foyers", foyerId, "envieCategories")), {
+        label: "Projet maison",
+        emoji: "🛠️",
+        conteneur: true,
+        ordre: maxOrdre + 1
+    });
+
+}
+
