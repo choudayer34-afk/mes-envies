@@ -1910,3 +1910,14 @@ button {
     padding:6px;
     vertical-align:top;
 }
+
+.categorieChip.categorieConteneur{
+    border:2px solid var(--color-primary);
+    font-weight:700;
+    background:#EEF6F8;
+}
+
+.categorieChip.categorieConteneur.active{
+    background:var(--color-primary);
+    color:white;
+}
