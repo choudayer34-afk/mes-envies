@@ -41,6 +41,7 @@ import {
     initContraintesVoyageSync, initHebergementTypesSync, initHebergementEquipementsSync,
     initFamilleImportantSync
 } from "./js/storage.js";
+import { initModeSync } from "./js/storage.js";
 
 import { initIdeesMenu } from "./js/ideesmenu.js";
 
@@ -106,6 +107,9 @@ function init() {
     initHebergementTypesSync(() => {});
     initHebergementEquipementsSync(() => {});
     initFamilleImportantSync(() => {});
+    initModeSync(() => {
+        renderEnvies();
+    });
 
         initSurvie();
     initSurvieImport();
