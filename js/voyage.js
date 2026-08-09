@@ -155,6 +155,7 @@ function renderVoyageContenu(envie, container) {
         appendCollapsibleGroup(container, "Sans date", todo, envie, "todo");
     }
 
+if (!estMaison) {
     const promptButton = document.createElement("button");
     promptButton.className = "secondaryButton";
     promptButton.textContent = "🔎 Quoi faire autour (1h15)";
@@ -212,6 +213,7 @@ function renderVoyageContenu(envie, container) {
 
     container.appendChild(mapButton);
 
+}
     if (envie.lieu?.latitude && envie.lieu?.longitude) {
 
         const carteTouristiqueButton = document.createElement("button");
