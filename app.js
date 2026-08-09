@@ -84,6 +84,15 @@ document.addEventListener("DOMContentLoaded", () => {
     initAuth(init);
 });
 
+let enviesPretes = false;
+let categoriesPretes = false;
+let modePret = false;
+
+function tryRenderEnvies() {
+    if (enviesPretes && categoriesPretes && modePret) {
+        renderEnvies();
+    }
+}
 
 
 function init() {
@@ -110,10 +119,7 @@ function init() {
     initHebergementTypesSync(() => {});
     initHebergementEquipementsSync(() => {});
     initFamilleImportantSync(() => {});
-      initModeSync(() => {
-        renderEnvies();
-        appliquerAffichageMode();
-    });
+   
 
 
         initSurvie();
@@ -155,31 +161,9 @@ initPlus();
     initAgenda();
     initFicheDelete();
 
-      initEnviesSync(() => {
+      
 
-        renderEnvies();
-
-        const ficheOverlay = document.getElementById("ficheOverlay");
-
-        if (ficheOverlay && !ficheOverlay.classList.contains("hidden")) {
-
-            const envieOuverte = getEnvies().find(e => e.id === getCurrentEnvieId());
-
-            if (envieOuverte) {
-                renderVoyageSection(envieOuverte);
-            }
-
-        }
-
-    });
-
-        initEnvieCategoriesSync(() => {
-
-        assurerCategorieProjetMaison();
-        renderEnvies();
-
-    });
-
+        
 
     initFichesSurvieCustomSync(() => {
         if (document.getElementById("survieModal")?.classList.contains("hidden") === false) {
