@@ -105,8 +105,6 @@ export function initModal() {
 
 export function renderCreationCategorieSelector(categorieIdPreselectionnee = null) {
 
-    console.log("renderCreationCategorieSelector appelée, categorieGridOuverte=" + categorieGridOuverte);
-
     const container = document.getElementById("categorieSelector");
     container.className = "categorieSelectorWrapper";
 
@@ -126,8 +124,6 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
     const grid = document.getElementById("creationCategorieGrid");
     const toggle = document.getElementById("creationCategorieToggle");
 
-    console.log("grid.style.display initial = " + grid.style.display);
-
     categories.forEach((cat) => {
 
         const estConteneur = cat.conteneur === true;
@@ -138,10 +134,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
         chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}${estConteneur ? " 📦" : ""}</span>`;
         chip.dataset.categorieId = cat.id;
 
-        
-             chip.addEventListener("click", () => {
-
-            console.log("CLIC sur chip " + cat.label + " conteneur=" + cat.conteneur);
+        chip.addEventListener("click", () => {
 
             document.querySelectorAll("#creationCategorieGrid .categorieChip")
                 .forEach(c => c.classList.remove("active"));
@@ -150,12 +143,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
             currentCategorie = cat.id;
 
             const estConteneurChoisi = cat.conteneur === true;
-
-            console.log("Mise à jour toggle avec estConteneurChoisi=" + estConteneurChoisi);
-
             const toggleSpan = toggle.querySelector("span");
-
-            console.log("toggleSpan trouvé=" + !!toggleSpan);
 
             if (toggleSpan) {
                 toggleSpan.textContent = `${cat.emoji} ${cat.label}${estConteneurChoisi ? " 📦" : ""}`;
@@ -166,20 +154,18 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
 
         });
 
-
         grid.appendChild(chip);
 
     });
 
-    const toggleClone = toggle.cloneNode(true);
-    toggle.parentNode.replaceChild(toggleClone, toggle);
-
-    toggleClone.addEventListener("click", () => {
+    // Pas de cloneNode/replaceChild ici : container.innerHTML régénère déjà
+    // un #creationCategorieToggle tout neuf à chaque appel, donc aucun listener
+    // résiduel à nettoyer. L'ancien clonage créait un nœud détaché que les
+    // handlers de chips continuaient de cibler → toggle jamais mis à jour visuellement.
+    toggle.addEventListener("click", () => {
 
         categorieGridOuverte = !categorieGridOuverte;
         grid.style.display = categorieGridOuverte ? "grid" : "none";
-
-        console.log("après clic toggle, categorieGridOuverte=" + categorieGridOuverte + " display=" + grid.style.display);
 
     });
 
