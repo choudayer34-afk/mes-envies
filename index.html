@@ -926,6 +926,18 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="addBoisPlancheButton" class="secondaryButton" style="margin-top:8px;">
             ➕ Ajouter une planche
         </button>
+<label class="fieldTitle" style="margin-top:20px;">Planche(s) brute(s) à découper</label>
+
+<div class="peintureAddRow" style="margin-top:8px;">
+    <input type="number" id="boisStockLongueur" placeholder="Longueur (cm)" step="0.1" min="0" class="numberInput">
+    <input type="number" id="boisStockLargeur" placeholder="Largeur (cm)" step="0.1" min="0" class="numberInput">
+</div>
+
+<button id="calculerDecoupeButton" class="secondaryButton" style="margin-top:8px;">
+    🧩 Calculer la découpe
+</button>
+
+<div id="boisDecoupeResultat" style="margin-top:16px;"></div>
 
         <div id="boisResultat" class="peintureResultat" style="margin-top:16px;"></div>
 
