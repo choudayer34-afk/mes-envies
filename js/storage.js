@@ -913,7 +913,7 @@ export function creerEnvieDansVoyage(voyageId, data) {
         description: data.description || "",
         photos: [],
         checklist: [],
-        urls: [],
+        urls: construireUrlsInitiales(data),
         tags: [],
 
         lieu: {
@@ -940,6 +940,7 @@ export function creerEnvieDansVoyage(voyageId, data) {
     return id;
 
 }
+
 
 const DEFAULT_PROMPT_IMPORT = `Tu es un assistant de planification de voyage.
 
