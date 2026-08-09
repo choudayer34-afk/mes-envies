@@ -539,8 +539,11 @@ export function initEnvieCategoriesSync(onChange) {
             return;
 
         }
-
         envieCategoriesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+        console.log("Catégories chargées: " + envieCategoriesCache.length);
+
+        
 
         onChange();
 
