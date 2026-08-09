@@ -351,7 +351,7 @@ export function isLogementCategory(categorieId) {
 
 function gererAccordeonsVides(envie) {
 
-    const accordeonsAVerifier = [
+        const accordeonsAVerifier = [
         { sectionId: "periodeSection", aDuContenu: () => !!envie.date?.start },
         { sectionId: "voyageSection", aDuContenu: () => (envie.contexte !== "maison") && (!!envie.voyageId || isContainer(envie.categorie)) }, 
         { sectionId: "lieuSection", aDuContenu: () => !!envie.lieu?.nom },
@@ -359,8 +359,12 @@ function gererAccordeonsVides(envie) {
         { sectionId: "photosSection", aDuContenu: () => (envie.photos || []).length > 0 },
         { sectionId: "ficheDescriptionSection", aDuContenu: () => !!envie.description },
         { sectionId: "checklistSection", aDuContenu: () => (envie.checklist || []).length > 0 },
-        { sectionId: "lienSection", aDuContenu: () => (envie.urls || []).length > 0 }
+        { sectionId: "lienSection", aDuContenu: () => (envie.urls || []).length > 0 },
+        { sectionId: "peintureSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.peinture?.murs || []).length > 0 },
+        { sectionId: "boisSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.bois?.planches || []).length > 0 },
+        { sectionId: "comparateurSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.comparateur?.produits || []).length > 0 }
     ];
+
 
     const zoneAjout = document.getElementById("ficheAjoutRubriques");
     zoneAjout.innerHTML = "";
@@ -370,8 +374,14 @@ function gererAccordeonsVides(envie) {
         const section = document.getElementById(sectionId);
         const accordion = section?.closest(".accordion");
 
-        if (!accordion)
+               if (!accordion)
             return;
+
+        if (typeof estPertinent === "function" && !estPertinent()) {
+            accordion.classList.add("hidden");
+            return;
+        }
+
 
         const dejaOuvertManuel = accordion.dataset.forceVisible === "true";
 
