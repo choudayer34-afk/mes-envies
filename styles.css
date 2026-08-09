@@ -1921,3 +1921,33 @@ button {
     background:var(--color-primary);
     color:white;
 }
+
+.peintureAddRow{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:8px;
+    margin-top:10px;
+}
+
+.peintureAddRow4{
+    grid-template-columns:1fr 1fr 1fr 60px;
+}
+
+.peintureAddRow .numberInput{
+    height:44px;
+    padding:0 10px;
+    font-size:14px;
+}
+
+.peintureResultat{
+    background:#EAF7F6;
+    border-radius:14px;
+    padding:14px 16px;
+    font-size:15px;
+    line-height:1.6;
+}
+
+.peintureResultatSurface,
+.peintureResultatLitres{
+    display:block;
+}
