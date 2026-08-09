@@ -2054,3 +2054,8 @@ button {
     background:#F4F9FA;
 }
 
+#imageAgrandieModal{
+    z-index:2200;
+    background:rgba(0,0,0,.85);
+    align-items:center;
+}
