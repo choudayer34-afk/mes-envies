@@ -150,7 +150,9 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
             chip.classList.add("active");
             currentCategorie = cat.id;
 
-            toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}`;
+                            const estConteneurChoisi = cat.conteneur === true;
+            toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}${estConteneurChoisi ? " 📦" : ""}`;
+
 
 
             categorieGridOuverte = false;
