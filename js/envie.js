@@ -339,7 +339,7 @@ function gererAccordeonsVides(envie) {
 
     const accordeonsAVerifier = [
         { sectionId: "periodeSection", aDuContenu: () => !!envie.date?.start },
-        { sectionId: "voyageSection", aDuContenu: () => !!envie.voyageId || isContainer(envie.categorie) },
+        { sectionId: "voyageSection", aDuContenu: () => (envie.contexte !== "maison") && (!!envie.voyageId || isContainer(envie.categorie)) }, 
         { sectionId: "lieuSection", aDuContenu: () => !!envie.lieu?.nom },
         { sectionId: "evaluationSection", aDuContenu: () => !!(envie.evaluation?.note || envie.evaluation?.enfants || envie.evaluation?.difficulte) },
         { sectionId: "photosSection", aDuContenu: () => (envie.photos || []).length > 0 },
