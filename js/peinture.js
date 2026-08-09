@@ -20,11 +20,7 @@ export function renderPeintureCalculateur(envie) {
 
     const section = document.getElementById("peintureSection")?.closest(".accordion");
 
-    if (!section)
-        return;
-
-    section.classList.toggle("hidden", envie.contexte !== "maison");
-
+    
     if (envie.contexte !== "maison")
         return;
 
