@@ -27,6 +27,9 @@ export function initEnviesSync(onChange) {
     });
 
 }
+export function updateEnvieComparateur(id, comparateur) {
+    patchEnvie(id, { comparateur });
+}
 
 
 export function propagateDateToGroup(envieId, date) {
