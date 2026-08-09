@@ -591,7 +591,7 @@ export function isContainerCategory(categorieId) {
 
     const cat = envieCategoriesCache.find(c => c.id === categorieId);
 
-    console.log(`isContainerCategory(${categorieId}) → cat trouvée=${JSON.stringify(cat)}`);
+    
 
     return cat?.conteneur || false;
 
