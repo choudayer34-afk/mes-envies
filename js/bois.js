@@ -16,11 +16,7 @@ export function renderBoisCalculateur(envie) {
 
     const section = document.getElementById("boisSection")?.closest(".accordion");
 
-    if (!section)
-        return;
-
-    section.classList.toggle("hidden", envie.contexte !== "maison");
-
+    
     if (envie.contexte !== "maison")
         return;
 
