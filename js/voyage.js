@@ -29,6 +29,11 @@ const groupesOuverts = new Set();
 const voyagesForcesEnEdition = new Set();
 
 
+function estContexteMaison(envie) {
+    return envie.contexte === "maison";
+}
+
+
 export function renderVoyageSection(envie) {
 
     const container = document.getElementById("ficheVoyageContent");
@@ -133,7 +138,7 @@ function renderVoyageContenu(envie, container) {
     }
 
     if (enfants.length === 0) {
-        container.innerHTML += `<div class="emptyState">Ce ${envie.categorie === "projet" ? "projet" : "voyage"} ne contient aucune envie pour l'instant.</div>`;
+            const estMaison = estContexteMaison(envie);         container.innerHTML += `<div class="emptyState">Ce${estMaison ? " projet" : (envie.categorie === "projet" ? " projet" : " voyage")} ne contient aucune ${estMaison ? "tâche" : "envie"} pour l'instant.</div>`; 
     }
 
     const enfantsRestants = enfants.filter(e =>
@@ -226,9 +231,12 @@ function renderVoyageContenu(envie, container) {
     }
 
 
+        const estMaison = estContexteMaison(envie);
+
     const addButton = document.createElement("button");
     addButton.className = "secondaryButton";
-    addButton.textContent = "➕ Ajouter une envie existante";
+    addButton.textContent = estMaison ? "➕ Ajouter une tâche existante" : "➕ Ajouter une envie existante";
+
     addButton.style.marginTop = "10px";
 
     addButton.addEventListener("click", () => {
@@ -237,9 +245,10 @@ function renderVoyageContenu(envie, container) {
 
     container.appendChild(addButton);
 
-    const creerNouvelleButton = document.createElement("button");
+        const creerNouvelleButton = document.createElement("button");
     creerNouvelleButton.className = "primaryButton";
-    creerNouvelleButton.textContent = "💡 Créer une nouvelle idée ici";
+    creerNouvelleButton.textContent = estMaison ? "🔧 Créer une nouvelle tâche ici" : "💡 Créer une nouvelle idée ici";
+
     creerNouvelleButton.style.marginTop = "10px";
 
     creerNouvelleButton.addEventListener("click", () => {
