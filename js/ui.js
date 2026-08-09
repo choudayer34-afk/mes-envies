@@ -67,9 +67,23 @@ function renderInboxList() {
 
 function renderHomeSections() {
 
-   const modeActif = getModeActif();
+    const modeActif = getModeActif();
+
+    console.log("Mode actif: " + modeActif);
+    console.log("Total envies (avant filtre contexte): " + getEnvies().length);
 
     const envies = getEnvies().filter(e => e.contexte === modeActif);
+
+    console.log("Envies après filtre contexte: " + envies.length);
+
+    const containersTotal = envies.filter(e => isContainer(e.categorie));
+    console.log("Conteneurs (voyages/projets) après filtre: " + containersTotal.length);
+
+    containersTotal.forEach(c => {
+        const { statut } = computeContainerStatus(c);
+        console.log(`- ${c.titre} : statut=${statut} date=${c.date?.start || "aucune"}`);
+    });
+
     const today = new Date().toISOString().slice(0, 10);
 
     const ajourdhuiItems = envies.filter(e =>
