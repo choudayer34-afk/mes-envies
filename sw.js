@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v14';
+const CACHE_NAME = 'envie-cache-v15';
 
 const APP_SHELL = [
     './index.html',
@@ -96,130 +96,65 @@ self.addEventListener('fetch', (event) => {
 
     const url = new URL(request.url);
 
-    if (request.destination === "image") {
-
-        event.respondWith(
-            (async () => {
-
-                try {
-
-                    const response = await fetch(request);
-
-                    if (response.ok) {
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put(request, response.clone()).catch(() => {});
-                    }
-
-                    return response;
-
-                } catch (err) {
-
-                    const cached = await caches.match(request, { ignoreSearch: true });
-
-                    return cached || Response.error();
-
-                }
-
-            })()
-        );
-
-        return;
-
-    }
-
-    event.respondWith(
-        (async () => {
-
-            try {
-
-                const response = await fetch(request);
-
-                if (response.ok) {
-                    const cache = await caches.open(CACHE_NAME);
-                    cache.put(request, response.clone()).catch(() => {});
-                }
-
-                return response;
-
-            } catch (err) {
-
-                const cached = await caches.match(request, { ignoreSearch: true });
-
-                return cached || Response.error();
-
-            }
-
-        })()
-    );
-
     const FIREBASE_CDN_URLS = [
-    "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
-    "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
-    "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
-];
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js",
+        "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"
+    ];
 
-if (url.origin !== self.location.origin && !FIREBASE_CDN_URLS.includes(request.url)) {
-    return;
-}
-
-
-        if (request.mode === 'navigate') {
-
-        event.respondWith(
-            (async () => {
-
-                try {
-
-                    const response = await fetch(request);
-
-                    if (!response.redirected) {
-                        const cache = await caches.open(CACHE_NAME);
-                        cache.put('./index.html', response.clone()).catch(() => {});
-                    }
-
-                    return response;
-
-                } catch (err) {
-
-                    const cached = await caches.match('./index.html');
-
-                    return cached || Response.error();
-
-                }
-
-            })()
-        );
-
+    if (url.origin !== self.location.origin && !FIREBASE_CDN_URLS.includes(request.url)) {
         return;
-
-    
-
-
     }
 
-    event.respondWith(
-        (async () => {
+    if (request.mode === 'navigate') {
+        event.respondWith(reseauPuisCacheNavigation(request));
+        return;
+    }
 
-            try {
-
-                const response = await fetch(request);
-
-                if (response.ok) {
-                    const cache = await caches.open(CACHE_NAME);
-                    cache.put(request, response.clone()).catch(() => {});
-                }
-
-                return response;
-
-            } catch (err) {
-
-                const cached = await caches.match(request, { ignoreSearch: true });
-
-                return cached || Response.error();
-
-            }
-
-        })()
-    );
+    event.respondWith(reseauPuisCache(request));
 
 });
+
+async function reseauPuisCache(request) {
+
+    try {
+
+        const response = await fetch(request);
+
+        if (response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, response.clone()).catch(() => {});
+        }
+
+        return response;
+
+    } catch (err) {
+
+        const cached = await caches.match(request, { ignoreSearch: true });
+        return cached || Response.error();
+
+    }
+
+}
+
+async function reseauPuisCacheNavigation(request) {
+
+    try {
+
+        const response = await fetch(request);
+
+        if (!response.redirected) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put('./index.html', response.clone()).catch(() => {});
+        }
+
+        return response;
+
+    } catch (err) {
+
+        const cached = await caches.match('./index.html');
+        return cached || Response.error();
+
+    }
+
+}
