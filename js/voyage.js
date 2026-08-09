@@ -7,6 +7,7 @@ import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
 import { supprimerVoyageEtContenu } from "./storage.js";
 import { closeFiche } from "./envie.js";
+import { openModalConteneurSelonMode } from "./modal.js";
 
 import { openModalVoyageContext } from "./modal.js";
 
@@ -558,23 +559,28 @@ function formatLogementPeriode(date) {
 
 function renderRattachement(envie, container) {
 
-    const voyages = getEnvies().filter(e => isContainer(e.categorie) && e.id !== envie.id);
-    const voyageActuel = voyages.find(v => v.id === envie.voyageId);
+    const estMaison = envie.contexte === "maison";
 
-    if (voyageActuel) {
+    const conteneurs = getEnvies().filter(e =>
+        isContainer(e.categorie) && e.id !== envie.id && e.contexte === envie.contexte
+    );
 
-        container.innerHTML = `<div class="templateRowNom">🧳 ${voyageActuel.titre}</div>`;
+    const conteneurActuel = conteneurs.find(v => v.id === envie.voyageId);
+
+    if (conteneurActuel) {
+
+        container.innerHTML = `<div class="templateRowNom">${estMaison ? "🛠️" : "🧳"} ${conteneurActuel.titre}</div>`;
 
         const removeButton = document.createElement("button");
         removeButton.className = "secondaryButton";
-        removeButton.textContent = "Retirer du voyage";
+        removeButton.textContent = estMaison ? "Retirer du projet" : "Retirer du voyage";
         removeButton.style.marginTop = "10px";
 
         removeButton.addEventListener("click", () => {
             updateEnvieVoyage(envie.id, null);
             openEnvie(envie.id);
             renderEnvies();
-            showToast("✓ Retiré du voyage");
+            showToast(estMaison ? "✓ Retiré du projet" : "✓ Retiré du voyage");
         });
 
         container.appendChild(removeButton);
@@ -583,16 +589,31 @@ function renderRattachement(envie, container) {
 
     }
 
-    if (voyages.length === 0) {
-        container.innerHTML = `<div class="emptyState">Aucun voyage créé pour l'instant.</div>`;
+    if (conteneurs.length === 0) {
+
+        container.innerHTML = `<div class="emptyState">Aucun ${estMaison ? "projet" : "voyage"} créé pour l'instant.</div>`;
+
+        const creerButton = document.createElement("button");
+        creerButton.className = "primaryButton";
+        creerButton.textContent = estMaison ? "➕ Créer un nouveau projet" : "➕ Créer un nouveau voyage";
+        creerButton.style.width = "100%";
+        creerButton.style.marginTop = "10px";
+
+        creerButton.addEventListener("click", () => {
+            openModalConteneurSelonMode();
+        });
+
+        container.appendChild(creerButton);
+
         return;
+
     }
 
     const select = document.createElement("select");
     select.className = "categorieSelect";
 
-    select.innerHTML = `<option value="">Choisir un voyage...</option>` +
-        voyages.map(v => `<option value="${v.id}">${v.titre}</option>`).join("");
+    select.innerHTML = `<option value="">${estMaison ? "Choisir un projet..." : "Choisir un voyage..."}</option>` +
+        conteneurs.map(v => `<option value="${v.id}">${v.titre}</option>`).join("");
 
     select.addEventListener("change", () => {
 
@@ -602,13 +623,26 @@ function renderRattachement(envie, container) {
         updateEnvieVoyage(envie.id, select.value);
         openEnvie(envie.id);
         renderEnvies();
-        showToast("✓ Rattaché au voyage");
+        showToast(estMaison ? "✓ Rattaché au projet" : "✓ Rattaché au voyage");
 
     });
 
     container.appendChild(select);
 
+    const creerButton = document.createElement("button");
+    creerButton.className = "secondaryButton";
+    creerButton.textContent = estMaison ? "➕ Ou créer un nouveau projet" : "➕ Ou créer un nouveau voyage";
+    creerButton.style.width = "100%";
+    creerButton.style.marginTop = "10px";
+
+    creerButton.addEventListener("click", () => {
+        openModalConteneurSelonMode();
+    });
+
+    container.appendChild(creerButton);
+
 }
+
 
 function openEnviePicker(voyageId) {
 
