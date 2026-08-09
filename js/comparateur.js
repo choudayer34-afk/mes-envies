@@ -99,8 +99,8 @@ function creerCarteProduit(envie, comparateur, produit) {
     const card = document.createElement("div");
     card.className = "comparateurCard" + (produit.retenu ? " retenu" : "");
 
-    const photoHtml = produit.photoUrl
-        ? `<img src="${produit.photoUrl.replace("/upload/", "/upload/w_150,h_150,c_fill,q_auto/")}" class="comparateurCardPhoto">`
+       const photoHtml = produit.photoUrl
+        ? `<img src="${produit.photoUrl.replace("/upload/", "/upload/w_150,h_150,c_fill,q_auto/")}" class="comparateurCardPhoto" style="cursor:pointer;">`
         : `<div class="comparateurCardPhoto"></div>`;
 
     const metaBits = [
@@ -123,6 +123,12 @@ function creerCarteProduit(envie, comparateur, produit) {
             </div>
         </div>
     `;
+        if (produit.photoUrl) {
+        card.querySelector(".comparateurCardPhoto")?.addEventListener("click", () => {
+            ouvrirImageAgrandie(produit.photoUrl);
+        });
+    }
+
 
     card.querySelector(".comparateurRetenuButton").addEventListener("click", () => {
 
@@ -191,6 +197,20 @@ function renderSuggestionsMagasin(filtre) {
     });
 
 }
+
+function ouvrirImageAgrandie(url) {
+
+    const modal = document.getElementById("imageAgrandieModal");
+    const img = document.getElementById("imageAgrandieSrc");
+
+    if (!modal || !img)
+        return;
+
+    img.src = url;
+    modal.classList.remove("hidden");
+
+}
+
 
 function renderAvisStars() {
 
@@ -262,6 +282,16 @@ export function initComparateur() {
         document.getElementById("comparateurMagasinSuggestions")?.classList.add("hidden");
     });
 
+    document.getElementById("closeImageAgrandie")?.addEventListener("click", () => {
+        document.getElementById("imageAgrandieModal")?.classList.add("hidden");
+    });
+
+    document.getElementById("imageAgrandieModal")?.addEventListener("click", (event) => {
+        if (event.target.id === "imageAgrandieModal") {
+            event.currentTarget.classList.add("hidden");
+        }
+    });
+
     document.getElementById("comparateurPhotoInput")?.addEventListener("change", async (event) => {
 
     
@@ -280,8 +310,12 @@ export function initComparateur() {
 
             photoUrlEnCours = result.secure_url;
 
-            document.getElementById("comparateurPhotoPreview").innerHTML =
-                `<img src="${photoUrlEnCours}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;">`;
+                    document.getElementById("comparateurPhotoPreview").innerHTML =
+                `<img src="${photoUrlEnCours}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;cursor:pointer;">`;
+
+            document.getElementById("comparateurPhotoPreview").querySelector("img")
+                .addEventListener("click", () => ouvrirImageAgrandie(photoUrlEnCours));
+
 
             showToast("✓ Photo ajoutée");
 
