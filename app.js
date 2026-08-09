@@ -109,9 +109,11 @@ function init() {
     initHebergementTypesSync(() => {});
     initHebergementEquipementsSync(() => {});
     initFamilleImportantSync(() => {});
-    initModeSync(() => {
+      initModeSync(() => {
         renderEnvies();
+        appliquerAffichageMode();
     });
+
 
         initSurvie();
     initSurvieImport();
