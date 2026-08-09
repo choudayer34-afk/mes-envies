@@ -1457,3 +1457,27 @@ export const initHebergementEquipementsSync = hebergementEquipStore.init;
 export const getFamilleImportant = familleImportantStore.get;
 export const initFamilleImportantSync = familleImportantStore.init;
 
+
+function construireUrlsInitiales(data) {
+
+    const liens = [];
+
+    if (Array.isArray(data.urls)) {
+
+        data.urls.forEach(url => {
+
+            if (url && typeof url === "string" && url.trim()) {
+                liens.push({ id: crypto.randomUUID(), url: url.trim(), createdAt: Date.now() });
+            }
+
+        });
+
+    }
+
+    if (data.url && typeof data.url === "string" && data.url.trim()) {
+        liens.push({ id: crypto.randomUUID(), url: data.url.trim(), createdAt: Date.now() });
+    }
+
+    return liens;
+
+}
