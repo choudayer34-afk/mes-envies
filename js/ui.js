@@ -66,7 +66,9 @@ function renderInboxList() {
 
 function renderHomeSections() {
 
-    const envies = getEnvies();
+   const modeActif = getModeActif();
+
+    const envies = getEnvies().filter(e => e.contexte === modeActif);
     const today = new Date().toISOString().slice(0, 10);
 
     const ajourdhuiItems = envies.filter(e =>
