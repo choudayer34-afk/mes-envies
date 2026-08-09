@@ -128,12 +128,14 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
 
     console.log("grid.style.display initial = " + grid.style.display);
 
-    categories.forEach((cat) => {
+        categories.forEach((cat) => {
+
+        const estConteneur = cat.conteneur === true;
 
         const chip = document.createElement("button");
         chip.type = "button";
-        chip.className = "categorieChip" + (cat.id === idActif ? " active" : "");
-        chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}</span>`;
+        chip.className = "categorieChip" + (cat.id === idActif ? " active" : "") + (estConteneur ? " categorieConteneur" : "");
+        chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}${estConteneur ? " 📦" : ""}</span>`;
         chip.dataset.categorieId = cat.id;
 
         chip.addEventListener("click", () => {
