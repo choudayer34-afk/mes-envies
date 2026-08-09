@@ -182,6 +182,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
 
 
 
+
 export function openModal(title = "💡 Une envie", value = "", editId = null) {
 
     currentEditId = editId;
