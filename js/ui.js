@@ -382,5 +382,22 @@ export function initModeBascule() {
 
     document.querySelector(`#modeBascule .itemTypeChip[data-mode="${getModeActif()}"]`)?.classList.add("active");
 
+    appliquerAffichageMode();
+
 }
 
+export function appliquerAffichageMode() {
+
+    const mode = getModeActif();
+
+    document.querySelectorAll(".voyageOnlyIcon").forEach(el => {
+        el.classList.toggle("hidden", mode !== "voyage");
+    });
+
+    const btnCreer = document.getElementById("btnCreerVoyage");
+
+    if (btnCreer) {
+        btnCreer.textContent = mode === "maison" ? "➕ Nouveau projet" : "➕ Nouveau voyage";
+    }
+
+}
