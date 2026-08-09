@@ -5,7 +5,9 @@ import { showToast } from "./toast.js";
 function getBois(envie) {
 
     return {
-        planches: envie.bois?.planches || []
+        planches: envie.bois?.planches || [],
+        stockLongueur: envie.bois?.stockLongueur || null,
+        stockLargeur: envie.bois?.stockLargeur || null
     };
 
 }
@@ -26,6 +28,17 @@ export function renderBoisCalculateur(envie) {
 
     renderPlanchesListe(envie, bois);
     renderResultat(bois);
+
+    const longueurInput = document.getElementById("boisStockLongueur");
+    const largeurInput = document.getElementById("boisStockLargeur");
+
+    if (longueurInput && document.activeElement !== longueurInput && bois.stockLongueur) {
+        longueurInput.value = bois.stockLongueur;
+    }
+
+    if (largeurInput && document.activeElement !== largeurInput && bois.stockLargeur) {
+        largeurInput.value = bois.stockLargeur;
+    }
 
 }
 
@@ -107,6 +120,193 @@ function renderResultat(bois) {
 
 }
 
+/* ---------- Optimisation de découpe (bin-packing 2D, coupes guillotine) ---------- */
+
+function decouperPlanches(stock, piecesDemandees) {
+
+    const unites = [];
+
+    piecesDemandees.forEach(p => {
+        for (let i = 0; i < p.quantite; i++) {
+            unites.push({ id: p.id, nom: p.nom, longueur: p.longueur, largeur: p.largeur });
+        }
+    });
+
+    unites.sort((a, b) => (b.longueur * b.largeur) - (a.longueur * a.largeur));
+
+    const planchesUtilisees = [];
+    const nonPlacees = [];
+
+    unites.forEach(piece => {
+
+        let meilleur = null;
+
+        planchesUtilisees.forEach(planche => {
+
+            planche.libres.forEach((rect, idx) => {
+
+                if (piece.longueur <= rect.w && piece.largeur <= rect.h) {
+                    const gaspillage = rect.w * rect.h - piece.longueur * piece.largeur;
+                    if (!meilleur || gaspillage < meilleur.gaspillage) {
+                        meilleur = { planche, rectIndex: idx, w: piece.longueur, h: piece.largeur, rotated: false, gaspillage, rect };
+                    }
+                }
+
+                if (piece.largeur <= rect.w && piece.longueur <= rect.h) {
+                    const gaspillage = rect.w * rect.h - piece.longueur * piece.largeur;
+                    if (!meilleur || gaspillage < meilleur.gaspillage) {
+                        meilleur = { planche, rectIndex: idx, w: piece.largeur, h: piece.longueur, rotated: true, gaspillage, rect };
+                    }
+                }
+
+            });
+
+        });
+
+        if (!meilleur) {
+
+            const tientNormal = piece.longueur <= stock.longueur && piece.largeur <= stock.largeur;
+            const tientPivote = piece.largeur <= stock.longueur && piece.longueur <= stock.largeur;
+
+            if (!tientNormal && !tientPivote) {
+                nonPlacees.push(piece);
+                return;
+            }
+
+            const nouvellePlanche = {
+                libres: [{ x: 0, y: 0, w: stock.longueur, h: stock.largeur }],
+                placements: []
+            };
+
+            planchesUtilisees.push(nouvellePlanche);
+
+            const rect = nouvellePlanche.libres[0];
+            const w = tientNormal ? piece.longueur : piece.largeur;
+            const h = tientNormal ? piece.largeur : piece.longueur;
+
+            meilleur = { planche: nouvellePlanche, rectIndex: 0, w, h, rotated: !tientNormal, rect };
+
+        }
+
+        const { planche, rectIndex, w, h, rect } = meilleur;
+
+        planche.placements.push({
+            id: piece.id, nom: piece.nom,
+            x: rect.x, y: rect.y, w, h, rotated: meilleur.rotated
+        });
+
+        planche.libres.splice(rectIndex, 1);
+
+        const largeurRestante = rect.w - w;
+        const hauteurRestante = rect.h - h;
+
+        if (largeurRestante > 0) {
+            planche.libres.push({ x: rect.x + w, y: rect.y, w: largeurRestante, h: h });
+        }
+
+        if (hauteurRestante > 0) {
+            planche.libres.push({ x: rect.x, y: rect.y + h, w: rect.w, h: hauteurRestante });
+        }
+
+    });
+
+    return { planchesUtilisees, nonPlacees };
+
+}
+
+function renderDiagrammePlanche(stock, planche, index) {
+
+    const couleurs = ["#6FAFC4", "#F2A65A", "#8FBF7F", "#D97C7C", "#B08FD1", "#E0C25A"];
+
+    const rects = planche.placements.map((p, i) => `
+        <rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}"
+              fill="${couleurs[i % couleurs.length]}" stroke="white" stroke-width="1.5" opacity="0.9"/>
+        <text x="${p.x + p.w / 2}" y="${p.y + p.h / 2}" font-size="${Math.max(8, Math.min(p.w, p.h) * 0.16)}"
+              text-anchor="middle" dominant-baseline="middle" fill="white" font-weight="600">
+            ${p.nom}${p.rotated ? " ↻" : ""}
+        </text>
+    `).join("");
+
+    return `
+        <div style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Planche brute #${index + 1}</div>
+            <svg viewBox="0 0 ${stock.longueur} ${stock.largeur}" style="width:100%;max-width:320px;height:auto;background:#F4F4F4;border-radius:8px;border:1px solid var(--color-border);display:block;">
+                <rect x="0" y="0" width="${stock.longueur}" height="${stock.largeur}" fill="#F4F4F4" stroke="#CCC" stroke-width="1"/>
+                ${rects}
+            </svg>
+        </div>
+    `;
+
+}
+
+function calculerEtAfficherDecoupe(envie, bois) {
+
+    const container = document.getElementById("boisDecoupeResultat");
+
+    if (!container)
+        return;
+
+    const longueurInput = document.getElementById("boisStockLongueur");
+    const largeurInput = document.getElementById("boisStockLargeur");
+
+    const stockLongueur = parseFloat(longueurInput.value);
+    const stockLargeur = parseFloat(largeurInput.value);
+
+    if (!stockLongueur || !stockLargeur) {
+        showToast("Renseigne les dimensions de la planche brute");
+        return;
+    }
+
+    if (bois.planches.length === 0) {
+        container.innerHTML = `<div class="emptyState">Ajoute d'abord des découpes ci-dessus.</div>`;
+        return;
+    }
+
+    const nouveauBois = { ...bois, stockLongueur, stockLargeur };
+    updateEnvieBois(envie.id, nouveauBois);
+
+    const groupesEpaisseur = [...new Set(bois.planches.map(p => p.epaisseur))];
+
+    let html = "";
+
+    groupesEpaisseur.forEach(epaisseur => {
+
+        const piecesGroupe = bois.planches.filter(p => p.epaisseur === epaisseur);
+
+        const { planchesUtilisees, nonPlacees } = decouperPlanches(
+            { longueur: stockLongueur, largeur: stockLargeur },
+            piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }))
+        );
+
+        html += `<div style="margin-bottom:20px;">`;
+        html += `<div class="peintureResultat" style="margin-bottom:10px;">`;
+
+        if (nonPlacees.length === 0) {
+
+            html += `<span class="peintureResultatSurface">✅ Épaisseur ${epaisseur} mm : ça passe avec <strong>${planchesUtilisees.length} planche${planchesUtilisees.length > 1 ? "s" : ""} brute${planchesUtilisees.length > 1 ? "s" : ""}</strong> de ${stockLongueur}×${stockLargeur} cm</span>`;
+
+        } else {
+
+            html += `<span class="peintureResultatSurface">❌ Épaisseur ${epaisseur} mm : ${nonPlacees.length} pièce${nonPlacees.length > 1 ? "s" : ""} ne rentre${nonPlacees.length > 1 ? "nt" : ""} pas, même seule, dans ${stockLongueur}×${stockLargeur} cm : ${nonPlacees.map(p => p.nom).join(", ")}</span>`;
+
+        }
+
+        html += `</div>`;
+
+        planchesUtilisees.forEach((planche, i) => {
+            html += renderDiagrammePlanche({ longueur: stockLongueur, largeur: stockLargeur }, planche, i);
+        });
+
+        html += `</div>`;
+
+    });
+
+    html += `<small style="color:var(--color-text-light);">↻ = pièce pivotée à 90° pour optimiser le placement. Le sens du fil du bois n'est pas pris en compte — vérifie toi-même si c'est important pour ta pièce.</small>`;
+
+    container.innerHTML = html;
+
+}
+
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
 }
@@ -158,6 +358,17 @@ export function initBoisCalculateur() {
         quantiteInput.value = "1";
 
         renderBoisCalculateur({ ...envie, bois: nouveauBois });
+
+    });
+
+    document.getElementById("calculerDecoupeButton")?.addEventListener("click", () => {
+
+        const envie = getEnvieCourante();
+
+        if (!envie)
+            return;
+
+        calculerEtAfficherDecoupe(envie, getBois(envie));
 
     });
 
