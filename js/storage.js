@@ -60,7 +60,8 @@ export function createEnvie({
     lieu = {},
     date,
     personnes = 1,
-    voyageId = null
+    voyageId = null,
+    contexte = "voyage"
 }) {
 
     const id = crypto.randomUUID();
@@ -69,6 +70,7 @@ export function createEnvie({
 
         titre,
         categorie,
+        contexte,
         favorite: false,
         realise: false,
         description: "",
@@ -101,6 +103,10 @@ export function createEnvie({
 
     return id;
 
+}
+
+export function getEnvies() {
+    return enviesCache.map(e => ({ ...e, contexte: e.contexte || "voyage" }));
 }
 
 
@@ -1480,5 +1486,30 @@ function construireUrlsInitiales(data) {
     }
 
     return liens;
+
+}
+
+let modeActifCache = "voyage";
+
+export function getModeActif() {
+    return modeActifCache;
+}
+
+export function initModeSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(doc(db, "foyers", foyerId), (snap) => {
+
+        modeActifCache = snap.data()?.modeActif || "voyage";
+        onChange();
+
+    });
+
+}
+
+export function basculerMode(nouveauMode) {
+
+    updateDoc(doc(db, "foyers", getFoyerId()), { modeActif: nouveauMode }).catch(console.error);
 
 }
