@@ -1379,8 +1379,11 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="fieldTitle" style="margin-top:12px;">Dimensions</label>
         <input type="text" id="comparateurDimensions" placeholder="Ex: 120 x 60 x 75 cm" class="numberInput">
 
-        <label class="fieldTitle" style="margin-top:12px;">Magasin</label>
-        <input type="text" id="comparateurMagasin" placeholder="Ex: Ikea, Leroy Merlin..." class="numberInput">
+     <label class="fieldTitle" style="margin-top:12px;">Magasin</label>
+<div style="position:relative;">
+    <input type="text" id="comparateurMagasin" placeholder="Ex: Ikea, Leroy Merlin..." class="numberInput" autocomplete="off">
+    <div id="comparateurMagasinSuggestions" class="autocompleteSuggestions hidden"></div>
+</div>
 
         <label class="fieldTitle" style="margin-top:12px;">Avis</label>
         <div id="comparateurAvisStars" class="starsRow"></div>
