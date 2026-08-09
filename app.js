@@ -45,6 +45,7 @@ import { initModeSync } from "./js/storage.js";
 
 import { initIdeesMenu } from "./js/ideesmenu.js";
 import { initModeBascule, appliquerAffichageMode } from "./js/ui.js";
+import { assurerCategorieProjetMaison } from "./js/storage.js";
 
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
@@ -149,10 +150,16 @@ initEnviesSync(() => {
 initEnvieCategoriesSync(() => {
 
     categoriesPretes = true;
-    assurerCategorieProjetMaison();
     tryRenderEnvies();
 
+    try {
+        assurerCategorieProjetMaison();
+    } catch (err) {
+        console.error("Erreur assurerCategorieProjetMaison: " + err.message);
+    }
+
 });
+
 
 
         initSurvie();
