@@ -112,8 +112,9 @@ export function initAdmin() {
 
             document.getElementById("adminChecklistTemplates")
                 .classList.toggle("hidden", target !== "templates");
-            document.getElementById("adminPromptRegion")
-                .classList.toggle("hidden", target !== "promptRegion");
+           document.getElementById("adminPromptRegion")
+    ?.classList.toggle("hidden", target !== "promptRegion");
+
             document.getElementById("adminActiviteTypes")?.classList.toggle("hidden", target !== "activiteTypes");
             document.getElementById("adminCriteresVoyage")?.classList.toggle("hidden", target !== "criteresVoyage");
 
