@@ -120,6 +120,39 @@ function init() {
     initHebergementEquipementsSync(() => {});
     initFamilleImportantSync(() => {});
    
+initModeSync(() => {
+    modePret = true;
+    tryRenderEnvies();
+    appliquerAffichageMode();
+});
+
+
+initEnviesSync(() => {
+
+    enviesPretes = true;
+    tryRenderEnvies();
+
+    const ficheOverlay = document.getElementById("ficheOverlay");
+
+    if (ficheOverlay && !ficheOverlay.classList.contains("hidden")) {
+
+        const envieOuverte = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+        if (envieOuverte) {
+            renderVoyageSection(envieOuverte);
+        }
+
+    }
+
+});
+
+initEnvieCategoriesSync(() => {
+
+    categoriesPretes = true;
+    assurerCategorieProjetMaison();
+    tryRenderEnvies();
+
+});
 
 
         initSurvie();
