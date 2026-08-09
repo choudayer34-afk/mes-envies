@@ -14,6 +14,9 @@ import { renderBoisCalculateur } from "./bois.js";
 import { renderVoyageSection } from "./voyage.js";
 import { renderEvaluation } from "./evaluation.js";
 import { getEnvieCategories, isContainerCategory } from "./storage.js";
+import { renderComparateur } from "./comparateur.js";
+
+
 let currentEnvieId = null;
 
 export function getCurrentEnvieId() {
@@ -71,8 +74,10 @@ export function openEnvie(id, returnTo = null) {
  renderPeriode(envie);
    renderChecklist(envie);
     renderPeintureCalculateur(envie);
-    renderBoisCalculateur(envie);
+     renderBoisCalculateur(envie);
+    renderComparateur(envie);
     renderUrls(envie);
+
        
     renderPhotosGrid(envie);
 
