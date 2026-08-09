@@ -1951,3 +1951,74 @@ button {
 .peintureResultatLitres{
     display:block;
 }
+
+.comparateurCard{
+    display:flex;
+    gap:12px;
+    padding:14px;
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-medium);
+    margin-bottom:12px;
+    background:var(--color-card);
+}
+
+.comparateurCard.retenu{
+    border:2px solid #6FAFC4;
+    background:#EAF7F6;
+}
+
+.comparateurCardPhoto{
+    width:64px;
+    height:64px;
+    border-radius:12px;
+    object-fit:cover;
+    flex-shrink:0;
+    background:#EEE;
+}
+
+.comparateurCardInfo{
+    flex:1;
+    min-width:0;
+}
+
+.comparateurCardTitre{
+    font-weight:700;
+    font-size:15px;
+}
+
+.comparateurCardMeta{
+    font-size:13px;
+    color:var(--color-text-light);
+    margin-top:2px;
+}
+
+.comparateurCardRemarque{
+    font-size:13px;
+    margin-top:6px;
+    color:var(--color-text-light);
+    font-style:italic;
+}
+
+.comparateurCardActions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    align-items:center;
+}
+
+.comparateurRetenuButton{
+    border:none;
+    background:#EEF4F6;
+    border-radius:12px;
+    padding:6px 12px;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    color:#4B5B66;
+}
+
+.comparateurRetenuButton.active{
+    background:#6FAFC4;
+    color:white;
+}
+
