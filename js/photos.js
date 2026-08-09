@@ -337,7 +337,7 @@ export function initPhotoCouverture() {
 
 }
 
-function compresserImageAvantEnvoi(file, maxLargeur = 1600, qualite = 0.75) {
+export function compresserImageAvantEnvoi(file, maxLargeur = 1600, qualite = 0.75) {
 
     return new Promise((resolve, reject) => {
 
