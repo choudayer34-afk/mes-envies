@@ -201,6 +201,9 @@ export function updateEnvieLieu(id, lieu) {
 
 }
 
+export function updateEnvieBois(id, bois) {
+    patchEnvie(id, { bois });
+}
 export function updateEnvieDate(id, date) {
     patchEnvie(id, { date });
 }
