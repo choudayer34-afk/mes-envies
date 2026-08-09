@@ -7,6 +7,7 @@ import { getSelectedLieu, resetSelectedLieu } from "./location.js";
 import { getSelectedPeriode, resetSelectedPeriode } from "./periode.js";
 import { getEnvieCategories } from "./storage.js";
 import { openEnvie } from "./envie.js";
+import { getModeActif } from "./storage.js";
 
 
 let currentEditId = null;
@@ -22,6 +23,24 @@ export function openModalVoyageContext(voyageId) {
 
 }
 
+export function openModalConteneurSelonMode() {
+
+    const mode = getModeActif();
+    const labelRecherche = mode === "maison" ? "Projet maison" : "Voyage";
+
+    openModal();
+
+    setTimeout(() => {
+
+        const cat = getEnvieCategories().find(c => c.label === labelRecherche);
+
+        if (cat) {
+            renderCreationCategorieSelector(cat.id);
+        }
+
+    }, 100);
+
+}
 
 /* ---------- Modale création / édition ---------- */
 
