@@ -53,7 +53,7 @@ import { initFicheTitre } from "./js/envie.js";
 import { renderCreationCategorieSelector } from "./js/modal.js";
 import { initSurvie } from "./js/survie.js";
 import { initOutils } from "./js/outils.js";
-
+import { initPeintureCalculateur } from "./js/peinture.js";
 import { renderEnvies } from "./js/ui.js";
 import {
     initModal,
@@ -223,6 +223,7 @@ initModal();
     
     initUrlModal();
     initChecklistModal();
+    initPeintureCalculateur();
     initAccordions();
 
     document.getElementById("closeFiche")
