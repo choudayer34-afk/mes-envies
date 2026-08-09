@@ -138,9 +138,10 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
         chip.innerHTML = `<span style="font-size:24px;">${cat.emoji}</span><span>${cat.label}${estConteneur ? " 📦" : ""}</span>`;
         chip.dataset.categorieId = cat.id;
 
-        chip.addEventListener("click", () => {
+        
+             chip.addEventListener("click", () => {
 
-            console.log("CLIC sur chip " + cat.label);
+            console.log("CLIC sur chip " + cat.label + " conteneur=" + cat.conteneur);
 
             document.querySelectorAll("#creationCategorieGrid .categorieChip")
                 .forEach(c => c.classList.remove("active"));
@@ -149,14 +150,22 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
             currentCategorie = cat.id;
 
             const estConteneurChoisi = cat.conteneur === true;
-            toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}${estConteneurChoisi ? " 📦" : ""}`;
+
+            console.log("Mise à jour toggle avec estConteneurChoisi=" + estConteneurChoisi);
+
+            const toggleSpan = toggle.querySelector("span");
+
+            console.log("toggleSpan trouvé=" + !!toggleSpan);
+
+            if (toggleSpan) {
+                toggleSpan.textContent = `${cat.emoji} ${cat.label}${estConteneurChoisi ? " 📦" : ""}`;
+            }
 
             categorieGridOuverte = false;
             grid.style.display = "none";
 
-            console.log("après clic, grid.style.display = " + grid.style.display);
-
         });
+
 
         grid.appendChild(chip);
 
