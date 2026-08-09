@@ -10,6 +10,13 @@ import { ouvrirPreparationAlbum } from "./album.js";
 
 export function renderCarnetVoyage(envie, container) {
 
+    const estMaison = envie.contexte === "maison";
+
+    if (enfants.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucune ${estMaison ? "tâche terminée" : "activité réalisée"} n'a encore été enregistrée pour ce ${estMaison ? "projet" : "voyage"}.</div>`;
+        return;
+    }
+
     const enfants = getEnvies().filter(e => e.voyageId === envie.id && (e.realise || isLogementCategory(e.categorie)));
 
     const editButton = document.createElement("button");
