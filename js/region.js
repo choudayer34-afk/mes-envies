@@ -332,8 +332,12 @@ function construirePrompt() {
         texte += `\n🪄 En quelques mots : "${profil.descriptionLibre}"\n`;
     }
 
-    texte += `\nPropose-moi 3 à 5 destinations qui correspondent le mieux à ce profil, en expliquant pour chacune en quoi elle répond à mes envies, en respectant mes contraintes et limites, et en indiquant un pourcentage de correspondance estimé avec ce profil. Sois concret et actionnable.`;
+    texte += `\nPropose-moi 5 a 8 destinations qui correspondent le mieux à ce profil, en expliquant pour chacune en quoi elle répond à mes envies, en respectant mes contraintes et limites, et en indiquant un pourcentage de correspondance estimé avec ce profil. Sois concret et actionnable.`;
+texte += `
+si pas de budget definis, estime le par categorie et Montre moi sur  une carte les éléments que tu trouves que je les localiser avec leur nom
 
+Fourni moi également une carte touristique de la région soit via un pdf que tu trouveras ou une url que tu trouveras avec les choses a voir, à faire`
+    
     return texte;
 
 }
