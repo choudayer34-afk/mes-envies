@@ -229,11 +229,15 @@ function initMainButton() {
             return;
         }
 
-        button.addEventListener("click", () => openModal());
+        button.addEventListener("click", () => {
+            renderCreationCategorieSelector();
+            openModal();
+        });
 
     });
 
 }
+
 
 
 function registerServiceWorker() {
