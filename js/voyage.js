@@ -122,9 +122,10 @@ function renderVoyageContenu(envie, container) {
         appendCollapsibleGroup(container, "🔆 Aujourd'hui", ajourdhuiItems, envie, `d_${today}`, true);
     }
 
-    const logements = enfants.filter(e => isLogementCategoryLocal(e.categorie));
+     const logements = estMaison ? [] : enfants.filter(e => isLogementCategoryLocal(e.categorie));
 
     if (logements.length > 0) {
+
 
         const header = document.createElement("div");
         header.className = "checklistCategorieHeader";
