@@ -168,10 +168,13 @@ console.error ("6");
 
     });
 
-    initEnvieCategoriesSync(() => {
+        initEnvieCategoriesSync(() => {
+
+        assurerCategorieProjetMaison();
         renderEnvies();
-        renderCreationCategorieSelector();
+
     });
+
 
     initFichesSurvieCustomSync(() => {
         if (document.getElementById("survieModal")?.classList.contains("hidden") === false) {
