@@ -6,7 +6,7 @@ import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
 import { buildPromptSortie } from "./promptgen.js";
 import { showToast } from "./toast.js";
 import { renderPhotosGrid } from "./photos.js";
-
+import { renderPeintureCalculateur } from "./peinture.js";
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
 import { renderPeriode } from "./periode.js";
@@ -69,7 +69,8 @@ export function openEnvie(id, returnTo = null) {
     renderEvaluation(envie);
 
  renderPeriode(envie);
-    renderChecklist(envie);
+   renderChecklist(envie);
+    renderPeintureCalculateur(envie);
     renderUrls(envie);
        
     renderPhotosGrid(envie);
