@@ -217,19 +217,52 @@ function decouperPlanches(stock, piecesDemandees) {
 function renderDiagrammePlanche(stock, planche, index) {
 
     const couleurs = ["#6FAFC4", "#F2A65A", "#8FBF7F", "#D97C7C", "#B08FD1", "#E0C25A"];
+    const nomsDejaAnnotes = new Set();
 
-    const rects = planche.placements.map((p, i) => `
-        <rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}"
-              fill="${couleurs[i % couleurs.length]}" stroke="white" stroke-width="1.5" opacity="0.9"/>
-        <text x="${p.x + p.w / 2}" y="${p.y + p.h / 2}" font-size="${Math.max(8, Math.min(p.w, p.h) * 0.16)}"
-              text-anchor="middle" dominant-baseline="middle" fill="white" font-weight="600">
-            ${p.nom}${p.rotated ? " ↻" : ""}
-        </text>
-    `).join("");
+    const rects = planche.placements.map((p, i) => {
+
+        const dejaAnnote = nomsDejaAnnotes.has(p.nom);
+
+        if (!dejaAnnote) {
+            nomsDejaAnnotes.add(p.nom);
+        }
+
+        const tailleNom = Math.max(7, Math.min(p.w, p.h) * 0.16);
+        const tailleDim = tailleNom * 0.75;
+
+        const centreX = p.x + p.w / 2;
+        const centreY = p.y + p.h / 2;
+
+        const texteNom = `
+            <text x="${centreX}" y="${dejaAnnote ? centreY : (centreY - tailleDim * 0.7).toFixed(1)}"
+                  font-size="${tailleNom.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
+                  fill="white" font-weight="600">
+                ${p.nom}${p.rotated ? " ↻" : ""}
+            </text>
+        `;
+
+        const texteDim = dejaAnnote ? "" : `
+            <text x="${centreX}" y="${(centreY + tailleNom * 0.7).toFixed(1)}"
+                  font-size="${tailleDim.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
+                  fill="white" opacity="0.9">
+                ${p.rotated ? `${p.h}×${p.w}` : `${p.w}×${p.h}`} cm
+            </text>
+        `;
+
+        return `
+            <rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}"
+                  fill="${couleurs[i % couleurs.length]}" stroke="white" stroke-width="1.5" opacity="0.9"/>
+            ${texteNom}
+            ${texteDim}
+        `;
+
+    }).join("");
 
     return `
         <div style="margin-bottom:14px;">
-            <div style="font-size:13px;font-weight:600;margin-bottom:6px;">Planche brute #${index + 1}</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px;">
+                Planche brute #${index + 1} — ${stock.longueur} × ${stock.largeur} cm
+            </div>
             <svg viewBox="0 0 ${stock.longueur} ${stock.largeur}" style="width:100%;max-width:320px;height:auto;background:#F4F4F4;border-radius:8px;border:1px solid var(--color-border);display:block;">
                 <rect x="0" y="0" width="${stock.longueur}" height="${stock.largeur}" fill="#F4F4F4" stroke="#CCC" stroke-width="1"/>
                 ${rects}
@@ -238,6 +271,7 @@ function renderDiagrammePlanche(stock, planche, index) {
     `;
 
 }
+
 
 function calculerEtAfficherDecoupe(envie, bois) {
 
