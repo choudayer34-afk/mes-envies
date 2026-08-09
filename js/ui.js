@@ -2,6 +2,7 @@ import { getEnvies, toggleFavorite, updateEnvieRealise } from "./storage.js";
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
+import { getModeActif, basculerMode } from "./storage.js";
 
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
@@ -364,4 +365,22 @@ export function initHomeMeteo() {
 
 }
 
+export function initModeBascule() {
+
+    document.querySelectorAll("#modeBascule .itemTypeChip").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            document.querySelectorAll("#modeBascule .itemTypeChip").forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+
+            basculerMode(btn.dataset.mode);
+
+        });
+
+    });
+
+    document.querySelector(`#modeBascule .itemTypeChip[data-mode="${getModeActif()}"]`)?.classList.add("active");
+
+}
 
