@@ -394,8 +394,6 @@ export function initModeBascule() {
 
     });
 
-    document.querySelector(`#modeBascule .itemTypeChip[data-mode="${getModeActif()}"]`)?.classList.add("active");
-
     appliquerAffichageMode();
 
 }
@@ -403,6 +401,10 @@ export function initModeBascule() {
 export function appliquerAffichageMode() {
 
     const mode = getModeActif();
+
+    document.querySelectorAll("#modeBascule .itemTypeChip").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.mode === mode);
+    });
 
     document.querySelectorAll(".voyageOnlyIcon").forEach(el => {
         el.classList.toggle("hidden", mode !== "voyage");
