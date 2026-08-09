@@ -24,11 +24,7 @@ export function renderComparateur(envie) {
 
     const section = document.getElementById("comparateurSection")?.closest(".accordion");
 
-    if (!section)
-        return;
-
-    section.classList.toggle("hidden", envie.contexte !== "maison");
-
+    
     if (envie.contexte !== "maison")
         return;
 
