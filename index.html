@@ -898,7 +898,46 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
         </div>
+<div class="accordion">
 
+    <button
+        class="accordionHeader"
+        data-target="boisSection">
+        <span>🪵 Bois &amp; découpes</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div
+        id="boisSection"
+        class="accordionContent hidden">
+
+        <label class="fieldTitle">Liste des planches</label>
+        <div id="boisPlanchesListe"></div>
+
+        <input type="text" id="boisPlancheNom" placeholder="Nom (ex: Étagère haute)" class="numberInput" style="margin-top:10px;">
+
+        <div class="peintureAddRow peintureAddRow4" style="margin-top:8px;">
+            <input type="number" id="boisPlancheLongueur" placeholder="Longueur (cm)" step="0.1" min="0" class="numberInput">
+            <input type="number" id="boisPlancheLargeur" placeholder="Largeur (cm)" step="0.1" min="0" class="numberInput">
+            <input type="number" id="boisPlancheEpaisseur" placeholder="Épaisseur (mm)" step="1" min="0" class="numberInput">
+            <input type="number" id="boisPlancheQuantite" placeholder="Qté" min="1" value="1" class="numberInput">
+        </div>
+
+        <button id="addBoisPlancheButton" class="secondaryButton" style="margin-top:8px;">
+            ➕ Ajouter une planche
+        </button>
+
+        <div id="boisResultat" class="peintureResultat" style="margin-top:16px;"></div>
+
+        <div style="margin-top:16px;">
+            <small style="color:var(--color-text-light);">
+                🔧 Astuce : utilise <strong>🧳 À emporter</strong> pour l'outillage/visserie, et <strong>📷 Photos</strong> ou <strong>🔗 Ajouter un lien</strong> pour le plan de montage.
+            </small>
+        </div>
+
+    </div>
+
+</div>
         <div class="accordion">
 
             <button
