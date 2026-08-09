@@ -159,9 +159,10 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
 
     });
 
-    toggle.addEventListener("click", () => {
+        const toggleClone = toggle.cloneNode(true);
+    toggle.parentNode.replaceChild(toggleClone, toggle);
 
-        console.log("CLIC sur toggle, avant: categorieGridOuverte=" + categorieGridOuverte);
+    toggleClone.addEventListener("click", () => {
 
         categorieGridOuverte = !categorieGridOuverte;
         grid.style.display = categorieGridOuverte ? "grid" : "none";
@@ -169,6 +170,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
         console.log("après clic toggle, categorieGridOuverte=" + categorieGridOuverte + " display=" + grid.style.display);
 
     });
+
 
     currentCategorie = idActif;
 
