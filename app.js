@@ -42,6 +42,7 @@ import {
     initFamilleImportantSync
 } from "./js/storage.js";
 import { initModeSync } from "./js/storage.js";
+import { initMagasinsSync } from "./js/storage.js";
 
 import { initIdeesMenu } from "./js/ideesmenu.js";
 import { initModeBascule, appliquerAffichageMode } from "./js/ui.js";
@@ -121,6 +122,8 @@ function init() {
     initHebergementTypesSync(() => {});
     initHebergementEquipementsSync(() => {});
     initFamilleImportantSync(() => {});
+        initMagasinsSync(() => {});
+
    
 initModeSync(() => {
     modePret = true;
