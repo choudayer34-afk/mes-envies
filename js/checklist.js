@@ -23,6 +23,15 @@ let currentBulkCategorieId = null;
 
 export function renderChecklist(envie) {
 
+    const toggleVue = document.getElementById("checklistVueToggle");
+
+    if (toggleVue) {
+        toggleVue.style.display = envie.contexte === "maison" ? "none" : "flex";
+    }
+    if (envie.contexte === "maison" && vueActuelle === "personne") {
+        vueActuelle = "categorie";
+    }
+
     const checklist = document.getElementById("checklistContainer");
     checklist.innerHTML = "";
 
