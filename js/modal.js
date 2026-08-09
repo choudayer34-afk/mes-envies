@@ -225,9 +225,9 @@ function saveCurrentEnvie() {
             updateEnvie(currentEditId, titre);
             showToast("✓ Envie modifiée");
 
-              } else {
+                   } else {
 
-               const nouvelId = createEnvie({
+            const nouvelId = createEnvie({
                 titre,
                 categorie: currentCategorie,
                 lieu: getSelectedLieu(),
@@ -236,6 +236,7 @@ function saveCurrentEnvie() {
                 contexte: getModeActif()
             });
 
+            console.log("Créé avec categorie=" + currentCategorie + " contexte=" + getModeActif());
 
             resetSelectedLieu();
             resetSelectedPeriode();
@@ -243,6 +244,7 @@ function saveCurrentEnvie() {
             showToast(voyageContextId ? "✓ Idée ajoutée au voyage" : "✓ Envie ajoutée");
 
         }
+
 
 
         currentEditId = null;
