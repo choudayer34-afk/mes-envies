@@ -6,6 +6,42 @@ import {
 
 let enviesCache = [];
 let onChangeCallback = null;
+let magasinsCache = [];
+
+export function getMagasins() {
+    return [...magasinsCache].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
+}
+
+export function initMagasinsSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(collection(db, "foyers", foyerId, "magasins"), (snap) => {
+
+        magasinsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+
+    });
+
+}
+
+export function rememberMagasin(nom) {
+
+    const nomPropre = nom.trim();
+
+    if (!nomPropre)
+        return;
+
+    const existe = magasinsCache.find(m => m.nom.toLowerCase() === nomPropre.toLowerCase());
+
+    if (existe)
+        return;
+
+    const foyerId = getFoyerId();
+
+    setDoc(doc(collection(db, "foyers", foyerId, "magasins")), { nom: nomPropre }).catch(console.error);
+
+}
 
 export function initEnviesSync(onChange) {
 
