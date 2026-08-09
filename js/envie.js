@@ -10,7 +10,7 @@ import { renderPeintureCalculateur } from "./peinture.js";
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
 import { renderPeriode } from "./periode.js";
-
+import { renderBoisCalculateur } from "./bois.js";
 import { renderVoyageSection } from "./voyage.js";
 import { renderEvaluation } from "./evaluation.js";
 import { getEnvieCategories, isContainerCategory } from "./storage.js";
@@ -71,6 +71,7 @@ export function openEnvie(id, returnTo = null) {
  renderPeriode(envie);
    renderChecklist(envie);
     renderPeintureCalculateur(envie);
+    renderBoisCalculateur(envie);
     renderUrls(envie);
        
     renderPhotosGrid(envie);
