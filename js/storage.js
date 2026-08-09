@@ -28,9 +28,7 @@ export function initEnviesSync(onChange) {
 
 }
 
-export function getEnvies() {
-    return enviesCache;
-}
+
 export function propagateDateToGroup(envieId, date) {
 
     const envie = enviesCache.find(e => e.id === envieId);
@@ -108,6 +106,7 @@ export function createEnvie({
 export function getEnvies() {
     return enviesCache.map(e => ({ ...e, contexte: e.contexte || "voyage" }));
 }
+
 
 
 function patchEnvie(id, fields) {
