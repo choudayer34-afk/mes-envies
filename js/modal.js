@@ -19,6 +19,7 @@ let voyageContextId = null;
 export function openModalVoyageContext(voyageId) {
 
     voyageContextId = voyageId;
+    renderCreationCategorieSelector();
     openModal();
 
 }
@@ -28,19 +29,13 @@ export function openModalConteneurSelonMode() {
     const mode = getModeActif();
     const labelRecherche = mode === "maison" ? "Projet maison" : "Voyage";
 
+    const cat = getEnvieCategories().find(c => c.label === labelRecherche);
+
+    renderCreationCategorieSelector(cat?.id || null);
     openModal();
 
-    setTimeout(() => {
-
-        const cat = getEnvieCategories().find(c => c.label === labelRecherche);
-
-        if (cat) {
-            renderCreationCategorieSelector(cat.id);
-        }
-
-    }, 100);
-
 }
+
 
 /* ---------- Modale création / édition ---------- */
 
