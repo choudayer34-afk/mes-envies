@@ -59,6 +59,13 @@ export function openEnvie(id, returnTo = null) {
 
     document.getElementById("ficheDescription").value = envie.description || "";
     renderVoyageSection(envie);
+    
+        const voyageLabel = document.getElementById("voyageSectionLabel");
+
+    if (voyageLabel) {
+        voyageLabel.textContent = envie.contexte === "maison" ? "🛠️ Projet" : "🧳 Voyage";
+    }
+
     renderEvaluation(envie);
 
  renderPeriode(envie);
