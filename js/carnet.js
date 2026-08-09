@@ -12,12 +12,12 @@ export function renderCarnetVoyage(envie, container) {
 
     const estMaison = envie.contexte === "maison";
 
+    const enfants = getEnvies().filter(e => e.voyageId === envie.id && (e.realise || isLogementCategory(e.categorie)));
+
     if (enfants.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune ${estMaison ? "tâche terminée" : "activité réalisée"} n'a encore été enregistrée pour ce ${estMaison ? "projet" : "voyage"}.</div>`;
         return;
     }
-
-    const enfants = getEnvies().filter(e => e.voyageId === envie.id && (e.realise || isLogementCategory(e.categorie)));
 
     const editButton = document.createElement("button");
     editButton.className = "secondaryButton";
@@ -30,7 +30,6 @@ export function renderCarnetVoyage(envie, container) {
     });
 
     container.appendChild(editButton);
-
 
     const albumButton = document.createElement("button");
     albumButton.className = "secondaryButton";
@@ -63,7 +62,7 @@ export function renderCarnetVoyage(envie, container) {
             const row = document.createElement("div");
             row.className = "templateRow";
 
-                        row.innerHTML = `
+            row.innerHTML = `
                 <div class="templateRowNom">${idee.titre}</div>
                 <div class="templateRowActions">
                     <button class="actionButton basculerButton" title="Basculer vers un autre voyage">🧳</button>
@@ -71,7 +70,6 @@ export function renderCarnetVoyage(envie, container) {
                     <button class="actionButton deleteButton" title="Supprimer">🗑️</button>
                 </div>
             `;
-
 
             row.querySelector(".libererButton").addEventListener("click", () => {
 
@@ -101,12 +99,6 @@ export function renderCarnetVoyage(envie, container) {
 
         container.appendChild(bloc);
 
-    }
-
-
-    if (enfants.length === 0) {
-        container.innerHTML = `<div class="emptyState">Aucune activité réalisée n'a encore été enregistrée pour ce voyage.</div>`;
-        return;
     }
 
     const groupes = {};
@@ -141,6 +133,7 @@ export function renderCarnetVoyage(envie, container) {
     }
 
 }
+
 
 
 
