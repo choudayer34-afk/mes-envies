@@ -46,7 +46,7 @@ import { initModeSync } from "./js/storage.js";
 import { initIdeesMenu } from "./js/ideesmenu.js";
 import { initModeBascule, appliquerAffichageMode } from "./js/ui.js";
 import { assurerCategorieProjetMaison } from "./js/storage.js";
-
+import { initBoisCalculateur } from "./js/bois.js";
 
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
 import { initFicheTitre } from "./js/envie.js";
@@ -224,6 +224,7 @@ initModal();
     initUrlModal();
     initChecklistModal();
     initPeintureCalculateur();
+ initBoisCalculateur();
     initAccordions();
 
     document.getElementById("closeFiche")
