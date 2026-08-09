@@ -142,6 +142,8 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
 
             console.log("CLIC sur chip " + cat.label);
 
+                    chip.addEventListener("click", () => {
+
             document.querySelectorAll("#creationCategorieGrid .categorieChip")
                 .forEach(c => c.classList.remove("active"));
 
@@ -149,6 +151,7 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
             currentCategorie = cat.id;
 
             toggle.querySelector("span").textContent = `${cat.emoji} ${cat.label}`;
+
 
             categorieGridOuverte = false;
             grid.style.display = "none";
