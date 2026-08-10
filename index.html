@@ -1538,6 +1538,29 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+
+    <div id="couverturePositionModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <h2>📷 Positionner la photo</h2>
+
+        <p style="font-size:13px;color:var(--color-text-light);">Touche l'endroit de la photo que tu veux voir bien centré sur la carte.</p>
+
+        <div id="couvertureCropFrame" style="position:relative;width:100%;aspect-ratio:16/9;border-radius:16px;overflow:hidden;background:#EEE;touch-action:none;">
+            <img id="couvertureCropImage" src="" style="width:100%;height:100%;object-fit:cover;object-position:50% 50%;display:block;">
+            <div id="couvertureCropMarker" style="position:absolute;width:28px;height:28px;border:3px solid white;border-radius:50%;box-shadow:0 0 0 2px rgba(0,0,0,.4);left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;"></div>
+        </div>
+
+        <div class="modal-actions">
+            <button id="cancelCouverturePosition">Annuler</button>
+            <button id="saveCouverturePosition">Valider</button>
+        </div>
+
+    </div>
+
+</div>
+    
 <div id="photoViewerModal" class="modal-overlay hidden" style="background:rgba(0,0,0,.92);">
 
     <div class="modal" style="background:transparent;box-shadow:none;padding:16px;">
