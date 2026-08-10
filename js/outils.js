@@ -53,6 +53,7 @@ export function initOutils() {
     initSuiteLogique();
         initRunner();
     initSnake();
+    initNback();
     initBreakout();
 initTetris();
 initTaquin();
@@ -4078,6 +4079,175 @@ function afficherProchainVisageTest() {
         zoneOptions.appendChild(bouton);
 
     });
+
+}
+
+/* ---------- N-back (stimulation mémoire de travail) ---------- */
+
+const NBACK_LETTRES = ["A", "B", "C", "D", "E", "F", "G", "H"];
+const NBACK_LONGUEUR = 20;
+const NBACK_PROBA_MATCH = 0.3;
+const NBACK_INTERVALLE_MS = 2500;
+
+let nbackState = null;
+let nbackTimer = null;
+
+function nbackGenererSequence(n, longueur, probaMatch) {
+
+    const sequence = [];
+    const estMatch = [];
+
+    for (let i = 0; i < longueur; i++) {
+
+        if (i < n) {
+            sequence.push(NBACK_LETTRES[Math.floor(Math.random() * NBACK_LETTRES.length)]);
+            estMatch.push(false);
+            continue;
+        }
+
+        const lettreNBack = sequence[i - n];
+        const forcerMatch = Math.random() < probaMatch;
+
+        if (forcerMatch) {
+
+            sequence.push(lettreNBack);
+            estMatch.push(true);
+
+        } else {
+
+            const choix = NBACK_LETTRES.filter(l => l !== lettreNBack);
+            sequence.push(choix[Math.floor(Math.random() * choix.length)]);
+            estMatch.push(false);
+
+        }
+
+    }
+
+    return { sequence, estMatch };
+
+}
+
+function initNback() {
+
+    const zone = document.getElementById("nbackLettreAffichee");
+
+    if (!zone)
+        return;
+
+    document.querySelectorAll("#nbackDifficulteToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+            document.querySelectorAll("#nbackDifficulteToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+        });
+
+    });
+
+    document.getElementById("nbackBtnMatch")?.addEventListener("click", () => {
+
+        if (!nbackState || nbackState.phase !== "jeu" || nbackState.aRepondu)
+            return;
+
+        nbackState.aRepondu = true;
+
+        const indexActuel = nbackState.index;
+
+        if (nbackState.estMatch[indexActuel]) {
+            nbackState.hits++;
+        } else {
+            nbackState.faussesAlertes++;
+        }
+
+    });
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("nbackModal")?.classList.contains("hidden"))
+            return;
+
+        if (event.code === "Space") {
+            event.preventDefault();
+            document.getElementById("nbackBtnMatch")?.click();
+        }
+
+    });
+
+    document.getElementById("nbackBtnAction")?.addEventListener("click", demarrerNback);
+
+    document.querySelector("#nbackModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (nbackTimer) {
+            clearInterval(nbackTimer);
+            nbackTimer = null;
+        }
+
+    });
+
+}
+
+function demarrerNback() {
+
+    if (nbackTimer) {
+        clearInterval(nbackTimer);
+    }
+
+    const n = Number(document.querySelector("#nbackDifficulteToggle .itemTypeChip.active")?.dataset.n || 1);
+    const { sequence, estMatch } = nbackGenererSequence(n, NBACK_LONGUEUR, NBACK_PROBA_MATCH);
+
+    nbackState = {
+        n,
+        sequence,
+        estMatch,
+        index: -1,
+        aRepondu: false,
+        hits: 0,
+        oublis: 0,
+        faussesAlertes: 0,
+        phase: "jeu"
+    };
+
+    document.getElementById("nbackResultat").textContent = "";
+    document.getElementById("nbackBtnAction").style.display = "none";
+    document.getElementById("nbackBtnMatch").disabled = false;
+
+    avancerNback();
+
+    nbackTimer = setInterval(avancerNback, NBACK_INTERVALLE_MS);
+
+}
+
+function avancerNback() {
+
+    const s = nbackState;
+
+    if (s.index >= 0 && s.index < s.n === false && s.estMatch[s.index] && !s.aRepondu) {
+        s.oublis++;
+    }
+
+    s.index++;
+
+    if (s.index >= s.sequence.length) {
+
+        clearInterval(nbackTimer);
+        nbackTimer = null;
+
+        s.phase = "fin";
+
+        document.getElementById("nbackLettreAffichee").textContent = "";
+        document.getElementById("nbackBtnMatch").disabled = true;
+        document.getElementById("nbackBtnAction").style.display = "block";
+        document.getElementById("nbackBtnAction").textContent = "🔄 Recommencer";
+
+        document.getElementById("nbackResultat").textContent =
+            `✅ ${s.hits} détectés · 😶 ${s.oublis} oubliés · ⚠️ ${s.faussesAlertes} fausses alertes`;
+
+        return;
+
+    }
+
+    s.aRepondu = false;
+
+    document.getElementById("nbackLettreAffichee").textContent = s.sequence[s.index];
 
 }
 
