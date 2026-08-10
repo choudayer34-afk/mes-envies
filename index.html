@@ -2241,6 +2241,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <button id="btnDes" class="secondaryButton" style="width:100%;margin-bottom:14px;">
     🎲 Lancer des dés
 </button>
+<button class="secondaryButton outilOuvrirButton" data-modal="memMotsModal" id="btnOuvrirMemMots" style="width:100%;margin-bottom:10px;">📝 Liste de mots</button>
 
 <input
     id="jeuxSearchInput"
@@ -2291,6 +2292,37 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+
+<div id="memMotsModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>📝 Liste de mots</h2>
+
+        <div class="itemTypeToggle" id="memMotsDifficulteToggle">
+            <button type="button" class="itemTypeChip active" data-nb="5">Facile (5 mots)</button>
+            <button type="button" class="itemTypeChip" data-nb="8">Moyen (8 mots)</button>
+            <button type="button" class="itemTypeChip" data-nb="12">Difficile (12 mots)</button>
+        </div>
+
+        <div style="margin-top:16px;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+
+            <div id="memMotsAffichage" style="font-size:28px;font-weight:700;color:var(--color-text);"></div>
+
+            <div id="memMotsGrille" style="display:none;grid-template-columns:repeat(auto-fill, minmax(100px, 1fr));gap:8px;width:100%;"></div>
+
+        </div>
+
+        <div id="memMotsResultat" style="text-align:center;margin-top:10px;font-size:14px;color:var(--color-text-light);"></div>
+
+        <button id="memMotsBtnAction" class="primaryButton" style="width:100%;margin-top:14px;">▶️ Commencer</button>
+
+    </div>
+
+</div>
+
 <div id="outilsMenuModal" class="modal-overlay hidden">
     <div class="modal">
         <button id="closeOutilsMenu" class="backButton">← Retour</button>
