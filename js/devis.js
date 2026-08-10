@@ -3,6 +3,7 @@ import { getEnvies, updateEnvieDevis } from "./storage.js";
 import { showToast } from "./toast.js";
 import { uploadToCloudinary, compresserImageAvantEnvoi } from "./photos.js";
 import { ouvrirImageAgrandie } from "./comparateur.js";
+import { getEnvies, updateEnvieDevis, getSocietes, rememberSociete } from "./storage.js";
 
 let devisEnCoursId = null;
 let photosEnCours = [];
@@ -28,7 +29,17 @@ export function renderDevis(envie) {
     if (envie.contexte !== "maison")
         return;
 
-    renderListeDevis(envie, getDevisData(envie));
+    const devis = getDevisData(envie);
+
+    const header = document.querySelector('.accordionHeader[data-target="devisSection"] span');
+
+    if (header) {
+        header.textContent = devis.entries.length > 0
+            ? `📋 Devis (${devis.entries.length})`
+            : `📋 Devis`;
+    }
+
+    renderListeDevis(envie, devis);
 
 }
 
@@ -75,7 +86,8 @@ function creerCarteDevis(envie, devis, entry) {
         entry.email ? `<a href="mailto:${entry.email}">✉️ ${entry.email}</a>` : null
     ].filter(Boolean).join(" · ");
 
-    const lignesDetails = [
+  const lignesDetails = [
+        entry.prix != null ? `💰 ${entry.prix} €` : null,
         entry.dateDevis ? `📅 Devis du ${formatDateFr(entry.dateDevis)}` : null,
         entry.statut === "rdv_planifie" && entry.dateRdv ? `🗓️ RDV le ${formatDateFr(entry.dateRdv)}` : null
     ].filter(Boolean).join(" · ");
@@ -90,6 +102,7 @@ function creerCarteDevis(envie, devis, entry) {
             ${badgeStatut}
             ${lignesContact ? `<div class="comparateurCardMeta">${lignesContact}</div>` : ""}
             ${lignesDetails ? `<div class="comparateurCardMeta">${lignesDetails}</div>` : ""}
+            ${entry.description ? `<div class="comparateurCardRemarque">"${entry.description}"</div>` : ""}
             ${entry.docUrl ? `<div class="comparateurCardMeta"><a href="${entry.docUrl}" target="_blank">📄 ${entry.docNom || "Voir le devis"}</a></div>` : ""}
             ${photosHtml ? `<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">${photosHtml}</div>` : ""}
             <div class="comparateurCardActions">
@@ -190,6 +203,49 @@ function renderDocEnCours() {
 
 }
 
+function renderSuggestionsSociete(filtre) {
+
+    const container = document.getElementById("devisSocieteSuggestions");
+
+    if (!container)
+        return;
+
+    const requete = filtre.trim().toLowerCase();
+
+    const resultats = getSocietes()
+        .filter(s => !requete || s.societe.toLowerCase().includes(requete))
+        .slice(0, 20);
+
+    if (resultats.length === 0) {
+        container.classList.add("hidden");
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML = resultats.map(s => `<div class="autocompleteItem">${s.societe}</div>`).join("");
+    container.classList.remove("hidden");
+
+    container.querySelectorAll(".autocompleteItem").forEach((item, i) => {
+
+        item.addEventListener("mousedown", (event) => {
+
+            event.preventDefault();
+
+            const societe = resultats[i];
+
+            document.getElementById("devisSociete").value = societe.societe;
+            document.getElementById("devisContact").value = societe.contact || "";
+            document.getElementById("devisTelephone").value = societe.telephone || "";
+            document.getElementById("devisEmail").value = societe.email || "";
+
+            container.classList.add("hidden");
+
+        });
+
+    });
+
+}
+
 function ouvrirModalDevis(entry = null) {
 
     devisEnCoursId = entry?.id || null;
@@ -204,7 +260,9 @@ function ouvrirModalDevis(entry = null) {
     document.getElementById("devisContact").value = entry?.contact || "";
     document.getElementById("devisTelephone").value = entry?.telephone || "";
     document.getElementById("devisEmail").value = entry?.email || "";
+    document.getElementById("devisPrix").value = entry?.prix ?? "";
     document.getElementById("devisDate").value = entry?.dateDevis || "";
+    document.getElementById("devisDescription").value = entry?.description || "";
     document.getElementById("devisLien").value = entry?.lien || "";
     document.getElementById("devisRdvDate").value = entry?.dateRdv || "";
 
@@ -290,8 +348,23 @@ export function initDevis() {
         document.getElementById("devisPhotoInput")?.click();
     });
 
+    const societeInput = document.getElementById("devisSociete");
+
+    societeInput?.addEventListener("input", () => {
+        renderSuggestionsSociete(societeInput.value);
+    });
+
+    societeInput?.addEventListener("focus", () => {
+        renderSuggestionsSociete(societeInput.value);
+    });
+
+    societeInput?.addEventListener("blur", () => {
+        document.getElementById("devisSocieteSuggestions")?.classList.add("hidden");
+    });
+    
     document.getElementById("devisPhotoInput")?.addEventListener("change", async (event) => {
 
+        
         const fichiers = Array.from(event.target.files || []);
 
         if (fichiers.length === 0)
@@ -388,7 +461,7 @@ export function initDevis() {
 
     });
 
-    document.getElementById("saveDevis")?.addEventListener("click", () => {
+   document.getElementById("saveDevis")?.addEventListener("click", () => {
 
         const societe = document.getElementById("devisSociete").value.trim();
         const contact = document.getElementById("devisContact").value.trim();
@@ -406,13 +479,20 @@ export function initDevis() {
         const devis = getDevisData(envie);
 
         const statutActuel = document.querySelector("#devisStatutToggle .itemTypeChip.active")?.dataset.statut || "a_contacter";
+        const telephone = document.getElementById("devisTelephone").value.trim();
+        const email = document.getElementById("devisEmail").value.trim();
+        const prixSaisi = parseFloat(document.getElementById("devisPrix").value);
+
+        rememberSociete({ societe, contact, telephone, email });
 
         const donneesDevis = {
             societe,
             contact,
-            telephone: document.getElementById("devisTelephone").value.trim(),
-            email: document.getElementById("devisEmail").value.trim(),
+            telephone,
+            email,
+            prix: isNaN(prixSaisi) ? null : prixSaisi,
             dateDevis: document.getElementById("devisDate").value || null,
+            description: document.getElementById("devisDescription").value.trim(),
             lien: document.getElementById("devisLien").value.trim(),
             statut: statutActuel,
             dateRdv: statutActuel === "rdv_planifie" ? (document.getElementById("devisRdvDate").value || null) : null,
