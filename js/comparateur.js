@@ -116,7 +116,7 @@ function creerCarteProduit(envie, comparateur, produit) {
             <div class="comparateurCardActions">
                 ${produit.url ? `<a href="${produit.url}" target="_blank" class="secondaryButton" style="text-decoration:none;padding:6px 12px;font-size:13px;">🔗 Voir</a>` : ""}
                 <button type="button" class="comparateurRetenuButton${produit.retenu ? " active" : ""}">✓ Retenu</button>
-                <button type="button" class="secondaryButton comparateurEditButton" style="padding:6px 12px;font-size:13px;">✏️</button>
+                <button type="button" class="iconSmallButton comparateurEditButton">✏️</button>
                 <button type="button" class="deleteChecklistButton comparateurDeleteButton" title="Supprimer" style="margin-left:auto;">🗑️</button>
             </div>
         </div>
