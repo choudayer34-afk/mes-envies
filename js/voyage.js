@@ -107,10 +107,15 @@ function renderVoyageContenu(envie, container) {
         couvertureRow.style.backgroundImage = `url(${envie.photoCouverture})`;
     }
 
-    couvertureRow.innerHTML = `
+couvertureRow.innerHTML = `
         <button id="addPhotoCouvertureButton" class="secondaryButton" style="position:relative;z-index:2;">
             📷 ${envie.photoCouverture ? "Changer la photo" : "Ajouter une photo de couverture"}
         </button>
+        ${envie.photoCouverture ? `
+        <button id="repositionnerCouvertureButton" class="secondaryButton" style="position:relative;z-index:2;margin-top:8px;">
+            🎯 Repositionner
+        </button>
+        ` : ""}
         <input type="file" id="photoCouvertureInput" accept="image/*" hidden>
     `;
 
