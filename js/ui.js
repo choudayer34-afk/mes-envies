@@ -413,15 +413,15 @@ function createEnvieCard(envie) {
 
     });
 
-    let statutHtml = "";
+      let statutHtml = "";
 
     if (isContainer(envie.categorie)) {
 
-        const { statut, pourcentage } = computeContainerStatus(envie);
+        const { statut, pourcentage, realises, total } = computeContainerStatus(envie);
 
         let decompteHtml = "";
 
-        if (statut === "planifie" && envie.date?.start) {
+               if (statut === "planifie" && envie.date?.start) {
 
             const jours = Math.ceil((new Date(envie.date.start) - new Date()) / (1000 * 60 * 60 * 24));
 
@@ -444,9 +444,14 @@ function createEnvieCard(envie) {
 
         }
 
-        statutHtml = decompteHtml;
+        const tachesHtml = total > 0
+            ? `<div class="containerTachesCount">${realises}/${total} tâche${total > 1 ? "s" : ""}</div>`
+            : "";
+
+        statutHtml = decompteHtml + tachesHtml;
 
     }
+
 
 
     if (isContainer(envie.categorie) && envie.photoCouverture) {
