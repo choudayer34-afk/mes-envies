@@ -243,6 +243,22 @@ function createCompactRow(envie) {
 
 }
 
+function calculerNomsTachesRestantes(container) {
+
+    if (container.contexte !== "maison")
+        return "";
+
+    const restantes = getEnvies().filter(e => e.voyageId === container.id && !e.realise);
+
+    if (restantes.length === 0 || restantes.length >= 5)
+        return "";
+
+    const noms = restantes.map(t => `<div class="envieTacheRestante">• ${t.titre}</div>`).join("");
+
+    return `<div class="envieTachesRestantesListe">${noms}</div>`;
+
+}
+
 function calculerPucesMaison(container) {
 
     if (container.contexte !== "maison")
@@ -475,8 +491,9 @@ function createEnvieCard(envie) {
         <div class="envieCategory">
             ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
-        ${statutHtml}
+${statutHtml}
         ${calculerPucesMaison(envie)}
+        ${calculerNomsTachesRestantes(envie)}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
