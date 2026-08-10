@@ -2242,6 +2242,7 @@ document.addEventListener("DOMContentLoaded", () => {
     🎲 Lancer des dés
 </button>
 <button class="secondaryButton outilOuvrirButton" data-modal="memMotsModal" id="btnOuvrirMemMots" style="width:100%;margin-bottom:10px;">📝 Liste de mots</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="memVisagesModal" id="btnOuvrirMemVisages" style="width:100%;margin-bottom:10px;">👤 Visages et prénoms</button>
 
 <input
     id="jeuxSearchInput"
@@ -2288,6 +2289,34 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="lancerDesButton" class="primaryButton" style="width:100%;">
             🎲 Lancer
         </button>
+
+    </div>
+
+</div>
+<div id="memVisagesModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>👤 Visages et prénoms</h2>
+
+        <div class="itemTypeToggle" id="memVisagesDifficulteToggle">
+            <button type="button" class="itemTypeChip active" data-nb="4">Facile (4)</button>
+            <button type="button" class="itemTypeChip" data-nb="6">Moyen (6)</button>
+            <button type="button" class="itemTypeChip" data-nb="9">Difficile (9)</button>
+        </div>
+
+        <div id="memVisagesEtudeGrille" style="display:none;grid-template-columns:repeat(auto-fill, minmax(90px, 1fr));gap:10px;margin-top:16px;"></div>
+
+        <div id="memVisagesTestZone" style="display:none;flex-direction:column;align-items:center;margin-top:16px;">
+            <div id="memVisagesTestVisage" style="font-size:64px;margin-bottom:12px;"></div>
+            <div id="memVisagesTestOptions" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;"></div>
+        </div>
+
+        <div id="memVisagesResultat" style="text-align:center;margin-top:14px;font-size:14px;color:var(--color-text-light);"></div>
+
+        <button id="memVisagesBtnAction" class="primaryButton" style="width:100%;margin-top:14px;">▶️ Commencer</button>
 
     </div>
 
