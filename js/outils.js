@@ -53,6 +53,7 @@ export function initOutils() {
     initSuiteLogique();
         initRunner();
     initSnake();
+    initBreakout();
 
 initGameboyMenu();
     initPileOuFace();
@@ -1950,8 +1951,10 @@ function bouclerRunner() {
 
 const CARTOUCHES_GAMEBOY = [
     { nom: "Coureur sans fin", emoji: "🦖", couleur: "#E4572E", modal: "runnerModal", demarrer: () => demarrerRunner() },
-    { nom: "Serpent", emoji: "🐍", couleur: "#4C9F70", modal: "snakeModal", demarrer: () => demarrerSnake() }
+    { nom: "Serpent", emoji: "🐍", couleur: "#4C9F70", modal: "snakeModal", demarrer: () => demarrerSnake() },
+    { nom: "Casse-briques", emoji: "🧊", couleur: "#3E7CB1", modal: "breakoutModal", demarrer: () => demarrerBreakout() }
 ];
+
 
 function initGameboyMenu() {
 
@@ -2201,4 +2204,272 @@ function bouclerSnake(timestamp) {
 
 }
 
+/* ---------- Casse-briques (Game Boy) ---------- */
+
+let breakoutCtx = null;
+let breakoutAnimId = null;
+let breakoutState = null;
+
+function initBreakout() {
+
+    const canvas = document.getElementById("breakoutCanvas");
+
+    if (!canvas)
+        return;
+
+    breakoutCtx = canvas.getContext("2d");
+
+    const definirMouvement = (direction, actif) => {
+
+        if (!breakoutState)
+            return;
+
+        if (direction === "gauche") breakoutState.gauche = actif;
+        if (direction === "droite") breakoutState.droite = actif;
+
+    };
+
+    const lancerBalle = () => {
+
+        if (!breakoutState || breakoutState.gameOver) {
+            demarrerBreakout();
+            return;
+        }
+
+        if (!breakoutState.lancee) {
+            breakoutState.lancee = true;
+            breakoutState.vx = 2.2;
+            breakoutState.vy = -3;
+        }
+
+    };
+
+    ["mousedown", "touchstart"].forEach(evt => {
+        document.getElementById("breakoutBtnLeft")?.addEventListener(evt, (e) => { e.preventDefault(); definirMouvement("gauche", true); });
+        document.getElementById("breakoutBtnRight")?.addEventListener(evt, (e) => { e.preventDefault(); definirMouvement("droite", true); });
+    });
+
+    ["mouseup", "mouseleave", "touchend"].forEach(evt => {
+        document.getElementById("breakoutBtnLeft")?.addEventListener(evt, () => definirMouvement("gauche", false));
+        document.getElementById("breakoutBtnRight")?.addEventListener(evt, () => definirMouvement("droite", false));
+    });
+
+    document.getElementById("breakoutBtnA")?.addEventListener("click", lancerBalle);
+    document.getElementById("breakoutBtnStart")?.addEventListener("click", demarrerBreakout);
+    canvas.addEventListener("pointerdown", lancerBalle);
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("breakoutModal")?.classList.contains("hidden"))
+            return;
+
+        if (event.code === "ArrowLeft") { event.preventDefault(); definirMouvement("gauche", true); }
+        if (event.code === "ArrowRight") { event.preventDefault(); definirMouvement("droite", true); }
+        if (event.code === "Space") { event.preventDefault(); lancerBalle(); }
+
+    });
+
+    document.addEventListener("keyup", (event) => {
+
+        if (event.code === "ArrowLeft") definirMouvement("gauche", false);
+        if (event.code === "ArrowRight") definirMouvement("droite", false);
+
+    });
+
+    document.querySelector("#breakoutModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (breakoutAnimId) {
+            cancelAnimationFrame(breakoutAnimId);
+            breakoutAnimId = null;
+        }
+
+        document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+
+    });
+
+}
+
+function genererBriquesBreakout(canvas) {
+
+    const briques = [];
+    const colonnes = 6;
+    const lignes = 4;
+    const marge = 6;
+    const largeurBrique = (canvas.width - marge * (colonnes + 1)) / colonnes;
+    const hauteurBrique = 12;
+
+    for (let ligne = 0; ligne < lignes; ligne++) {
+
+        for (let colonne = 0; colonne < colonnes; colonne++) {
+
+            briques.push({
+                x: marge + colonne * (largeurBrique + marge),
+                y: 24 + ligne * (hauteurBrique + marge),
+                w: largeurBrique,
+                h: hauteurBrique,
+                vivante: true
+            });
+
+        }
+
+    }
+
+    return briques;
+
+}
+
+function demarrerBreakout() {
+
+    if (breakoutAnimId) {
+        cancelAnimationFrame(breakoutAnimId);
+    }
+
+    const canvas = document.getElementById("breakoutCanvas");
+
+    breakoutState = {
+        paddleX: canvas.width / 2 - 24,
+        paddleW: 48,
+        paddleH: 8,
+        paddleY: canvas.height - 16,
+        bx: canvas.width / 2,
+        by: canvas.height - 20,
+        rayon: 4,
+        vx: 0,
+        vy: 0,
+        lancee: false,
+        gauche: false,
+        droite: false,
+        score: 0,
+        gameOver: false,
+        briques: genererBriquesBreakout(canvas)
+    };
+
+    document.getElementById("breakoutGameOverOverlay")?.classList.add("hidden");
+    document.getElementById("breakoutScoreOverlay").textContent = "00000";
+
+    bouclerBreakout();
+
+}
+
+function bouclerBreakout() {
+
+    if (!breakoutCtx || !breakoutState)
+        return;
+
+    const canvas = document.getElementById("breakoutCanvas");
+    const s = breakoutState;
+
+    if (!s.gameOver) {
+
+        const vitessePaddle = 4;
+
+        if (s.gauche) s.paddleX -= vitessePaddle;
+        if (s.droite) s.paddleX += vitessePaddle;
+
+        s.paddleX = Math.max(0, Math.min(canvas.width - s.paddleW, s.paddleX));
+
+        if (!s.lancee) {
+
+            s.bx = s.paddleX + s.paddleW / 2;
+            s.by = s.paddleY - s.rayon - 1;
+
+        } else {
+
+            s.bx += s.vx;
+            s.by += s.vy;
+
+            if (s.bx - s.rayon <= 0) {
+                s.bx = s.rayon;
+                s.vx = Math.abs(s.vx);
+            }
+
+            if (s.bx + s.rayon >= canvas.width) {
+                s.bx = canvas.width - s.rayon;
+                s.vx = -Math.abs(s.vx);
+            }
+
+            if (s.by - s.rayon <= 0) {
+                s.by = s.rayon;
+                s.vy = Math.abs(s.vy);
+            }
+
+            if (
+                s.vy > 0 &&
+                s.by + s.rayon >= s.paddleY &&
+                s.by + s.rayon <= s.paddleY + s.paddleH + 4 &&
+                s.bx >= s.paddleX &&
+                s.bx <= s.paddleX + s.paddleW
+            ) {
+
+                s.by = s.paddleY - s.rayon;
+                s.vy = -Math.abs(s.vy);
+
+                const impact = (s.bx - (s.paddleX + s.paddleW / 2)) / (s.paddleW / 2);
+                s.vx = impact * 3;
+
+            }
+
+            s.briques.forEach(b => {
+
+                if (!b.vivante)
+                    return;
+
+                const chevauche = s.bx + s.rayon > b.x && s.bx - s.rayon < b.x + b.w &&
+                    s.by + s.rayon > b.y && s.by - s.rayon < b.y + b.h;
+
+                if (chevauche) {
+                    b.vivante = false;
+                    s.vy = -s.vy;
+                    s.score += 10;
+                }
+
+            });
+
+            if (s.by - s.rayon > canvas.height) {
+                s.gameOver = true;
+            }
+
+            if (s.briques.every(b => !b.vivante)) {
+
+                s.briques = genererBriquesBreakout(canvas);
+                s.lancee = false;
+                s.vx = 0;
+                s.vy = 0;
+                s.score += 50;
+
+            }
+
+        }
+
+        document.getElementById("breakoutScoreOverlay").textContent = String(s.score).padStart(5, "0");
+
+    }
+
+    breakoutCtx.fillStyle = "#9BBC0F";
+    breakoutCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    breakoutCtx.fillStyle = "#0F380F";
+
+    s.briques.forEach(b => {
+        if (b.vivante) breakoutCtx.fillRect(b.x, b.y, b.w, b.h);
+    });
+
+    breakoutCtx.fillRect(s.paddleX, s.paddleY, s.paddleW, s.paddleH);
+
+    breakoutCtx.beginPath();
+    breakoutCtx.arc(s.bx, s.by, s.rayon, 0, Math.PI * 2);
+    breakoutCtx.fill();
+
+    if (s.gameOver) {
+
+        document.getElementById("breakoutGameOverOverlay")?.classList.remove("hidden");
+        document.getElementById("breakoutScoreFinal").textContent = `Score : ${s.score}`;
+
+        return;
+
+    }
+
+    breakoutAnimId = requestAnimationFrame(bouclerBreakout);
+
+}
 
