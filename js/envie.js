@@ -199,14 +199,14 @@ export function closeFiche() {
 
 }
 
-export function initAccordions() {
+export function initAccordions(containerId = "ficheOverlay") {
 
-    const ficheOverlay = document.getElementById("ficheOverlay");
+    const container = document.getElementById(containerId);
 
-    if (!ficheOverlay)
+    if (!container)
         return;
 
-    ficheOverlay.addEventListener("click", (event) => {
+    container.addEventListener("click", (event) => {
 
         const header = event.target.closest(".accordionHeader");
 
@@ -220,7 +220,7 @@ export function initAccordions() {
 
         const etaitOuvert = !section.classList.contains("hidden");
 
-        document.querySelectorAll(".accordionHeader").forEach(autreHeader => {
+        container.querySelectorAll(".accordionHeader").forEach(autreHeader => {
 
             const autreSection = document.getElementById(autreHeader.dataset.target);
 
