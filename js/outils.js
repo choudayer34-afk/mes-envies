@@ -57,6 +57,7 @@ export function initOutils() {
 initTetris();
 initTaquin();
     initMemMots();
+    initMemVisages();
     initDemineur();
 initMemoireChiffres();
 initGameboyMenu();
