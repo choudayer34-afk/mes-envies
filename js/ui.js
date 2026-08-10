@@ -90,7 +90,7 @@ function renderHomeSections() {
         !isContainer(e.categorie) && e.date?.start === today
     );
 
-        const enCoursItems = envies.filter(e => {
+    const enCoursItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
         const { statut } = computeContainerStatus(e);
         return statut === "en_cours";
@@ -216,17 +216,13 @@ function createCompactRow(envie) {
 
     });
 
-        row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
-
-        console.log("Crayon (accueil) cliqué, envie=" + JSON.stringify({ id: envie?.id, titre: envie?.titre }));
+    row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
 
         event.stopPropagation();
         event.preventDefault();
 
         try {
             openEnvie(envie.id, null);
-
-            console.log("openEnvie OK (accueil)");
         } catch (err) {
             console.error("ERREUR dans le handler crayon accueil: " + err.message);
         }
@@ -307,7 +303,7 @@ function createEnvieCard(envie) {
 
     });
 
-        let statutHtml = "";
+    let statutHtml = "";
 
     if (isContainer(envie.categorie)) {
 
@@ -315,7 +311,7 @@ function createEnvieCard(envie) {
 
         let decompteHtml = "";
 
-               if (statut === "planifie" && envie.date?.start) {
+        if (statut === "planifie" && envie.date?.start) {
 
             const jours = Math.ceil((new Date(envie.date.start) - new Date()) / (1000 * 60 * 60 * 24));
 
@@ -343,7 +339,7 @@ function createEnvieCard(envie) {
     }
 
 
-      if (isContainer(envie.categorie) && envie.photoCouverture) {
+    if (isContainer(envie.categorie) && envie.photoCouverture) {
         card.style.backgroundImage = `linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.45)), url(${envie.photoCouverture})`;
         card.classList.add("envie-card-avec-photo");
     }
@@ -362,7 +358,7 @@ function createEnvieCard(envie) {
         <div class="envieCategory">
             ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
-${statutHtml}
+        ${statutHtml}
         ${calculerPucesMaison(envie)}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
@@ -371,7 +367,7 @@ ${statutHtml}
 
     card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
-       openEnvie(envie.id, null);
+        openEnvie(envie.id, null);
 
     });
 
