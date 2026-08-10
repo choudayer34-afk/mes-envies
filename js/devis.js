@@ -1,5 +1,4 @@
 import { getCurrentEnvieId } from "./envie.js";
-import { getEnvies, updateEnvieDevis } from "./storage.js";
 import { showToast } from "./toast.js";
 import { uploadToCloudinary, compresserImageAvantEnvoi } from "./photos.js";
 import { ouvrirImageAgrandie } from "./comparateur.js";
