@@ -55,6 +55,7 @@ export function initOutils() {
     initSnake();
     initBreakout();
 initTetris();
+initTaquin();
 initGameboyMenu();
 initGameboySecret()
     initPileOuFace();
@@ -1954,8 +1955,8 @@ const CARTOUCHES_GAMEBOY = [
     { nom: "Coureur sans fin", emoji: "🦖", couleur: "#E4572E", modal: "runnerModal", demarrer: () => demarrerRunner() },
     { nom: "Serpent", emoji: "🐍", couleur: "#4C9F70", modal: "snakeModal", demarrer: () => demarrerSnake() },
     { nom: "Casse-briques", emoji: "🧊", couleur: "#3E7CB1", modal: "breakoutModal", demarrer: () => demarrerBreakout() },
-    { nom: "Empileur de blocs", emoji: "🧱", couleur: "#6B4C9A", modal: "tetrisModal", demarrer: () => demarrerTetris() }
-
+    { nom: "Empileur de blocs", emoji: "🧱", couleur: "#6B4C9A", modal: "tetrisModal", demarrer: () => demarrerTetris() },
+        { nom: "Taquin", emoji: "🧩", couleur: "#B5854B", modal: "taquinModal", demarrer: () => demarrerTaquin(3) }
 ];
 
 
@@ -2800,6 +2801,232 @@ function initGameboySecret() {
         }
 
     });
+
+}
+
+/* ---------- Taquin (Game Boy) ---------- */
+
+let taquinCtx = null;
+let taquinState = null;
+
+function taquinCreerGrilleResolue(taille) {
+
+    const grille = [];
+
+    for (let i = 1; i < taille * taille; i++) {
+        grille.push(i);
+    }
+
+    grille.push(0);
+
+    return grille;
+
+}
+
+function taquinDeplacer(grille, taille, direction) {
+
+    const videIdx = grille.indexOf(0);
+    const videLigne = Math.floor(videIdx / taille);
+    const videCol = videIdx % taille;
+
+    let tuileLigne = videLigne;
+    let tuileCol = videCol;
+
+    if (direction === "haut") tuileLigne = videLigne + 1;
+    if (direction === "bas") tuileLigne = videLigne - 1;
+    if (direction === "gauche") tuileCol = videCol + 1;
+    if (direction === "droite") tuileCol = videCol - 1;
+
+    if (tuileLigne < 0 || tuileLigne >= taille || tuileCol < 0 || tuileCol >= taille)
+        return false;
+
+    const tuileIdx = tuileLigne * taille + tuileCol;
+
+    grille[videIdx] = grille[tuileIdx];
+    grille[tuileIdx] = 0;
+
+    return true;
+
+}
+
+function taquinMelanger(taille) {
+
+    const grille = taquinCreerGrilleResolue(taille);
+    const directions = ["haut", "bas", "gauche", "droite"];
+    const inverse = { haut: "bas", bas: "haut", gauche: "droite", droite: "gauche" };
+
+    let derniereInverse = null;
+    let coupsReussis = 0;
+
+    while (coupsReussis < 120) {
+
+        const direction = directions[Math.floor(Math.random() * directions.length)];
+
+        if (direction === derniereInverse)
+            continue;
+
+        if (taquinDeplacer(grille, taille, direction)) {
+            derniereInverse = inverse[direction];
+            coupsReussis++;
+        }
+
+    }
+
+    return grille;
+
+}
+
+function taquinEstResolue(grille) {
+
+    for (let i = 0; i < grille.length - 1; i++) {
+        if (grille[i] !== i + 1) return false;
+    }
+
+    return grille[grille.length - 1] === 0;
+
+}
+
+function initTaquin() {
+
+    const canvas = document.getElementById("taquinCanvas");
+
+    if (!canvas)
+        return;
+
+    taquinCtx = canvas.getContext("2d");
+
+    document.querySelectorAll("#taquinDifficulteToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            document.querySelectorAll("#taquinDifficulteToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            demarrerTaquin(Number(chip.dataset.taille));
+
+        });
+
+    });
+
+    const jouer = (direction) => {
+
+        if (!taquinState || taquinState.gagne)
+            return;
+
+        if (taquinDeplacer(taquinState.grille, taquinState.taille, direction)) {
+            taquinState.coups++;
+            dessinerTaquin();
+
+            if (taquinEstResolue(taquinState.grille)) {
+                taquinState.gagne = true;
+                document.getElementById("taquinGagneOverlay")?.classList.remove("hidden");
+                document.getElementById("taquinCoupsFinal").textContent = `En ${taquinState.coups} coups`;
+            }
+
+        }
+
+    };
+
+    document.getElementById("taquinBtnUp")?.addEventListener("click", () => jouer("haut"));
+    document.getElementById("taquinBtnDown")?.addEventListener("click", () => jouer("bas"));
+    document.getElementById("taquinBtnLeft")?.addEventListener("click", () => jouer("gauche"));
+    document.getElementById("taquinBtnRight")?.addEventListener("click", () => jouer("droite"));
+
+    document.getElementById("taquinBtnStart")?.addEventListener("click", () => {
+        demarrerTaquin(taquinState?.taille || 3);
+    });
+
+    canvas.addEventListener("click", (event) => {
+
+        if (!taquinState || taquinState.gagne)
+            return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width * canvas.width;
+        const y = (event.clientY - rect.top) / rect.height * canvas.height;
+
+        const taille = taquinState.taille;
+        const cell = canvas.width / taille;
+
+        const videIdx = taquinState.grille.indexOf(0);
+        const videLigne = Math.floor(videIdx / taille);
+        const videCol = videIdx % taille;
+
+        const ligneClic = Math.floor(y / cell);
+        const colClic = Math.floor(x / cell);
+
+        if (ligneClic === videLigne && colClic === videCol - 1) jouer("droite");
+        else if (ligneClic === videLigne && colClic === videCol + 1) jouer("gauche");
+        else if (colClic === videCol && ligneClic === videLigne - 1) jouer("bas");
+        else if (colClic === videCol && ligneClic === videLigne + 1) jouer("haut");
+
+    });
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("taquinModal")?.classList.contains("hidden"))
+            return;
+
+        const touches = { ArrowUp: "haut", ArrowDown: "bas", ArrowLeft: "gauche", ArrowRight: "droite" };
+
+        if (touches[event.code]) {
+            event.preventDefault();
+            jouer(touches[event.code]);
+        }
+
+    });
+
+    document.querySelector("#taquinModal .outilFermerButton")?.addEventListener("click", () => {
+        document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+    });
+
+}
+
+function demarrerTaquin(taille) {
+
+    taquinState = {
+        taille,
+        grille: taquinMelanger(taille),
+        coups: 0,
+        gagne: false
+    };
+
+    document.getElementById("taquinGagneOverlay")?.classList.add("hidden");
+    document.getElementById("taquinCoupsOverlay").textContent = "0 coups";
+
+    dessinerTaquin();
+
+}
+
+function dessinerTaquin() {
+
+    const canvas = document.getElementById("taquinCanvas");
+    const taille = taquinState.taille;
+    const cell = canvas.width / taille;
+
+    taquinCtx.fillStyle = "#9BBC0F";
+    taquinCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    taquinState.grille.forEach((valeur, idx) => {
+
+        if (valeur === 0)
+            return;
+
+        const ligne = Math.floor(idx / taille);
+        const col = idx % taille;
+
+        taquinCtx.fillStyle = "#0F380F";
+        taquinCtx.fillRect(col * cell + 2, ligne * cell + 2, cell - 4, cell - 4);
+
+        taquinCtx.fillStyle = "#9BBC0F";
+        taquinCtx.font = `bold ${Math.floor(cell * 0.4)}px monospace`;
+        taquinCtx.textAlign = "center";
+        taquinCtx.textBaseline = "middle";
+        taquinCtx.fillText(String(valeur), col * cell + cell / 2, ligne * cell + cell / 2 + 1);
+
+    });
+
+    document.getElementById("taquinCoupsOverlay").textContent = `${taquinState.coups} coups`;
 
 }
 
