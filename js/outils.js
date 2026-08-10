@@ -52,7 +52,7 @@ export function initOutils() {
     initTirCible();
     initSuiteLogique();
     initRunner();
-
+initGameboyMenu();
     initPileOuFace();
     initRoueDecision();
     initTirageNombre();
@@ -1816,18 +1816,17 @@ function initRunner() {
 
     });
 
-    document.querySelector('[data-modal="runnerModal"]')?.addEventListener("click", () => {
-        setTimeout(demarrerRunner, 50);
-    });
-
-    document.querySelector("#runnerModal .outilFermerButton")?.addEventListener("click", () => {
+            document.querySelector("#runnerModal .outilFermerButton")?.addEventListener("click", () => {
 
         if (runnerAnimId) {
             cancelAnimationFrame(runnerAnimId);
             runnerAnimId = null;
         }
 
+        document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+
     });
+
 
 }
 
@@ -1942,6 +1941,50 @@ function bouclerRunner() {
     }
 
     runnerAnimId = requestAnimationFrame(bouclerRunner);
+
+}
+
+/* ---------- Menu Game Boy (cartouches) ---------- */
+
+const CARTOUCHES_GAMEBOY = [
+    { nom: "Coureur sans fin", emoji: "🦖", couleur: "#E4572E", modal: "runnerModal", demarrer: () => demarrerRunner() },
+    { nom: "Serpent", emoji: "🐍", couleur: "#4C9F70", modal: "snakeModal", demarrer: () => demarrerSnake() }
+];
+
+function initGameboyMenu() {
+
+    const grille = document.getElementById("gameboyCartouchesGrid");
+
+    if (!grille)
+        return;
+
+    grille.innerHTML = "";
+
+    CARTOUCHES_GAMEBOY.forEach(jeu => {
+
+        const cartouche = document.createElement("button");
+        cartouche.type = "button";
+        cartouche.className = "gameboyCartouche";
+        cartouche.style.setProperty("--couleurCartouche", jeu.couleur);
+
+        cartouche.innerHTML = `
+            <div class="gameboyCartoucheEncoche"></div>
+            <div class="gameboyCartoucheEmoji">${jeu.emoji}</div>
+            <div class="gameboyCartoucheLabel">${jeu.nom}</div>
+        `;
+
+        cartouche.addEventListener("click", () => {
+
+            document.getElementById("gameboyMenuModal").classList.add("hidden");
+            document.getElementById(jeu.modal).classList.remove("hidden");
+
+            setTimeout(jeu.demarrer, 50);
+
+        });
+
+        grille.appendChild(cartouche);
+
+    });
 
 }
 
