@@ -2285,3 +2285,7 @@ button {
     font-weight:700;
     cursor:pointer;
 }
+
+.runnerGameOverOverlay.hidden{
+    display:none;
+}
