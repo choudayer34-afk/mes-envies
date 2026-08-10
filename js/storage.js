@@ -25,6 +25,10 @@ export function initMagasinsSync(onChange) {
 
 }
 
+export function updateEnvieDevis(id, devis) {
+    patchEnvie(id, { devis });
+}
+
 export function rememberMagasin(nom) {
 
     const nomPropre = nom.trim();
