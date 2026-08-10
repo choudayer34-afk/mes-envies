@@ -16,6 +16,7 @@ import { renderEvaluation } from "./evaluation.js";
 import { getEnvieCategories, isContainerCategory } from "./storage.js";
 import { renderComparateur } from "./comparateur.js";
 import { renderDevis } from "./devis.js";
+import { getEnvies, updateEnvieCategorie, updateEnvie, updateEnvieDescription } from "./storage.js";
 
 let currentEnvieId = null;
 
@@ -114,6 +115,16 @@ async function renderFicheMeteo(envie) {
     } catch (err) {
         console.error("Erreur météo fiche: " + err.message);
     }
+
+}
+
+export function initFicheDescription() {
+
+    document.getElementById("ficheDescription").addEventListener("change", (event) => {
+
+        updateEnvieDescription(getCurrentEnvieId(), event.target.value.trim());
+
+    });
 
 }
 
