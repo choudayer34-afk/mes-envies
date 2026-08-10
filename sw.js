@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v27';
+const CACHE_NAME = 'envie-cache-v29';
 
 
 const APP_SHELL = [
