@@ -3725,3 +3725,180 @@ function dessinerMemChiffres() {
 
 }
 
+/* ---------- Liste de mots (stimulation mémoire) ---------- */
+
+const MEM_MOTS_POOL = [
+    "table", "chaise", "fenêtre", "jardin", "voiture", "vélo", "montagne", "rivière", "soleil", "lune",
+    "chien", "chat", "pomme", "banane", "crayon", "livre", "téléphone", "horloge", "porte", "escalier",
+    "nuage", "fleur", "arbre", "bateau", "train", "avion", "chapeau", "valise", "clé", "miroir",
+    "bougie", "tasse", "assiette", "couteau", "fourchette", "lit", "oreiller", "tapis", "lampe", "étoile"
+];
+
+let memMotsState = null;
+let memMotsTimer = null;
+
+function memMotsMelanger(liste) {
+    return [...liste].sort(() => Math.random() - 0.5);
+}
+
+function initMemMots() {
+
+    const zoneAffichage = document.getElementById("memMotsAffichage");
+
+    if (!zoneAffichage)
+        return;
+
+    document.querySelectorAll("#memMotsDifficulteToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+            document.querySelectorAll("#memMotsDifficulteToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+        });
+
+    });
+
+    document.getElementById("memMotsBtnAction")?.addEventListener("click", () => {
+
+        if (!memMotsState || memMotsState.phase === "fin") {
+            demarrerMemMots();
+        } else if (memMotsState.phase === "recognition") {
+            validerMemMots();
+        }
+
+    });
+
+    document.querySelector("#memMotsModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (memMotsTimer) {
+            clearTimeout(memMotsTimer);
+            memMotsTimer = null;
+        }
+
+    });
+
+}
+
+function demarrerMemMots() {
+
+    if (memMotsTimer) {
+        clearTimeout(memMotsTimer);
+    }
+
+    const nb = Number(document.querySelector("#memMotsDifficulteToggle .itemTypeChip.active")?.dataset.nb || 5);
+    const cibles = memMotsMelanger(MEM_MOTS_POOL).slice(0, nb);
+
+    memMotsState = {
+        cibles,
+        phase: "montre",
+        index: 0,
+        selection: new Set()
+    };
+
+    const grille = document.getElementById("memMotsGrille");
+    grille.style.display = "none";
+    grille.innerHTML = "";
+
+    document.getElementById("memMotsResultat").textContent = "";
+    document.getElementById("memMotsAffichage").style.display = "block";
+    document.getElementById("memMotsBtnAction").disabled = true;
+
+    afficherProchainMot();
+
+}
+
+function afficherProchainMot() {
+
+    const s = memMotsState;
+    const zone = document.getElementById("memMotsAffichage");
+
+    if (s.index >= s.cibles.length) {
+        s.phase = "recognition";
+        lancerRecognitionMemMots();
+        return;
+    }
+
+    zone.textContent = s.cibles[s.index];
+
+    memMotsTimer = setTimeout(() => {
+
+        zone.textContent = "";
+
+        memMotsTimer = setTimeout(() => {
+            s.index++;
+            afficherProchainMot();
+        }, 250);
+
+    }, 1200);
+
+}
+
+function lancerRecognitionMemMots() {
+
+    const s = memMotsState;
+
+    const restants = MEM_MOTS_POOL.filter(m => !s.cibles.includes(m));
+    const distracteurs = memMotsMelanger(restants).slice(0, s.cibles.length);
+    const tous = memMotsMelanger([...s.cibles, ...distracteurs]);
+
+    document.getElementById("memMotsAffichage").style.display = "none";
+
+    const grille = document.getElementById("memMotsGrille");
+    grille.style.display = "grid";
+    grille.innerHTML = "";
+
+    tous.forEach(mot => {
+
+        const tuile = document.createElement("button");
+        tuile.type = "button";
+        tuile.className = "memMotTuile";
+        tuile.textContent = mot;
+
+        tuile.addEventListener("click", () => {
+
+            if (s.selection.has(mot)) {
+                s.selection.delete(mot);
+                tuile.classList.remove("selectionne");
+            } else {
+                s.selection.add(mot);
+                tuile.classList.add("selectionne");
+            }
+
+        });
+
+        grille.appendChild(tuile);
+
+    });
+
+    document.getElementById("memMotsResultat").textContent = "Sélectionne les mots que tu as vus, puis Valider.";
+    document.getElementById("memMotsBtnAction").textContent = "✓ Valider";
+    document.getElementById("memMotsBtnAction").disabled = false;
+
+}
+
+function validerMemMots() {
+
+    const s = memMotsState;
+
+    const bonnesReponses = [...s.selection].filter(m => s.cibles.includes(m)).length;
+    const erreurs = [...s.selection].filter(m => !s.cibles.includes(m)).length;
+    const oublies = s.cibles.length - bonnesReponses;
+
+    document.getElementById("memMotsResultat").textContent =
+        `✅ ${bonnesReponses}/${s.cibles.length} retrouvés · ❌ ${erreurs} erreur${erreurs > 1 ? "s" : ""} · 😶 ${oublies} oublié${oublies > 1 ? "s" : ""}`;
+
+    s.phase = "fin";
+
+    document.getElementById("memMotsBtnAction").textContent = "🔄 Recommencer";
+
+    document.querySelectorAll(".memMotTuile").forEach(tuile => {
+
+        tuile.disabled = true;
+
+        if (s.cibles.includes(tuile.textContent)) {
+            tuile.style.borderColor = "#4C9F70";
+        }
+
+    });
+
+}
+
