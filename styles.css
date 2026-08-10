@@ -256,7 +256,7 @@ main{
 #tableauSaisieModal, #ideesMenuModal,
 #voyagePourImportModal,#runnerModal, #snakeModal,
 #aProposModal,#tetrisModal, #guideModal,#gameboyMenuModal,
-#breakoutModal
+#breakoutModal,#taquinModal
 {
     z-index:2100;
 }
