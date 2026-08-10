@@ -3903,3 +3903,181 @@ function validerMemMots() {
 
 }
 
+/* ---------- Visages et prénoms (stimulation mémoire) ---------- */
+
+const MEM_VISAGES_POOL = ["👨","👩","👴","👵","👦","👧","🧑","🧔","👱‍♂️","👱‍♀️","👨‍🦰","👩‍🦰","👨‍🦳","👩‍🦳","👨‍🦱","👩‍🦱"];
+const MEM_PRENOMS_POOL = ["Lucas","Emma","Nathan","Léa","Hugo","Chloé","Louis","Manon","Jules","Camille","Adam","Inès","Gabriel","Jade","Raphaël","Sarah","Arthur","Louise","Paul","Alice"];
+
+let memVisagesState = null;
+let memVisagesTimer = null;
+
+function memVisagesMelanger(liste) {
+    return [...liste].sort(() => Math.random() - 0.5);
+}
+
+function initMemVisages() {
+
+    const zone = document.getElementById("memVisagesEtudeGrille");
+
+    if (!zone)
+        return;
+
+    document.querySelectorAll("#memVisagesDifficulteToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+            document.querySelectorAll("#memVisagesDifficulteToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+        });
+
+    });
+
+    document.getElementById("memVisagesBtnAction")?.addEventListener("click", () => {
+
+        if (!memVisagesState || memVisagesState.phase === "fin") {
+            demarrerMemVisages();
+        } else if (memVisagesState.phase === "etude") {
+            lancerTestMemVisages();
+        }
+
+    });
+
+    document.querySelector("#memVisagesModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (memVisagesTimer) {
+            clearTimeout(memVisagesTimer);
+            memVisagesTimer = null;
+        }
+
+    });
+
+}
+
+function demarrerMemVisages() {
+
+    if (memVisagesTimer) {
+        clearTimeout(memVisagesTimer);
+    }
+
+    const nb = Number(document.querySelector("#memVisagesDifficulteToggle .itemTypeChip.active")?.dataset.nb || 4);
+
+    const visages = memVisagesMelanger(MEM_VISAGES_POOL).slice(0, nb);
+    const prenoms = memVisagesMelanger(MEM_PRENOMS_POOL).slice(0, nb);
+
+    const paires = visages.map((visage, i) => ({ visage, prenom: prenoms[i] }));
+
+    memVisagesState = {
+        paires,
+        phase: "etude",
+        indexTest: 0,
+        ordreTest: memVisagesMelanger(paires.map((_, i) => i)),
+        score: 0
+    };
+
+    document.getElementById("memVisagesTestZone").style.display = "none";
+    document.getElementById("memVisagesResultat").textContent = "";
+    document.getElementById("memVisagesBtnAction").style.display = "block";
+
+    const grille = document.getElementById("memVisagesEtudeGrille");
+    grille.style.display = "grid";
+    grille.innerHTML = paires.map(p => `
+        <div class="memVisageCarte">
+            <span class="emoji">${p.visage}</span>
+            <span class="prenom">${p.prenom}</span>
+        </div>
+    `).join("");
+
+    document.getElementById("memVisagesBtnAction").textContent = "👁️ J'ai retenu, commencer le test";
+
+}
+
+function lancerTestMemVisages() {
+
+    const s = memVisagesState;
+
+    s.phase = "test";
+    s.indexTest = 0;
+
+    document.getElementById("memVisagesEtudeGrille").style.display = "none";
+    document.getElementById("memVisagesTestZone").style.display = "flex";
+    document.getElementById("memVisagesBtnAction").style.display = "none";
+
+    afficherProchainVisageTest();
+
+}
+
+function afficherProchainVisageTest() {
+
+    const s = memVisagesState;
+
+    if (s.indexTest >= s.ordreTest.length) {
+
+        s.phase = "fin";
+
+        document.getElementById("memVisagesTestZone").style.display = "none";
+        document.getElementById("memVisagesResultat").textContent = `Score : ${s.score}/${s.paires.length} bons prénoms retrouvés`;
+        document.getElementById("memVisagesBtnAction").style.display = "block";
+        document.getElementById("memVisagesBtnAction").textContent = "🔄 Recommencer";
+
+        return;
+
+    }
+
+    const paireIdx = s.ordreTest[s.indexTest];
+    const paire = s.paires[paireIdx];
+
+    document.getElementById("memVisagesTestVisage").textContent = paire.visage;
+
+    const autresPrenoms = s.paires.filter((_, i) => i !== paireIdx).map(p => p.prenom);
+    const distracteurs = memVisagesMelanger(autresPrenoms).slice(0, Math.min(3, autresPrenoms.length));
+    const options = memVisagesMelanger([paire.prenom, ...distracteurs]);
+
+    const zoneOptions = document.getElementById("memVisagesTestOptions");
+    zoneOptions.innerHTML = "";
+
+    options.forEach(prenomOption => {
+
+        const bouton = document.createElement("button");
+        bouton.type = "button";
+        bouton.className = "memMotTuile";
+        bouton.textContent = prenomOption;
+
+        bouton.addEventListener("click", () => {
+
+            document.querySelectorAll("#memVisagesTestOptions .memMotTuile").forEach(b => b.disabled = true);
+
+            const correct = prenomOption === paire.prenom;
+
+            if (correct) {
+
+                s.score++;
+                bouton.style.borderColor = "#4C9F70";
+                bouton.style.background = "#4C9F70";
+                bouton.style.color = "white";
+
+            } else {
+
+                bouton.style.borderColor = "#D97C7C";
+                bouton.style.background = "#D97C7C";
+                bouton.style.color = "white";
+
+                document.querySelectorAll("#memVisagesTestOptions .memMotTuile").forEach(b => {
+                    if (b.textContent === paire.prenom) {
+                        b.style.borderColor = "#4C9F70";
+                    }
+                });
+
+            }
+
+            memVisagesTimer = setTimeout(() => {
+                s.indexTest++;
+                afficherProchainVisageTest();
+            }, 900);
+
+        });
+
+        zoneOptions.appendChild(bouton);
+
+    });
+
+}
+
