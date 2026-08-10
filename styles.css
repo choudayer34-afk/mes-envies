@@ -2148,3 +2148,13 @@ button {
     font-size:12px;
     cursor:pointer;
 }
+
+.envieTachesRestantesListe{
+    margin-top:6px;
+}
+
+.envieTacheRestante{
+    font-size:12px;
+    color:var(--color-text-light);
+    line-height:1.4;
+}
