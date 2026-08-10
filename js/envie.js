@@ -1,5 +1,4 @@
 import { renderLieuActions } from "./location.js";
-import { getEnvies, updateEnvieCategorie, updateEnvie } from "./storage.js";
 import { closeAllOverlaysExcept } from "./modal-utils.js";
 import { removeEnvie } from "./modal.js";
 import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
