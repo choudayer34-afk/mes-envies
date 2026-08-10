@@ -216,7 +216,7 @@ main{
     overflow-y:auto;
     padding:24px 0;
     box-sizing:border-box;
-    z-index:2000;
+    index:2000;
 }
 
 #deleteModal,
@@ -249,7 +249,7 @@ main{
  #mapPickerModal,
 #etapeFinderModal,
  #morpionModal,
-#carteVoyagesModal,
+#carteVoyagesModal,#couverturePositionModal,
  #lectureModal, #anglaisModal,
 #albumPrepModal, 
 #simonModal, #cibleModal, #suiteModal,
