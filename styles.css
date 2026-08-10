@@ -2128,3 +2128,9 @@ button {
     right:16px;
     z-index:2;
 }
+
+.containerTachesCount{
+    font-size:12px;
+    color:var(--color-text-light);
+    margin-top:2px;
+}
