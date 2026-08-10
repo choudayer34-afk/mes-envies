@@ -312,8 +312,9 @@ export function updateEnvieVoyage(id, voyageId) {
 }
 
 export function updateEnvieRealise(id, realise) {
-    patchEnvie(id, { realise });
+    patchEnvie(id, { realise, realiseAt: realise ? Date.now() : null });
 }
+
 
 export function updateEnvieEvaluation(id, critere, valeur) {
 
