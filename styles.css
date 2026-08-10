@@ -257,7 +257,7 @@ main{
 #voyagePourImportModal,#runnerModal, #snakeModal,
 #aProposModal,#tetrisModal, #guideModal,#gameboyMenuModal,
 #breakoutModal,#taquinModal,#demineurModal,
-#memChiffresModal
+#memChiffresModal, #memMotsModal
 {
     z-index:2100;
 }
