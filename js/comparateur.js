@@ -200,7 +200,7 @@ function renderSuggestionsMagasin(filtre) {
 
 }
 
-function ouvrirImageAgrandie(url) {
+export function ouvrirImageAgrandie(url) {
 
     const modal = document.getElementById("imageAgrandieModal");
     const img = document.getElementById("imageAgrandieSrc");
