@@ -7,6 +7,49 @@ import {
 let enviesCache = [];
 let onChangeCallback = null;
 let magasinsCache = [];
+let societesCache = [];
+
+export function getSocietes() {
+    return [...societesCache].sort((a, b) => a.societe.localeCompare(b.societe, "fr", { sensitivity: "base" }));
+}
+
+export function initSocietesSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(collection(db, "foyers", foyerId, "societes"), (snap) => {
+
+        societesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+
+    });
+
+}
+
+export function rememberSociete({ societe, contact, telephone, email }) {
+
+    const nomPropre = societe.trim();
+
+    if (!nomPropre)
+        return;
+
+    const foyerId = getFoyerId();
+    const existante = societesCache.find(s => s.societe.toLowerCase() === nomPropre.toLowerCase());
+
+    const donnees = {
+        societe: nomPropre,
+        contact: contact?.trim() || "",
+        telephone: telephone?.trim() || "",
+        email: email?.trim() || ""
+    };
+
+    if (existante) {
+        updateDoc(doc(db, "foyers", foyerId, "societes", existante.id), donnees).catch(console.error);
+    } else {
+        setDoc(doc(collection(db, "foyers", foyerId, "societes")), donnees).catch(console.error);
+    }
+
+}
 
 export function getMagasins() {
     return [...magasinsCache].sort((a, b) => a.nom.localeCompare(b.nom, "fr", { sensitivity: "base" }));
