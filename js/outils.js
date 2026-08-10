@@ -51,6 +51,7 @@ export function initOutils() {
     initSimon();
     initTirCible();
     initSuiteLogique();
+    initRunner();
 
     initPileOuFace();
     initRoueDecision();
@@ -1768,4 +1769,179 @@ function repondreSuiteLogique(reponseChoisie, btn) {
 
 }
 
+
+/* ---------- Coureur sans fin (Game Boy) ---------- */
+
+let runnerCtx = null;
+let runnerAnimId = null;
+let runnerState = null;
+
+function initRunner() {
+
+    const canvas = document.getElementById("runnerCanvas");
+
+    if (!canvas)
+        return;
+
+    runnerCtx = canvas.getContext("2d");
+
+    const sauter = () => {
+
+        if (!runnerState || runnerState.gameOver) {
+            demarrerRunner();
+            return;
+        }
+
+        if (!runnerState.enSaut) {
+            runnerState.enSaut = true;
+            runnerState.vitesseVerticale = -6.5;
+        }
+
+    };
+
+    document.getElementById("runnerBtnA")?.addEventListener("click", sauter);
+    document.getElementById("runnerBtnUp")?.addEventListener("click", sauter);
+    document.getElementById("runnerBtnStart")?.addEventListener("click", demarrerRunner);
+    canvas.addEventListener("pointerdown", sauter);
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("runnerModal")?.classList.contains("hidden"))
+            return;
+
+        if (event.code === "Space" || event.code === "ArrowUp") {
+            event.preventDefault();
+            sauter();
+        }
+
+    });
+
+    document.querySelector('[data-modal="runnerModal"]')?.addEventListener("click", () => {
+        setTimeout(demarrerRunner, 50);
+    });
+
+    document.querySelector("#runnerModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (runnerAnimId) {
+            cancelAnimationFrame(runnerAnimId);
+            runnerAnimId = null;
+        }
+
+    });
+
+}
+
+function demarrerRunner() {
+
+    if (runnerAnimId) {
+        cancelAnimationFrame(runnerAnimId);
+    }
+
+    runnerState = {
+        sol: 120,
+        dinoX: 30,
+        dinoY: 120,
+        dinoLargeur: 22,
+        dinoHauteur: 22,
+        vitesseVerticale: 0,
+        enSaut: false,
+        obstacles: [],
+        vitesse: 3.2,
+        distance: 0,
+        score: 0,
+        gameOver: false,
+        prochainObstacle: 60,
+        inverse: false
+    };
+
+    document.getElementById("runnerGameOverOverlay")?.classList.add("hidden");
+    document.getElementById("runnerScoreOverlay").textContent = "00000";
+
+    bouclerRunner();
+
+}
+
+function bouclerRunner() {
+
+    if (!runnerCtx || !runnerState)
+        return;
+
+    const canvas = document.getElementById("runnerCanvas");
+    const s = runnerState;
+
+    if (!s.gameOver) {
+
+        s.vitesseVerticale += 0.35;
+        s.dinoY += s.vitesseVerticale;
+
+        if (s.dinoY >= s.sol) {
+            s.dinoY = s.sol;
+            s.enSaut = false;
+            s.vitesseVerticale = 0;
+        }
+
+        s.distance += s.vitesse;
+        s.score = Math.floor(s.distance / 5);
+        s.vitesse = Math.min(8, 3.2 + s.score / 150);
+
+        s.prochainObstacle -= s.vitesse;
+
+        if (s.prochainObstacle <= 0) {
+
+            s.obstacles.push({
+                x: canvas.width,
+                largeur: 10 + Math.random() * 10,
+                hauteur: 20 + Math.random() * 16
+            });
+
+            s.prochainObstacle = 70 + Math.random() * 90;
+
+        }
+
+        s.obstacles.forEach(o => o.x -= s.vitesse);
+        s.obstacles = s.obstacles.filter(o => o.x + o.largeur > 0);
+
+        s.obstacles.forEach(o => {
+
+            const collisionX = s.dinoX + s.dinoLargeur > o.x && s.dinoX < o.x + o.largeur;
+            const collisionY = s.dinoY + s.dinoHauteur > s.sol + 22 - o.hauteur;
+
+            if (collisionX && collisionY) {
+                s.gameOver = true;
+            }
+
+        });
+
+        s.inverse = Math.floor(s.score / 200) % 2 === 1;
+
+        document.getElementById("runnerScoreOverlay").textContent = String(s.score).padStart(5, "0");
+
+    }
+
+    const clair = s.inverse ? "#0F380F" : "#9BBC0F";
+    const fonce = s.inverse ? "#9BBC0F" : "#0F380F";
+
+    runnerCtx.fillStyle = clair;
+    runnerCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    runnerCtx.fillStyle = fonce;
+    runnerCtx.fillRect(0, s.sol + 22, canvas.width, 2);
+    runnerCtx.fillRect(s.dinoX, s.dinoY, s.dinoLargeur, s.dinoHauteur);
+
+    s.obstacles.forEach(o => {
+        runnerCtx.fillRect(o.x, s.sol + 22 - o.hauteur, o.largeur, o.hauteur);
+    });
+
+    if (s.gameOver) {
+
+        document.getElementById("runnerGameOverOverlay")?.classList.remove("hidden");
+        document.getElementById("runnerScoreFinal").textContent = `Score : ${s.score}`;
+
+        return;
+
+    }
+
+    runnerAnimId = requestAnimationFrame(bouclerRunner);
+
+}
 
