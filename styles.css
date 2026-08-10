@@ -224,6 +224,7 @@ main{
 #modalOverlay,
 #templateEditModal,
 #checklistModal,
+#devisModal,
 #comparateurProduitModal,
 #assignModal,
 #urlModal,
@@ -2059,3 +2060,16 @@ button {
     background:rgba(0,0,0,.85);
     align-items:center;
 }
+
+.devisStatutBadge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:10px;
+    font-size:12px;
+    font-weight:600;
+    margin:4px 0;
+}
+
+.devisStatutBadge.a_contacter{ background:#F2E4C4; color:#8A6D1D; }
+.devisStatutBadge.rdv_planifie{ background:#D9E9F5; color:#2C5E82; }
+.devisStatutBadge.devis_recu{ background:#DCF0E1; color:#1F7A43; }
