@@ -2090,3 +2090,9 @@ button {
 .iconSmallButton:active{
     transform:scale(.96);
 }
+
+.envieMaisonPuces{
+    font-size:12px;
+    color:var(--color-text-light);
+    margin-top:6px;
+}
