@@ -1,8 +1,10 @@
-import { getEnvies, toggleFavorite, updateEnvieRealise } from "./storage.js";
+
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
 import { getModeActif, basculerMode } from "./storage.js";
+import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre } from "./storage.js";
+import { makeRowDraggable } from "./dragdrop.js";
 
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
@@ -106,11 +108,11 @@ function renderHomeSections() {
         return statut === "planifie" && !!e.date?.start;
     }).sort((a, b) => a.date.start.localeCompare(b.date.start));
 
-    const enProjetItems = envies.filter(e => {
+        const enProjetItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
         const { statut } = computeContainerStatus(e);
         return statut === "planifie" && !e.date?.start;
-    }).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+    }).sort((a, b) => (a.ordre ?? a.createdAt ?? 0) - (b.ordre ?? b.createdAt ?? 0));
 
     const termineItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
@@ -132,7 +134,8 @@ function renderHomeSections() {
     renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
     renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
     renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
-    renderCollapsibleSection("projetSection", "projetContainer", "🛠️ En projet", enProjetItems, createEnvieCard);
+    renderCollapsibleSection("projetSection", "projetContainer", "🛠️ En projet", enProjetItems, createEnvieCardDraggable);
+
     renderCollapsibleSection("termineSection", "termineContainer", "✅ Terminés", termineItems, createEnvieCard);
 
 }
@@ -492,6 +495,45 @@ function createEnvieCard(envie) {
     return card;
 
 }
+
+function reorderProjetNear(sourceId, targetId) {
+
+    const target = getEnvies().find(e => e.id === targetId);
+
+    if (!target)
+        return;
+
+    const valeurCible = target.ordre ?? target.createdAt ?? 0;
+
+    updateEnvieOrdre(sourceId, valeurCible - 0.5);
+
+}
+
+function createEnvieCardDraggable(envie) {
+
+    const card = createEnvieCard(envie);
+
+    card.dataset.dragId = envie.id;
+
+    const handle = document.createElement("span");
+    handle.className = "dragHandle envieCardDragHandle";
+    handle.textContent = "⠿";
+
+    handle.addEventListener("click", (event) => event.stopPropagation());
+
+    card.appendChild(handle);
+
+    makeRowDraggable(card, envie.id, (targetId) => {
+
+        reorderProjetNear(envie.id, targetId);
+        renderEnvies();
+
+    });
+
+    return card;
+
+}
+
 
 export function initHomeMeteo() {
 
