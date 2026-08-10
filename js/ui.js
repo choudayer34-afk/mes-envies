@@ -239,7 +239,10 @@ function calculerPucesMaison(container) {
     if (container.contexte !== "maison")
         return "";
 
-    const taches = getEnvies().filter(e => e.voyageId === container.id && !e.realise);
+    const taches = [
+        container,
+        ...getEnvies().filter(e => e.voyageId === container.id && !e.realise)
+    ];
 
     let devisTotal = 0;
     let devisRetenu = false;
