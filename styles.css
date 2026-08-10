@@ -2096,3 +2096,28 @@ button {
     color:var(--color-text-light);
     margin-top:6px;
 }
+
+.actionGroupCard{
+    background:var(--color-card);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-medium);
+    padding:12px 14px;
+    margin-bottom:10px;
+}
+
+.actionGroupTitre{
+    font-weight:700;
+    font-size:14px;
+    margin-bottom:6px;
+}
+
+.actionGroupLigne{
+    font-size:13px;
+    padding:6px 0;
+    cursor:pointer;
+    color:#4B5B66;
+}
+
+.actionGroupLigne:active{
+    opacity:.7;
+}
