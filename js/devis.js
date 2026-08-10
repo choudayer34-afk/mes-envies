@@ -95,7 +95,7 @@ function creerCarteDevis(envie, devis, entry) {
             <div class="comparateurCardActions">
                 ${entry.lien ? `<a href="${entry.lien}" target="_blank" class="secondaryButton" style="text-decoration:none;padding:6px 12px;font-size:13px;">🔗 Voir</a>` : ""}
                 <button type="button" class="comparateurRetenuButton${entry.retenu ? " active" : ""}">✓ Retenu</button>
-                <button type="button" class="secondaryButton devisEditButton" style="padding:6px 12px;font-size:13px;">✏️</button>
+                <button type="button" class="iconSmallButton devisEditButton">✏️</button>
                 <button type="button" class="deleteChecklistButton devisDeleteButton" title="Supprimer" style="margin-left:auto;">🗑️</button>
             </div>
         </div>
