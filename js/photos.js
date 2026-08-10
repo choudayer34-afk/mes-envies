@@ -1,6 +1,7 @@
 import { updateEnviePhotos, updatePhotoDescription, getEnvies, updateEnviePhotoCouverture } from "./storage.js";
 import { getCurrentEnvieId, openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
+import { renderVoyageSection } from "./voyage.js";
 
 const CLOUD_NAME = "wz4fkcbs";
 const UPLOAD_PRESET = "Envies";
@@ -277,6 +278,45 @@ export function initPhotoDescription() {
 
 }
 
+let couverturePositionEnvieId = null;
+let couverturePositionUrl = null;
+let couverturePositionXY = { x: 50, y: 50 };
+
+function ouvrirPositionCouverture(envieId, url) {
+
+    couverturePositionEnvieId = envieId;
+    couverturePositionUrl = url;
+    couverturePositionXY = { x: 50, y: 50 };
+
+    const img = document.getElementById("couvertureCropImage");
+    img.src = url;
+    img.style.objectPosition = "50% 50%";
+
+    const marker = document.getElementById("couvertureCropMarker");
+    marker.style.left = "50%";
+    marker.style.top = "50%";
+
+    document.getElementById("couverturePositionModal")?.classList.remove("hidden");
+
+}
+
+function majPositionDepuisEvent(event, frame) {
+
+    const rect = frame.getBoundingClientRect();
+
+    const x = Math.min(100, Math.max(0, ((event.clientX - rect.left) / rect.width) * 100));
+    const y = Math.min(100, Math.max(0, ((event.clientY - rect.top) / rect.height) * 100));
+
+    couverturePositionXY = { x, y };
+
+    document.getElementById("couvertureCropImage").style.objectPosition = `${x}% ${y}%`;
+
+    const marker = document.getElementById("couvertureCropMarker");
+    marker.style.left = `${x}%`;
+    marker.style.top = `${y}%`;
+
+}
+
 export function initPhotoCouverture() {
 
     const ficheOverlay = document.getElementById("ficheOverlay");
@@ -288,15 +328,24 @@ export function initPhotoCouverture() {
 
     ficheOverlay.addEventListener("click", (event) => {
 
-        const btn = event.target.closest("#addPhotoCouvertureButton");
+        const addBtn = event.target.closest("#addPhotoCouvertureButton");
 
-        if (!btn)
+        if (addBtn) {
+            document.getElementById("photoCouvertureInput")?.click();
             return;
+        }
 
-        const input = document.getElementById("photoCouvertureInput");
+        const repoBtn = event.target.closest("#repositionnerCouvertureButton");
 
-        if (input) {
-            input.click();
+        if (repoBtn) {
+
+            const envieId = getCurrentEnvieId();
+            const envie = getEnvies().find(e => e.id === envieId);
+
+            if (envie?.photoCouverture) {
+                ouvrirPositionCouverture(envieId, envie.photoCouverture);
+            }
+
         }
 
     });
@@ -315,16 +364,12 @@ export function initPhotoCouverture() {
 
         showToast("📤 Envoi en cours...");
 
-             try {
+        try {
 
             const fichierCompresse = await compresserImageAvantEnvoi(file);
             const result = await uploadToCloudinary(fichierCompresse);
 
-            updateEnviePhotoCouverture(envieId, result.secure_url);
-
-            showToast("✓ Photo de couverture mise à jour");
-
-            openEnvie(envieId, null);
+            ouvrirPositionCouverture(envieId, result.secure_url);
 
         } catch (err) {
             console.error("Erreur upload couverture: " + err.message);
@@ -332,6 +377,46 @@ export function initPhotoCouverture() {
         }
 
         event.target.value = "";
+
+    });
+
+    document.getElementById("couvertureCropFrame")?.addEventListener("pointerdown", (event) => {
+
+        const frame = event.currentTarget;
+
+        majPositionDepuisEvent(event, frame);
+
+        function move(e) {
+            majPositionDepuisEvent(e, frame);
+        }
+
+        function up() {
+            document.removeEventListener("pointermove", move);
+            document.removeEventListener("pointerup", up);
+        }
+
+        document.addEventListener("pointermove", move);
+        document.addEventListener("pointerup", up);
+
+    });
+
+    document.getElementById("cancelCouverturePosition")?.addEventListener("click", () => {
+        document.getElementById("couverturePositionModal")?.classList.add("hidden");
+    });
+
+    document.getElementById("saveCouverturePosition")?.addEventListener("click", () => {
+
+        updateEnviePhotoCouverture(couverturePositionEnvieId, couverturePositionUrl, couverturePositionXY);
+
+        document.getElementById("couverturePositionModal")?.classList.add("hidden");
+
+        showToast("✓ Photo de couverture mise à jour");
+
+        const envie = getEnvies().find(e => e.id === couverturePositionEnvieId);
+
+        if (envie) {
+            renderVoyageSection(envie);
+        }
 
     });
 
