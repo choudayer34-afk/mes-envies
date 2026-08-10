@@ -15,7 +15,7 @@ import { renderVoyageSection } from "./voyage.js";
 import { renderEvaluation } from "./evaluation.js";
 import { getEnvieCategories, isContainerCategory } from "./storage.js";
 import { renderComparateur } from "./comparateur.js";
-
+import { renderDevis } from "./devis.js";
 
 let currentEnvieId = null;
 
@@ -76,6 +76,7 @@ export function openEnvie(id, returnTo = null) {
     renderPeintureCalculateur(envie);
      renderBoisCalculateur(envie);
     renderComparateur(envie);
+    renderDevis(envie);
     renderUrls(envie);
 
        
@@ -362,7 +363,8 @@ function gererAccordeonsVides(envie) {
         { sectionId: "lienSection", aDuContenu: () => (envie.urls || []).length > 0 },
         { sectionId: "peintureSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.peinture?.murs || []).length > 0 },
         { sectionId: "boisSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.bois?.planches || []).length > 0 },
-        { sectionId: "comparateurSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.comparateur?.produits || []).length > 0 }
+        { sectionId: "comparateurSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.comparateur?.produits || []).length > 0 },
+            { sectionId: "devisSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.devis?.entries || []).length > 0 }
     ];
 
 
