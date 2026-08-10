@@ -42,16 +42,10 @@ export function renderVoyageSection(envie) {
     if (!container)
         return;
 
-    if (envie.contexte === "maison" && !isContainer(envie.categorie)) {
+    const accordion = container.closest(".accordion");
 
-        const accordion = container.closest(".accordion");
-
-        if (accordion) {
-            accordion.style.display = "none";
-        }
-
-        return;
-
+    if (accordion) {
+        accordion.style.display = "";
     }
 
     container.innerHTML = "";
