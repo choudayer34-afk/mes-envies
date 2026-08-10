@@ -2121,3 +2121,10 @@ button {
 .actionGroupLigne:active{
     opacity:.7;
 }
+
+.envieCardDragHandle{
+    position:absolute;
+    top:16px;
+    right:16px;
+    z-index:2;
+}
