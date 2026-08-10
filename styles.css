@@ -7,7 +7,6 @@
 /* ==========================================================
    Variables
    ========================================================== */
-
 :root{
     --color-primary:#6FAFC4;
     --color-primary-dark:#4F92A8;
@@ -257,7 +256,7 @@ main{
 #voyagePourImportModal,#runnerModal, #snakeModal,
 #aProposModal,#tetrisModal, #guideModal,#gameboyMenuModal,
 #breakoutModal,#taquinModal,#demineurModal,
-#memChiffresModal, #memMotsModal,#memVisagesModal
+#memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal
 {
     z-index:2100;
 }
