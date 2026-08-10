@@ -23,13 +23,18 @@ function getEnvieCourante() {
 
 export function renderComparateur(envie) {
 
-    const section = document.getElementById("comparateurSection")?.closest(".accordion");
-
-    
     if (envie.contexte !== "maison")
         return;
 
     const comparateur = getComparateur(envie);
+
+    const header = document.querySelector('.accordionHeader[data-target="comparateurSection"] span');
+
+    if (header) {
+        header.textContent = comparateur.produits.length > 0
+            ? `🔍 Comparateur de produits (${comparateur.produits.length})`
+            : `🔍 Comparateur de produits`;
+    }
 
     document.querySelectorAll("#comparateurTriToggle .itemTypeChip").forEach(chip => {
         chip.classList.toggle("active", chip.dataset.tri === comparateur.tri);
