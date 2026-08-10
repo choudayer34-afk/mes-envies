@@ -2532,6 +2532,60 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div id="demineurModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>💣 Démineur</h2>
+
+        <div class="itemTypeToggle" id="demineurDifficulteToggle">
+            <button type="button" class="itemTypeChip active" data-niveau="facile">Facile</button>
+            <button type="button" class="itemTypeChip" data-niveau="moyen">Moyen</button>
+            <button type="button" class="itemTypeChip" data-niveau="difficile">Difficile</button>
+        </div>
+
+        <div class="gameboyShell" style="margin-top:14px;">
+
+            <div class="gameboyScreenFrame">
+                <canvas id="demineurCanvas" width="160" height="160"></canvas>
+                <div id="demineurMinesOverlay" class="runnerScoreOverlay">💣 0</div>
+                <div id="demineurFinOverlay" class="runnerGameOverOverlay hidden">
+                    <div id="demineurFinTitre"></div>
+                    <div style="font-size:10px;">Appuie sur START pour rejouer</div>
+                </div>
+            </div>
+
+            <div class="gameboyControls">
+
+                <div class="gameboyDpad">
+                    <button type="button" class="gameboyDpadBtn gameboyDpadUp" id="demineurBtnUp" style="color:#8C8C96;">▲</button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadLeft" id="demineurBtnLeft" style="color:#8C8C96;">◀</button>
+                    <button type="button" class="gameboyDpadCenter"></button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadRight" id="demineurBtnRight" style="color:#8C8C96;">▶</button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadDown" id="demineurBtnDown" style="color:#8C8C96;">▼</button>
+                </div>
+
+                <div class="gameboyButtons">
+                    <button type="button" class="gameboyRoundBtn" id="demineurBtnB">B</button>
+                    <button type="button" class="gameboyRoundBtn" id="demineurBtnA">A</button>
+                </div>
+
+            </div>
+
+            <div class="gameboyStartSelect">
+                <button type="button" class="gameboySmallBtn" id="demineurBtnSelect">SELECT</button>
+                <button type="button" class="gameboySmallBtn" id="demineurBtnStart">START</button>
+            </div>
+
+        </div>
+
+        <p style="text-align:center;font-size:13px;color:var(--color-text-light);margin-top:10px;">Croix pour déplacer le curseur, A pour révéler, B pour planter/retirer un drapeau.</p>
+
+    </div>
+
+</div>
 
 <div id="taquinModal" class="modal-overlay hidden">
 
