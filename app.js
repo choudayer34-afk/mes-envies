@@ -52,7 +52,7 @@ import { initBoisCalculateur } from "./js/bois.js";
 import { initComparateur } from "./js/comparateur.js";
 import { initDevis } from "./js/devis.js";
 import { initFoyerDataSync, getEnvies } from "./js/storage.js";
-import { initFicheTitre } from "./js/envie.js";
+import { initFicheTitre, initFicheDescription  } from "./js/envie.js";
 import { renderCreationCategorieSelector } from "./js/modal.js";
 import { initSurvie } from "./js/survie.js";
 import { initOutils } from "./js/outils.js";
@@ -204,6 +204,7 @@ document.getElementById("btnCreerVoyage")?.addEventListener("click", openModalCo
 initPlus();
 
     initFicheTitre();
+   initFicheDescription();
     initAgenda();
     initFicheDelete();
 
