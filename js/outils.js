@@ -58,7 +58,7 @@ initTetris();
 initTaquin();
     
     initDemineur();
-
+initMemoireChiffres();
 initGameboyMenu();
 initGameboySecret()
     initPileOuFace();
@@ -1960,7 +1960,8 @@ const CARTOUCHES_GAMEBOY = [
     { nom: "Casse-briques", emoji: "🧊", couleur: "#3E7CB1", modal: "breakoutModal", demarrer: () => demarrerBreakout() },
     { nom: "Empileur de blocs", emoji: "🧱", couleur: "#6B4C9A", modal: "tetrisModal", demarrer: () => demarrerTetris() },
         { nom: "Taquin", emoji: "🧩", couleur: "#B5854B", modal: "taquinModal", demarrer: () => demarrerTaquin(3) },
-    { nom: "Démineur", emoji: "💣", couleur: "#4A4A52", modal: "demineurModal", demarrer: () => demarrerDemineur("facile") }
+    { nom: "Démineur", emoji: "💣", couleur: "#4A4A52", modal: "demineurModal", demarrer: () => demarrerDemineur("facile") },
+        { nom: "Suite de chiffres", emoji: "🔢", couleur: "#3E7CB1", modal: "memChiffresModal", demarrer: () => demarrerMemoireChiffres() }
 
 ];
 
@@ -3399,3 +3400,328 @@ function dessinerDemineur() {
     demineurCtx.strokeRect(s.curseurX * cell + 1, s.curseurY * cell + 1, cell - 2, cell - 2);
 
 }
+
+/* ---------- Suite de chiffres (Game Boy) ---------- */
+
+const MEM_CLAVIER = [
+    [1, 2, 3, 4, 5],
+    [6, 7, 8, 9, 0]
+];
+
+let memChiffresCtx = null;
+let memChiffresState = null;
+let memChiffresTimer = null;
+
+function memChiffresGenererSequence(longueur) {
+
+    const seq = [];
+
+    for (let i = 0; i < longueur; i++) {
+        seq.push(Math.floor(Math.random() * 10));
+    }
+
+    return seq;
+
+}
+
+function memChiffresVerifier(sequence, reponse, inverse) {
+
+    const attendue = inverse ? [...sequence].reverse() : sequence;
+
+    if (reponse.length !== attendue.length)
+        return false;
+
+    return reponse.every((v, i) => v === attendue[i]);
+
+}
+
+function initMemoireChiffres() {
+
+    const canvas = document.getElementById("memChiffresCanvas");
+
+    if (!canvas)
+        return;
+
+    memChiffresCtx = canvas.getContext("2d");
+
+    document.querySelectorAll("#memChiffresModeToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+            document.querySelectorAll("#memChiffresModeToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+        });
+
+    });
+
+    const deplacerCurseur = (dx, dy) => {
+
+        if (!memChiffresState || memChiffresState.phase !== "saisie")
+            return;
+
+        const s = memChiffresState;
+
+        s.curseurCol = Math.max(0, Math.min(4, s.curseurCol + dx));
+        s.curseurRow = Math.max(0, Math.min(1, s.curseurRow + dy));
+
+        dessinerMemChiffres();
+
+    };
+
+    const confirmerChiffre = () => {
+
+        if (!memChiffresState || memChiffresState.phase !== "saisie")
+            return;
+
+        const s = memChiffresState;
+
+        s.reponse.push(MEM_CLAVIER[s.curseurRow][s.curseurCol]);
+
+        if (s.reponse.length >= s.sequence.length) {
+            validerTourMemChiffres();
+        } else {
+            dessinerMemChiffres();
+        }
+
+    };
+
+    const effacerChiffre = () => {
+
+        if (!memChiffresState || memChiffresState.phase !== "saisie")
+            return;
+
+        memChiffresState.reponse.pop();
+        dessinerMemChiffres();
+
+    };
+
+    document.getElementById("memChiffresBtnUp")?.addEventListener("click", () => deplacerCurseur(0, -1));
+    document.getElementById("memChiffresBtnDown")?.addEventListener("click", () => deplacerCurseur(0, 1));
+    document.getElementById("memChiffresBtnLeft")?.addEventListener("click", () => deplacerCurseur(-1, 0));
+    document.getElementById("memChiffresBtnRight")?.addEventListener("click", () => deplacerCurseur(1, 0));
+    document.getElementById("memChiffresBtnA")?.addEventListener("click", confirmerChiffre);
+    document.getElementById("memChiffresBtnB")?.addEventListener("click", effacerChiffre);
+    document.getElementById("memChiffresBtnStart")?.addEventListener("click", demarrerMemoireChiffres);
+
+    canvas.addEventListener("click", (event) => {
+
+        if (!memChiffresState || memChiffresState.phase !== "saisie")
+            return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width * canvas.width;
+        const y = (event.clientY - rect.top) / rect.height * canvas.height;
+
+        if (y < 80)
+            return;
+
+        const col = Math.floor(x / (canvas.width / 5));
+        const row = Math.floor((y - 80) / 60);
+
+        if (row >= 0 && row <= 1 && col >= 0 && col <= 4) {
+
+            memChiffresState.curseurCol = col;
+            memChiffresState.curseurRow = row;
+
+            confirmerChiffre();
+
+        }
+
+    });
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("memChiffresModal")?.classList.contains("hidden"))
+            return;
+
+        if (event.code === "ArrowUp") { event.preventDefault(); deplacerCurseur(0, -1); }
+        if (event.code === "ArrowDown") { event.preventDefault(); deplacerCurseur(0, 1); }
+        if (event.code === "ArrowLeft") { event.preventDefault(); deplacerCurseur(-1, 0); }
+        if (event.code === "ArrowRight") { event.preventDefault(); deplacerCurseur(1, 0); }
+        if (event.code === "Enter" || event.code === "Space") { event.preventDefault(); confirmerChiffre(); }
+        if (event.code === "Backspace") { event.preventDefault(); effacerChiffre(); }
+
+        if (/^Digit[0-9]$/.test(event.code) && memChiffresState?.phase === "saisie") {
+
+            const chiffre = Number(event.code.replace("Digit", ""));
+
+            memChiffresState.reponse.push(chiffre);
+
+            if (memChiffresState.reponse.length >= memChiffresState.sequence.length) {
+                validerTourMemChiffres();
+            } else {
+                dessinerMemChiffres();
+            }
+
+        }
+
+    });
+
+    document.querySelector("#memChiffresModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (memChiffresTimer) {
+            clearTimeout(memChiffresTimer);
+            memChiffresTimer = null;
+        }
+
+        document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+
+    });
+
+    dessinerMemChiffres();
+
+}
+
+function demarrerMemoireChiffres() {
+
+    if (memChiffresTimer) {
+        clearTimeout(memChiffresTimer);
+    }
+
+    const inverse = document.querySelector("#memChiffresModeToggle .itemTypeChip.active")?.dataset.mode === "inverse";
+
+    memChiffresState = {
+        longueur: 3,
+        sequence: [],
+        reponse: [],
+        phase: "montre",
+        indexAffichage: 0,
+        montreBlanc: false,
+        curseurRow: 0,
+        curseurCol: 0,
+        inverse,
+        meilleurScore: memChiffresState?.meilleurScore || 0
+    };
+
+    document.getElementById("memChiffresFinOverlay")?.classList.add("hidden");
+
+    lancerTourMemChiffres();
+
+}
+
+function lancerTourMemChiffres() {
+
+    const s = memChiffresState;
+
+    s.sequence = memChiffresGenererSequence(s.longueur);
+    s.reponse = [];
+    s.phase = "montre";
+    s.indexAffichage = 0;
+
+    afficherProchainChiffre();
+
+}
+
+function afficherProchainChiffre() {
+
+    const s = memChiffresState;
+
+    if (s.indexAffichage >= s.sequence.length) {
+        s.phase = "saisie";
+        dessinerMemChiffres();
+        return;
+    }
+
+    dessinerMemChiffres();
+
+    memChiffresTimer = setTimeout(() => {
+
+        s.indexAffichage++;
+        s.montreBlanc = true;
+
+        dessinerMemChiffres();
+
+        memChiffresTimer = setTimeout(() => {
+            s.montreBlanc = false;
+            afficherProchainChiffre();
+        }, 250);
+
+    }, 800);
+
+}
+
+function validerTourMemChiffres() {
+
+    const s = memChiffresState;
+    const correct = memChiffresVerifier(s.sequence, s.reponse, s.inverse);
+
+    if (correct) {
+
+        s.meilleurScore = Math.max(s.meilleurScore, s.longueur);
+        s.longueur++;
+        s.phase = "resultat";
+
+        dessinerMemChiffres();
+
+        memChiffresTimer = setTimeout(lancerTourMemChiffres, 900);
+
+    } else {
+
+        s.phase = "perdu";
+
+        document.getElementById("memChiffresFinTitre").textContent = "💭 Raté !";
+        document.getElementById("memChiffresFinScore").textContent = `Meilleure suite : ${s.meilleurScore} chiffres`;
+        document.getElementById("memChiffresFinOverlay")?.classList.remove("hidden");
+
+        dessinerMemChiffres();
+
+    }
+
+}
+
+function dessinerMemChiffres() {
+
+    const canvas = document.getElementById("memChiffresCanvas");
+    const s = memChiffresState;
+    const ctx = memChiffresCtx;
+
+    ctx.fillStyle = "#9BBC0F";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "#0F380F";
+    ctx.font = "bold 42px monospace";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+
+    if (!s) {
+
+        ctx.font = "12px monospace";
+        ctx.fillText("Appuie sur START", canvas.width / 2, 40);
+
+    } else if (s.phase === "montre") {
+
+        if (!s.montreBlanc) {
+            ctx.fillText(String(s.sequence[s.indexAffichage]), canvas.width / 2, 40);
+        }
+
+    } else if (s.phase === "saisie" || s.phase === "perdu") {
+
+        ctx.font = "bold 22px monospace";
+        ctx.fillText(s.reponse.map(() => "•").join(" ") || "?", canvas.width / 2, 40);
+
+    } else if (s.phase === "resultat") {
+
+        ctx.fillStyle = "#306230";
+        ctx.font = "bold 16px monospace";
+        ctx.fillText("✓ Bravo !", canvas.width / 2, 40);
+
+    }
+
+    for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 5; col++) {
+
+            const px = col * (canvas.width / 5);
+            const py = 80 + row * 60;
+            const surCurseur = s && s.phase === "saisie" && s.curseurRow === row && s.curseurCol === col;
+
+            ctx.fillStyle = surCurseur ? "#0F380F" : "#306230";
+            ctx.fillRect(px + 2, py + 2, canvas.width / 5 - 4, 56);
+
+            ctx.fillStyle = surCurseur ? "#9BBC0F" : "#0F380F";
+            ctx.font = "bold 18px monospace";
+            ctx.fillText(String(MEM_CLAVIER[row][col]), px + canvas.width / 10, py + 30);
+
+        }
+    }
+
+}
+
