@@ -131,8 +131,8 @@ function renderVoyageContenu(envie, container) {
     `;
     container.appendChild(statutBox);
 
-    const today = new Date().toISOString().slice(0, 10);
-    const ajourdhuiItems = enfants.filter(e => e.date?.start === today);
+        const today = new Date().toISOString().slice(0, 10);
+    const ajourdhuiItems = enfants.filter(e => e.date?.start === today && !(estMaison && e.realise));
 
     if (ajourdhuiItems.length > 0) {
         appendCollapsibleGroup(container, "🔆 Aujourd'hui", ajourdhuiItems, envie, `d_${today}`, true);
@@ -156,19 +156,48 @@ function renderVoyageContenu(envie, container) {
 
     
 
-    const enfantsRestants = enfants.filter(e =>
-        e.date?.start !== today && !isLogementCategoryLocal(e.categorie)
-    );
+      if (estMaison) {
 
-    const { groups, todo } = groupAndSort(enfantsRestants);
+        const enfantsRestants = enfants.filter(e =>
+            e.date?.start !== today && !isLogementCategoryLocal(e.categorie) && !e.realise
+        );
 
-    groups.forEach(group => {
-        appendCollapsibleGroup(container, group.label, group.items, envie, group.key);
-    });
+        const { groups, todo } = groupAndSort(enfantsRestants);
 
-    if (todo.length > 0) {
-        appendCollapsibleGroup(container, "Sans date", todo, envie, "todo");
+        groups.forEach(group => {
+            appendCollapsibleGroup(container, group.label, group.items, envie, group.key);
+        });
+
+        todo.forEach(item => {
+            container.appendChild(createVoyageItemRow(item, envie));
+        });
+
+        const realises = enfants
+            .filter(e => e.realise)
+            .sort((a, b) => (b.realiseAt || 0) - (a.realiseAt || 0));
+
+        if (realises.length > 0) {
+            appendRealiseGroup(container, realises, envie);
+        }
+
+    } else {
+
+        const enfantsRestants = enfants.filter(e =>
+            e.date?.start !== today && !isLogementCategoryLocal(e.categorie)
+        );
+
+        const { groups, todo } = groupAndSort(enfantsRestants);
+
+        groups.forEach(group => {
+            appendCollapsibleGroup(container, group.label, group.items, envie, group.key);
+        });
+
+        if (todo.length > 0) {
+            appendCollapsibleGroup(container, "Sans date", todo, envie, "todo");
+        }
+
     }
+
 
 if (!estMaison) {
     const promptButton = document.createElement("button");
@@ -393,6 +422,46 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey, 
     }
 
 
+
+}
+
+function appendRealiseGroup(container, items, voyageEnvie) {
+
+    const groupKey = "realise";
+    const estOuvert = groupesOuverts.has(groupKey);
+
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "accordionHeader groupCollapseHeader";
+    header.innerHTML = `
+        <span>✅ Réalisé <small class="groupProgress">(${items.length})</small></span>
+        <span class="accordionIcon">${estOuvert ? "▾" : "▸"}</span>
+    `;
+
+    const content = document.createElement("div");
+    content.className = "accordionContent" + (estOuvert ? "" : " hidden");
+
+    items.forEach(item => {
+        content.appendChild(createVoyageItemRow(item, voyageEnvie));
+    });
+
+    header.addEventListener("click", () => {
+
+        content.classList.toggle("hidden");
+
+        if (content.classList.contains("hidden")) {
+            groupesOuverts.delete(groupKey);
+        } else {
+            groupesOuverts.add(groupKey);
+        }
+
+        const icon = header.querySelector(".accordionIcon");
+        icon.textContent = content.classList.contains("hidden") ? "▸" : "▾";
+
+    });
+
+    container.appendChild(header);
+    container.appendChild(content);
 
 }
 
