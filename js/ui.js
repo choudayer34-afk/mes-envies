@@ -238,6 +238,65 @@ function createCompactRow(envie) {
 
 }
 
+function calculerPucesMaison(container) {
+
+    if (container.contexte !== "maison")
+        return "";
+
+    const taches = getEnvies().filter(e => e.voyageId === container.id && !e.realise);
+
+    let devisTotal = 0;
+    let devisRetenu = false;
+
+    let produitsTotal = 0;
+    let produitRetenu = false;
+
+    let boisEnAttente = false;
+
+    taches.forEach(tache => {
+
+        const entriesDevis = tache.devis?.entries || [];
+        devisTotal += entriesDevis.length;
+
+        if (entriesDevis.some(d => d.retenu))
+            devisRetenu = true;
+
+        const produits = tache.comparateur?.produits || [];
+        produitsTotal += produits.length;
+
+        if (produits.some(p => p.retenu))
+            produitRetenu = true;
+
+        if ((tache.bois?.planches || []).length > 0)
+            boisEnAttente = true;
+
+    });
+
+    const puces = [];
+
+    if (devisRetenu) {
+        puces.push("📞 Devis retenu");
+    } else if (devisTotal > 0) {
+        puces.push(`📞 ${devisTotal} devis`);
+    }
+
+    if (produitRetenu) {
+        puces.push("🔍 Produit retenu");
+    } else if (produitsTotal > 0) {
+        puces.push(`🔍 ${produitsTotal} produit${produitsTotal > 1 ? "s" : ""} comparé${produitsTotal > 1 ? "s" : ""}`);
+    }
+
+    if (boisEnAttente) {
+        puces.push("🪵 planches en attente");
+    }
+
+    if (puces.length === 0)
+        return "";
+
+    return `<div class="envieMaisonPuces">${puces.join(" · ")}</div>`;
+
+}
+
 function createEnvieCard(envie) {
 
     const card = document.createElement("div");
@@ -303,7 +362,8 @@ function createEnvieCard(envie) {
         <div class="envieCategory">
             ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
-        ${statutHtml}
+${statutHtml}
+        ${calculerPucesMaison(envie)}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
