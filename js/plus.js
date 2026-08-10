@@ -1,6 +1,7 @@
 import { openJeux } from "./jeux.js";
 import { openSurvie } from "./survie.js";
 import { initHomeMeteo } from "./ui.js";
+import { initAccordions } from "./envie.js";
 
 export function initPlus() {
 
