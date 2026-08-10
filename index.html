@@ -2241,6 +2241,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <button class="secondaryButton outilOuvrirButton" data-modal="simonModal" id="btnOuvrirSimon" style="width:100%;margin-bottom:10px;">🌈 Simon</button>
 <button class="secondaryButton outilOuvrirButton" data-modal="cibleModal" id="btnOuvrirCible" style="width:100%;margin-bottom:10px;">🎯 Tir à la cible</button>
 <button class="secondaryButton outilOuvrirButton" data-modal="suiteModal" id="btnOuvrirSuite" style="width:100%;margin-bottom:10px;">🧠 Suite logique</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="runnerModal" id="btnOuvrirRunner" style="width:100%;margin-bottom:10px;">🦖 Coureur sans fin</button>
 
     
     </div>
@@ -2467,6 +2468,55 @@ document.addEventListener("DOMContentLoaded", () => {
         <div id="anglaisChoixContainer"></div>
         <p id="anglaisMessage" style="font-size:15px;font-weight:600;margin-top:10px;min-height:20px;"></p>
     </div>
+</div>
+<div id="runnerModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>🦖 Coureur sans fin</h2>
+
+        <div class="gameboyShell">
+
+            <div class="gameboyScreenFrame">
+                <canvas id="runnerCanvas" width="300" height="150"></canvas>
+                <div id="runnerScoreOverlay" class="runnerScoreOverlay">00000</div>
+                <div id="runnerGameOverOverlay" class="runnerGameOverOverlay hidden">
+                    <div>💀 Perdu !</div>
+                    <div id="runnerScoreFinal"></div>
+                    <div style="font-size:10px;">Appuie sur START</div>
+                </div>
+            </div>
+
+            <div class="gameboyControls">
+
+                <div class="gameboyDpad">
+                    <button type="button" class="gameboyDpadBtn gameboyDpadUp" id="runnerBtnUp">▲</button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadLeft" disabled></button>
+                    <button type="button" class="gameboyDpadCenter"></button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadRight" disabled></button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadDown" disabled></button>
+                </div>
+
+                <div class="gameboyButtons">
+                    <button type="button" class="gameboyRoundBtn" id="runnerBtnB">B</button>
+                    <button type="button" class="gameboyRoundBtn" id="runnerBtnA">A</button>
+                </div>
+
+            </div>
+
+            <div class="gameboyStartSelect">
+                <button type="button" class="gameboySmallBtn" id="runnerBtnSelect">SELECT</button>
+                <button type="button" class="gameboySmallBtn" id="runnerBtnStart">START</button>
+            </div>
+
+        </div>
+
+        <p style="text-align:center;font-size:13px;color:var(--color-text-light);margin-top:10px;">Appuie sur A, ▲, START ou tape l'écran pour sauter.</p>
+
+    </div>
+
 </div>
 
 
