@@ -130,14 +130,20 @@ export function renderPhotosGrid(envie) {
 
         const thumbUrl = photo.url.replace("/upload/", "/upload/w_400,h_400,c_fill,q_auto/");
 
-        item.innerHTML = `
+       item.innerHTML = `
             <img src="${thumbUrl}" loading="lazy">
+            <button class="photoCouvertureButton" title="Définir comme couverture">🖼️</button>
             <button class="photoDeleteButton" title="Supprimer">✕</button>
             ${photo.description ? `<div class="photoDescriptionBadge">📝</div>` : ""}
         `;
 
         item.querySelector("img").addEventListener("click", () => {
             openPhotoViewer(envie.id, photo);
+        });
+
+        item.querySelector(".photoCouvertureButton").addEventListener("click", (event) => {
+            event.stopPropagation();
+            ouvrirPositionCouverture(envie.id, photo.url);
         });
 
         item.querySelector(".photoDeleteButton").addEventListener("click", (event) => {
@@ -404,7 +410,26 @@ export function initPhotoCouverture() {
         document.getElementById("couverturePositionModal")?.classList.add("hidden");
     });
 
-    document.getElementById("saveCouverturePosition")?.addEventListener("click", () => {
+  document.getElementById("saveCouverturePosition")?.addEventListener("click", () => {
+
+        const envie = getEnvies().find(e => e.id === couverturePositionEnvieId);
+
+        if (!envie)
+            return;
+
+        const dejaDansGalerie = (envie.photos || []).some(p => p.url === couverturePositionUrl);
+        let photosMAJ = envie.photos || [];
+
+        if (!dejaDansGalerie) {
+
+            photosMAJ = [...photosMAJ, {
+                id: crypto.randomUUID(),
+                url: couverturePositionUrl
+            }];
+
+            updateEnviePhotos(couverturePositionEnvieId, photosMAJ);
+
+        }
 
         updateEnviePhotoCouverture(couverturePositionEnvieId, couverturePositionUrl, couverturePositionXY);
 
@@ -412,11 +437,10 @@ export function initPhotoCouverture() {
 
         showToast("✓ Photo de couverture mise à jour");
 
-        const envie = getEnvies().find(e => e.id === couverturePositionEnvieId);
+        const envieMAJ = { ...envie, photos: photosMAJ, photoCouverture: couverturePositionUrl, photoCouverturePosition: couverturePositionXY };
 
-        if (envie) {
-            renderVoyageSection(envie);
-        }
+        renderVoyageSection(envieMAJ);
+        renderPhotosGrid(envieMAJ);
 
     });
 
