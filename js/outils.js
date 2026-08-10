@@ -51,7 +51,9 @@ export function initOutils() {
     initSimon();
     initTirCible();
     initSuiteLogique();
-    initRunner();
+        initRunner();
+    initSnake();
+
 initGameboyMenu();
     initPileOuFace();
     initRoueDecision();
@@ -1987,4 +1989,216 @@ function initGameboyMenu() {
     });
 
 }
+
+/* ---------- Serpent (Game Boy) ---------- */
+
+let snakeCtx = null;
+let snakeAnimId = null;
+let snakeState = null;
+const SNAKE_TAILLE_CASE = 14;
+const SNAKE_COLONNES = 20;
+const SNAKE_LIGNES = 18;
+
+function initSnake() {
+
+    const canvas = document.getElementById("snakeCanvas");
+
+    if (!canvas)
+        return;
+
+    snakeCtx = canvas.getContext("2d");
+
+    const definirDirection = (dx, dy) => {
+
+        if (!snakeState || snakeState.gameOver)
+            return;
+
+        if (snakeState.direction.dx === -dx && snakeState.direction.dy === -dy)
+            return;
+
+        snakeState.prochaineDirection = { dx, dy };
+
+    };
+
+    document.getElementById("snakeBtnUp")?.addEventListener("click", () => definirDirection(0, -1));
+    document.getElementById("snakeBtnDown")?.addEventListener("click", () => definirDirection(0, 1));
+    document.getElementById("snakeBtnLeft")?.addEventListener("click", () => definirDirection(-1, 0));
+    document.getElementById("snakeBtnRight")?.addEventListener("click", () => definirDirection(1, 0));
+
+    document.getElementById("snakeBtnStart")?.addEventListener("click", demarrerSnake);
+
+    document.getElementById("snakeBtnA")?.addEventListener("click", () => {
+
+        if (!snakeState || snakeState.gameOver) {
+            demarrerSnake();
+        }
+
+    });
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("snakeModal")?.classList.contains("hidden"))
+            return;
+
+        const touches = {
+            ArrowUp: [0, -1], ArrowDown: [0, 1],
+            ArrowLeft: [-1, 0], ArrowRight: [1, 0]
+        };
+
+        if (touches[event.code]) {
+            event.preventDefault();
+            definirDirection(...touches[event.code]);
+        }
+
+    });
+
+    document.querySelector('[data-modal="snakeModal"]')?.addEventListener("click", () => {
+        setTimeout(demarrerSnake, 50);
+    });
+
+    document.querySelector("#snakeModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (snakeAnimId) {
+            cancelAnimationFrame(snakeAnimId);
+            snakeAnimId = null;
+        }
+
+    });
+
+}
+
+function placerNourritureSnake(serpent) {
+
+    let position;
+
+    do {
+
+        position = {
+            x: Math.floor(Math.random() * SNAKE_COLONNES),
+            y: Math.floor(Math.random() * SNAKE_LIGNES)
+        };
+
+    } while (serpent.some(s => s.x === position.x && s.y === position.y));
+
+    return position;
+
+}
+
+function demarrerSnake() {
+
+    if (snakeAnimId) {
+        cancelAnimationFrame(snakeAnimId);
+    }
+
+    const depart = [{ x: 8, y: 9 }, { x: 7, y: 9 }, { x: 6, y: 9 }];
+
+    snakeState = {
+        serpent: depart,
+        direction: { dx: 1, dy: 0 },
+        prochaineDirection: { dx: 1, dy: 0 },
+        nourriture: placerNourritureSnake(depart),
+        score: 0,
+        gameOver: false,
+        dernierTick: 0,
+        intervalleMs: 160
+    };
+
+    document.getElementById("snakeGameOverOverlay")?.classList.add("hidden");
+    document.getElementById("snakeScoreOverlay").textContent = "00000";
+
+    snakeAnimId = requestAnimationFrame(bouclerSnake);
+
+}
+
+function bouclerSnake(timestamp) {
+
+    if (!snakeCtx || !snakeState)
+        return;
+
+    const canvas = document.getElementById("snakeCanvas");
+    const s = snakeState;
+
+    if (!s.gameOver) {
+
+        if (!s.dernierTick) {
+            s.dernierTick = timestamp;
+        }
+
+        if (timestamp - s.dernierTick >= s.intervalleMs) {
+
+            s.dernierTick = timestamp;
+            s.direction = s.prochaineDirection;
+
+            const tete = s.serpent[0];
+            const nouvelleTete = { x: tete.x + s.direction.dx, y: tete.y + s.direction.dy };
+
+            const collisionMur = nouvelleTete.x < 0 || nouvelleTete.x >= SNAKE_COLONNES || nouvelleTete.y < 0 || nouvelleTete.y >= SNAKE_LIGNES;
+            const mangeFood = nouvelleTete.x === s.nourriture.x && nouvelleTete.y === s.nourriture.y;
+            const corpsAVerifier = mangeFood ? s.serpent : s.serpent.slice(0, -1);
+            const collisionCorps = corpsAVerifier.some(seg => seg.x === nouvelleTete.x && seg.y === nouvelleTete.y);
+
+            if (collisionMur || collisionCorps) {
+
+                s.gameOver = true;
+
+            } else {
+
+                s.serpent.unshift(nouvelleTete);
+
+                if (mangeFood) {
+
+                    s.score += 1;
+                    s.intervalleMs = Math.max(70, 160 - s.score * 4);
+                    s.nourriture = placerNourritureSnake(s.serpent);
+
+                } else {
+
+                    s.serpent.pop();
+
+                }
+
+            }
+
+            document.getElementById("snakeScoreOverlay").textContent = String(s.score).padStart(5, "0");
+
+        }
+
+    }
+
+    snakeCtx.fillStyle = "#9BBC0F";
+    snakeCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    snakeCtx.fillStyle = "#0F380F";
+
+    snakeCtx.fillRect(
+        s.nourriture.x * SNAKE_TAILLE_CASE,
+        s.nourriture.y * SNAKE_TAILLE_CASE,
+        SNAKE_TAILLE_CASE - 1,
+        SNAKE_TAILLE_CASE - 1
+    );
+
+    s.serpent.forEach(seg => {
+
+        snakeCtx.fillRect(
+            seg.x * SNAKE_TAILLE_CASE,
+            seg.y * SNAKE_TAILLE_CASE,
+            SNAKE_TAILLE_CASE - 1,
+            SNAKE_TAILLE_CASE - 1
+        );
+
+    });
+
+    if (s.gameOver) {
+
+        document.getElementById("snakeGameOverOverlay")?.classList.remove("hidden");
+        document.getElementById("snakeScoreFinal").textContent = `Score : ${s.score}`;
+
+        return;
+
+    }
+
+    snakeAnimId = requestAnimationFrame(bouclerSnake);
+
+}
+
 
