@@ -5,6 +5,7 @@ import { uploadToCloudinary, compresserImageAvantEnvoi } from "./photos.js";
 import { getEnvies, updateEnvieComparateur, getMagasins, rememberMagasin } from "./storage.js";
 
 let avisEnCours = 0;
+let produitEnCoursId = null;
 let photoUrlEnCours = null;
 
 function getComparateur(envie) {
@@ -105,7 +106,7 @@ function creerCarteProduit(envie, comparateur, produit) {
         produit.magasin ? `🏬 ${produit.magasin}` : null
     ].filter(Boolean).join(" · ");
 
-    card.innerHTML = `
+   card.innerHTML = `
         ${photoHtml}
         <div class="comparateurCardInfo">
             <div class="comparateurCardTitre">${produit.nom}</div>
@@ -115,10 +116,15 @@ function creerCarteProduit(envie, comparateur, produit) {
             <div class="comparateurCardActions">
                 ${produit.url ? `<a href="${produit.url}" target="_blank" class="secondaryButton" style="text-decoration:none;padding:6px 12px;font-size:13px;">🔗 Voir</a>` : ""}
                 <button type="button" class="comparateurRetenuButton${produit.retenu ? " active" : ""}">✓ Retenu</button>
+                <button type="button" class="secondaryButton comparateurEditButton" style="padding:6px 12px;font-size:13px;">✏️</button>
                 <button type="button" class="deleteChecklistButton comparateurDeleteButton" title="Supprimer" style="margin-left:auto;">🗑️</button>
             </div>
         </div>
     `;
+
+    card.querySelector(".comparateurEditButton").addEventListener("click", () => {
+        ouvrirModalProduit(produit);
+    });
         if (produit.photoUrl) {
         card.querySelector(".comparateurCardPhoto")?.addEventListener("click", () => {
             ouvrirImageAgrandie(produit.photoUrl);
@@ -207,7 +213,35 @@ function ouvrirImageAgrandie(url) {
 
 }
 
+function ouvrirModalProduit(produit = null) {
 
+    produitEnCoursId = produit?.id || null;
+    avisEnCours = produit?.avis || 0;
+    photoUrlEnCours = produit?.photoUrl || null;
+
+    document.getElementById("comparateurModalTitre").textContent = produit ? "Modifier le produit" : "Produit à comparer";
+    document.getElementById("saveComparateurProduit").textContent = produit ? "Enregistrer" : "Ajouter";
+
+    document.getElementById("comparateurNom").value = produit?.nom || "";
+    document.getElementById("comparateurPrix").value = produit?.prix ?? "";
+    document.getElementById("comparateurDimensions").value = produit?.dimensions || "";
+    document.getElementById("comparateurMagasin").value = produit?.magasin || "";
+    document.getElementById("comparateurUrl").value = produit?.url || "";
+    document.getElementById("comparateurRemarque").value = produit?.remarque || "";
+
+    const preview = document.getElementById("comparateurPhotoPreview");
+    preview.innerHTML = "";
+
+    if (photoUrlEnCours) {
+        preview.innerHTML = `<img src="${photoUrlEnCours}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;cursor:pointer;">`;
+        preview.querySelector("img").addEventListener("click", () => ouvrirImageAgrandie(photoUrlEnCours));
+    }
+
+    renderAvisStars();
+
+    document.getElementById("comparateurProduitModal")?.classList.remove("hidden");
+
+}
 function renderAvisStars() {
 
     const container = document.getElementById("comparateurAvisStars");
@@ -237,29 +271,13 @@ function renderAvisStars() {
 
 export function initComparateur() {
 
-    document.getElementById("addComparateurProduitButton")?.addEventListener("click", () => {
-
-        avisEnCours = 0;
-        photoUrlEnCours = null;
-
-        document.getElementById("comparateurNom").value = "";
-        document.getElementById("comparateurPrix").value = "";
-        document.getElementById("comparateurDimensions").value = "";
-        document.getElementById("comparateurMagasin").value = "";
-        document.getElementById("comparateurUrl").value = "";
-        document.getElementById("comparateurRemarque").value = "";
-        document.getElementById("comparateurPhotoPreview").innerHTML = "";
-
-        renderAvisStars();
-
-        document.getElementById("comparateurProduitModal")?.classList.remove("hidden");
-
+document.getElementById("addComparateurProduitButton")?.addEventListener("click", () => {
+        ouvrirModalProduit();
     });
-
-    document.getElementById("cancelComparateurProduit")?.addEventListener("click", () => {
+document.getElementById("cancelComparateurProduit")?.addEventListener("click", () => {
         document.getElementById("comparateurProduitModal")?.classList.add("hidden");
+        produitEnCoursId = null;
     });
-
     document.getElementById("comparateurPhotoButton")?.addEventListener("click", () => {
         document.getElementById("comparateurPhotoInput")?.click();
     });
@@ -324,7 +342,7 @@ export function initComparateur() {
 
     });
 
-    document.getElementById("saveComparateurProduit")?.addEventListener("click", () => {
+document.getElementById("saveComparateurProduit")?.addEventListener("click", () => {
 
         const nom = document.getElementById("comparateurNom").value.trim();
 
@@ -342,8 +360,9 @@ export function initComparateur() {
 
         const prixSaisi = parseFloat(document.getElementById("comparateurPrix").value);
 
-        const nouveauProduit = {
-            id: crypto.randomUUID(),
+        rememberMagasin(document.getElementById("comparateurMagasin").value);
+
+        const donneesProduit = {
             nom,
             prix: isNaN(prixSaisi) ? null : prixSaisi,
             dimensions: document.getElementById("comparateurDimensions").value.trim(),
@@ -351,13 +370,24 @@ export function initComparateur() {
             avis: avisEnCours || null,
             url: document.getElementById("comparateurUrl").value.trim(),
             remarque: document.getElementById("comparateurRemarque").value.trim(),
-            photoUrl: photoUrlEnCours,
-            retenu: false
+            photoUrl: photoUrlEnCours
         };
 
-        const nouveauComparateur = { ...comparateur, produits: [...comparateur.produits, nouveauProduit] };
+        let nouveauxProduits;
 
-        rememberMagasin(document.getElementById("comparateurMagasin").value);
+        if (produitEnCoursId) {
+
+            nouveauxProduits = comparateur.produits.map(p =>
+                p.id === produitEnCoursId ? { ...p, ...donneesProduit } : p
+            );
+
+        } else {
+
+            nouveauxProduits = [...comparateur.produits, { id: crypto.randomUUID(), retenu: false, ...donneesProduit }];
+
+        }
+
+        const nouveauComparateur = { ...comparateur, produits: nouveauxProduits };
 
         updateEnvieComparateur(envie.id, nouveauComparateur);
 
@@ -365,7 +395,9 @@ export function initComparateur() {
 
         renderComparateur({ ...envie, comparateur: nouveauComparateur });
 
-        showToast("✓ Produit ajouté");
+        showToast(produitEnCoursId ? "✓ Produit modifié" : "✓ Produit ajouté");
+
+        produitEnCoursId = null;
 
     });
 
