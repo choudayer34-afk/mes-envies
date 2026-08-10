@@ -268,6 +268,10 @@ export function deleteEnvie(id) {
     deleteDoc(envieRef(id)).catch(console.error);
 }
 
+export function updateEnvieDescription(id, description) {
+    patchEnvie(id, { description });
+}
+
 export function updateEnvie(id, titre) {
     patchEnvie(id, { titre });
 }
