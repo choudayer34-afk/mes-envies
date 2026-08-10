@@ -230,7 +230,7 @@ initModal();
     initPeintureCalculateur();
      initBoisCalculateur();
     initComparateur();
-
+initDevis();
     initAccordions();
 
     document.getElementById("closeFiche")
