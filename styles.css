@@ -2134,3 +2134,17 @@ button {
     color:var(--color-text-light);
     margin-top:2px;
 }
+
+.photoCouvertureButton{
+    position:absolute;
+    top:4px;
+    left:4px;
+    width:24px;
+    height:24px;
+    border-radius:50%;
+    border:none;
+    background:rgba(0,0,0,.6);
+    color:white;
+    font-size:12px;
+    cursor:pointer;
+}
