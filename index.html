@@ -2243,6 +2243,7 @@ document.addEventListener("DOMContentLoaded", () => {
 </button>
 <button class="secondaryButton outilOuvrirButton" data-modal="memMotsModal" id="btnOuvrirMemMots" style="width:100%;margin-bottom:10px;">📝 Liste de mots</button>
 <button class="secondaryButton outilOuvrirButton" data-modal="memVisagesModal" id="btnOuvrirMemVisages" style="width:100%;margin-bottom:10px;">👤 Visages et prénoms</button>
+<button class="secondaryButton outilOuvrirButton" data-modal="nbackModal" id="btnOuvrirNback" style="width:100%;margin-bottom:10px;">🧠 N-back</button>
 
 <input
     id="jeuxSearchInput"
@@ -2293,6 +2294,38 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+
+<div id="nbackModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>🧠 N-back</h2>
+
+        <p style="font-size:13px;color:var(--color-text-light);">Appuie sur "Ça correspond !" quand la lettre affichée est identique à celle d'il y a N étapes.</p>
+
+        <div class="itemTypeToggle" id="nbackDifficulteToggle">
+            <button type="button" class="itemTypeChip active" data-n="1">Facile (N=1)</button>
+            <button type="button" class="itemTypeChip" data-n="2">Moyen (N=2)</button>
+            <button type="button" class="itemTypeChip" data-n="3">Difficile (N=3)</button>
+        </div>
+
+        <div style="min-height:120px;display:flex;align-items:center;justify-content:center;margin-top:16px;">
+            <div id="nbackLettreAffichee" style="font-size:64px;font-weight:700;color:var(--color-text);"></div>
+        </div>
+
+        <button id="nbackBtnMatch" class="secondaryButton" style="width:100%;font-size:18px;padding:18px;" disabled>🔁 Ça correspond !</button>
+
+        <div id="nbackResultat" style="text-align:center;margin-top:14px;font-size:14px;color:var(--color-text-light);"></div>
+
+        <button id="nbackBtnAction" class="primaryButton" style="width:100%;margin-top:14px;">▶️ Commencer</button>
+
+    </div>
+
+</div>
+
+
 <div id="memVisagesModal" class="modal-overlay hidden">
 
     <div class="modal">
