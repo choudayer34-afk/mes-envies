@@ -42,5 +42,23 @@ export function initPlus() {
         }
 
     });
+document.getElementById("plusBtnGuide")?.addEventListener("click", () => {
+        document.getElementById("plusModal").classList.add("hidden");
+        document.getElementById("guideModal").classList.remove("hidden");
+    });
 
+    document.getElementById("closeGuide")?.addEventListener("click", () => {
+        document.getElementById("guideModal").classList.add("hidden");
+    });
+
+    document.getElementById("plusBtnAPropos")?.addEventListener("click", () => {
+        document.getElementById("plusModal").classList.add("hidden");
+        document.getElementById("aProposModal").classList.remove("hidden");
+    });
+
+    document.getElementById("closeAPropos")?.addEventListener("click", () => {
+        document.getElementById("aProposModal").classList.add("hidden");
+    });
+
+    initAccordions("guideModal");
 }
