@@ -54,7 +54,7 @@ export function initOutils() {
         initRunner();
     initSnake();
     initBreakout();
-
+initTetris();
 initGameboyMenu();
     initPileOuFace();
     initRoueDecision();
@@ -1952,7 +1952,9 @@ function bouclerRunner() {
 const CARTOUCHES_GAMEBOY = [
     { nom: "Coureur sans fin", emoji: "🦖", couleur: "#E4572E", modal: "runnerModal", demarrer: () => demarrerRunner() },
     { nom: "Serpent", emoji: "🐍", couleur: "#4C9F70", modal: "snakeModal", demarrer: () => demarrerSnake() },
-    { nom: "Casse-briques", emoji: "🧊", couleur: "#3E7CB1", modal: "breakoutModal", demarrer: () => demarrerBreakout() }
+    { nom: "Casse-briques", emoji: "🧊", couleur: "#3E7CB1", modal: "breakoutModal", demarrer: () => demarrerBreakout() },
+    { nom: "Empileur de blocs", emoji: "🧱", couleur: "#6B4C9A", modal: "tetrisModal", demarrer: () => demarrerTetris() }
+
 ];
 
 
@@ -2470,6 +2472,301 @@ function bouclerBreakout() {
     }
 
     breakoutAnimId = requestAnimationFrame(bouclerBreakout);
+
+}
+
+/* ---------- Empileur de blocs façon Tetris (Game Boy) ---------- */
+
+const TETRIS_COLS = 10;
+const TETRIS_ROWS = 18;
+const TETRIS_CELL = 14;
+
+const TETRIS_PIECES = {
+    I: { matrice: [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], couleur: "#0F380F" },
+    O: { matrice: [[1,1],[1,1]], couleur: "#306230" },
+    T: { matrice: [[0,1,0],[1,1,1],[0,0,0]], couleur: "#0F380F" },
+    S: { matrice: [[0,1,1],[1,1,0],[0,0,0]], couleur: "#306230" },
+    Z: { matrice: [[1,1,0],[0,1,1],[0,0,0]], couleur: "#0F380F" },
+    J: { matrice: [[1,0,0],[1,1,1],[0,0,0]], couleur: "#306230" },
+    L: { matrice: [[0,0,1],[1,1,1],[0,0,0]], couleur: "#0F380F" }
+};
+
+let tetrisCtx = null;
+let tetrisAnimId = null;
+let tetrisState = null;
+
+function tetrisTourner(matrice) {
+
+    const n = matrice.length;
+    const resultat = Array.from({ length: n }, () => Array(n).fill(0));
+
+    for (let y = 0; y < n; y++) {
+        for (let x = 0; x < n; x++) {
+            resultat[x][n - 1 - y] = matrice[y][x];
+        }
+    }
+
+    return resultat;
+
+}
+
+function tetrisCollision(plateau, matrice, posX, posY) {
+
+    for (let y = 0; y < matrice.length; y++) {
+        for (let x = 0; x < matrice[y].length; x++) {
+
+            if (!matrice[y][x])
+                continue;
+
+            const bx = posX + x;
+            const by = posY + y;
+
+            if (bx < 0 || bx >= TETRIS_COLS || by >= TETRIS_ROWS)
+                return true;
+
+            if (by >= 0 && plateau[by][bx])
+                return true;
+
+        }
+    }
+
+    return false;
+
+}
+
+function tetrisPieceAleatoire() {
+
+    const noms = Object.keys(TETRIS_PIECES);
+    const nom = noms[Math.floor(Math.random() * noms.length)];
+    const piece = TETRIS_PIECES[nom];
+
+    return {
+        matrice: piece.matrice.map(ligne => [...ligne]),
+        couleur: piece.couleur,
+        x: Math.floor(TETRIS_COLS / 2) - Math.ceil(piece.matrice.length / 2),
+        y: -1
+    };
+
+}
+
+function initTetris() {
+
+    const canvas = document.getElementById("tetrisCanvas");
+
+    if (!canvas)
+        return;
+
+    tetrisCtx = canvas.getContext("2d");
+
+    const deplacer = (dx) => {
+
+        if (!tetrisState || tetrisState.gameOver)
+            return;
+
+        const s = tetrisState;
+
+        if (!tetrisCollision(s.plateau, s.piece.matrice, s.piece.x + dx, s.piece.y)) {
+            s.piece.x += dx;
+        }
+
+    };
+
+    const descendreVite = () => {
+
+        if (!tetrisState || tetrisState.gameOver)
+            return;
+
+        tetrisState.chuteRapide = true;
+
+    };
+
+    const pivoter = () => {
+
+        if (!tetrisState || tetrisState.gameOver) {
+            demarrerTetris();
+            return;
+        }
+
+        const s = tetrisState;
+        const tournee = tetrisTourner(s.piece.matrice);
+
+        if (!tetrisCollision(s.plateau, tournee, s.piece.x, s.piece.y)) {
+            s.piece.matrice = tournee;
+        }
+
+    };
+
+    document.getElementById("tetrisBtnLeft")?.addEventListener("click", () => deplacer(-1));
+    document.getElementById("tetrisBtnRight")?.addEventListener("click", () => deplacer(1));
+    document.getElementById("tetrisBtnDown")?.addEventListener("click", descendreVite);
+    document.getElementById("tetrisBtnA")?.addEventListener("click", pivoter);
+    document.getElementById("tetrisBtnStart")?.addEventListener("click", demarrerTetris);
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("tetrisModal")?.classList.contains("hidden"))
+            return;
+
+        if (event.code === "ArrowLeft") { event.preventDefault(); deplacer(-1); }
+        if (event.code === "ArrowRight") { event.preventDefault(); deplacer(1); }
+        if (event.code === "ArrowDown") { event.preventDefault(); descendreVite(); }
+        if (event.code === "ArrowUp" || event.code === "Space") { event.preventDefault(); pivoter(); }
+
+    });
+
+    document.querySelector("#tetrisModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (tetrisAnimId) {
+            cancelAnimationFrame(tetrisAnimId);
+            tetrisAnimId = null;
+        }
+
+        document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+
+    });
+
+}
+
+function demarrerTetris() {
+
+    if (tetrisAnimId) {
+        cancelAnimationFrame(tetrisAnimId);
+    }
+
+    tetrisState = {
+        plateau: Array.from({ length: TETRIS_ROWS }, () => Array(TETRIS_COLS).fill(0)),
+        piece: tetrisPieceAleatoire(),
+        score: 0,
+        gameOver: false,
+        dernierTick: 0,
+        intervalleMs: 550,
+        chuteRapide: false
+    };
+
+    document.getElementById("tetrisGameOverOverlay")?.classList.add("hidden");
+    document.getElementById("tetrisScoreOverlay").textContent = "00000";
+
+    bouclerTetris();
+
+}
+
+function tetrisVerrouillerEtContinuer(s) {
+
+    s.piece.matrice.forEach((ligne, y) => {
+        ligne.forEach((cellule, x) => {
+
+            if (!cellule)
+                return;
+
+            const by = s.piece.y + y;
+
+            if (by >= 0) {
+                s.plateau[by][s.piece.x + x] = s.piece.couleur;
+            }
+
+        });
+    });
+
+    let lignesSupprimees = 0;
+
+    for (let y = TETRIS_ROWS - 1; y >= 0; y--) {
+
+        if (s.plateau[y].every(c => c !== 0)) {
+
+            s.plateau.splice(y, 1);
+            s.plateau.unshift(Array(TETRIS_COLS).fill(0));
+            lignesSupprimees++;
+            y++;
+
+        }
+
+    }
+
+    if (lignesSupprimees > 0) {
+
+        s.score += [0, 40, 100, 300, 1200][lignesSupprimees] || lignesSupprimees * 100;
+        s.intervalleMs = Math.max(150, 550 - Math.floor(s.score / 300) * 30);
+
+    }
+
+    s.piece = tetrisPieceAleatoire();
+
+    if (tetrisCollision(s.plateau, s.piece.matrice, s.piece.x, s.piece.y)) {
+        s.gameOver = true;
+    }
+
+}
+
+function bouclerTetris(timestamp) {
+
+    if (!tetrisCtx || !tetrisState)
+        return;
+
+    const s = tetrisState;
+
+    if (!s.gameOver) {
+
+        if (!s.dernierTick) {
+            s.dernierTick = timestamp;
+        }
+
+        const intervalleActuel = s.chuteRapide ? 40 : s.intervalleMs;
+
+        if (timestamp - s.dernierTick >= intervalleActuel) {
+
+            s.dernierTick = timestamp;
+
+            if (!tetrisCollision(s.plateau, s.piece.matrice, s.piece.x, s.piece.y + 1)) {
+                s.piece.y += 1;
+            } else {
+                tetrisVerrouillerEtContinuer(s);
+                s.chuteRapide = false;
+            }
+
+        }
+
+        document.getElementById("tetrisScoreOverlay").textContent = String(s.score).padStart(5, "0");
+
+    }
+
+    tetrisCtx.fillStyle = "#9BBC0F";
+    tetrisCtx.fillRect(0, 0, TETRIS_COLS * TETRIS_CELL, TETRIS_ROWS * TETRIS_CELL);
+
+    tetrisCtx.fillStyle = "#0F380F";
+
+    s.plateau.forEach((ligne, y) => {
+        ligne.forEach((cellule, x) => {
+            if (cellule) {
+                tetrisCtx.fillRect(x * TETRIS_CELL, y * TETRIS_CELL, TETRIS_CELL - 1, TETRIS_CELL - 1);
+            }
+        });
+    });
+
+    s.piece.matrice.forEach((ligne, y) => {
+        ligne.forEach((cellule, x) => {
+
+            if (!cellule)
+                return;
+
+            const by = s.piece.y + y;
+
+            if (by >= 0) {
+                tetrisCtx.fillRect((s.piece.x + x) * TETRIS_CELL, by * TETRIS_CELL, TETRIS_CELL - 1, TETRIS_CELL - 1);
+            }
+
+        });
+    });
+
+    if (s.gameOver) {
+
+        document.getElementById("tetrisGameOverOverlay")?.classList.remove("hidden");
+        document.getElementById("tetrisScoreFinal").textContent = `Score : ${s.score}`;
+
+        return;
+
+    }
+
+    tetrisAnimId = requestAnimationFrame(bouclerTetris);
 
 }
 
