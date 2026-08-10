@@ -61,7 +61,7 @@ initTaquin();
     initDemineur();
 initMemoireChiffres();
 initGameboyMenu();
-initGameboySecret()
+initGameboySecret();
     initPileOuFace();
     initRoueDecision();
     initTirageNombre();
