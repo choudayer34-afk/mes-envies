@@ -982,6 +982,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div class="accordion">
 
+    <button
+        class="accordionHeader"
+        data-target="devisSection">
+        <span>📋 Devis</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div
+        id="devisSection"
+        class="accordionContent hidden">
+
+        <div id="devisListe"></div>
+
+        <button id="addDevisButton" class="secondaryButton" style="margin-top:10px;">
+            ➕ Ajouter un devis
+        </button>
+
+    </div>
+
+</div>
+        
+        <div class="accordion">
+
             <button
                 class="accordionHeader"
                 data-target="lienSection">
@@ -1065,7 +1088,69 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </div>
 
+<div id="devisModal" class="modal-overlay hidden">
 
+    <div class="modal">
+
+        <h2 id="devisModalTitre">Nouveau devis</h2>
+
+        <button type="button" id="devisScanButton" class="secondaryButton" style="width:100%;margin-bottom:14px;">
+            📇 Scanner une carte de visite
+        </button>
+        <input type="file" id="devisScanInput" accept="image/*" capture="environment" hidden>
+
+        <label class="fieldTitle">Société</label>
+        <input type="text" id="devisSociete" placeholder="Ex: Dupont Peinture" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Contact</label>
+        <input type="text" id="devisContact" placeholder="Ex: Jean Dupont" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Téléphone</label>
+        <input type="tel" id="devisTelephone" placeholder="06 12 34 56 78" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Email</label>
+        <input type="email" id="devisEmail" placeholder="contact@exemple.fr" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Date du devis</label>
+        <input type="date" id="devisDate" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Lien</label>
+        <input type="text" id="devisLien" placeholder="https://..." class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Statut</label>
+        <div class="itemTypeToggle" id="devisStatutToggle">
+            <button type="button" class="itemTypeChip active" data-statut="a_contacter">📞 À contacter</button>
+            <button type="button" class="itemTypeChip" data-statut="rdv_planifie">📅 RDV planifié</button>
+            <button type="button" class="itemTypeChip" data-statut="devis_recu">✅ Devis reçu</button>
+        </div>
+
+        <div id="devisRdvDateWrapper" class="hidden" style="margin-top:12px;">
+            <label class="fieldTitle">Date du RDV</label>
+            <input type="date" id="devisRdvDate" class="numberInput">
+        </div>
+
+        <label class="fieldTitle" style="margin-top:12px;">Document du devis</label>
+        <div id="devisDocPreview" style="margin-bottom:8px;"></div>
+        <input type="file" id="devisDocInput" accept="application/pdf,image/*" hidden>
+        <button type="button" id="devisDocButton" class="secondaryButton" style="width:100%;">
+            📎 Ajouter le document
+        </button>
+
+        <label class="fieldTitle" style="margin-top:12px;">Photos</label>
+        <div id="devisPhotosPreview" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;"></div>
+        <input type="file" id="devisPhotoInput" accept="image/*" multiple hidden>
+        <button type="button" id="devisPhotoButton" class="secondaryButton" style="width:100%;">
+            📷 Ajouter des photos
+        </button>
+
+        <div class="modal-actions">
+            <button id="cancelDevis">Annuler</button>
+            <button id="saveDevis">Ajouter</button>
+        </div>
+
+    </div>
+
+</div>
 <div id="dateModal" class="modal-overlay hidden">
 
     <div class="modal">
