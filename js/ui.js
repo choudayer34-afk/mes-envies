@@ -123,6 +123,12 @@ function renderHomeSections() {
     });
 
 
+ if (modeActif === "maison") {
+        renderCollapsibleSection("actionSection", "actionContainer", "🔔 En attente d'action", calculerGroupesActionsMaison(), createActionGroupCard, true);
+    } else {
+        document.getElementById("actionSection")?.classList.add("hidden");
+    }
+
     renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
     renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
     renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
@@ -293,6 +299,104 @@ function calculerPucesMaison(container) {
         return "";
 
     return `<div class="envieMaisonPuces">${puces.join(" · ")}</div>`;
+
+}
+
+function formatDateFrCourt(dateStr) {
+
+    if (!dateStr)
+        return "";
+
+    const [annee, mois, jour] = dateStr.split("-");
+    return `${jour}/${mois}`;
+
+}
+
+function calculerGroupesActionsMaison() {
+
+    const conteneursMaison = getEnvies().filter(e =>
+        e.contexte === "maison" &&
+        isContainer(e.categorie) &&
+        computeContainerStatus(e).statut !== "termine"
+    );
+
+    const groupes = [];
+
+    conteneursMaison.forEach(container => {
+
+        const taches = [
+            container,
+            ...getEnvies().filter(e => e.voyageId === container.id && !e.realise)
+        ];
+
+        const actions = [];
+
+        taches.forEach(tache => {
+
+            const entriesDevis = tache.devis?.entries || [];
+            const devisRetenu = entriesDevis.some(d => d.retenu);
+
+            if (!devisRetenu) {
+
+                entriesDevis.filter(d => d.statut === "a_contacter").forEach(d => {
+                    actions.push({ envieId: tache.id, texte: `📞 Contacter ${d.societe || d.contact || "un contact"}` });
+                });
+
+                entriesDevis.filter(d => d.statut === "rdv_planifie").forEach(d => {
+                    const dateTxt = d.dateRdv ? ` le ${formatDateFrCourt(d.dateRdv)}` : "";
+                    actions.push({ envieId: tache.id, texte: `📅 RDV${dateTxt} — ${d.societe || d.contact || ""}`.trim() });
+                });
+
+                const recus = entriesDevis.filter(d => d.statut === "devis_recu");
+
+                if (recus.length > 0) {
+                    actions.push({ envieId: tache.id, texte: `✅ ${recus.length} devis reçu${recus.length > 1 ? "s" : ""} — à choisir` });
+                }
+
+            }
+
+            const produits = tache.comparateur?.produits || [];
+            const produitRetenu = produits.some(p => p.retenu);
+
+            if (!produitRetenu && produits.length > 0) {
+                actions.push({ envieId: tache.id, texte: `🔍 ${produits.length} produit${produits.length > 1 ? "s" : ""} à départager` });
+            }
+
+        });
+
+        if (actions.length > 0) {
+            groupes.push({
+                containerId: container.id,
+                titre: `${getCategorieById(container.categorie)?.emoji || "🛠️"} ${container.titre}`,
+                actions
+            });
+        }
+
+    });
+
+    return groupes;
+
+}
+
+function createActionGroupCard(groupe) {
+
+    const card = document.createElement("div");
+    card.className = "actionGroupCard";
+
+    card.innerHTML = `
+        <div class="actionGroupTitre">${groupe.titre}</div>
+        ${groupe.actions.map(a => `<div class="actionGroupLigne" data-envie-id="${a.envieId}">${a.texte}</div>`).join("")}
+    `;
+
+    card.querySelectorAll(".actionGroupLigne").forEach(ligne => {
+
+        ligne.addEventListener("click", () => {
+            openEnvie(ligne.dataset.envieId, null);
+        });
+
+    });
+
+    return card;
 
 }
 
