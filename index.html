@@ -662,6 +662,60 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div id="memChiffresModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>🔢 Suite de chiffres</h2>
+
+        <div class="itemTypeToggle" id="memChiffresModeToggle">
+            <button type="button" class="itemTypeChip active" data-mode="normal">Normal</button>
+            <button type="button" class="itemTypeChip" data-mode="inverse">Inversé</button>
+        </div>
+
+        <div class="gameboyShell" style="margin-top:14px;">
+
+            <div class="gameboyScreenFrame">
+                <canvas id="memChiffresCanvas" width="200" height="200"></canvas>
+                <div id="memChiffresFinOverlay" class="runnerGameOverOverlay hidden">
+                    <div id="memChiffresFinTitre"></div>
+                    <div id="memChiffresFinScore" style="font-size:11px;"></div>
+                    <div style="font-size:10px;">Appuie sur START pour rejouer</div>
+                </div>
+            </div>
+
+            <div class="gameboyControls">
+
+                <div class="gameboyDpad">
+                    <button type="button" class="gameboyDpadBtn gameboyDpadUp" id="memChiffresBtnUp" style="color:#8C8C96;">▲</button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadLeft" id="memChiffresBtnLeft" style="color:#8C8C96;">◀</button>
+                    <button type="button" class="gameboyDpadCenter"></button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadRight" id="memChiffresBtnRight" style="color:#8C8C96;">▶</button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadDown" id="memChiffresBtnDown" style="color:#8C8C96;">▼</button>
+                </div>
+
+                <div class="gameboyButtons">
+                    <button type="button" class="gameboyRoundBtn" id="memChiffresBtnB">B</button>
+                    <button type="button" class="gameboyRoundBtn" id="memChiffresBtnA">A</button>
+                </div>
+
+            </div>
+
+            <div class="gameboyStartSelect">
+                <button type="button" class="gameboySmallBtn" id="memChiffresBtnSelect">SELECT</button>
+                <button type="button" class="gameboySmallBtn" id="memChiffresBtnStart">START</button>
+            </div>
+
+        </div>
+
+        <p style="text-align:center;font-size:13px;color:var(--color-text-light);margin-top:10px;">Retiens la suite affichée, puis retape-la sur le clavier (croix + A, ou tape directement). B pour effacer.</p>
+
+    </div>
+
+</div>
+
 <div id="gameboyMenuModal" class="modal-overlay hidden">
 
     <div class="modal">
