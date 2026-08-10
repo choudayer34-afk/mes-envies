@@ -56,6 +56,9 @@ export function initOutils() {
     initBreakout();
 initTetris();
 initTaquin();
+    
+    initDemineur();
+
 initGameboyMenu();
 initGameboySecret()
     initPileOuFace();
@@ -1956,7 +1959,9 @@ const CARTOUCHES_GAMEBOY = [
     { nom: "Serpent", emoji: "🐍", couleur: "#4C9F70", modal: "snakeModal", demarrer: () => demarrerSnake() },
     { nom: "Casse-briques", emoji: "🧊", couleur: "#3E7CB1", modal: "breakoutModal", demarrer: () => demarrerBreakout() },
     { nom: "Empileur de blocs", emoji: "🧱", couleur: "#6B4C9A", modal: "tetrisModal", demarrer: () => demarrerTetris() },
-        { nom: "Taquin", emoji: "🧩", couleur: "#B5854B", modal: "taquinModal", demarrer: () => demarrerTaquin(3) }
+        { nom: "Taquin", emoji: "🧩", couleur: "#B5854B", modal: "taquinModal", demarrer: () => demarrerTaquin(3) },
+    { nom: "Démineur", emoji: "💣", couleur: "#4A4A52", modal: "demineurModal", demarrer: () => demarrerDemineur("facile") }
+
 ];
 
 
@@ -3030,3 +3035,367 @@ function dessinerTaquin() {
 
 }
 
+/* ---------- Démineur (Game Boy) ---------- */
+
+const DEMINEUR_NIVEAUX = {
+    facile: { cols: 8, rows: 8, mines: 10 },
+    moyen: { cols: 10, rows: 10, mines: 18 },
+    difficile: { cols: 10, rows: 14, mines: 30 }
+};
+
+let demineurCtx = null;
+let demineurState = null;
+
+function demineurCreerGrilleVide(cols, rows) {
+
+    return Array.from({ length: rows }, () =>
+        Array.from({ length: cols }, () => ({
+            estMine: false, nombreAdjacent: 0, revelee: false, marquee: false
+        }))
+    );
+
+}
+
+function demineurPlacerMines(grille, cols, rows, nbMines, safeX, safeY) {
+
+    const zoneSure = new Set();
+
+    for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+
+            const nx = safeX + dx;
+            const ny = safeY + dy;
+
+            if (nx >= 0 && nx < cols && ny >= 0 && ny < rows) {
+                zoneSure.add(ny * cols + nx);
+            }
+
+        }
+    }
+
+    let placees = 0;
+    let tentatives = 0;
+
+    while (placees < nbMines && tentatives < 100000) {
+
+        tentatives++;
+
+        const x = Math.floor(Math.random() * cols);
+        const y = Math.floor(Math.random() * rows);
+        const idx = y * cols + x;
+
+        if (zoneSure.has(idx) || grille[y][x].estMine)
+            continue;
+
+        grille[y][x].estMine = true;
+        placees++;
+
+    }
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+
+            if (grille[y][x].estMine)
+                continue;
+
+            let compte = 0;
+
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+
+                    if (dx === 0 && dy === 0)
+                        continue;
+
+                    const nx = x + dx;
+                    const ny = y + dy;
+
+                    if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && grille[ny][nx].estMine) {
+                        compte++;
+                    }
+
+                }
+            }
+
+            grille[y][x].nombreAdjacent = compte;
+
+        }
+    }
+
+}
+
+function demineurReveler(grille, cols, rows, x, y) {
+
+    if (x < 0 || x >= cols || y < 0 || y >= rows)
+        return "ok";
+
+    if (grille[y][x].revelee || grille[y][x].marquee)
+        return "ok";
+
+    grille[y][x].revelee = true;
+
+    if (grille[y][x].estMine)
+        return "perdu";
+
+    if (grille[y][x].nombreAdjacent === 0) {
+
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+
+                if (dx === 0 && dy === 0)
+                    continue;
+
+                demineurReveler(grille, cols, rows, x + dx, y + dy);
+
+            }
+        }
+
+    }
+
+    return "ok";
+
+}
+
+function demineurVerifierVictoire(grille, cols, rows) {
+
+    for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+
+            if (!grille[y][x].estMine && !grille[y][x].revelee) {
+                return false;
+            }
+
+        }
+    }
+
+    return true;
+
+}
+
+function initDemineur() {
+
+    const canvas = document.getElementById("demineurCanvas");
+
+    if (!canvas)
+        return;
+
+    demineurCtx = canvas.getContext("2d");
+
+    document.querySelectorAll("#demineurDifficulteToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            document.querySelectorAll("#demineurDifficulteToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            demarrerDemineur(chip.dataset.niveau);
+
+        });
+
+    });
+
+    const deplacerCurseur = (dx, dy) => {
+
+        if (!demineurState || demineurState.termine)
+            return;
+
+        const s = demineurState;
+
+        s.curseurX = Math.max(0, Math.min(s.cols - 1, s.curseurX + dx));
+        s.curseurY = Math.max(0, Math.min(s.rows - 1, s.curseurY + dy));
+
+        dessinerDemineur();
+
+    };
+
+    const revelerCurseur = () => {
+
+        if (!demineurState || demineurState.termine)
+            return;
+
+        const s = demineurState;
+
+        if (!s.minesPlacees) {
+
+            demineurPlacerMines(s.grille, s.cols, s.rows, s.nbMines, s.curseurX, s.curseurY);
+            s.minesPlacees = true;
+
+        }
+
+        const resultat = demineurReveler(s.grille, s.cols, s.rows, s.curseurX, s.curseurY);
+
+        if (resultat === "perdu") {
+
+            s.termine = true;
+
+            s.grille.forEach(ligne => ligne.forEach(c => { if (c.estMine) c.revelee = true; }));
+
+            document.getElementById("demineurFinTitre").textContent = "💥 Perdu !";
+            document.getElementById("demineurFinOverlay")?.classList.remove("hidden");
+
+        } else if (demineurVerifierVictoire(s.grille, s.cols, s.rows)) {
+
+            s.termine = true;
+
+            document.getElementById("demineurFinTitre").textContent = "🎉 Gagné !";
+            document.getElementById("demineurFinOverlay")?.classList.remove("hidden");
+
+        }
+
+        dessinerDemineur();
+
+    };
+
+    const marquerCurseur = () => {
+
+        if (!demineurState || demineurState.termine)
+            return;
+
+        const s = demineurState;
+        const case_ = s.grille[s.curseurY][s.curseurX];
+
+        if (!case_.revelee) {
+            case_.marquee = !case_.marquee;
+        }
+
+        dessinerDemineur();
+
+    };
+
+    document.getElementById("demineurBtnUp")?.addEventListener("click", () => deplacerCurseur(0, -1));
+    document.getElementById("demineurBtnDown")?.addEventListener("click", () => deplacerCurseur(0, 1));
+    document.getElementById("demineurBtnLeft")?.addEventListener("click", () => deplacerCurseur(-1, 0));
+    document.getElementById("demineurBtnRight")?.addEventListener("click", () => deplacerCurseur(1, 0));
+    document.getElementById("demineurBtnA")?.addEventListener("click", revelerCurseur);
+    document.getElementById("demineurBtnB")?.addEventListener("click", marquerCurseur);
+
+    document.getElementById("demineurBtnStart")?.addEventListener("click", () => {
+        demarrerDemineur(demineurState?.niveau || "facile");
+    });
+
+    canvas.addEventListener("click", (event) => {
+
+        if (!demineurState)
+            return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((event.clientX - rect.left) / rect.width * canvas.width / (canvas.width / demineurState.cols));
+        const y = Math.floor((event.clientY - rect.top) / rect.height * canvas.height / (canvas.height / demineurState.rows));
+
+        demineurState.curseurX = Math.max(0, Math.min(demineurState.cols - 1, x));
+        demineurState.curseurY = Math.max(0, Math.min(demineurState.rows - 1, y));
+
+        revelerCurseur();
+
+    });
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("demineurModal")?.classList.contains("hidden"))
+            return;
+
+        if (event.code === "ArrowUp") { event.preventDefault(); deplacerCurseur(0, -1); }
+        if (event.code === "ArrowDown") { event.preventDefault(); deplacerCurseur(0, 1); }
+        if (event.code === "ArrowLeft") { event.preventDefault(); deplacerCurseur(-1, 0); }
+        if (event.code === "ArrowRight") { event.preventDefault(); deplacerCurseur(1, 0); }
+        if (event.code === "Space") { event.preventDefault(); revelerCurseur(); }
+        if (event.code === "KeyF") { event.preventDefault(); marquerCurseur(); }
+
+    });
+
+    document.querySelector("#demineurModal .outilFermerButton")?.addEventListener("click", () => {
+        document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+    });
+
+}
+
+function demarrerDemineur(niveau) {
+
+    const config = DEMINEUR_NIVEAUX[niveau];
+    const canvas = document.getElementById("demineurCanvas");
+
+    const cell = 18;
+    canvas.width = config.cols * cell;
+    canvas.height = config.rows * cell;
+
+    demineurState = {
+        niveau,
+        cols: config.cols,
+        rows: config.rows,
+        nbMines: config.mines,
+        grille: demineurCreerGrilleVide(config.cols, config.rows),
+        minesPlacees: false,
+        curseurX: Math.floor(config.cols / 2),
+        curseurY: Math.floor(config.rows / 2),
+        termine: false
+    };
+
+    document.getElementById("demineurFinOverlay")?.classList.add("hidden");
+    document.getElementById("demineurMinesOverlay").textContent = `💣 ${config.mines}`;
+
+    dessinerDemineur();
+
+}
+
+function dessinerDemineur() {
+
+    const canvas = document.getElementById("demineurCanvas");
+    const s = demineurState;
+    const cell = canvas.width / s.cols;
+
+    demineurCtx.fillStyle = "#9BBC0F";
+    demineurCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let y = 0; y < s.rows; y++) {
+        for (let x = 0; x < s.cols; x++) {
+
+            const case_ = s.grille[y][x];
+            const px = x * cell;
+            const py = y * cell;
+
+            if (case_.revelee) {
+
+                demineurCtx.fillStyle = case_.estMine ? "#0F380F" : "#8BAC0F";
+                demineurCtx.fillRect(px + 1, py + 1, cell - 2, cell - 2);
+
+                if (case_.estMine) {
+
+                    demineurCtx.fillStyle = "#9BBC0F";
+                    demineurCtx.beginPath();
+                    demineurCtx.arc(px + cell / 2, py + cell / 2, cell * 0.22, 0, Math.PI * 2);
+                    demineurCtx.fill();
+
+                } else if (case_.nombreAdjacent > 0) {
+
+                    demineurCtx.fillStyle = "#0F380F";
+                    demineurCtx.font = `bold ${Math.floor(cell * 0.55)}px monospace`;
+                    demineurCtx.textAlign = "center";
+                    demineurCtx.textBaseline = "middle";
+                    demineurCtx.fillText(String(case_.nombreAdjacent), px + cell / 2, py + cell / 2 + 1);
+
+                }
+
+            } else {
+
+                demineurCtx.fillStyle = "#306230";
+                demineurCtx.fillRect(px + 1, py + 1, cell - 2, cell - 2);
+
+                if (case_.marquee) {
+
+                    demineurCtx.fillStyle = "#0F380F";
+                    demineurCtx.font = `bold ${Math.floor(cell * 0.55)}px monospace`;
+                    demineurCtx.textAlign = "center";
+                    demineurCtx.textBaseline = "middle";
+                    demineurCtx.fillText("⚑", px + cell / 2, py + cell / 2 + 1);
+
+                }
+
+            }
+
+        }
+    }
+
+    demineurCtx.strokeStyle = "#0F380F";
+    demineurCtx.lineWidth = 2;
+    demineurCtx.strokeRect(s.curseurX * cell + 1, s.curseurY * cell + 1, cell - 2, cell - 2);
+
+}
