@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v33';
+const CACHE_NAME = 'envie-cache-v34';
 
 
 const APP_SHELL = [
@@ -34,6 +34,13 @@ const APP_SHELL = [
     './js/plus.js',
     './js/catalogue.js',
     './js/region.js',
+        './js/urls.js',
+    './js/carnet.js',
+    './js/peinture.js',
+    './js/bois.js',
+    './js/comparateur.js',
+    './js/devis.js',
+
     './js/voyage-import.js',
     './js/urls.js',
     './js/carnet.js',
@@ -116,7 +123,8 @@ self.addEventListener('fetch', (event) => {
 
 });
 
-async function reseauPuisCache(request) {
+
+async function reseauPuisCacheNavigation(request) {
 
     try {
 
@@ -124,19 +132,20 @@ async function reseauPuisCache(request) {
 
         if (response.ok) {
             const cache = await caches.open(CACHE_NAME);
-            cache.put(request, response.clone()).catch(() => {});
+            cache.put('./index.html', response.clone()).catch(() => {});
         }
 
         return response;
 
     } catch (err) {
 
-        const cached = await caches.match(request, { ignoreSearch: true });
+        const cached = await caches.match('./index.html');
         return cached || Response.error();
 
     }
 
 }
+
 
 async function reseauPuisCacheNavigation(request) {
 
