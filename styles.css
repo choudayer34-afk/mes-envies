@@ -254,7 +254,8 @@ main{
 #albumPrepModal, 
 #simonModal, #cibleModal, #suiteModal,
 #tableauSaisieModal, #ideesMenuModal,
-#voyagePourImportModal
+#voyagePourImportModal,
+#aProposModal,#guideModal,
 {
     z-index:2100;
 }
