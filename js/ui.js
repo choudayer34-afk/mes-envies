@@ -454,9 +454,11 @@ function createEnvieCard(envie) {
 
 
 
-    if (isContainer(envie.categorie) && envie.photoCouverture) {
+  if (isContainer(envie.categorie) && envie.photoCouverture) {
         card.style.backgroundImage = `linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.45)), url(${envie.photoCouverture})`;
         card.classList.add("envie-card-avec-photo");
+        const pos = envie.photoCouverturePosition || { x: 50, y: 50 };
+        card.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
     }
 
     card.innerHTML = `
