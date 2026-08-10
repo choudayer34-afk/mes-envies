@@ -247,6 +247,34 @@ function ouvrirModalProduit(produit = null) {
     document.getElementById("comparateurProduitModal")?.classList.remove("hidden");
 
 }
+
+async function televerserPhotoProduit(file) {
+
+    if (!file)
+        return;
+
+    showToast("📤 Envoi en cours...");
+
+    try {
+
+        const fichierCompresse = await compresserImageAvantEnvoi(file);
+        const result = await uploadToCloudinary(fichierCompresse);
+
+        photoUrlEnCours = result.secure_url;
+
+        const preview = document.getElementById("comparateurPhotoPreview");
+        preview.innerHTML = `<img src="${photoUrlEnCours}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;cursor:pointer;">`;
+        preview.querySelector("img").addEventListener("click", () => ouvrirImageAgrandie(photoUrlEnCours));
+
+        showToast("✓ Photo ajoutée");
+
+    } catch (err) {
+        console.error("Erreur upload photo comparateur: " + err.message);
+        showToast("❌ Échec de l'envoi");
+    }
+
+}
+
 function renderAvisStars() {
 
     const container = document.getElementById("comparateurAvisStars");
@@ -311,39 +339,36 @@ document.getElementById("cancelComparateurProduit")?.addEventListener("click", (
         }
     });
 
-    document.getElementById("comparateurPhotoInput")?.addEventListener("change", async (event) => {
+        document.getElementById("comparateurPhotoInput")?.addEventListener("change", (event) => {
+
+        televerserPhotoProduit(event.target.files[0]);
+        event.target.value = "";
+
+    });
+
+    document.addEventListener("paste", (event) => {
+
+        const modal = document.getElementById("comparateurProduitModal");
+
+        if (!modal || modal.classList.contains("hidden"))
+            return;
+
+        const items = event.clipboardData?.items;
+
+        if (!items)
+            return;
+
+        const imageItem = Array.from(items).find(item => item.type.startsWith("image/"));
+
+        if (!imageItem)
+            return;
+
+        event.preventDefault();
+
+        televerserPhotoProduit(imageItem.getAsFile());
 
     
 
-        const file = event.target.files[0];
-
-        if (!file)
-            return;
-
-        showToast("📤 Envoi en cours...");
-
-        try {
-
-            const fichierCompresse = await compresserImageAvantEnvoi(file);
-            const result = await uploadToCloudinary(fichierCompresse);
-
-            photoUrlEnCours = result.secure_url;
-
-                    document.getElementById("comparateurPhotoPreview").innerHTML =
-                `<img src="${photoUrlEnCours}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;cursor:pointer;">`;
-
-            document.getElementById("comparateurPhotoPreview").querySelector("img")
-                .addEventListener("click", () => ouvrirImageAgrandie(photoUrlEnCours));
-
-
-            showToast("✓ Photo ajoutée");
-
-        } catch (err) {
-            console.error("Erreur upload photo comparateur: " + err.message);
-            showToast("❌ Échec de l'envoi");
-        }
-
-        event.target.value = "";
 
     });
 
