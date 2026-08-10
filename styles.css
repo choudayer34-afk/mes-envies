@@ -255,7 +255,7 @@ main{
 #simonModal, #cibleModal, #suiteModal,
 #tableauSaisieModal, #ideesMenuModal,
 #voyagePourImportModal,#runnerModal, #snakeModal,
-#aProposModal,#guideModal,#gameboyMenuModal,
+#aProposModal,#tetrisModal, #guideModal,#gameboyMenuModal,
 #breakoutModal
 {
     z-index:2100;
