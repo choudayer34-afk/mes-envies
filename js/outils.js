@@ -56,6 +56,7 @@ export function initOutils() {
     initBreakout();
 initTetris();
 initGameboyMenu();
+initGameboySecret()
     initPileOuFace();
     initRoueDecision();
     initTirageNombre();
@@ -2767,6 +2768,38 @@ function bouclerTetris(timestamp) {
     }
 
     tetrisAnimId = requestAnimationFrame(bouclerTetris);
+
+}
+
+function initGameboySecret() {
+
+    const titre = document.getElementById("titreEnvie");
+
+    if (!titre)
+        return;
+
+    let compteur = 0;
+    let dernierClic = 0;
+
+    titre.addEventListener("click", () => {
+
+        const maintenant = Date.now();
+
+        if (maintenant - dernierClic > 600) {
+            compteur = 0;
+        }
+
+        compteur++;
+        dernierClic = maintenant;
+
+        if (compteur >= 3) {
+
+            compteur = 0;
+            document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+
+        }
+
+    });
 
 }
 
