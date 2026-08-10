@@ -1735,14 +1735,146 @@ document.addEventListener("DOMContentLoaded", () => {
             🎲 Jeux avec les enfants
         </button>
 
-        <button id="plusBtnSurvie" class="secondaryButton" style="width:100%;">
+        <button id="plusBtnSurvie" class="secondaryButton" style="width:100%;margin-bottom:10px;">
             🌲 Survie & autonomie
+        </button>
+
+        <button id="plusBtnGuide" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            📖 Guide d'utilisation
+        </button>
+
+        <button id="plusBtnAPropos" class="secondaryButton" style="width:100%;">
+            ℹ️ À propos
         </button>
 
     </div>
 
 </div>
 
+    <div id="guideModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeGuide" class="backButton">← Retour</button>
+
+        <h2>📖 Guide d'utilisation</h2>
+
+        <div class="accordion">
+            <button class="accordionHeader" data-target="guideVoyages">
+                <span>🧳 Voyages</span>
+                <span class="accordionIcon">▸</span>
+            </button>
+            <div id="guideVoyages" class="accordionContent hidden">
+                <ul style="padding-left:20px;line-height:1.7;">
+                    <li>Crée un voyage depuis l'accueil ("➕ Nouveau voyage"), puis ajoute des idées à l'intérieur : activités, lieux, hébergements.</li>
+                    <li>Chaque idée peut avoir une date, un lieu, une description, des photos, une checklist et des liens.</li>
+                    <li>Les idées se regroupent automatiquement par jour si elles ont une date — ou glisse-les toi-même pour les regrouper manuellement.</li>
+                    <li>Le statut du voyage (planifié / en cours / terminé) se met à jour seul selon les dates.</li>
+                    <li>Une fois terminé, le voyage passe en "Carnet" : lecture seule pour se souvenir, avec un bouton pour repasser en modification si besoin.</li>
+                    <li>La météo à 3 jours s'affiche automatiquement sur les idées qui ont un lieu renseigné.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <button class="accordionHeader" data-target="guideMaison">
+                <span>🛠️ Mode Maison</span>
+                <span class="accordionIcon">▸</span>
+            </button>
+            <div id="guideMaison" class="accordionContent hidden">
+                <ul style="padding-left:20px;line-height:1.7;">
+                    <li>Le bouton Voyage/Maison en haut de l'accueil bascule tout l'affichage et le vocabulaire ("projet" au lieu de "voyage", "tâche" au lieu d'"idée").</li>
+                    <li>Un projet maison fonctionne comme un voyage : tu crées le projet, puis des tâches à l'intérieur.</li>
+                    <li>Sur une tâche maison, des outils dédiés apparaissent : calculateur de peinture (litres nécessaires), calculateur de bois (liste de planches + plan de découpe optimal sur une planche brute), comparateur de produits (photo, prix, avis, magasin), et suivi de devis (société, contact, statut, scan de carte de visite).</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <button class="accordionHeader" data-target="guideIdees">
+                <span>🔎 Trouver des idées</span>
+                <span class="accordionIcon">▸</span>
+            </button>
+            <div id="guideIdees" class="accordionContent hidden">
+                <ul style="padding-left:20px;line-height:1.7;">
+                    <li><strong>Chercher une région</strong> : un petit questionnaire sur tes envies/contraintes génère un texte à donner à une IA pour obtenir des suggestions.</li>
+                    <li><strong>Importer des idées via IA</strong> : même principe, mais pour remplir un voyage déjà créé — tu colles le résultat, tu coches ce qui t'intéresse.</li>
+                    <li><strong>Catalogue</strong> : une bibliothèque d'idées déjà prêtes, avec recherche et filtres, à ajouter directement.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <button class="accordionHeader" data-target="guideSouvenirs">
+                <span>📔 Souvenirs</span>
+                <span class="accordionIcon">▸</span>
+            </button>
+            <div id="guideSouvenirs" class="accordionContent hidden">
+                <ul style="padding-left:20px;line-height:1.7;">
+                    <li><strong>Album photo</strong> : sur un voyage terminé, mets en page les photos et génère un PDF façon magazine.</li>
+                    <li><strong>Carnet</strong> : relis un voyage terminé jour par jour, comme un journal.</li>
+                    <li><strong>Partage public</strong> : envoie un lien à qui tu veux (pas besoin de compte) pour montrer ce que vous avez vraiment fait.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <button class="accordionHeader" data-target="guideAutres">
+                <span>🎲 Jeux & survie</span>
+                <span class="accordionIcon">▸</span>
+            </button>
+            <div id="guideAutres" class="accordionContent hidden">
+                <ul style="padding-left:20px;line-height:1.7;">
+                    <li>Plus de 80 jeux avec les enfants, plus une boîte à outils (dés, minuteur, Memory, morpion...).</li>
+                    <li>Fiches Survie & autonomie, utiles même sans réseau — feu, abri, occuper un enfant en attente, etc.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="accordion">
+            <button class="accordionHeader" data-target="guideAstuces">
+                <span>💡 Astuces</span>
+                <span class="accordionIcon">▸</span>
+            </button>
+            <div id="guideAstuces" class="accordionContent hidden">
+                <ul style="padding-left:20px;line-height:1.7;">
+                    <li>Une rubrique vide dans une fiche affiche un bouton "+ Nom de la rubrique" — clique pour la faire apparaître.</li>
+                    <li>Les catégories marquées d'un 📦 peuvent contenir d'autres idées (comme un voyage ou un projet).</li>
+                    <li>Tout est synchronisé en famille en temps réel — pas besoin de recharger la page.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="aProposModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeAPropos" class="backButton">← Retour</button>
+
+        <h2>🧡 À propos d'EnVie</h2>
+
+        <p>EnVie est l'application de la famille pour organiser voyages et projets maison — de l'envie à la réalisation.</p>
+
+        <p>Elle est faite pour :</p>
+
+        <ul style="padding-left:20px;line-height:1.7;">
+            <li>🧳 Planifier un voyage jour par jour, avec carte, météo et checklist</li>
+            <li>🛠️ Suivre un projet maison de bout en bout — peinture, bois, devis, comparatif de produits</li>
+            <li>💡 Capturer une idée en quelques secondes, où que tu sois</li>
+            <li>📔 Se souvenir : carnet de voyage, album photo, partage en famille</li>
+            <li>🎲 Occuper les enfants et gérer l'imprévu grâce aux jeux et fiches survie</li>
+        </ul>
+
+        <p style="color:var(--color-text-light);font-size:13px;margin-top:16px;">Développée en famille, pour la famille.</p>
+
+    </div>
+
+</div>
+    
 <div id="ideesMenuModal" class="modal-overlay hidden">
 
     <div class="modal">
