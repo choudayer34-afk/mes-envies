@@ -842,6 +842,55 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div id="platformerModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>🏃 Aventure Pixel</h2>
+
+        <div class="gameboyShell">
+
+            <div class="gameboyScreenFrame">
+                <canvas id="platformerCanvas" width="280" height="200"></canvas>
+                <div id="platformerScoreOverlay" class="runnerScoreOverlay">💰 0 · ❤️ 3</div>
+                <div id="platformerFinOverlay" class="runnerGameOverOverlay hidden">
+                    <div id="platformerFinTitre"></div>
+                    <div id="platformerFinScore" style="font-size:11px;"></div>
+                    <div style="font-size:10px;">Appuie sur START</div>
+                </div>
+            </div>
+
+            <div class="gameboyControls">
+
+                <div class="gameboyDpad">
+                    <button type="button" class="gameboyDpadBtn gameboyDpadUp" disabled></button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadLeft" id="platBtnLeft" style="color:#8C8C96;">◀</button>
+                    <button type="button" class="gameboyDpadCenter"></button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadRight" id="platBtnRight" style="color:#8C8C96;">▶</button>
+                    <button type="button" class="gameboyDpadBtn gameboyDpadDown" disabled></button>
+                </div>
+
+                <div class="gameboyButtons">
+                    <button type="button" class="gameboyRoundBtn" id="platBtnB">B</button>
+                    <button type="button" class="gameboyRoundBtn" id="platBtnA">A</button>
+                </div>
+
+            </div>
+
+            <div class="gameboyStartSelect">
+                <button type="button" class="gameboySmallBtn" id="platBtnSelect">SELECT</button>
+                <button type="button" class="gameboySmallBtn" id="platBtnStart">START</button>
+            </div>
+
+        </div>
+
+        <p style="text-align:center;font-size:13px;color:var(--color-text-light);margin-top:10px;">◀▶ pour avancer, A pour sauter. Sauter sur un ennemi l'élimine, le toucher de côté te coûte une vie.</p>
+
+    </div>
+
+</div>
 
 <div id="ficheOverlay" class="modal-overlay hidden">
 
