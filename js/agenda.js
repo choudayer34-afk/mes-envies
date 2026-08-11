@@ -11,7 +11,7 @@ export function initAgenda() {
     document.getElementById("closeAgenda").addEventListener("click", closeAgenda);
 
     const container = document.getElementById("agendaContent");
-
+ 
     container.addEventListener("click", (event) => {
 
         const button = event.target.closest('[data-action="edit"]');
