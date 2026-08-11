@@ -3,7 +3,7 @@ import {
     deleteEnvieCategoryDef, moveEnvieCategory
 } from "./storage.js";
 import { fusionnerActiviteTypesParDefaut, fusionnerCriteresVoyageParDefaut } from "./storage.js";
-
+import { updatePersonneDateNaissance, calculerAgeDepuisNaissance } from "./storage.js";
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
 import { isContainer } from "./envie.js";
@@ -564,13 +564,24 @@ function renderPersonnesList() {
         const row = document.createElement("div");
         row.className = "templateRow";
 
+      const age = calculerAgeDepuisNaissance(personne.dateNaissance);
+
         row.innerHTML = `
-            <div class="templateRowNom">👤 ${personne.nom}</div>
+            <div class="templateRowNom">
+                👤 ${personne.nom}
+                ${age !== null ? `<div style="font-size:11px;color:var(--color-text-light);">🎂 ${age} an${age > 1 ? "s" : ""}</div>` : ""}
+            </div>
+            <input type="date" class="personneDateNaissanceInput" value="${personne.dateNaissance || ""}" title="Date de naissance" style="margin-right:8px;">
             <div class="templateRowActions">
                 <button class="actionButton editButton">Modifier</button>
                 <button class="actionButton deleteButton">Supprimer</button>
             </div>
         `;
+
+        row.querySelector(".personneDateNaissanceInput").addEventListener("change", (event) => {
+            updatePersonneDateNaissance(personne.id, event.target.value || null);
+            renderPersonnesList();
+        });
 
         row.querySelector(".editButton").addEventListener("click", () => {
 
