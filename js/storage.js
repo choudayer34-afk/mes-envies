@@ -1720,3 +1720,18 @@ export async function assurerCategorieProjetMaison() {
 
 }
 
+export function updateChecklistItem(envieId, itemId, fields) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const checklist = envie.checklist.map(item =>
+        item.id === itemId ? { ...item, ...fields } : item
+    );
+
+    patchEnvie(envieId, { checklist });
+
+}
+
