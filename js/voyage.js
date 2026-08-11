@@ -55,10 +55,35 @@ export function renderVoyageSection(envie) {
         const { statut } = computeContainerStatus(envie);
         const forceEdition = voyagesForcesEnEdition.has(envie.id);
 
-        if (statut === "termine" && !forceEdition) {
+if (statut === "termine" && !forceEdition) {
+
             renderCarnetVoyage(envie, container);
+
         } else {
+
             renderVoyageContenu(envie, container);
+
+            if (envie.contexte === "maison") {
+
+                const aDesTachesEnCours = getEnvies().some(e => e.voyageId === envie.id && !e.realise);
+
+                if (aDesTachesEnCours) {
+
+                    const section = document.getElementById("voyageSection");
+                    const header = document.querySelector('.accordionHeader[data-target="voyageSection"]');
+
+                    section?.classList.remove("hidden");
+
+                    const icon = header?.querySelector(".accordionIcon");
+
+                    if (icon) {
+                        icon.textContent = "▾";
+                    }
+
+                }
+
+            }
+
         }
 
     } else {
