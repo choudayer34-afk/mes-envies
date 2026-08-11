@@ -240,7 +240,10 @@ document.addEventListener("DOMContentLoaded", () => {
     <button type="button" class="itemTypeChip" data-mode="voyage">🧳 Voyages</button>
     <button type="button" class="itemTypeChip" data-mode="maison">🛠️ Maison</button>
 </div>
-
+<div style="position:relative;margin-bottom:14px;">
+    <input type="text" id="rechercheAccueilInput" placeholder="🔎 Rechercher un projet ou une tâche..." class="numberInput" autocomplete="off">
+    <div id="rechercheAccueilSuggestions" class="autocompleteSuggestions hidden"></div>
+</div>
         <div class="homeIconRow">
             <button id="btnInbox" class="iconButtonRow" title="À trier" aria-label="À trier">
                 📥 <span id="inboxBadge" class="iconBadge hidden">0</span>
