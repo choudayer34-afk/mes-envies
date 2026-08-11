@@ -1,14 +1,13 @@
 
 import { searchLocation, getVilleDepuisCoordonnees } from "./location.js";
+import { normaliserTexte } from "./utils.js";
 
 const CITIZENKID_VILLES = ["paris", "lyon", "marseille", "lille", "bordeaux", "nantes", "toulouse", "strasbourg", "nice"];
 
 let agendaLocalLieuChoisi = null;
 let agendaLocalDebounce = null;
 
-function normaliserTexte(texte) {
-    return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
+
 
 async function getDepartementRegion(latitude, longitude) {
 
