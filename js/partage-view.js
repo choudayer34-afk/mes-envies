@@ -264,6 +264,7 @@ function construireContenuTache(tache) {
                             ${item.texte}${item.magasin ? ` <small class="assignBadge">🏬 ${item.magasin}</small>` : ""}
                         </span>
                     </label>
+                    ${item.url ? `<a href="${item.url}" target="_blank" class="iconSmallButton">🔗</a>` : ""}
                 </div>
             `;
 
@@ -272,72 +273,25 @@ function construireContenuTache(tache) {
     }
 
     if ((tache.peinture?.murs || []).length > 0) {
-
-        const surfaceMurs = tache.peinture.murs.reduce((t, m) => t + m.largeur * m.hauteur, 0);
-
-        contenuHtml += `
-            <div class="checklistCategorieHeader">🎨 Peinture</div>
-            <div class="peintureResultat">
-                <span class="peintureResultatSurface">📐 Surface murs : <strong>${surfaceMurs.toFixed(2)} m²</strong></span>
-            </div>
-        `;
-
+        contenuHtml += construireDetailPeinture(tache.peinture);
     }
 
     if ((tache.bois?.planches || []).length > 0) {
-
-        const nbPlanches = tache.bois.planches.reduce((t, p) => t + p.quantite, 0);
-
-        contenuHtml += `
-            <div class="checklistCategorieHeader">🪵 Bois</div>
-            <div class="peintureResultat">
-                <span class="peintureResultatSurface">🪵 ${nbPlanches} planche${nbPlanches > 1 ? "s" : ""} au total</span>
-            </div>
-        `;
-
+        contenuHtml += construireDetailBois(tache.bois);
     }
 
     if ((tache.comparateur?.produits || []).length > 0) {
-
-        contenuHtml += `<div class="checklistCategorieHeader">🔍 Comparateur de produits</div>`;
-
-        tache.comparateur.produits.forEach(produit => {
-
-            contenuHtml += `
-                <div class="comparateurCard${produit.retenu ? " retenu" : ""}">
-                    <div class="comparateurCardInfo">
-                        <div class="comparateurCardTitre">${produit.nom}${produit.retenu ? " 🏆" : ""}</div>
-                        <div class="comparateurCardMeta">${produit.prix != null ? `💰 ${produit.prix} €` : ""}${produit.magasin ? ` · 🏬 ${produit.magasin}` : ""}</div>
-                    </div>
-                </div>
-            `;
-
-        });
-
+        contenuHtml += construireDetailComparateur(tache.comparateur);
     }
 
     if ((tache.devis?.entries || []).length > 0) {
-
-        contenuHtml += `<div class="checklistCategorieHeader">📋 Devis</div>`;
-
-        tache.devis.entries.forEach(entree => {
-
-            contenuHtml += `
-                <div class="comparateurCard${entree.retenu ? " retenu" : ""}">
-                    <div class="comparateurCardInfo">
-                        <div class="comparateurCardTitre">${entree.societe || "Devis"}${entree.retenu ? " 🏆" : ""}</div>
-                        <div class="comparateurCardMeta">${entree.prix != null ? `💰 ${entree.prix} €` : ""}</div>
-                    </div>
-                </div>
-            `;
-
-        });
-
+        contenuHtml += construireDetailDevis(tache.devis);
     }
 
     return contenuHtml;
 
 }
+
 
 function renderTacheSeulePartage(tache, container) {
 
@@ -352,6 +306,323 @@ function renderTacheSeulePartage(tache, container) {
     `;
 
 }
+
+function decouperPlanchesPartage(stock, piecesDemandees) {
+
+    const unites = [];
+
+    piecesDemandees.forEach(p => {
+        for (let i = 0; i < p.quantite; i++) {
+            unites.push({ id: p.id, nom: p.nom, longueur: p.longueur, largeur: p.largeur });
+        }
+    });
+
+    unites.sort((a, b) => (b.longueur * b.largeur) - (a.longueur * a.largeur));
+
+    const planchesUtilisees = [];
+    const nonPlacees = [];
+
+    unites.forEach(piece => {
+
+        let meilleur = null;
+
+        planchesUtilisees.forEach(planche => {
+
+            planche.libres.forEach((rect, idx) => {
+
+                if (piece.longueur <= rect.w && piece.largeur <= rect.h) {
+                    const gaspillage = rect.w * rect.h - piece.longueur * piece.largeur;
+                    if (!meilleur || gaspillage < meilleur.gaspillage) {
+                        meilleur = { planche, rectIndex: idx, w: piece.longueur, h: piece.largeur, rotated: false, gaspillage, rect };
+                    }
+                }
+
+                if (piece.largeur <= rect.w && piece.longueur <= rect.h) {
+                    const gaspillage = rect.w * rect.h - piece.longueur * piece.largeur;
+                    if (!meilleur || gaspillage < meilleur.gaspillage) {
+                        meilleur = { planche, rectIndex: idx, w: piece.largeur, h: piece.longueur, rotated: true, gaspillage, rect };
+                    }
+                }
+
+            });
+
+        });
+
+        if (!meilleur) {
+
+            const tientNormal = piece.longueur <= stock.longueur && piece.largeur <= stock.largeur;
+            const tientPivote = piece.largeur <= stock.longueur && piece.longueur <= stock.largeur;
+
+            if (!tientNormal && !tientPivote) {
+                nonPlacees.push(piece);
+                return;
+            }
+
+            const nouvellePlanche = {
+                libres: [{ x: 0, y: 0, w: stock.longueur, h: stock.largeur }],
+                placements: []
+            };
+
+            planchesUtilisees.push(nouvellePlanche);
+
+            const rect = nouvellePlanche.libres[0];
+            const w = tientNormal ? piece.longueur : piece.largeur;
+            const h = tientNormal ? piece.largeur : piece.longueur;
+
+            meilleur = { planche: nouvellePlanche, rectIndex: 0, w, h, rotated: !tientNormal, rect };
+
+        }
+
+        const { planche, rectIndex, w, h, rect } = meilleur;
+
+        planche.placements.push({
+            id: piece.id, nom: piece.nom,
+            x: rect.x, y: rect.y, w, h, rotated: meilleur.rotated
+        });
+
+        planche.libres.splice(rectIndex, 1);
+
+        const largeurRestante = rect.w - w;
+        const hauteurRestante = rect.h - h;
+
+        if (largeurRestante > 0) {
+            planche.libres.push({ x: rect.x + w, y: rect.y, w: largeurRestante, h: h });
+        }
+
+        if (hauteurRestante > 0) {
+            planche.libres.push({ x: rect.x, y: rect.y + h, w: rect.w, h: hauteurRestante });
+        }
+
+    });
+
+    return { planchesUtilisees, nonPlacees };
+
+}
+
+function renderDiagrammePlanchePartage(stock, planche, index) {
+
+    const couleurs = ["#6FAFC4", "#F2A65A", "#8FBF7F", "#D97C7C", "#B08FD1", "#E0C25A"];
+    const nomsDejaAnnotes = new Set();
+
+    const rects = planche.placements.map((p, i) => {
+
+        const dejaAnnote = nomsDejaAnnotes.has(p.nom);
+
+        if (!dejaAnnote) {
+            nomsDejaAnnotes.add(p.nom);
+        }
+
+        const tailleNom = Math.max(7, Math.min(p.w, p.h) * 0.16);
+        const tailleDim = tailleNom * 0.75;
+
+        const centreX = p.x + p.w / 2;
+        const centreY = p.y + p.h / 2;
+
+        const texteNom = `
+            <text x="${centreX}" y="${dejaAnnote ? centreY : (centreY - tailleDim * 0.7).toFixed(1)}"
+                  font-size="${tailleNom.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
+                  fill="white" font-weight="600">
+                ${p.nom}${p.rotated ? " ↻" : ""}
+            </text>
+        `;
+
+        const texteDim = dejaAnnote ? "" : `
+            <text x="${centreX}" y="${(centreY + tailleNom * 0.7).toFixed(1)}"
+                  font-size="${tailleDim.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
+                  fill="white" opacity="0.9">
+                ${p.rotated ? `${p.h}×${p.w}` : `${p.w}×${p.h}`} cm
+            </text>
+        `;
+
+        return `
+            <rect x="${p.x}" y="${p.y}" width="${p.w}" height="${p.h}"
+                  fill="${couleurs[i % couleurs.length]}" stroke="white" stroke-width="1.5" opacity="0.9"/>
+            ${texteNom}
+            ${texteDim}
+        `;
+
+    }).join("");
+
+    return `
+        <div style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:6px;">
+                Planche brute #${index + 1} — ${stock.longueur} × ${stock.largeur} cm
+            </div>
+            <svg viewBox="0 0 ${stock.longueur} ${stock.largeur}" style="width:100%;max-width:320px;height:auto;background:#F4F4F4;border-radius:8px;border:1px solid var(--color-border);display:block;">
+                <rect x="0" y="0" width="${stock.longueur}" height="${stock.largeur}" fill="#F4F4F4" stroke="#CCC" stroke-width="1"/>
+                ${rects}
+            </svg>
+        </div>
+    `;
+
+}
+
+function formatDateFrPartage(dateStr) {
+
+    if (!dateStr)
+        return "";
+
+    const [annee, mois, jour] = dateStr.split("-");
+    return `${jour}/${mois}/${annee}`;
+
+}
+
+const LABELS_STATUT_PARTAGE = {
+    a_contacter: "📞 À contacter",
+    rdv_planifie: "📅 RDV planifié",
+    devis_recu: "✅ Devis reçu"
+};
+
+function construireDetailPeinture(peinture) {
+
+    let html = `<div class="checklistCategorieHeader">🎨 Peinture</div>`;
+
+    (peinture.murs || []).forEach(mur => {
+        html += `<div class="checklistRow"><span>${mur.nom || "Mur"} — ${mur.largeur} × ${mur.hauteur} m</span></div>`;
+    });
+
+    (peinture.ouvertures || []).forEach(o => {
+        html += `<div class="checklistRow"><span>${o.quantite}× ${o.nom || "Ouverture"} (à déduire) — ${o.largeur} × ${o.hauteur} m</span></div>`;
+    });
+
+    const surfaceMurs = (peinture.murs || []).reduce((t, m) => t + m.largeur * m.hauteur, 0);
+    const surfaceOuvertures = (peinture.ouvertures || []).reduce((t, o) => t + o.largeur * o.hauteur * o.quantite, 0);
+    const surfaceNette = Math.max(0, surfaceMurs - surfaceOuvertures);
+    const couches = peinture.couches || 2;
+    const rendement = peinture.rendement || 10;
+    const litres = Math.ceil(((surfaceNette * couches) / rendement) * 2) / 2;
+
+    html += `
+        <div class="peintureResultat" style="margin-top:8px;">
+            <span class="peintureResultatSurface">📐 Surface nette : <strong>${surfaceNette.toFixed(2)} m²</strong></span>
+            <span class="peintureResultatLitres">🎨 Peinture nécessaire (${couches} couche${couches > 1 ? "s" : ""}, rendement ${rendement} m²/L) : <strong>${litres} L</strong></span>
+        </div>
+    `;
+
+    return html;
+
+}
+
+function construireDetailBois(bois) {
+
+    let html = `<div class="checklistCategorieHeader">🪵 Bois</div>`;
+
+    (bois.planches || []).forEach(p => {
+
+        const volumeDm3 = ((p.longueur / 100) * (p.largeur / 100) * (p.epaisseur / 1000) * p.quantite * 1000).toFixed(2);
+
+        html += `<div class="checklistRow"><span>${p.quantite}× ${p.nom || "Planche"} — ${p.longueur} × ${p.largeur} cm, ${p.epaisseur} mm (${volumeDm3} dm³)</span></div>`;
+
+    });
+
+    if (bois.stockLongueur && bois.stockLargeur && (bois.planches || []).length > 0) {
+
+        html += `<p style="font-size:13px;color:var(--color-text-light);margin:12px 0 8px;">Planche brute utilisée : ${bois.stockLongueur} × ${bois.stockLargeur} cm</p>`;
+
+        const groupesEpaisseur = [...new Set(bois.planches.map(p => p.epaisseur))];
+
+        groupesEpaisseur.forEach(epaisseur => {
+
+            const piecesGroupe = bois.planches
+                .filter(p => p.epaisseur === epaisseur)
+                .map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }));
+
+            const { planchesUtilisees, nonPlacees } = decouperPlanchesPartage(
+                { longueur: bois.stockLongueur, largeur: bois.stockLargeur },
+                piecesGroupe
+            );
+
+            if (nonPlacees.length === 0) {
+                html += `<div class="peintureResultat" style="margin-bottom:10px;"><span class="peintureResultatSurface">✅ Épaisseur ${epaisseur} mm : ${planchesUtilisees.length} planche${planchesUtilisees.length > 1 ? "s" : ""} brute${planchesUtilisees.length > 1 ? "s" : ""} nécessaire${planchesUtilisees.length > 1 ? "s" : ""}</span></div>`;
+            } else {
+                html += `<div class="peintureResultat" style="margin-bottom:10px;background:#FEE2E2;"><span class="peintureResultatSurface">❌ Épaisseur ${epaisseur} mm : ${nonPlacees.length} pièce(s) ne rentrent pas</span></div>`;
+            }
+
+            planchesUtilisees.forEach((planche, i) => {
+                html += renderDiagrammePlanchePartage({ longueur: bois.stockLongueur, largeur: bois.stockLargeur }, planche, i);
+            });
+
+        });
+
+    }
+
+    return html;
+
+}
+
+function construireDetailComparateur(comparateur) {
+
+    let html = `<div class="checklistCategorieHeader">🔍 Comparateur de produits</div>`;
+
+    comparateur.produits.forEach(produit => {
+
+        const photoHtml = produit.photoUrl
+            ? `<img src="${produit.photoUrl.replace("/upload/", "/upload/w_150,h_150,c_fill,q_auto/")}" class="comparateurCardPhoto">`
+            : `<div class="comparateurCardPhoto"></div>`;
+
+        const metaBits = [
+            produit.prix != null ? `💰 ${produit.prix} €` : null,
+            produit.dimensions ? `📐 ${produit.dimensions}` : null,
+            produit.magasin ? `🏬 ${produit.magasin}` : null
+        ].filter(Boolean).join(" · ");
+
+        html += `
+            <div class="comparateurCard${produit.retenu ? " retenu" : ""}">
+                ${photoHtml}
+                <div class="comparateurCardInfo">
+                    <div class="comparateurCardTitre">${produit.nom}${produit.retenu ? " 🏆" : ""}</div>
+                    ${metaBits ? `<div class="comparateurCardMeta">${metaBits}</div>` : ""}
+                    ${produit.avis ? `<div class="comparateurCardMeta">${"★".repeat(produit.avis)}${"☆".repeat(5 - produit.avis)}</div>` : ""}
+                    ${produit.remarque ? `<div class="comparateurCardRemarque">"${produit.remarque}"</div>` : ""}
+                    ${produit.url ? `<div class="comparateurCardMeta"><a href="${produit.url}" target="_blank">🔗 Voir le produit</a></div>` : ""}
+                </div>
+            </div>
+        `;
+
+    });
+
+    return html;
+
+}
+
+function construireDetailDevis(devis) {
+
+    let html = `<div class="checklistCategorieHeader">📋 Devis</div>`;
+
+    devis.entries.forEach(entree => {
+
+        const lignesContact = [
+            entree.contact ? `👤 ${entree.contact}` : null,
+            entree.telephone ? `<a href="tel:${entree.telephone.replace(/\s/g, "")}">📞 ${entree.telephone}</a>` : null,
+            entree.email ? `<a href="mailto:${entree.email}">✉️ ${entree.email}</a>` : null
+        ].filter(Boolean).join(" · ");
+
+        const lignesDetails = [
+            entree.prix != null ? `💰 ${entree.prix} €` : null,
+            entree.dateDevis ? `📅 Devis du ${formatDateFrPartage(entree.dateDevis)}` : null,
+            entree.statut === "rdv_planifie" && entree.dateRdv ? `🗓️ RDV le ${formatDateFrPartage(entree.dateRdv)}` : null
+        ].filter(Boolean).join(" · ");
+
+        html += `
+            <div class="comparateurCard${entree.retenu ? " retenu" : ""}">
+                <div class="comparateurCardInfo">
+                    <div class="comparateurCardTitre">${entree.societe || "Devis"}${entree.retenu ? " 🏆" : ""}</div>
+                    <span class="devisStatutBadge ${entree.statut || "a_contacter"}">${LABELS_STATUT_PARTAGE[entree.statut] || LABELS_STATUT_PARTAGE.a_contacter}</span>
+                    ${lignesContact ? `<div class="comparateurCardMeta">${lignesContact}</div>` : ""}
+                    ${lignesDetails ? `<div class="comparateurCardMeta">${lignesDetails}</div>` : ""}
+                    ${entree.description ? `<div class="comparateurCardRemarque">"${entree.description}"</div>` : ""}
+                    ${entree.docUrl ? `<div class="comparateurCardMeta"><a href="${entree.docUrl}" target="_blank">📄 ${entree.docNom || "Voir le devis"}</a></div>` : ""}
+                    ${entree.lien ? `<div class="comparateurCardMeta"><a href="${entree.lien}" target="_blank">🔗 Voir</a></div>` : ""}
+                </div>
+            </div>
+        `;
+
+    });
+
+    return html;
+
+}
+
 
 function renderProjetMaisonPartage(projet, enfants, container) {
 
