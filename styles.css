@@ -261,7 +261,8 @@ main{
 #breakoutModal,#taquinModal,#demineurModal,
 #memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal,
 #agendaLocalModal,#rapportModal,
-#adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal
+#adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
+#adminPartagesModal
 {
     z-index:2100;
 }
