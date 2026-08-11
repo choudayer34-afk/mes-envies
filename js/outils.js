@@ -4517,7 +4517,7 @@ function bouclerPlatformer(timestamp) {
 
     if (!s.gameOver) {
 
-        if (s.touches.gauche) {
+        
         const ACCEL = 0.5;
         const FRICTION = 0.82;
         const VITESSE_MAX = 2.6;
