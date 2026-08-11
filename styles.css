@@ -262,7 +262,7 @@ main{
 #memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal,
 #agendaLocalModal,
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
-#checklistEditItemModal, #checklistEditItemModal
+#checklistEditItemModal
 {
     z-index:2100;
 }
