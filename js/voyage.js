@@ -754,6 +754,20 @@ function renderRattachement(envie, container) {
 
     container.appendChild(creerButton);
 
+    if (estMaison) {
+
+        const partagerTacheButton = document.createElement("button");
+        partagerTacheButton.className = "secondaryButton";
+        partagerTacheButton.textContent = envie.partagePublic ? "🔗 Gérer le partage" : "🔗 Partager cette tâche";
+        partagerTacheButton.style.marginTop = "14px";
+
+        partagerTacheButton.addEventListener("click", () => {
+            ouvrirPartageModal(envie);
+        });
+
+        container.appendChild(partagerTacheButton);
+
+    }
 }
 
 
