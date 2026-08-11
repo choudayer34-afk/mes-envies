@@ -1,7 +1,7 @@
 
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
-import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
+
 import { getModeActif, basculerMode } from "./storage.js";
 
 import { makeRowDraggable } from "./dragdrop.js";
