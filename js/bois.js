@@ -2,6 +2,8 @@ import { getCurrentEnvieId } from "./envie.js";
 import { getEnvies, updateEnvieBois } from "./storage.js";
 import { showToast } from "./toast.js";
 
+let plancheEnCoursEditionId = null;
+
 function getBois(envie) {
 
     return {
@@ -59,10 +61,15 @@ function renderPlanchesListe(envie, bois) {
 
         const volumeDm3 = ((planche.longueur / 100) * (planche.largeur / 100) * (planche.epaisseur / 1000) * planche.quantite * 1000).toFixed(2);
 
-        row.innerHTML = `
+row.innerHTML = `
             <span>${planche.quantite}× ${planche.nom || "Planche"} — ${planche.longueur} × ${planche.largeur} cm, ${planche.epaisseur} mm (${volumeDm3} dm³)</span>
+            <button class="iconSmallButton editPlancheButton" title="Modifier">✏️</button>
             <button class="deleteChecklistButton" title="Supprimer">🗑️</button>
         `;
+
+        row.querySelector(".editPlancheButton").addEventListener("click", () => {
+            ouvrirEditionPlanche(planche);
+        });
 
         row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
 
@@ -409,9 +416,26 @@ function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
 }
 
+function ouvrirEditionPlanche(planche) {
+
+    plancheEnCoursEditionId = planche.id;
+
+    document.getElementById("boisPlancheNom").value = planche.nom || "";
+    document.getElementById("boisPlancheLongueur").value = planche.longueur;
+    document.getElementById("boisPlancheLargeur").value = planche.largeur;
+    document.getElementById("boisPlancheEpaisseur").value = planche.epaisseur;
+    document.getElementById("boisPlancheQuantite").value = planche.quantite;
+
+    const bouton = document.getElementById("addBoisPlancheButton");
+    bouton.textContent = "💾 Enregistrer les modifications";
+
+    document.getElementById("boisPlancheNom")?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+}
+
 export function initBoisCalculateur() {
 
-    document.getElementById("addBoisPlancheButton")?.addEventListener("click", () => {
+ document.getElementById("addBoisPlancheButton")?.addEventListener("click", () => {
 
         const nomInput = document.getElementById("boisPlancheNom");
         const longueurInput = document.getElementById("boisPlancheLongueur");
@@ -435,17 +459,34 @@ export function initBoisCalculateur() {
             return;
 
         const bois = getBois(envie);
+        const etaitEnEdition = !!plancheEnCoursEditionId;
 
-        const nouvellePlanche = {
-            id: crypto.randomUUID(),
-            nom: nomInput.value.trim(),
-            longueur,
-            largeur,
-            epaisseur,
-            quantite
-        };
+        let nouveauBois;
 
-        const nouveauBois = { ...bois, planches: [...bois.planches, nouvellePlanche] };
+        if (etaitEnEdition) {
+
+            const nouvellesPlanches = bois.planches.map(p =>
+                p.id === plancheEnCoursEditionId
+                    ? { ...p, nom: nomInput.value.trim(), longueur, largeur, epaisseur, quantite }
+                    : p
+            );
+
+            nouveauBois = { ...bois, planches: nouvellesPlanches };
+
+        } else {
+
+            const nouvellePlanche = {
+                id: crypto.randomUUID(),
+                nom: nomInput.value.trim(),
+                longueur,
+                largeur,
+                epaisseur,
+                quantite
+            };
+
+            nouveauBois = { ...bois, planches: [...bois.planches, nouvellePlanche] };
+
+        }
 
         updateEnvieBois(envie.id, nouveauBois);
 
@@ -455,7 +496,12 @@ export function initBoisCalculateur() {
         epaisseurInput.value = "";
         quantiteInput.value = "1";
 
+        document.getElementById("addBoisPlancheButton").textContent = "➕ Ajouter une planche";
+        plancheEnCoursEditionId = null;
+
         renderBoisCalculateur({ ...envie, bois: nouveauBois });
+
+        showToast(etaitEnEdition ? "✓ Planche modifiée" : "✓ Planche ajoutée");
 
     });
 
