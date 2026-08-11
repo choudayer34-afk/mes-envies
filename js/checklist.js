@@ -154,19 +154,11 @@ export function groupByCategorie(items, categories) {
         i => !categories.some(c => c.id === i.categorieId)
     );
 
-    const hasMultipleGroups =
-        groupsWithCategorie.length > 0 && sansCategorie.length > 0
-        || groupsWithCategorie.length > 1;
-
     if (sansCategorie.length > 0) {
         groupsWithCategorie.push({
-            categorie: hasMultipleGroups ? null : undefined,
+            categorie: null,
             items: sansCategorie
         });
-    }
-
-    if (!hasMultipleGroups) {
-        groupsWithCategorie.forEach(g => { if (g.categorie === null) g.categorie = undefined; });
     }
 
     return groupsWithCategorie;
