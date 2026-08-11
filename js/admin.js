@@ -6,10 +6,9 @@ import { fusionnerActiviteTypesParDefaut, fusionnerCriteresVoyageParDefaut } fro
 import { updatePersonneDateNaissance, calculerAgeDepuisNaissance } from "./storage.js";
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
-import { isContainer } from "./envie.js";
 import { computeContainerStatus } from "./progress.js";
 import { getEnvies } from "./storage.js";
-
+import { isContainer, getCategorieById, openEnvie } from "./envie.js";
 import {
     getActiviteTypes, createActiviteType, updateActiviteType, deleteActiviteType, moveActiviteType,
     getCriteresVoyage, createCritereVoyage, updateCritereVoyage, deleteCritereVoyage, moveCritereVoyage
@@ -848,12 +847,14 @@ function calculerKpi(annee) {
     return {
         nombreVoyages: voyagesTermines.length,
         joursCumules,
-        nombreProjetsMaison: projetsMaisonTermines.length
+        nombreProjetsMaison: projetsMaisonTermines.length,
+        listeVoyages: voyagesTermines,
+        listeProjetsMaison: projetsMaisonTermines
     };
 
 }
 
-function creerLigneKpi(label, valeurActuelle, valeurPrecedente) {
+function creerLigneKpi(id, label, valeurActuelle, valeurPrecedente, liste = null) {
 
     const difference = valeurActuelle - valeurPrecedente;
 
@@ -875,17 +876,22 @@ function creerLigneKpi(label, valeurActuelle, valeurPrecedente) {
 
     }
 
+    const cliquable = liste && liste.length > 0;
+
     return `
-        <div class="templateRow">
-            <div class="templateRowNom">${label}</div>
+        <div class="templateRow ${cliquable ? "kpiLigneCliquable" : ""}" ${cliquable ? `data-kpi-id="${id}"` : ""}>
+            <div class="templateRowNom">${label}${cliquable ? " 🔎" : ""}</div>
             <div style="text-align:right;">
                 <div style="font-size:18px;font-weight:700;">${valeurActuelle}</div>
                 <div style="font-size:12px;color:var(--color-text-light);">${indicateur} (${valeurPrecedente} en ${rapportAnneeSelectionnee - 1})</div>
             </div>
         </div>
+        <div id="kpiDetail-${id}" class="hidden" style="margin:-8px 0 14px;padding-left:8px;"></div>
     `;
 
 }
+
+let kpiListesCourantes = {};
 
 function renderRapport() {
 
@@ -894,16 +900,67 @@ function renderRapport() {
     const actuel = calculerKpi(rapportAnneeSelectionnee);
     const precedent = calculerKpi(rapportAnneeSelectionnee - 1);
 
+    kpiListesCourantes = {
+        voyages: actuel.listeVoyages,
+        projetsMaison: actuel.listeProjetsMaison
+    };
+
     const container = document.getElementById("rapportContenu");
 
     container.innerHTML = `
         <div class="fieldTitle" style="margin-top:10px;">🧳 Voyages</div>
-        ${creerLigneKpi("Voyages terminés", actuel.nombreVoyages, precedent.nombreVoyages)}
-        ${creerLigneKpi("Jours de voyage cumulés", actuel.joursCumules, precedent.joursCumules)}
+        ${creerLigneKpi("voyages", "Voyages terminés", actuel.nombreVoyages, precedent.nombreVoyages, actuel.listeVoyages)}
+        ${creerLigneKpi("jours", "Jours de voyage cumulés", actuel.joursCumules, precedent.joursCumules)}
 
         <div class="fieldTitle" style="margin-top:20px;">🛠️ Maison</div>
-        ${creerLigneKpi("Projets terminés", actuel.nombreProjetsMaison, precedent.nombreProjetsMaison)}
+        ${creerLigneKpi("projetsMaison", "Projets terminés", actuel.nombreProjetsMaison, precedent.nombreProjetsMaison, actuel.listeProjetsMaison)}
     `;
+
+    container.querySelectorAll(".kpiLigneCliquable").forEach(ligne => {
+
+        ligne.addEventListener("click", () => {
+
+            const id = ligne.dataset.kpiId;
+            const detail = document.getElementById(`kpiDetail-${id}`);
+            const liste = kpiListesCourantes[id];
+
+            if (!detail || !liste)
+                return;
+
+            const estOuvert = !detail.classList.contains("hidden");
+
+            if (estOuvert) {
+                detail.classList.add("hidden");
+                detail.innerHTML = "";
+                return;
+            }
+
+            detail.innerHTML = liste.map(item => `
+                <div class="autocompleteItem kpiDetailItem" data-envie-id="${item.id}">
+                    ${getCategorieById(item.categorie)?.emoji || "🛠️"} ${item.titre}
+                </div>
+            `).join("");
+
+            detail.classList.remove("hidden");
+
+            detail.querySelectorAll(".kpiDetailItem").forEach(ligneItem => {
+
+                ligneItem.addEventListener("click", (event) => {
+
+                    event.stopPropagation();
+
+                    document.getElementById("rapportModal")?.classList.add("hidden");
+                    document.getElementById("adminModal")?.classList.add("hidden");
+
+                    openEnvie(ligneItem.dataset.envieId, null);
+
+                });
+
+            });
+
+        });
+
+    });
 
 }
 
