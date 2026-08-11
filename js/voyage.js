@@ -304,7 +304,7 @@ if (!estMaison) {
 
     const supprimerVoyageButton = document.createElement("button");
     supprimerVoyageButton.className = "secondaryButton";
-    supprimerVoyageButton.textContent = "🗑️ Supprimer ce voyage et tout son contenu";
+supprimerVoyageButton.textContent = estMaison ? "🗑️ Supprimer ce projet et tout son contenu" : "🗑️ Supprimer ce voyage et tout son contenu";
     supprimerVoyageButton.style.marginTop = "20px";
     supprimerVoyageButton.style.background = "#FEE2E2";
     supprimerVoyageButton.style.color = "#DC2626";
