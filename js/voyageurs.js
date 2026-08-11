@@ -7,15 +7,22 @@ export function renderVoyageursWidget(containerId) {
     if (!container)
         return;
 
+    const personnes = getPersonnes();
+
+    const ages = personnes.map(p => calculerAgeDepuisNaissance(p.dateNaissance));
+
+    const nombreEnfants = ages.filter(age => age !== null && age < 18).length;
+    const nombreAdultes = Math.max(1, personnes.length - nombreEnfants);
+
     container.innerHTML = `
         <div style="display:flex;gap:10px;margin-bottom:10px;">
             <div style="flex:1;">
                 <label class="fieldTitle">Adultes</label>
-                <input type="number" class="voyageursAdultes" min="1" value="2" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+                <input type="number" class="voyageursAdultes" min="1" value="${nombreAdultes}" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
             </div>
             <div style="flex:1;">
                 <label class="fieldTitle">Enfants</label>
-                <input type="number" class="voyageursEnfants" min="0" value="0" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+                <input type="number" class="voyageursEnfants" min="0" value="${nombreEnfants}" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
             </div>
             <div style="flex:1;">
                 <label class="fieldTitle">Chambres</label>
@@ -27,7 +34,8 @@ export function renderVoyageursWidget(containerId) {
 
     const enfantsInput = container.querySelector(".voyageursEnfants");
     const agesContainer = container.querySelector(".voyageursAgesContainer");
-function renderAges() {
+
+    function renderAges() {
 
         const nb = parseInt(enfantsInput.value, 10) || 0;
 
@@ -76,7 +84,10 @@ function renderAges() {
 
     enfantsInput.addEventListener("input", renderAges);
 
+    renderAges();
+
 }
+
 
 export function getVoyageursData(containerId) {
 
