@@ -782,7 +782,7 @@ function applyTemplate(templateId) {
                 texte: item.texte,
                 quantite: quantiteAvecJours,
                 categorieId: item.categorieId,
-                assignedTo: getPersonnes().map(p => p.id), 
+                assignedTo: envie.personnesIds || [], 
                 parPersonne: true,
                 checked: false,
                 checkedBy: {}
