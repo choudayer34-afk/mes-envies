@@ -1,4 +1,4 @@
-import { getEnvies, updateEnvieRealise } from "./storage.js";
+import { getEnvies, updateEnvieRealise, getModeActif } from "./storage.js";
 import { groupAndSort } from "./grouping.js";
 
 import { groupForAgenda } from "./grouping.js";
@@ -81,7 +81,9 @@ function renderAgenda() {
     const container = document.getElementById("agendaContent");
     container.innerHTML = "";
 
-    const { datedGroups, adhocGroups, todo } = groupForAgenda(getEnvies());
+const envies = getEnvies().filter(e => e.contexte === getModeActif());
+
+    const { datedGroups, adhocGroups, todo } = groupForAgenda(envies);
 
     if (datedGroups.length === 0 && adhocGroups.length === 0 && todo.length === 0) {
         container.innerHTML = `<div class="emptyState">Rien à planifier pour l'instant.</div>`;
