@@ -256,7 +256,8 @@ main{
 #voyagePourImportModal,#runnerModal, #snakeModal,
 #aProposModal,#tetrisModal, #guideModal,#gameboyMenuModal,
 #breakoutModal,#taquinModal,#demineurModal,
-#memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal
+#memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal,
+#agendaLocalModal
 {
     z-index:2100;
 }
