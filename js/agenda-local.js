@@ -289,8 +289,10 @@ export function initAgendaLocal() {
             </a>
         `).join("");
 
-        bouton.disabled = false;
+                bouton.disabled = false;
         bouton.textContent = "🔍 Voir les liens";
+
+    });
 
 
     document.getElementById("closeAgendaLocal")?.addEventListener("click", () => {
