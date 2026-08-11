@@ -66,16 +66,43 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
 
 }
 
+function filtrerTrajetParDistance(points, minKm, maxKm) {
 
-export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress) {
+    if (points.length === 0)
+        return points;
+
+    const resultat = [];
+    let distanceCumulee = 0;
+
+    for (let i = 0; i < points.length; i++) {
+
+        if (i > 0) {
+            distanceCumulee += calculerDistanceKm(points[i - 1].lat, points[i - 1].lon, points[i].lat, points[i].lon);
+        }
+
+        if (distanceCumulee >= minKm && distanceCumulee <= maxKm) {
+            resultat.push(points[i]);
+        }
+
+    }
+
+    return resultat.length > 0 ? resultat : points;
+
+}
+
+export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress, minKm = 0, maxKm = Infinity) {
 
     onProgress?.("Calcul de l'itinéraire...");
 
-    const trajet = await calculerItineraireOSRM(depart, arrivee);
+    const trajetComplet = await calculerItineraireOSRM(depart, arrivee);
 
-    if (!trajet) {
+    if (!trajetComplet) {
         return { erreur: "Impossible de calculer l'itinéraire." };
     }
+
+    const trajet = (minKm > 0 || maxKm < Infinity)
+        ? filtrerTrajetParDistance(trajetComplet, minKm, maxKm)
+        : trajetComplet;
 
     const echantillons = echantillonnerTrajet(trajet, 8);
 
@@ -133,7 +160,7 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
 
     }
 
-    return { trajet, resultatsParCategorie };
+   return { trajet: trajetComplet, resultatsParCategorie };
 
 }
 
