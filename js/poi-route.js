@@ -70,8 +70,9 @@ async function chercherPoiAutourPoint(point, rayonM, categoriesActives) {
 
         try {
 
-            const response = await fetch(miroir, {
+      const response = await fetch(miroir, {
                 method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: "data=" + encodeURIComponent(query)
             });
 
