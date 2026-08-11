@@ -43,6 +43,26 @@ function filtrerTrajetParDistance(points, minKm, maxKm) {
 
 }
 
+async function fetchAvecTimeout(url, options, timeoutMs = 10000) {
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(timeoutId);
+        return response;
+
+    } catch (err) {
+
+        clearTimeout(timeoutId);
+        throw err;
+
+    }
+
+}
+
 async function chercherPoiAutourPoint(point, rayonM, categoriesActives) {
 
     const filtresParCategorie = categoriesActives.map(catId => {
@@ -71,11 +91,10 @@ const miroirs = [
 
         try {
 
-      const response = await fetch(miroir, {
+const response = await fetchAvecTimeout(miroir, {
                 method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: "data=" + encodeURIComponent(query)
-            });
+            }, 10000);
 
             if (!response.ok) {
                 console.error(`Miroir ${miroir} status: ${response.status}`);
