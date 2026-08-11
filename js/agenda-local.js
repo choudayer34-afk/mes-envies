@@ -334,14 +334,38 @@ async function trouverVillesAlentours(latitude, longitude, nomVillePrincipale) {
     const rayon = 15000;
     const requete = `[out:json][timeout:15];(node["place"~"city|town|village"](around:${rayon},${latitude},${longitude}););out body;`;
 
+   const miroirs = [
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter",
+        "https://overpass-api.de/api/interpreter"
+    ];
+
     try {
 
-        const response = await fetch("https://overpass-api.de/api/interpreter", {
-            method: "POST",
-            body: "data=" + encodeURIComponent(requete)
-        });
+        let data = null;
 
-        const data = await response.json();
+        for (const miroir of miroirs) {
+
+            try {
+
+                const response = await fetch(miroir, {
+                    method: "POST",
+                    body: "data=" + encodeURIComponent(requete)
+                });
+
+                if (response.ok) {
+                    data = await response.json();
+                    break;
+                }
+
+            } catch (err) {
+                console.error(`Erreur miroir ${miroir}: ${err.message}`);
+            }
+
+        }
+
+        if (!data)
+            throw new Error("Tous les miroirs Overpass ont échoué");
         const villesUniques = new Map();
 
         data.elements.forEach(el => {
