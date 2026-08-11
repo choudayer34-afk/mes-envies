@@ -55,7 +55,7 @@ export function openEnvie(id, returnTo = null) {
 
 
        document.getElementById("ficheTitreInput").value = envie.titre;
-
+document.getElementById("ficheModeIcone").textContent = envie.contexte === "maison" ? "🏠" : "✈️";
 
       renderCategorieSelector(envie);
 
