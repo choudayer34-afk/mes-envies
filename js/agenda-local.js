@@ -52,24 +52,36 @@ function formaterPeriodeRecherche(dateDebut, dateFin) {
 
 }
 
-function genererLiensAgenda({ ville, departement, region, periode }) {
+function construireRequeteVilles(villes) {
+    return villes.map(v => `"${v}"`).join(" OR ");
+}
+
+function genererLiensAgenda({ ville, villesAlentours, departement, region, periode }) {
 
     const suffixePeriode = periode ? ` ${periode}` : "";
+    const toutesLesVilles = [ville, ...villesAlentours];
+    const requeteVilles = construireRequeteVilles(toutesLesVilles);
+
     const liens = [];
 
     liens.push({
-        label: `🔍 Agenda culturel — ${ville}`,
-        url: `https://www.google.com/search?q=${encodeURIComponent(`agenda culturel ${ville}${suffixePeriode}`)}`
+        label: `🔍 Agenda culturel — ${ville} et alentours`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`agenda culturel (${requeteVilles})${suffixePeriode}`)}`
     });
 
     liens.push({
-        label: `🏛️ OpenAgenda — ${ville}`,
-        url: `https://www.google.com/search?q=${encodeURIComponent(`site:openagenda.com ${ville}`)}`
+        label: `🏛️ OpenAgenda — ${ville} et alentours`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`site:openagenda.com (${requeteVilles})`)}`
     });
 
     liens.push({
-        label: `🏢 Mairie / office de tourisme — ${ville}`,
-        url: `https://www.google.com/search?q=${encodeURIComponent(`${ville} agenda OR "office de tourisme" sorties${suffixePeriode}`)}`
+        label: `🏢 Mairie / office de tourisme — ${ville} et alentours`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`(${requeteVilles}) agenda OR "office de tourisme" sorties${suffixePeriode}`)}`
+    });
+
+    liens.push({
+        label: `🎬 Cinémas — séances à ${ville} et alentours`,
+        url: `https://www.google.com/search?q=${encodeURIComponent(`site:allocine.fr séances cinéma (${requeteVilles})${suffixePeriode}`)}`
     });
 
     if (departement) {
@@ -114,6 +126,7 @@ function genererLiensAgenda({ ville, departement, region, periode }) {
     return liens;
 
 }
+
 
 function renderSuggestionsAgendaLocal(resultats) {
 
@@ -203,12 +216,20 @@ export function initAgendaLocal() {
         const dateFin = document.getElementById("agendaLocalDateFin").value;
         const periode = formaterPeriodeRecherche(dateDebut, dateFin);
 
-        const { departement, region } = await getDepartementRegion(agendaLocalLieuChoisi.latitude, agendaLocalLieuChoisi.longitude);
+                const [{ departement, region }, villesAlentours] = await Promise.all([
+            getDepartementRegion(agendaLocalLieuChoisi.latitude, agendaLocalLieuChoisi.longitude),
+            trouverVillesAlentours(agendaLocalLieuChoisi.latitude, agendaLocalLieuChoisi.longitude, agendaLocalLieuChoisi.nom)
+        ]);
 
-        const liens = genererLiensAgenda({ ville: agendaLocalLieuChoisi.nom, departement, region, periode });
+        const liens = genererLiensAgenda({ ville: agendaLocalLieuChoisi.nom, villesAlentours, departement, region, periode });
 
         const resultats = document.getElementById("agendaLocalResultats");
-        resultats.innerHTML = liens.map(lien => `
+
+        const infoVilles = villesAlentours.length > 0
+            ? `<p style="font-size:12px;color:var(--color-text-light);text-align:center;margin-bottom:10px;">🔎 Recherche élargie à : ${villesAlentours.join(", ")}</p>`
+            : "";
+
+        resultats.innerHTML = infoVilles + liens.map(lien => `
             <a href="${lien.url}" target="_blank" class="secondaryButton" style="display:block;text-decoration:none;width:100%;margin-bottom:10px;text-align:center;box-sizing:border-box;">
                 ${lien.label}
             </a>
@@ -217,7 +238,6 @@ export function initAgendaLocal() {
         bouton.disabled = false;
         bouton.textContent = "🔍 Voir les liens";
 
-    });
 
     document.getElementById("closeAgendaLocal")?.addEventListener("click", () => {
         document.getElementById("agendaLocalModal")?.classList.add("hidden");
@@ -236,3 +256,58 @@ export function initAgendaLocal() {
     });
 
 }
+
+function distanceKm(lat1, lon1, lat2, lon2) {
+
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+
+    const a = Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+}
+
+async function trouverVillesAlentours(latitude, longitude, nomVillePrincipale) {
+
+    const rayon = 15000;
+    const requete = `[out:json][timeout:15];(node["place"~"city|town|village"](around:${rayon},${latitude},${longitude}););out body;`;
+
+    try {
+
+        const response = await fetch("https://overpass-api.de/api/interpreter", {
+            method: "POST",
+            body: "data=" + encodeURIComponent(requete)
+        });
+
+        const data = await response.json();
+        const villesUniques = new Map();
+
+        data.elements.forEach(el => {
+
+            const nom = el.tags?.name;
+
+            if (!nom || normaliserTexte(nom) === normaliserTexte(nomVillePrincipale))
+                return;
+
+            if (villesUniques.has(nom))
+                return;
+
+            villesUniques.set(nom, distanceKm(latitude, longitude, el.lat, el.lon));
+
+        });
+
+        return [...villesUniques.entries()]
+            .sort((a, b) => a[1] - b[1])
+            .slice(0, 4)
+            .map(([nom]) => nom);
+
+    } catch (err) {
+        console.error("Erreur recherche villes alentours: " + err.message);
+        return [];
+    }
+
+}
+
