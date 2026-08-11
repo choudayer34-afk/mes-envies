@@ -17,54 +17,7 @@ export function rechercheAnnuleeReset() {
 }
 
 
-async function chercherPoiAutourPoint(point, rayonM, tags) {
 
-    const filtreTags = tags.map(t => {
-        const [cle, valeur] = t.split("=");
-        return `node[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});way[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});`;
-    }).join("");
-
-    const query = `[out:json][timeout:15];(${filtreTags});out center 20;`;
-
-    const miroirs = [
-        "https://overpass-api.de/api/interpreter",
-        "https://overpass.private.coffee/api/interpreter"
-    ];
-
-    for (const miroir of miroirs) {
-
-        try {
-
-            const response = await fetch(miroir, {
-                method: "POST",
-                body: "data=" + encodeURIComponent(query)
-            });
-
-            if (!response.ok) {
-                console.error(`Miroir ${miroir} status: ${response.status}`);
-                continue;
-            }
-
-            const data = await response.json();
-
-            console.log(`Miroir ${miroir} OK, éléments=${data.elements?.length || 0}`);
-
-            return (data.elements || []).map(el => ({
-                nom: el.tags?.name || null,
-                lat: el.lat || el.center?.lat,
-                lon: el.lon || el.center?.lon,
-                type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
-            })).filter(p => p.nom && p.lat && p.lon);
-
-        } catch (err) {
-            console.error(`Erreur miroir ${miroir}: ${err.message}`);
-        }
-
-    }
-
-    return [];
-
-}
 
 function filtrerTrajetParDistance(points, minKm, maxKm) {
 
@@ -90,6 +43,90 @@ function filtrerTrajetParDistance(points, minKm, maxKm) {
 
 }
 
+async function chercherPoiAutourPoint(point, rayonM, categoriesActives) {
+
+    const filtresParCategorie = categoriesActives.map(catId => {
+
+        const categorie = CATEGORIES_POI[catId];
+
+        if (!categorie)
+            return "";
+
+        return categorie.overpassTags.map(t => {
+            const [cle, valeur] = t.split("=");
+            return `node[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});way[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});`;
+        }).join("");
+
+    }).join("");
+
+    const query = `[out:json][timeout:20];(${filtresParCategorie});out center 60;`;
+
+    const miroirs = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter"
+    ];
+
+    for (const miroir of miroirs) {
+
+        try {
+
+            const response = await fetch(miroir, {
+                method: "POST",
+                body: "data=" + encodeURIComponent(query)
+            });
+
+            if (!response.ok) {
+                console.error(`Miroir ${miroir} status: ${response.status}`);
+                continue;
+            }
+
+            const data = await response.json();
+
+            console.log(`Miroir ${miroir} OK, éléments=${data.elements?.length || 0}`);
+
+            return (data.elements || []).map(el => {
+
+                const tags = el.tags || {};
+
+                let catTrouvee = null;
+
+                for (const catId of categoriesActives) {
+
+                    const categorie = CATEGORIES_POI[catId];
+
+                    const correspond = categorie?.overpassTags.some(t => {
+                        const [cle, valeur] = t.split("=");
+                        return tags[cle] === valeur;
+                    });
+
+                    if (correspond) {
+                        catTrouvee = catId;
+                        break;
+                    }
+
+                }
+
+                return {
+                    nom: tags.name || null,
+                    lat: el.lat || el.center?.lat,
+                    lon: el.lon || el.center?.lon,
+                    type: tags.tourism || tags.amenity || tags.place || tags.natural || tags.historic || tags.leisure || "",
+                    catId: catTrouvee
+                };
+
+            }).filter(p => p.nom && p.lat && p.lon && p.catId);
+
+        } catch (err) {
+            console.error(`Erreur miroir ${miroir}: ${err.message}`);
+        }
+
+    }
+
+    return [];
+
+}
+
+
 export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress, minKm = 0, maxKm = Infinity) {
 
     onProgress?.("Calcul de l'itinéraire...");
@@ -104,63 +141,58 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
         ? filtrerTrajetParDistance(trajetComplet, minKm, maxKm)
         : trajetComplet;
 
-    const echantillons = echantillonnerTrajet(trajet, 8);
+    let distanceTrajetKm = 0;
+
+    for (let i = 1; i < trajet.length; i++) {
+        distanceTrajetKm += calculerDistanceKm(trajet[i - 1].lat, trajet[i - 1].lon, trajet[i].lat, trajet[i].lon);
+    }
+
+    const intervalleAdaptatif = Math.max(8, Math.ceil(distanceTrajetKm / 25));
+
+    const echantillons = echantillonnerTrajet(trajet, intervalleAdaptatif);
 
     const resultatsParCategorie = {};
+    categoriesActives.forEach(catId => { resultatsParCategorie[catId] = []; });
+
     const dejaVus = new Set();
 
-    let indexGlobal = 0;
-    const totalRequetes = categoriesActives.length * echantillons.length;
+    for (let i = 0; i < echantillons.length; i++) {
 
-    for (const catId of categoriesActives) {
-
-        const categorie = CATEGORIES_POI[catId];
-
-        if (!categorie)
-            continue;
-
-        resultatsParCategorie[catId] = [];
-
-        for (const point of echantillons) {
-
-            if (rechercheAnnulee) {
-                return { erreur: "Recherche annulée." };
-            }
-
-            indexGlobal++;
-
-            onProgress?.(`${categorie.label} — point ${indexGlobal} / ${totalRequetes}`);
-
-            const pois = await chercherPoiAutourPoint(point, rayonKm * 1000, categorie.overpassTags);
-
-
-            pois.forEach(poi => {
-
-                const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
-
-                if (dejaVus.has(cle))
-                    return;
-
-                dejaVus.add(cle);
-
-                const distanceMin = Math.min(...echantillons.map(e =>
-                    calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
-                ));
-
-                resultatsParCategorie[catId].push({ ...poi, distanceKm: distanceMin });
-
-            });
-
-            await new Promise(resolve => setTimeout(resolve, 300));
-
+        if (rechercheAnnulee) {
+            return { erreur: "Recherche annulée." };
         }
 
-        resultatsParCategorie[catId].sort((a, b) => a.distanceKm - b.distanceKm);
-        resultatsParCategorie[catId] = resultatsParCategorie[catId].slice(0, 15);
+        onProgress?.(`Recherche autour du point ${i + 1} / ${echantillons.length}`);
+
+        const pois = await chercherPoiAutourPoint(echantillons[i], rayonKm * 1000, categoriesActives);
+
+        pois.forEach(poi => {
+
+            const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
+
+            if (dejaVus.has(cle))
+                return;
+
+            dejaVus.add(cle);
+
+            const distanceMin = Math.min(...echantillons.map(e =>
+                calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
+            ));
+
+            resultatsParCategorie[poi.catId]?.push({ ...poi, distanceKm: distanceMin });
+
+        });
+
+        await new Promise(resolve => setTimeout(resolve, 250));
 
     }
 
-   return { trajet: trajetComplet, resultatsParCategorie };
+    categoriesActives.forEach(catId => {
+        resultatsParCategorie[catId].sort((a, b) => a.distanceKm - b.distanceKm);
+        resultatsParCategorie[catId] = resultatsParCategorie[catId].slice(0, 15);
+    });
+
+    return { trajet: trajetComplet, resultatsParCategorie };
 
 }
 
