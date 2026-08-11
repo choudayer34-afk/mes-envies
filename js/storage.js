@@ -828,7 +828,7 @@ export function removeFromJourGroup(envieId) {
 
 }
 
-export function addMultipleChecklistItems(envieId, textes, categorieId = null, assignedTo = []) {
+export function addMultipleChecklistItems(envieId, textes, categorieId = null, assignedTo = [], magasin = null, url = null) {
 
     const envie = enviesCache.find(e => e.id === envieId);
 
@@ -843,14 +843,62 @@ export function addMultipleChecklistItems(envieId, textes, categorieId = null, a
         assignedTo,
         parPersonne: false,
         checked: false,
-        checkedBy: {}
+        checkedBy: {},
+        magasin: magasin || null,
+        url: url || null
     }));
 
     patchEnvie(envieId, { checklist: [...(envie.checklist || []), ...newItems] });
 
     newItems.forEach(item => rememberChecklistItem(item.texte, categorieId));
 
+    if (magasin) {
+        rememberMagasin(magasin);
+    }
+
     return newItems;
+
+}
+
+export function synchroniserChecklistDepuisProduit(envieId, produit, retenu) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const checklistActuelle = envie.checklist || [];
+
+    if (retenu) {
+
+        if (checklistActuelle.some(item => item.produitOrigineId === produit.id))
+            return;
+
+        const nouvelItem = {
+            id: crypto.randomUUID(),
+            texte: produit.prix != null ? `${produit.nom} (${produit.prix} €)` : produit.nom,
+            quantite: 1,
+            categorieId: null,
+            assignedTo: [],
+            parPersonne: false,
+            checked: false,
+            checkedBy: {},
+            magasin: produit.magasin || null,
+            url: produit.url || null,
+            produitOrigineId: produit.id
+        };
+
+        patchEnvie(envieId, { checklist: [...checklistActuelle, nouvelItem] });
+
+        if (produit.magasin) {
+            rememberMagasin(produit.magasin);
+        }
+
+    } else {
+
+        patchEnvie(envieId, { checklist: checklistActuelle.filter(item => item.produitOrigineId !== produit.id) });
+
+    }
 
 }
 
