@@ -629,11 +629,15 @@ function renderRattachement(envie, container) {
 
     const estMaison = envie.contexte === "maison";
 
-    const conteneurs = getEnvies().filter(e =>
+    const tousLesConteneurs = getEnvies().filter(e =>
         isContainer(e.categorie) && e.id !== envie.id && e.contexte === envie.contexte
     );
 
-    const conteneurActuel = conteneurs.find(v => v.id === envie.voyageId);
+    const conteneurActuel = tousLesConteneurs.find(v => v.id === envie.voyageId);
+
+    const conteneurs = tousLesConteneurs.filter(v =>
+        computeContainerStatus(v).statut !== "termine"
+    );
 
     if (conteneurActuel) {
 
