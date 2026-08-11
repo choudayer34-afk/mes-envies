@@ -3,8 +3,10 @@ import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
 import { getModeActif, basculerMode } from "./storage.js";
-import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem } from "./storage.js";
+
 import { makeRowDraggable } from "./dragdrop.js";
+import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem, assurerListeLibreCourses } from "./storage.js";
+import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion, openChecklistAccordion } from "./envie.js";
 
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
@@ -560,6 +562,7 @@ function renderRechercheAccueilResultats(requete) {
 
 }
 
+
 function calculerAchatsMaison() {
 
     const conteneursMaison = getEnvies().filter(e => e.contexte === "maison" && isContainer(e.categorie));
@@ -593,17 +596,46 @@ function calculerAchatsMaison() {
 
     });
 
-    return items;
+    const listeLibre = getEnvies().find(e => e.contexte === "maison" && e.listeLibre === true);
+
+    if (listeLibre) {
+
+        (listeLibre.checklist || []).forEach(item => {
+
+            if (!item.checked) {
+
+                items.push({
+                    envieId: listeLibre.id,
+                    itemId: item.id,
+                    texte: item.texte,
+                    magasin: item.magasin || null,
+                    projetTitre: listeLibre.titre,
+                    projetEmoji: "📝"
+                });
+
+            }
+
+        });
+
+    }
+
+    return { items, listeLibre };
 
 }
 
-function creerGroupeAchat(titreGroupe, items, infoComplementaireType) {
+
+function creerGroupeAchat(envieId, titreGroupe, items, infoComplementaireType, estCliquable) {
 
     const bloc = document.createElement("div");
     bloc.className = "actionGroupCard";
 
+    const titreHtml = estCliquable
+        ? `<div class="actionGroupTitre achatGroupeTitreCliquable">${titreGroupe} (${items.length})</div>`
+        : `<div class="actionGroupTitre">${titreGroupe} (${items.length})</div>`;
+
     bloc.innerHTML = `
-        <div class="actionGroupTitre">${titreGroupe} (${items.length})</div>
+        ${titreHtml}
+        ${items.length === 0 ? `<div class="emptyState" style="padding:8px 0;">Aucun article pour l'instant.</div>` : ""}
         ${items.map(item => `
             <label class="checkLabel achatCheckLabel" data-envie-id="${item.envieId}" data-item-id="${item.itemId}" style="display:flex;align-items:center;gap:8px;padding:6px 0;">
                 <input type="checkbox">
@@ -611,6 +643,20 @@ function creerGroupeAchat(titreGroupe, items, infoComplementaireType) {
             </label>
         `).join("")}
     `;
+
+    if (estCliquable) {
+
+        bloc.querySelector(".achatGroupeTitreCliquable").addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            openEnvie(envieId, null);
+
+            setTimeout(openChecklistAccordion, 200);
+
+        });
+
+    }
 
     bloc.querySelectorAll(".achatCheckLabel input").forEach(checkbox => {
 
@@ -630,7 +676,9 @@ function creerGroupeAchat(titreGroupe, items, infoComplementaireType) {
 
 }
 
+
 let achatsOuvert = true;
+
 
 export function renderAchatsMaison() {
 
@@ -644,9 +692,11 @@ export function renderAchatsMaison() {
         return;
     }
 
-    const items = calculerAchatsMaison();
+    assurerListeLibreCourses();
 
-    if (items.length === 0) {
+    const { items, listeLibre } = calculerAchatsMaison();
+
+    if (items.length === 0 && !listeLibre) {
         section.classList.add("hidden");
         return;
     }
@@ -717,16 +767,20 @@ export function renderAchatsMaison() {
 
         items.forEach(item => {
 
-            if (!groupes.has(item.projetTitre)) {
-                groupes.set(item.projetTitre, { emoji: item.projetEmoji, items: [] });
+            if (!groupes.has(item.envieId)) {
+                groupes.set(item.envieId, { titre: item.projetTitre, emoji: item.projetEmoji, items: [] });
             }
 
-            groupes.get(item.projetTitre).items.push(item);
+            groupes.get(item.envieId).items.push(item);
 
         });
 
-        groupes.forEach((groupe, titre) => {
-            content.appendChild(creerGroupeAchat(`${groupe.emoji} ${titre}`, groupe.items, "magasin"));
+        if (listeLibre && !groupes.has(listeLibre.id)) {
+            groupes.set(listeLibre.id, { titre: listeLibre.titre, emoji: "📝", items: [] });
+        }
+
+        groupes.forEach((groupe, envieId) => {
+            content.appendChild(creerGroupeAchat(envieId, `${groupe.emoji} ${groupe.titre}`, groupe.items, "magasin", true));
         });
 
     } else {
@@ -755,12 +809,15 @@ export function renderAchatsMaison() {
         });
 
         clesTriees.forEach(cle => {
-            content.appendChild(creerGroupeAchat(`🏬 ${cle}`, groupes.get(cle), "projet"));
+            content.appendChild(creerGroupeAchat(null, `🏬 ${cle}`, groupes.get(cle), "projet", false));
         });
 
     }
 
 }
+
+    
+
 
 function createEnvieCard(envie) {
 
