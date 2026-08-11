@@ -8,6 +8,24 @@ let enviesCache = [];
 let onChangeCallback = null;
 let magasinsCache = [];
 let societesCache = [];
+let changelogCache = [];
+
+export function getChangelog() {
+    return [...changelogCache].sort((a, b) => (b.date || 0) - (a.date || 0));
+}
+
+export function initChangelogSync(onChange) {
+
+    const foyerId = getFoyerId();
+
+    onSnapshot(collection(db, "foyers", foyerId, "changelog"), (snap) => {
+
+        changelogCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange();
+
+    });
+
+}
 
 export function getSocietes() {
     return [...societesCache].sort((a, b) => a.societe.localeCompare(b.societe, "fr", { sensitivity: "base" }));
