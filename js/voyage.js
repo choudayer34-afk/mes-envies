@@ -327,6 +327,22 @@ if (!estMaison) {
 
     container.appendChild(creerNouvelleButton);
 
+    
+  if (estMaison) {
+
+        const partagerButton = document.createElement("button");
+        partagerButton.className = "secondaryButton";
+        partagerButton.textContent = envie.partagePublic ? "🔗 Gérer le partage" : "🔗 Partager ce projet";
+        partagerButton.style.marginTop = "10px";
+
+        partagerButton.addEventListener("click", () => {
+            ouvrirPartageModal(envie);
+        });
+
+        container.appendChild(partagerButton);
+
+    }
+
     const supprimerVoyageButton = document.createElement("button");
     supprimerVoyageButton.className = "secondaryButton";
 supprimerVoyageButton.textContent = estMaison ? "🗑️ Supprimer ce projet et tout son contenu" : "🗑️ Supprimer ce voyage et tout son contenu";
