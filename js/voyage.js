@@ -680,6 +680,23 @@ function renderRattachement(envie, container) {
         computeContainerStatus(v).statut !== "termine"
     );
 
+    function ajouterBoutonPartage() {
+
+        const partagerTacheButton = document.createElement("button");
+        partagerTacheButton.className = "secondaryButton";
+        partagerTacheButton.textContent = envie.partagePublic
+            ? "🔗 Gérer le partage"
+            : (estMaison ? "🔗 Partager cette tâche" : "🔗 Partager cette idée");
+        partagerTacheButton.style.marginTop = "14px";
+
+        partagerTacheButton.addEventListener("click", () => {
+            ouvrirPartageModal(envie);
+        });
+
+        container.appendChild(partagerTacheButton);
+
+    }
+
     if (conteneurActuel) {
 
         container.innerHTML = `<div class="templateRowNom">${estMaison ? "🛠️" : "🧳"} ${conteneurActuel.titre}</div>`;
@@ -697,6 +714,8 @@ function renderRattachement(envie, container) {
         });
 
         container.appendChild(removeButton);
+
+        ajouterBoutonPartage();
 
         return;
 
@@ -718,13 +737,14 @@ function renderRattachement(envie, container) {
 
         container.appendChild(creerButton);
 
+        ajouterBoutonPartage();
+
         return;
 
     }
 
     const select = document.createElement("select");
     select.className = "categorieSelect";
-
     select.innerHTML = `<option value="">${estMaison ? "Choisir un projet..." : "Choisir un voyage..."}</option>` +
         conteneurs.map(v => `<option value="${v.id}">${v.titre}</option>`).join("");
 
@@ -754,18 +774,8 @@ function renderRattachement(envie, container) {
 
     container.appendChild(creerButton);
 
-   const partagerTacheButton = document.createElement("button");
-    partagerTacheButton.className = "secondaryButton";
-    partagerTacheButton.textContent = envie.partagePublic
-        ? "🔗 Gérer le partage"
-        : (estMaison ? "🔗 Partager cette tâche" : "🔗 Partager cette idée");
-    partagerTacheButton.style.marginTop = "14px";
+    ajouterBoutonPartage();
 
-    partagerTacheButton.addEventListener("click", () => {
-        ouvrirPartageModal(envie);
-    });
-
-    container.appendChild(partagerTacheButton);
 }
 
 
