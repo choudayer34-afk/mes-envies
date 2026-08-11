@@ -29,6 +29,7 @@ import { initPromptRegionSync } from "./js/storage.js";
 import { openModalVoyage } from "./js/modal.js";
 import { initVoyageImport } from "./js/voyage-import.js";
 import { getCurrentEnvieId } from "./js/envie.js";
+import { renderChecklist } from "./js/checklist.js";
 import { renderVoyageSection } from "./js/voyage.js";
 import { initMapPicker } from "./js/location.js";
 import { initEtapeFinder } from "./js/etape-finder.js";
@@ -224,7 +225,21 @@ initPlus();
     });
     initSurvieEditor();
 
-    initFoyerDataSync(() => {});
+    initFoyerDataSync(() => {
+
+    const ficheOverlay = document.getElementById("ficheOverlay");
+
+    if (ficheOverlay && !ficheOverlay.classList.contains("hidden")) {
+
+        const envieOuverte = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+        if (envieOuverte) {
+            renderChecklist(envieOuverte);
+        }
+
+    }
+
+});
 initModal();
 
     
