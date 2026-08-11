@@ -630,6 +630,8 @@ function creerGroupeAchat(titreGroupe, items, infoComplementaireType) {
 
 }
 
+let achatsOuvert = true;
+
 export function renderAchatsMaison() {
 
     const section = document.getElementById("achatsSection");
@@ -651,14 +653,63 @@ export function renderAchatsMaison() {
 
     section.classList.remove("hidden");
 
-    const header = document.getElementById("achatsHeaderTitre");
+    let header = section.querySelector(".homeSectionHeader");
+    let content = document.getElementById("achatsContainer");
 
-    if (header) {
-        header.textContent = `🛒 À acheter (${items.length})`;
+    if (!header || !content) {
+
+        header = document.createElement("button");
+        header.type = "button";
+        header.className = "homeSectionHeader";
+
+        content = document.createElement("div");
+        content.id = "achatsContainer";
+        content.className = "homeSectionContent";
+
+        section.innerHTML = "";
+        section.appendChild(header);
+        section.appendChild(content);
+
+        header.addEventListener("click", () => {
+
+            achatsOuvert = !achatsOuvert;
+            content.classList.toggle("hidden", !achatsOuvert);
+
+            const icon = header.querySelector(".accordionIcon");
+            icon.textContent = achatsOuvert ? "▾" : "▸";
+
+        });
+
     }
 
-    const container = document.getElementById("achatsContenu");
-    container.innerHTML = "";
+    content.classList.toggle("hidden", !achatsOuvert);
+
+    header.innerHTML = `<span>🛒 À acheter (${items.length})</span><span class="accordionIcon">${achatsOuvert ? "▾" : "▸"}</span>`;
+
+    content.innerHTML = "";
+
+    const toggleVue = document.createElement("div");
+    toggleVue.className = "itemTypeToggle";
+    toggleVue.style.marginBottom = "10px";
+    toggleVue.innerHTML = `
+        <button type="button" class="itemTypeChip ${vueAchats === "projet" ? "active" : ""}" data-vue="projet">Par projet</button>
+        <button type="button" class="itemTypeChip ${vueAchats === "magasin" ? "active" : ""}" data-vue="magasin">Par magasin</button>
+    `;
+
+    toggleVue.querySelectorAll(".itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            vueAchats = chip.dataset.vue;
+            renderAchatsMaison();
+
+        });
+
+    });
+
+    content.appendChild(toggleVue);
 
     if (vueAchats === "projet") {
 
@@ -675,7 +726,7 @@ export function renderAchatsMaison() {
         });
 
         groupes.forEach((groupe, titre) => {
-            container.appendChild(creerGroupeAchat(`${groupe.emoji} ${titre}`, groupe.items, "magasin"));
+            content.appendChild(creerGroupeAchat(`${groupe.emoji} ${titre}`, groupe.items, "magasin"));
         });
 
     } else {
@@ -704,29 +755,10 @@ export function renderAchatsMaison() {
         });
 
         clesTriees.forEach(cle => {
-            container.appendChild(creerGroupeAchat(`🏬 ${cle}`, groupes.get(cle), "projet"));
+            content.appendChild(creerGroupeAchat(`🏬 ${cle}`, groupes.get(cle), "projet"));
         });
 
     }
-
-}
-
-export function initAchatsMaison() {
-
-    document.querySelectorAll("#achatsVueToggle .itemTypeChip").forEach(chip => {
-
-        chip.addEventListener("click", () => {
-
-            document.querySelectorAll("#achatsVueToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
-            chip.classList.add("active");
-
-            vueAchats = chip.dataset.vue;
-
-            renderAchatsMaison();
-
-        });
-
-    });
 
 }
 
