@@ -622,12 +622,20 @@ function createEnvieCardDraggable(envie) {
     card.dataset.dragId = envie.id;
 
     const handle = document.createElement("span");
-    handle.className = "dragHandle envieCardDragHandle";
+    handle.className = "dragHandle";
     handle.textContent = "⠿";
 
     handle.addEventListener("click", (event) => event.stopPropagation());
 
-    card.appendChild(handle);
+    const ligneReduite = card.querySelector(".envieReduiteLigne");
+
+    if (ligneReduite) {
+        handle.classList.add("envieCardDragHandleInline");
+        ligneReduite.insertBefore(handle, ligneReduite.firstChild);
+    } else {
+        handle.classList.add("envieCardDragHandle");
+        card.appendChild(handle);
+    }
 
     makeRowDraggable(card, envie.id, (targetId) => {
 
