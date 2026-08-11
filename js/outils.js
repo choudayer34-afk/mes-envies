@@ -4143,7 +4143,7 @@ function initNback() {
 
     });
 
-    document.getElementById("nbackBtnMatch")?.addEventListener("click", () => {
+        document.getElementById("nbackBtnMatch")?.addEventListener("click", () => {
 
         if (!nbackState || nbackState.phase !== "jeu" || nbackState.aRepondu)
             return;
@@ -4158,7 +4158,12 @@ function initNback() {
             nbackState.faussesAlertes++;
         }
 
+        const bouton = document.getElementById("nbackBtnMatch");
+        bouton.disabled = true;
+        bouton.textContent = "✓ Réponse enregistrée";
+
     });
+
 
     document.addEventListener("keydown", (event) => {
 
@@ -4245,9 +4250,13 @@ function avancerNback() {
 
     }
 
-    s.aRepondu = false;
+       s.aRepondu = false;
 
     document.getElementById("nbackLettreAffichee").textContent = s.sequence[s.index];
+
+    const bouton = document.getElementById("nbackBtnMatch");
+    bouton.disabled = false;
+    bouton.textContent = "🔁 Ça correspond !";
 
 }
 
