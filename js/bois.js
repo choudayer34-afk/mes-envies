@@ -108,10 +108,28 @@ function renderResultat(bois) {
 
     const { volumeM3, surfaceM2, nombreTotal } = calculerBois(bois.planches);
 
+    const groupesEpaisseur = [...new Set(bois.planches.map(p => p.epaisseur))];
+
+    const lignesOptimales = groupesEpaisseur.map(epaisseur => {
+
+        const piecesGroupe = bois.planches
+            .filter(p => p.epaisseur === epaisseur)
+            .map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }));
+
+        const tailleOptimale = trouverTaillePlancheOptimale(piecesGroupe);
+
+        if (!tailleOptimale)
+            return `<span class="peintureResultatLitres">💡 Épaisseur ${epaisseur} mm : aucune planche raisonnable (≤ 400 cm) ne suffit en une seule pièce</span>`;
+
+        return `<span class="peintureResultatLitres">💡 Planche optimale (${epaisseur} mm) si tu dois l'acheter : <strong>${tailleOptimale.longueur} × ${tailleOptimale.largeur} cm</strong></span>`;
+
+    }).join("");
+
     container.innerHTML = `
         <span class="peintureResultatSurface">🪵 ${nombreTotal} planche${nombreTotal > 1 ? "s" : ""} au total</span>
         <span class="peintureResultatLitres">📦 Volume total : <strong>${(volumeM3 * 1000).toFixed(2)} dm³</strong> (${volumeM3.toFixed(4)} m³)</span>
         <span class="peintureResultatLitres">🧱 Surface totale (une face) : <strong>${surfaceM2.toFixed(2)} m²</strong></span>
+        ${lignesOptimales}
     `;
 
 }
@@ -351,23 +369,14 @@ groupesEpaisseur.forEach(epaisseur => {
 
         const piecesGroupe = bois.planches.filter(p => p.epaisseur === epaisseur);
 
-        const piecesPourAlgo = piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }));
+      const piecesPourAlgo = piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }));
 
-        const { planchesUtilisees, nonPlacees } = decouperPlanches(
+       const { planchesUtilisees, nonPlacees } = decouperPlanches(
             { longueur: stockLongueur, largeur: stockLargeur },
-            piecesPourAlgo
+            piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }))
         );
 
-        const tailleOptimale = trouverTaillePlancheOptimale(piecesPourAlgo);
-
         html += `<div style="margin-bottom:20px;">`;
-
-        if (tailleOptimale) {
-            html += `<div class="peintureResultat" style="margin-bottom:10px;background:#FFF6E5;">
-                <span class="peintureResultatSurface">💡 Planche optimale pour l'épaisseur ${epaisseur} mm, si tu dois l'acheter : <strong>${tailleOptimale.longueur} × ${tailleOptimale.largeur} cm</strong></span>
-            </div>`;
-        }
-
         html += `<div class="peintureResultat" style="margin-bottom:10px;">`;
 
         if (nonPlacees.length === 0) {
