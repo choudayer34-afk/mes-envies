@@ -207,6 +207,23 @@ export function createEnvie({
 
 }
 
+export function assurerListeLibreCourses() {
+
+    const existe = enviesCache.some(e => e.contexte === "maison" && e.listeLibre === true);
+
+    if (existe)
+        return;
+
+    const id = createEnvie({
+        titre: "Courses",
+        contexte: "maison"
+    });
+
+    patchEnvie(id, { listeLibre: true });
+
+}
+
+
 export function getEnvies() {
     return enviesCache.map(e => ({ ...e, contexte: e.contexte || "voyage" }));
 }
