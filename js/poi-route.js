@@ -63,25 +63,16 @@ async function fetchAvecTimeout(url, options, timeoutMs = 10000) {
 
 }
 
-async function chercherPoiAutourPoint(point, rayonM, categoriesActives) {
+async function chercherPoiAutourPoint(point, rayonM, tags) {
 
-    const filtresParCategorie = categoriesActives.map(catId => {
-
-        const categorie = CATEGORIES_POI[catId];
-
-        if (!categorie)
-            return "";
-
-        return categorie.overpassTags.map(t => {
-            const [cle, valeur] = t.split("=");
-            return `node[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});way[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});`;
-        }).join("");
-
+    const filtreTags = tags.map(t => {
+        const [cle, valeur] = t.split("=");
+        return `node[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});way[${cle}=${valeur}](around:${rayonM},${point.lat},${point.lon});`;
     }).join("");
 
-    const query = `[out:json][timeout:20];(${filtresParCategorie});out center 60;`;
+    const query = `[out:json][timeout:20];(${filtreTags});out center 20;`;
 
-const miroirs = [
+    const miroirs = [
         "https://overpass.kumi.systems/api/interpreter",
         "https://overpass.private.coffee/api/interpreter",
         "https://overpass-api.de/api/interpreter"
@@ -91,10 +82,11 @@ const miroirs = [
 
         try {
 
-const response = await fetchAvecTimeout(miroir, {
+            const response = await fetchAvecTimeout(miroir, {
                 method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: "data=" + encodeURIComponent(query)
-            }, 10000);
+            }, 15000);
 
             if (!response.ok) {
                 console.error(`Miroir ${miroir} status: ${response.status}`);
@@ -103,39 +95,12 @@ const response = await fetchAvecTimeout(miroir, {
 
             const data = await response.json();
 
-            console.log(`Miroir ${miroir} OK, éléments=${data.elements?.length || 0}`);
-
-            return (data.elements || []).map(el => {
-
-                const tags = el.tags || {};
-
-                let catTrouvee = null;
-
-                for (const catId of categoriesActives) {
-
-                    const categorie = CATEGORIES_POI[catId];
-
-                    const correspond = categorie?.overpassTags.some(t => {
-                        const [cle, valeur] = t.split("=");
-                        return tags[cle] === valeur;
-                    });
-
-                    if (correspond) {
-                        catTrouvee = catId;
-                        break;
-                    }
-
-                }
-
-                return {
-                    nom: tags.name || null,
-                    lat: el.lat || el.center?.lat,
-                    lon: el.lon || el.center?.lon,
-                    type: tags.tourism || tags.amenity || tags.place || tags.natural || tags.historic || tags.leisure || "",
-                    catId: catTrouvee
-                };
-
-            }).filter(p => p.nom && p.lat && p.lon && p.catId);
+            return (data.elements || []).map(el => ({
+                nom: el.tags?.name || null,
+                lat: el.lat || el.center?.lat,
+                lon: el.lon || el.center?.lon,
+                type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
+            })).filter(p => p.nom && p.lat && p.lon);
 
         } catch (err) {
             console.error(`Erreur miroir ${miroir}: ${err.message}`);
@@ -169,63 +134,69 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
     }
 
     const intervalleAdaptatif = Math.max(8, Math.ceil(distanceTrajetKm / 25));
-
     const echantillons = echantillonnerTrajet(trajet, intervalleAdaptatif);
 
     const resultatsParCategorie = {};
-    categoriesActives.forEach(catId => { resultatsParCategorie[catId] = []; });
-
     const dejaVus = new Set();
 
     const TAILLE_LOT = 3;
     const DELAI_ENTRE_LOTS_MS = 400;
 
-    for (let debut = 0; debut < echantillons.length; debut += TAILLE_LOT) {
+    for (const catId of categoriesActives) {
 
-        if (rechercheAnnulee) {
-            return { erreur: "Recherche annulée." };
-        }
+        const categorie = CATEGORIES_POI[catId];
 
-        const lot = echantillons.slice(debut, debut + TAILLE_LOT);
-        const fin = Math.min(debut + TAILLE_LOT, echantillons.length);
+        if (!categorie)
+            continue;
 
-        onProgress?.(`Recherche des points ${debut + 1} à ${fin} / ${echantillons.length}`);
+        resultatsParCategorie[catId] = [];
 
-        const resultatsLot = await Promise.all(
-            lot.map(point => chercherPoiAutourPoint(point, rayonKm * 1000, categoriesActives))
-        );
+        for (let debut = 0; debut < echantillons.length; debut += TAILLE_LOT) {
 
-        resultatsLot.forEach(pois => {
+            if (rechercheAnnulee) {
+                return { erreur: "Recherche annulée." };
+            }
 
-            pois.forEach(poi => {
+            const lot = echantillons.slice(debut, debut + TAILLE_LOT);
+            const fin = Math.min(debut + TAILLE_LOT, echantillons.length);
 
-                const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
+            onProgress?.(`${categorie.label} — points ${debut + 1} à ${fin} / ${echantillons.length}`);
 
-                if (dejaVus.has(cle))
-                    return;
+            const resultatsLot = await Promise.all(
+                lot.map(point => chercherPoiAutourPoint(point, rayonKm * 1000, categorie.overpassTags))
+            );
 
-                dejaVus.add(cle);
+            resultatsLot.forEach(pois => {
 
-                const distanceMin = Math.min(...echantillons.map(e =>
-                    calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
-                ));
+                pois.forEach(poi => {
 
-                resultatsParCategorie[poi.catId]?.push({ ...poi, distanceKm: distanceMin });
+                    const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
+
+                    if (dejaVus.has(cle))
+                        return;
+
+                    dejaVus.add(cle);
+
+                    const distanceMin = Math.min(...echantillons.map(e =>
+                        calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
+                    ));
+
+                    resultatsParCategorie[catId].push({ ...poi, distanceKm: distanceMin });
+
+                });
 
             });
 
-        });
+            if (fin < echantillons.length) {
+                await new Promise(resolve => setTimeout(resolve, DELAI_ENTRE_LOTS_MS));
+            }
 
-        if (fin < echantillons.length) {
-            await new Promise(resolve => setTimeout(resolve, DELAI_ENTRE_LOTS_MS));
         }
 
-    }
-
-    categoriesActives.forEach(catId => {
         resultatsParCategorie[catId].sort((a, b) => a.distanceKm - b.distanceKm);
         resultatsParCategorie[catId] = resultatsParCategorie[catId].slice(0, 15);
-    });
+
+    }
 
     return { trajet: trajetComplet, resultatsParCategorie };
 
