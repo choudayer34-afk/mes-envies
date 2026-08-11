@@ -4422,7 +4422,10 @@ function initPlatformer() {
         document.getElementById("platBtnRight")?.addEventListener(evt, () => definirTouche("droite", false));
     });
 
-    document.getElementById("platBtnA")?.addEventListener("click", sauter);
+    ["mousedown", "touchstart"].forEach(evt => {
+        document.getElementById("platBtnA")?.addEventListener(evt, (e) => { e.preventDefault(); sauter(); });
+    });
+
     document.getElementById("platBtnStart")?.addEventListener("click", demarrerPlatformer);
     canvas.addEventListener("pointerdown", sauter);
 
