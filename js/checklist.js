@@ -2,8 +2,9 @@ import {
     addChecklistItem, toggleChecklistItem, toggleChecklistItemForPersonne, deleteChecklistItem,
     getChecklistTemplates, getEnvies, getChecklistCategories,
     getChecklistLibrary, getPersonnes, createPersonne,
-    updateChecklistItemAssignment, getMagasins, rememberMagasin
+    updateChecklistItemAssignment, getMagasins, rememberMagasin, updateChecklistItem
 } from "./storage.js";
+
 import { removePersonneFromChecklistItem } from "./storage.js";
 import { setChecklistItems } from "./storage.js";
 
@@ -19,6 +20,7 @@ let currentAssignedTo = [];
 let currentAssignItemId = null;
 let viewMode = "categorie";
 let currentBulkCategorieId = null;
+let checklistItemEnCoursEdition = null;
 
 
 export function renderChecklist(envie) {
@@ -165,6 +167,19 @@ export function groupByCategorie(items, categories) {
 
 }
 
+function ouvrirEditionChecklistItem(envieId, item) {
+
+    checklistItemEnCoursEdition = { envieId, itemId: item.id };
+
+    document.getElementById("checklistEditTexteInput").value = item.texte;
+    document.getElementById("checklistEditMagasinInput").value = item.magasin || "";
+    document.getElementById("checklistEditUrlInput").value = item.url || "";
+
+    document.getElementById("checklistEditItemModal")?.classList.remove("hidden");
+
+}
+
+
 function createChecklistRow(item, envie, personneContext = null) {
 
     const row = document.createElement("div");
@@ -191,10 +206,12 @@ function createChecklistRow(item, envie, personneContext = null) {
 
             </span>
         </label>
-        ${item.url ? `<a href="${item.url}" target="_blank" class="iconSmallButton" onclick="event.stopPropagation()">🔗</a>` : ""}
+            ${item.url ? `<a href="${item.url}" target="_blank" class="iconSmallButton" onclick="event.stopPropagation()">🔗</a>` : ""}
+        <button class="iconSmallButton editChecklistItemButton" title="Modifier">✏️</button>
         <button class="assignItemButton" title="Attribuer">👤</button>
         <button class="deleteChecklistButton" title="${personneContext ? "Retirer pour cette personne" : "Supprimer"}">🗑️</button>
     `;
+
 
       row.querySelector("input").addEventListener("change", (event) => {
 
@@ -214,6 +231,11 @@ function createChecklistRow(item, envie, personneContext = null) {
     row.querySelector(".assignItemButton").addEventListener("click", (event) => {
         event.stopPropagation();
         openAssignModal(envie.id, item);
+    });
+
+    row.querySelector(".editChecklistItemButton").addEventListener("click", (event) => {
+        event.stopPropagation();
+        ouvrirEditionChecklistItem(envie.id, item);
     });
 
     row.querySelector(".deleteChecklistButton").addEventListener("click", (event) => {
@@ -404,6 +426,60 @@ const labelPourQui = document.getElementById("checklistPersonnesSelector")?.prev
         openEnvie(currentChecklistEnvieId);
 
     });
+    
+        document.getElementById("cancelChecklistEditItem")?.addEventListener("click", () => {
+        document.getElementById("checklistEditItemModal")?.classList.add("hidden");
+    });
+
+    document.getElementById("saveChecklistEditItem")?.addEventListener("click", () => {
+
+        if (!checklistItemEnCoursEdition)
+            return;
+
+        const texte = document.getElementById("checklistEditTexteInput").value.trim();
+
+        if (!texte) {
+            showToast("Le texte ne peut pas être vide");
+            return;
+        }
+
+        const magasin = document.getElementById("checklistEditMagasinInput").value.trim() || null;
+        const url = document.getElementById("checklistEditUrlInput").value.trim() || null;
+
+        updateChecklistItem(checklistItemEnCoursEdition.envieId, checklistItemEnCoursEdition.itemId, { texte, magasin, url });
+
+        if (magasin) {
+            rememberMagasin(magasin);
+        }
+
+        document.getElementById("checklistEditItemModal")?.classList.add("hidden");
+
+        const envie = getEnvies().find(e => e.id === checklistItemEnCoursEdition.envieId);
+
+        if (envie) {
+            renderChecklist(envie);
+        }
+
+        showToast("✓ Élément modifié");
+
+        checklistItemEnCoursEdition = null;
+
+    });
+
+    const checklistEditMagasinInput = document.getElementById("checklistEditMagasinInput");
+
+    checklistEditMagasinInput?.addEventListener("input", () => {
+        renderSuggestionsMagasinChecklist(checklistEditMagasinInput.value, "checklistEditMagasinInput", "checklistEditMagasinSuggestions");
+    });
+
+    checklistEditMagasinInput?.addEventListener("focus", () => {
+        renderSuggestionsMagasinChecklist(checklistEditMagasinInput.value, "checklistEditMagasinInput", "checklistEditMagasinSuggestions");
+    });
+
+    checklistEditMagasinInput?.addEventListener("blur", () => {
+        setTimeout(() => document.getElementById("checklistEditMagasinSuggestions")?.classList.add("hidden"), 150);
+    });
+
 
     document.querySelectorAll('#checklistViewToggle .itemTypeChip').forEach(chip => {
 
@@ -507,9 +583,10 @@ function refreshCreationSelector() {
 
 }
 
-function renderSuggestionsMagasinChecklist(filtre) {
 
-    const container = document.getElementById("checklistMagasinSuggestions");
+function renderSuggestionsMagasinChecklist(filtre, inputId = "checklistMagasinInput", containerId = "checklistMagasinSuggestions") {
+
+    const container = document.getElementById(containerId);
 
     if (!container)
         return;
@@ -535,7 +612,7 @@ function renderSuggestionsMagasinChecklist(filtre) {
 
             event.preventDefault();
 
-            document.getElementById("checklistMagasinInput").value = resultats[i].nom;
+            document.getElementById(inputId).value = resultats[i].nom;
             container.classList.add("hidden");
 
         });
@@ -543,6 +620,7 @@ function renderSuggestionsMagasinChecklist(filtre) {
     });
 
 }
+
 
 function saveChecklistItem() {
 
