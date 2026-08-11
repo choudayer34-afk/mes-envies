@@ -3,14 +3,14 @@ import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion } from "./envie.js";
 import { getModeActif, basculerMode } from "./storage.js";
-import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre } from "./storage.js";
+import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem } from "./storage.js";
 import { makeRowDraggable } from "./dragdrop.js";
 
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
 let modeReduitGlobal = false;
 const cartesEtatIndividuel = new Map();
-
+let vueAchats = "projet";
 function isUntriaged(envie) {
 
     if (envie.voyageId)
@@ -138,7 +138,7 @@ function renderHomeSections() {
     } else {
         document.getElementById("actionSection")?.classList.add("hidden");
     }
-
+renderAchatsMaison();
     renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
     renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
     renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
@@ -553,6 +553,176 @@ function renderRechercheAccueilResultats(requete) {
             document.getElementById("rechercheAccueilInput").value = "";
 
             openEnvie(resultats[i].id, null);
+
+        });
+
+    });
+
+}
+
+function calculerAchatsMaison() {
+
+    const conteneursMaison = getEnvies().filter(e => e.contexte === "maison" && isContainer(e.categorie));
+
+    const items = [];
+
+    conteneursMaison.forEach(conteneur => {
+
+        const taches = [conteneur, ...getEnvies().filter(e => e.voyageId === conteneur.id)];
+
+        taches.forEach(tache => {
+
+            (tache.checklist || []).forEach(item => {
+
+                if (!item.checked) {
+
+                    items.push({
+                        envieId: tache.id,
+                        itemId: item.id,
+                        texte: item.texte,
+                        magasin: item.magasin || null,
+                        projetTitre: conteneur.titre,
+                        projetEmoji: getCategorieById(conteneur.categorie)?.emoji || "🛠️"
+                    });
+
+                }
+
+            });
+
+        });
+
+    });
+
+    return items;
+
+}
+
+function creerGroupeAchat(titreGroupe, items, infoComplementaireType) {
+
+    const bloc = document.createElement("div");
+    bloc.className = "actionGroupCard";
+
+    bloc.innerHTML = `
+        <div class="actionGroupTitre">${titreGroupe} (${items.length})</div>
+        ${items.map(item => `
+            <label class="checkLabel achatCheckLabel" data-envie-id="${item.envieId}" data-item-id="${item.itemId}" style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+                <input type="checkbox">
+                <span>${item.texte} <small class="assignBadge">${infoComplementaireType === "magasin" ? (item.magasin || "Sans magasin précisé") : item.projetTitre}</small></span>
+            </label>
+        `).join("")}
+    `;
+
+    bloc.querySelectorAll(".achatCheckLabel input").forEach(checkbox => {
+
+        checkbox.addEventListener("change", (event) => {
+
+            const label = event.target.closest(".achatCheckLabel");
+
+            toggleChecklistItem(label.dataset.envieId, label.dataset.itemId);
+
+            setTimeout(renderAchatsMaison, 300);
+
+        });
+
+    });
+
+    return bloc;
+
+}
+
+export function renderAchatsMaison() {
+
+    const section = document.getElementById("achatsSection");
+
+    if (!section)
+        return;
+
+    if (getModeActif() !== "maison") {
+        section.classList.add("hidden");
+        return;
+    }
+
+    const items = calculerAchatsMaison();
+
+    if (items.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    section.classList.remove("hidden");
+
+    const header = document.getElementById("achatsHeaderTitre");
+
+    if (header) {
+        header.textContent = `🛒 À acheter (${items.length})`;
+    }
+
+    const container = document.getElementById("achatsContenu");
+    container.innerHTML = "";
+
+    if (vueAchats === "projet") {
+
+        const groupes = new Map();
+
+        items.forEach(item => {
+
+            if (!groupes.has(item.projetTitre)) {
+                groupes.set(item.projetTitre, { emoji: item.projetEmoji, items: [] });
+            }
+
+            groupes.get(item.projetTitre).items.push(item);
+
+        });
+
+        groupes.forEach((groupe, titre) => {
+            container.appendChild(creerGroupeAchat(`${groupe.emoji} ${titre}`, groupe.items, "magasin"));
+        });
+
+    } else {
+
+        const groupes = new Map();
+
+        items.forEach(item => {
+
+            const cle = item.magasin || "Sans magasin précisé";
+
+            if (!groupes.has(cle)) {
+                groupes.set(cle, []);
+            }
+
+            groupes.get(cle).push(item);
+
+        });
+
+        const clesTriees = [...groupes.keys()].sort((a, b) => {
+
+            if (a === "Sans magasin précisé") return 1;
+            if (b === "Sans magasin précisé") return -1;
+
+            return a.localeCompare(b);
+
+        });
+
+        clesTriees.forEach(cle => {
+            container.appendChild(creerGroupeAchat(`🏬 ${cle}`, groupes.get(cle), "projet"));
+        });
+
+    }
+
+}
+
+export function initAchatsMaison() {
+
+    document.querySelectorAll("#achatsVueToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            document.querySelectorAll("#achatsVueToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            vueAchats = chip.dataset.vue;
+
+            renderAchatsMaison();
 
         });
 
