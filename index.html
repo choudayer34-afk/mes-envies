@@ -1111,14 +1111,20 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="addBoisPlancheButton" class="secondaryButton" style="margin-top:8px;">
             ➕ Ajouter une planche
         </button>
-<label class="fieldTitle" style="margin-top:20px;">Planche(s) brute(s) à découper</label>
+<label class="fieldTitle" style="margin-top:20px;">Planches brutes disponibles</label>
+<div id="boisStocksListe"></div>
 
 <div class="peintureAddRow" style="margin-top:8px;">
     <input type="number" id="boisStockLongueur" placeholder="Longueur (cm)" step="0.1" min="0" class="numberInput">
     <input type="number" id="boisStockLargeur" placeholder="Largeur (cm)" step="0.1" min="0" class="numberInput">
+    <input type="number" id="boisStockQuantite" placeholder="Qté" min="1" value="1" class="numberInput">
 </div>
 
-<button id="calculerDecoupeButton" class="secondaryButton" style="margin-top:8px;">
+<button id="addBoisStockButton" class="secondaryButton" style="margin-top:8px;">
+    ➕ Ajouter ce modèle
+</button>
+
+<button id="calculerDecoupeButton" class="secondaryButton" style="margin-top:14px;">
     🧩 Calculer la découpe
 </button>
 
