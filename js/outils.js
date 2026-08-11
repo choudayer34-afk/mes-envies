@@ -4465,8 +4465,10 @@ function demarrerPlatformer() {
 
     platState = {
         touches: platState?.touches || { gauche: false, droite: false },
-        joueur: { x: 20, y: PLAT_SOL - PLAT_HAUTEUR_JOUEUR, largeur: PLAT_LARGEUR_JOUEUR, hauteur: PLAT_HAUTEUR_JOUEUR, vy: 0, onGround: true, regardeDroite: true },
-        camera: 0,
+                    joueur: { x: 20, y: PLAT_SOL - PLAT_HAUTEUR_JOUEUR, largeur: PLAT_LARGEUR_JOUEUR, hauteur: PLAT_HAUTEUR_JOUEUR, vx: 0, vy: 0, onGround: true, regardeDroite: true },
+        marcheTimer: 0,
+
+                            camera: 0,
         pieces: PLAT_NIVEAU.pieces.map(p => ({ ...p, ramassee: false })),
         ennemis: PLAT_NIVEAU.ennemis.map(e => ({ ...e, vivant: true })),
         score: 0,
@@ -4516,16 +4518,26 @@ function bouclerPlatformer(timestamp) {
     if (!s.gameOver) {
 
         if (s.touches.gauche) {
-            j.x -= 2.2;
+        const ACCEL = 0.5;
+        const FRICTION = 0.82;
+        const VITESSE_MAX = 2.6;
+
+        if (s.touches.gauche) {
+            j.vx = Math.max(j.vx - ACCEL, -VITESSE_MAX);
             j.regardeDroite = false;
-        }
-
-        if (s.touches.droite) {
-            j.x += 2.2;
+        } else if (s.touches.droite) {
+            j.vx = Math.min(j.vx + ACCEL, VITESSE_MAX);
             j.regardeDroite = true;
+        } else {
+            j.vx *= FRICTION;
+            if (Math.abs(j.vx) < 0.05) j.vx = 0;
         }
 
+        j.x += j.vx;
         j.x = Math.max(0, Math.min(j.x, PLAT_NIVEAU.longueur - j.largeur));
+
+        s.marcheTimer += Math.abs(j.vx) > 0.1 ? 1 : 0;
+
 
         j.vy = Math.min(j.vy + PLAT_GRAVITE, PLAT_VITESSE_MAX_CHUTE);
 
@@ -4624,7 +4636,9 @@ function bouclerPlatformer(timestamp) {
             terminerPlatformer(true);
         }
 
-        s.camera = Math.max(0, Math.min(j.x - canvas.width / 3, PLAT_NIVEAU.longueur - canvas.width));
+        const cibleCamera = Math.max(0, Math.min(j.x - canvas.width / 3, PLAT_NIVEAU.longueur - canvas.width));
+        s.camera += (cibleCamera - s.camera) * 0.15;
+
 
     }
 
@@ -4684,17 +4698,59 @@ function bouclerPlatformer(timestamp) {
     platCtx.lineTo(PLAT_NIVEAU.drapeauX - s.camera + 4, PLAT_SOL - 44);
     platCtx.fill();
 
-    const clignote = j.vy && timestamp < (s.invulnerableJusqua || 0) && Math.floor(timestamp / 100) % 2 === 0;
+    const clignote = timestamp < (s.invulnerableJusqua || 0) && Math.floor(timestamp / 100) % 2 === 0;
 
     if (!clignote) {
-        platCtx.fillStyle = "#0F380F";
-        platCtx.fillRect(j.x - s.camera, j.y, j.largeur, j.hauteur);
+        const marcheFrame = Math.floor(s.marcheTimer / 8) % 2;
+        dessinerJoueur(platCtx, j, s.camera, marcheFrame);
     }
+
 
     if (s.gameOver) {
         return;
     }
 
     platAnimId = requestAnimationFrame(bouclerPlatformer);
+
+}
+
+function dessinerJoueur(ctx, j, cameraX, marcheFrame) {
+
+    const x = j.x - cameraX;
+    const y = j.y;
+    const largeur = j.largeur;
+    const hauteur = j.hauteur;
+
+    ctx.save();
+
+    if (!j.regardeDroite) {
+        ctx.translate(x + largeur, y);
+        ctx.scale(-1, 1);
+    } else {
+        ctx.translate(x, y);
+    }
+
+    ctx.fillStyle = "#306230";
+
+    if (marcheFrame === 0) {
+        ctx.fillRect(1, hauteur - 4, 3, 4);
+        ctx.fillRect(largeur - 4, hauteur - 4, 3, 4);
+    } else {
+        ctx.fillRect(0, hauteur - 4, 3, 3);
+        ctx.fillRect(largeur - 3, hauteur - 5, 3, 5);
+    }
+
+    ctx.fillStyle = "#0F380F";
+    ctx.fillRect(1, hauteur * 0.4, largeur - 2, hauteur * 0.45);
+
+    ctx.fillStyle = "#8BAC0F";
+    ctx.beginPath();
+    ctx.arc(largeur / 2, hauteur * 0.28, largeur * 0.42, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#4A4A2E";
+    ctx.fillRect(0, hauteur * 0.05, largeur, hauteur * 0.18);
+
+    ctx.restore();
 
 }
