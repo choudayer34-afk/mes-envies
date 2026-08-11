@@ -6,6 +6,8 @@ import { fusionnerActiviteTypesParDefaut, fusionnerCriteresVoyageParDefaut } fro
 
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
+import { isContainer } from "./envie.js";
+import { computeContainerStatus } from "./progress.js";
 
 import {
     getActiviteTypes, createActiviteType, updateActiviteType, deleteActiviteType, moveActiviteType,
@@ -115,6 +117,7 @@ export function initAdmin() {
             if (cible === "adminActiviteTypesModal") renderActiviteTypesList();
             if (cible === "adminCriteresVoyageModal") renderCriteresVoyageList();
             if (cible === "nouveautesModal") renderNouveautes();
+            if (cible === "rapportModal") renderRapport();
 
         });
 
@@ -246,6 +249,7 @@ export function initAdmin() {
     });
 
 
+    initRapport();
 
 
 }
@@ -778,4 +782,130 @@ function renderCriteresVoyageList() {
 
 }
 
+let rapportAnneeSelectionnee = new Date().getFullYear();
+
+function calculerKpi(annee) {
+
+    const voyagesTermines = getEnvies().filter(e =>
+        e.contexte !== "maison" &&
+        isContainer(e.categorie) &&
+        computeContainerStatus(e).statut === "termine"
+    ).filter(v => {
+
+        const dateRef = v.date?.end || v.date?.start;
+
+        if (!dateRef)
+            return false;
+
+        return new Date(dateRef).getFullYear() === annee;
+
+    });
+
+    const joursCumules = voyagesTermines.reduce((total, v) => {
+
+        if (!v.date?.start)
+            return total;
+
+        const debut = new Date(v.date.start);
+        const fin = v.date.end ? new Date(v.date.end) : debut;
+        const jours = Math.round((fin - debut) / (1000 * 60 * 60 * 24)) + 1;
+
+        return total + jours;
+
+    }, 0);
+
+    const projetsMaisonTermines = getEnvies().filter(e =>
+        e.contexte === "maison" &&
+        isContainer(e.categorie) &&
+        computeContainerStatus(e).statut === "termine"
+    ).filter(p => {
+
+        const taches = [p, ...getEnvies().filter(e => e.voyageId === p.id)];
+
+        const dernierRealiseAt = taches
+            .filter(t => t.realise && t.realiseAt)
+            .reduce((max, t) => Math.max(max, t.realiseAt), 0);
+
+        if (!dernierRealiseAt)
+            return false;
+
+        return new Date(dernierRealiseAt).getFullYear() === annee;
+
+    });
+
+    return {
+        nombreVoyages: voyagesTermines.length,
+        joursCumules,
+        nombreProjetsMaison: projetsMaisonTermines.length
+    };
+
+}
+
+function creerLigneKpi(label, valeurActuelle, valeurPrecedente) {
+
+    const difference = valeurActuelle - valeurPrecedente;
+
+    let indicateur = "→ stable";
+
+    if (valeurPrecedente === 0 && valeurActuelle > 0) {
+
+        indicateur = "🆕";
+
+    } else if (difference > 0) {
+
+        const pourcentage = valeurPrecedente > 0 ? Math.round((difference / valeurPrecedente) * 100) : 100;
+        indicateur = `↑ +${pourcentage}%`;
+
+    } else if (difference < 0) {
+
+        const pourcentage = valeurPrecedente > 0 ? Math.round((Math.abs(difference) / valeurPrecedente) * 100) : 100;
+        indicateur = `↓ -${pourcentage}%`;
+
+    }
+
+    return `
+        <div class="templateRow">
+            <div class="templateRowNom">${label}</div>
+            <div style="text-align:right;">
+                <div style="font-size:18px;font-weight:700;">${valeurActuelle}</div>
+                <div style="font-size:12px;color:var(--color-text-light);">${indicateur} (${valeurPrecedente} en ${rapportAnneeSelectionnee - 1})</div>
+            </div>
+        </div>
+    `;
+
+}
+
+function renderRapport() {
+
+    document.getElementById("rapportAnneeLabel").textContent = rapportAnneeSelectionnee;
+
+    const actuel = calculerKpi(rapportAnneeSelectionnee);
+    const precedent = calculerKpi(rapportAnneeSelectionnee - 1);
+
+    const container = document.getElementById("rapportContenu");
+
+    container.innerHTML = `
+        <div class="fieldTitle" style="margin-top:10px;">🧳 Voyages</div>
+        ${creerLigneKpi("Voyages terminés", actuel.nombreVoyages, precedent.nombreVoyages)}
+        ${creerLigneKpi("Jours de voyage cumulés", actuel.joursCumules, precedent.joursCumules)}
+
+        <div class="fieldTitle" style="margin-top:20px;">🛠️ Maison</div>
+        ${creerLigneKpi("Projets terminés", actuel.nombreProjetsMaison, precedent.nombreProjetsMaison)}
+    `;
+
+}
+
+function initRapport() {
+
+    document.getElementById("rapportAnneePrecedente")?.addEventListener("click", () => {
+        rapportAnneeSelectionnee--;
+        renderRapport();
+    });
+
+    document.getElementById("rapportAnneeSuivante")?.addEventListener("click", () => {
+        rapportAnneeSelectionnee++;
+        renderRapport();
+    });
+
+}
 
