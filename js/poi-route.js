@@ -158,34 +158,48 @@ export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categori
 
     const dejaVus = new Set();
 
-    for (let i = 0; i < echantillons.length; i++) {
+    const TAILLE_LOT = 3;
+    const DELAI_ENTRE_LOTS_MS = 400;
+
+    for (let debut = 0; debut < echantillons.length; debut += TAILLE_LOT) {
 
         if (rechercheAnnulee) {
             return { erreur: "Recherche annulée." };
         }
 
-        onProgress?.(`Recherche autour du point ${i + 1} / ${echantillons.length}`);
+        const lot = echantillons.slice(debut, debut + TAILLE_LOT);
+        const fin = Math.min(debut + TAILLE_LOT, echantillons.length);
 
-        const pois = await chercherPoiAutourPoint(echantillons[i], rayonKm * 1000, categoriesActives);
+        onProgress?.(`Recherche des points ${debut + 1} à ${fin} / ${echantillons.length}`);
 
-        pois.forEach(poi => {
+        const resultatsLot = await Promise.all(
+            lot.map(point => chercherPoiAutourPoint(point, rayonKm * 1000, categoriesActives))
+        );
 
-            const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
+        resultatsLot.forEach(pois => {
 
-            if (dejaVus.has(cle))
-                return;
+            pois.forEach(poi => {
 
-            dejaVus.add(cle);
+                const cle = `${poi.nom}_${poi.lat.toFixed(3)}_${poi.lon.toFixed(3)}`;
 
-            const distanceMin = Math.min(...echantillons.map(e =>
-                calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
-            ));
+                if (dejaVus.has(cle))
+                    return;
 
-            resultatsParCategorie[poi.catId]?.push({ ...poi, distanceKm: distanceMin });
+                dejaVus.add(cle);
+
+                const distanceMin = Math.min(...echantillons.map(e =>
+                    calculerDistanceKm(e.lat, e.lon, poi.lat, poi.lon)
+                ));
+
+                resultatsParCategorie[poi.catId]?.push({ ...poi, distanceKm: distanceMin });
+
+            });
 
         });
 
-        await new Promise(resolve => setTimeout(resolve, 250));
+        if (fin < echantillons.length) {
+            await new Promise(resolve => setTimeout(resolve, DELAI_ENTRE_LOTS_MS));
+        }
 
     }
 
