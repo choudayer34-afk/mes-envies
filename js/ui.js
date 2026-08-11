@@ -132,13 +132,13 @@ function renderHomeSections() {
         return dateB.localeCompare(dateA);
     });
 
-
+renderAchatsMaison();
  if (modeActif === "maison") {
         renderCollapsibleSection("actionSection", "actionContainer", "🔔 En attente d'action", calculerGroupesActionsMaison(), createActionGroupCard, true);
     } else {
         document.getElementById("actionSection")?.classList.add("hidden");
     }
-renderAchatsMaison();
+
     renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
     renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
     renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
