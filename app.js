@@ -82,7 +82,7 @@ import { initLocation } from "./js/location.js";
 import { closeFiche, initAccordions } from "./js/envie.js";
 import { initAdmin } from "./js/admin.js";
 import { initFicheDelete } from "./js/envie.js";
-    
+    import { afficherVersionCache } from "./js/ui.js";
 const APP = {
     name: "EnVie",
     version: "0.3.0",
@@ -121,7 +121,7 @@ function init() {
    initRechercheAccueil();
         initIdeesMenu();
     initModeBascule();
-
+afficherVersionCache();
  
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
