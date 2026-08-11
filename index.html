@@ -557,6 +557,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </div>
 
+<div id="rapportModal" class="modal-overlay hidden">
+    <div class="modal">
+
+        <button class="backButton adminSousRetour">← Retour</button>
+
+        <h2>📊 Rapport annuel</h2>
+
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin:16px 0;">
+            <button id="rapportAnneePrecedente" class="iconSmallButton">◀</button>
+            <span id="rapportAnneeLabel" style="font-size:20px;font-weight:700;"></span>
+            <button id="rapportAnneeSuivante" class="iconSmallButton">▶</button>
+        </div>
+
+        <div id="rapportContenu"></div>
+
+    </div>
+</div>
 
 <div id="etapeFinderModal" class="modal-overlay hidden">
 
@@ -1412,6 +1429,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="adminTuileEmoji">🔑</span>
                 <span class="adminTuileLabel">Mon compte</span>
             </button>
+
+<button class="adminTuile" data-modal="rapportModal">
+    <span class="adminTuileEmoji">📊</span>
+    <span class="adminTuileLabel">Rapport</span>
+</button>
 
             <button class="adminTuile" data-modal="nouveautesModal">
                 <span class="adminTuileEmoji">🆕</span>
