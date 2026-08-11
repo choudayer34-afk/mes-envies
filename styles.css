@@ -261,12 +261,14 @@ main{
 #breakoutModal,#taquinModal,#demineurModal,
 #memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal,
 #agendaLocalModal,
-#adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
-#checklistEditItemModal
+#adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal
 {
     z-index:2100;
 }
 
+#checklistEditItemModal{
+    z-index:2200;
+}
 
 
 .modal{
