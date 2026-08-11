@@ -8,6 +8,9 @@ import { makeRowDraggable } from "./dragdrop.js";
 
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
+let modeReduitGlobal = false;
+const cartesEtatIndividuel = new Map();
+
 function isUntriaged(envie) {
 
     if (envie.voyageId)
@@ -72,6 +75,11 @@ function renderHomeSections() {
     const modeActif = getModeActif();
 
     console.log("Mode actif: " + modeActif);
+    const btnToggle = document.getElementById("btnToggleReductionGlobale");
+
+    if (btnToggle) {
+        btnToggle.textContent = modeReduitGlobal ? "🔼 Tout développer" : "🔽 Tout réduire";
+    }
     console.log("Total envies (avant filtre contexte): " + getEnvies().length);
 
     const envies = getEnvies().filter(e => e.contexte === modeActif);
@@ -419,6 +427,19 @@ function createActionGroupCard(groupe) {
 
 }
 
+export function initToggleReduction() {
+
+    document.getElementById("btnToggleReductionGlobale")?.addEventListener("click", () => {
+
+        modeReduitGlobal = !modeReduitGlobal;
+        cartesEtatIndividuel.clear();
+
+        renderEnvies();
+
+    });
+
+}
+
 function createEnvieCard(envie) {
 
     const card = document.createElement("div");
@@ -429,9 +450,12 @@ function createEnvieCard(envie) {
 
     });
 
-      let statutHtml = "";
+    const estContainer = isContainer(envie.categorie);
+    const estReduite = estContainer && (cartesEtatIndividuel.has(envie.id) ? cartesEtatIndividuel.get(envie.id) : modeReduitGlobal);
 
-    if (isContainer(envie.categorie)) {
+    let statutHtml = "";
+
+    if (estContainer) {
 
         const { statut, pourcentage, realises, total } = computeContainerStatus(envie);
 
@@ -469,13 +493,16 @@ function createEnvieCard(envie) {
     }
 
 
-
-  if (isContainer(envie.categorie) && envie.photoCouverture) {
+    if (estContainer && envie.photoCouverture && !estReduite) {
         card.style.backgroundImage = `linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.45)), url(${envie.photoCouverture})`;
         card.classList.add("envie-card-avec-photo");
         const pos = envie.photoCouverturePosition || { x: 50, y: 50 };
         card.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
     }
+
+    const boutonReduireHtml = estContainer
+        ? `<button class="envieReduireButton" title="${estReduite ? "Développer" : "Réduire"}">${estReduite ? "▸" : "▾"}</button>`
+        : "";
 
     card.innerHTML = `
         <div class="envieHeader">
@@ -487,17 +514,29 @@ function createEnvieCard(envie) {
                 ${getCategorieById(envie.categorie)?.emoji || "💡"}
                 ${envie.titre}
             </div>
+            ${boutonReduireHtml}
         </div>
         <div class="envieCategory">
             ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
-${statutHtml}
-        ${calculerPucesMaison(envie)}
-        ${calculerNomsTachesRestantes(envie)}
+        ${statutHtml}
+        ${estReduite ? "" : calculerPucesMaison(envie)}
+        ${estReduite ? "" : calculerNomsTachesRestantes(envie)}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
         </div>`;
+
+    card.querySelector(".envieReduireButton")?.addEventListener("click", (event) => {
+
+        event.stopPropagation();
+
+        const etatActuel = cartesEtatIndividuel.has(envie.id) ? cartesEtatIndividuel.get(envie.id) : modeReduitGlobal;
+        cartesEtatIndividuel.set(envie.id, !etatActuel);
+
+        renderEnvies();
+
+    });
 
     card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
