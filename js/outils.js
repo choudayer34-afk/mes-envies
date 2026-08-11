@@ -3291,6 +3291,28 @@ function initDemineur() {
 
     });
 
+    canvas.addEventListener("contextmenu", (event) => {
+
+        event.preventDefault();
+
+        if (!demineurState)
+            return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((event.clientX - rect.left) / rect.width * canvas.width / (canvas.width / demineurState.cols));
+        const y = Math.floor((event.clientY - rect.top) / rect.height * canvas.height / (canvas.height / demineurState.rows));
+
+        if (x < 0 || x >= demineurState.cols || y < 0 || y >= demineurState.rows)
+            return;
+
+        demineurState.curseurX = x;
+        demineurState.curseurY = y;
+
+        marquerCurseur();
+
+    });
+    
+
     document.addEventListener("keydown", (event) => {
 
         if (document.getElementById("demineurModal")?.classList.contains("hidden"))
