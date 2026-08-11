@@ -27,8 +27,25 @@ import { getFoyerId } from "./auth.js";
 import { desactiverPartagePublic } from "./storage.js";
 
 let currentTemplateId = null;
-let currentItemType = "fixe";
+let currentItemParJour = false;
+let currentItemParPersonne = false;
+
 let currentItemCategorieId = null;
+
+function formatLabelTemplateItem(item) {
+
+    const labels = [];
+
+    if (item.parJour) labels.push("📅 par jour");
+    if (item.parPersonne) labels.push("👤 par personne");
+
+    if (labels.length === 0) {
+        return item.quantite > 1 ? `${item.quantite}×` : "";
+    }
+
+    return `${item.quantite}× ${labels.join(" et ")}`;
+
+}
 
 export function initAdmin() {
 
@@ -167,20 +184,24 @@ export function initAdmin() {
 
     });
 
-    document.querySelectorAll(".itemTypeChip").forEach(chip => {
+    document.querySelectorAll(".templateFlagChip").forEach(chip => {
 
         chip.addEventListener("click", () => {
 
-            currentItemType = chip.dataset.type;
+            chip.classList.toggle("active");
 
-            document.querySelectorAll(".itemTypeChip")
-                .forEach(c => c.classList.remove("active"));
+            if (chip.dataset.flag === "parJour") {
+                currentItemParJour = chip.classList.contains("active");
+            }
 
-            chip.classList.add("active");
+            if (chip.dataset.flag === "parPersonne") {
+                currentItemParPersonne = chip.classList.contains("active");
+            }
 
         });
 
     });
+
 
     document.getElementById("templateItemCategorie").addEventListener("change", (event) => {
         currentItemCategorieId = event.target.value || null;
@@ -229,7 +250,8 @@ export function initAdmin() {
         if (lignes.length === 0 || !currentTemplateId)
             return;
 
-        addMultipleTemplateItems(currentTemplateId, lignes, currentItemCategorieId, currentItemType, quantite);
+             addMultipleTemplateItems(currentTemplateId, lignes, currentItemCategorieId, currentItemParJour, currentItemParPersonne, quantite);
+
 
         input.value = "";
         quantiteInput.value = 1;
@@ -238,13 +260,15 @@ export function initAdmin() {
 
         if (template) {
 
-            const optimisticItems = lignes.map(texte => ({
+                   const optimisticItems = lignes.map(texte => ({
                 id: crypto.randomUUID(),
                 texte,
-                type: currentItemType,
+                parJour: currentItemParJour,
+                parPersonne: currentItemParPersonne,
                 categorieId: currentItemCategorieId,
                 quantite
             }));
+
 
             renderTemplateItemsFromList([...(template.items || []), ...optimisticItems]);
 
@@ -262,11 +286,7 @@ function renderTemplateItemsFromList(items) {
     const container = document.getElementById("templateItemsList");
     const categories = getChecklistCategories();
 
-    const typeLabel = {
-        fixe: item => item.quantite > 1 ? `${item.quantite}×` : "",
-        parPersonne: item => `${item.quantite}× 👤 par personne`,
-        parJour: item => `${item.quantite}× 📅 par jour`
-    };
+  
 
     container.innerHTML = "";
 
@@ -297,7 +317,7 @@ function renderTemplateItemsFromList(items) {
             row.innerHTML = `
                 <span class="checkLabel">
                     ${item.texte}
-                    <small>${typeLabel[item.type](item)}</small>
+                    <small>${formatLabelTemplateItem(item)}</small> 
                 </span>
                 <button class="deleteChecklistButton">🗑️</button>
             `;
@@ -379,7 +399,10 @@ function renderTemplatesList() {
 function openTemplateEdit(id) {
 
     currentTemplateId = id;
-    currentItemType = "fixe";
+       currentItemParJour = false;
+    currentItemParPersonne = false;
+    document.querySelectorAll(".templateFlagChip").forEach(c => c.classList.remove("active"));
+
     currentItemCategorieId = null;
 
     const template = getTemplate(id);
@@ -419,11 +442,7 @@ function renderTemplateItems() {
 
     const categories = getChecklistCategories();
 
-    const typeLabel = {
-        fixe: item => item.quantite > 1 ? `${item.quantite}×` : "",
-        parPersonne: item => `${item.quantite}× 👤 par personne`,
-        parJour: item => `${item.quantite}× 📅 par jour`
-    };
+ 
 
     container.innerHTML = "";
 
@@ -454,7 +473,7 @@ function renderTemplateItems() {
             row.innerHTML = `
                 <span class="checkLabel">
                     ${item.texte}
-                    <small>${typeLabel[item.type](item)}</small>
+                    <small>${formatLabelTemplateItem(item)}</small> 
                 </span>
                 <button class="deleteChecklistButton">🗑️</button>
             `;
