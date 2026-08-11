@@ -61,9 +61,10 @@ async function chercherPoiAutourPoint(point, rayonM, categoriesActives) {
 
     const query = `[out:json][timeout:20];(${filtresParCategorie});out center 60;`;
 
-    const miroirs = [
-        "https://overpass-api.de/api/interpreter",
-        "https://overpass.private.coffee/api/interpreter"
+const miroirs = [
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.private.coffee/api/interpreter",
+        "https://overpass-api.de/api/interpreter"
     ];
 
     for (const miroir of miroirs) {
