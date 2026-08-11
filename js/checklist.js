@@ -2,7 +2,7 @@ import {
     addChecklistItem, toggleChecklistItem, toggleChecklistItemForPersonne, deleteChecklistItem,
     getChecklistTemplates, getEnvies, getChecklistCategories,
     getChecklistLibrary, getPersonnes, createPersonne,
-    updateChecklistItemAssignment
+    updateChecklistItemAssignment, getMagasins, rememberMagasin
 } from "./storage.js";
 import { removePersonneFromChecklistItem } from "./storage.js";
 import { setChecklistItems } from "./storage.js";
@@ -181,17 +181,17 @@ function createChecklistRow(item, envie, personneContext = null) {
 
   
 
-    row.innerHTML = `
+  row.innerHTML = `
         <label class="checkLabel">
             <input type="checkbox" ${isChecked ? "checked" : ""}>
             <span>
                 ${prefix}${item.texte}
                                     <small class="assignBadge">${assignLabel}${item.parPersonne && !personneContext ? ` (${item.quantite}/pers)` : ""}${!personneContext ? formatProgressBadge(item) : ""}</small>
-
-
+                ${item.magasin ? `<small class="assignBadge">🏬 ${item.magasin}</small>` : ""}
 
             </span>
         </label>
+        ${item.url ? `<a href="${item.url}" target="_blank" class="iconSmallButton" onclick="event.stopPropagation()">🔗</a>` : ""}
         <button class="assignItemButton" title="Attribuer">👤</button>
         <button class="deleteChecklistButton" title="${personneContext ? "Retirer pour cette personne" : "Supprimer"}">🗑️</button>
     `;
@@ -343,13 +343,17 @@ document.getElementById("addChecklistButton").addEventListener("click", () => {
         const envieActuelle = getEnvies().find(e => e.id === currentChecklistEnvieId);
         const estMaison = envieActuelle?.contexte === "maison";
 
-        const labelPourQui = document.getElementById("checklistPersonnesSelector")?.previousElementSibling;
+const labelPourQui = document.getElementById("checklistPersonnesSelector")?.previousElementSibling;
 
         if (labelPourQui) {
             labelPourQui.style.display = estMaison ? "none" : "block";
         }
 
         document.getElementById("checklistPersonnesSelector").style.display = estMaison ? "none" : "";
+
+        document.getElementById("checklistAchatFields").style.display = estMaison ? "block" : "none";
+        document.getElementById("checklistMagasinInput").value = "";
+        document.getElementById("checklistUrlInput").value = "";
 
         refreshCreationSelector();
         renderBulkCategorieSelector();
@@ -358,6 +362,19 @@ document.getElementById("addChecklistButton").addEventListener("click", () => {
 
     });
 
+    const checklistMagasinInput = document.getElementById("checklistMagasinInput");
+
+    checklistMagasinInput?.addEventListener("input", () => {
+        renderSuggestionsMagasinChecklist(checklistMagasinInput.value);
+    });
+
+    checklistMagasinInput?.addEventListener("focus", () => {
+        renderSuggestionsMagasinChecklist(checklistMagasinInput.value);
+    });
+
+    checklistMagasinInput?.addEventListener("blur", () => {
+        setTimeout(() => document.getElementById("checklistMagasinSuggestions")?.classList.add("hidden"), 150);
+    });
 
 
     document.getElementById("cancelChecklist").addEventListener("click", () => {
@@ -490,6 +507,43 @@ function refreshCreationSelector() {
 
 }
 
+function renderSuggestionsMagasinChecklist(filtre) {
+
+    const container = document.getElementById("checklistMagasinSuggestions");
+
+    if (!container)
+        return;
+
+    const requete = filtre.trim().toLowerCase();
+
+    const resultats = getMagasins()
+        .filter(m => !requete || m.nom.toLowerCase().includes(requete))
+        .slice(0, 20);
+
+    if (resultats.length === 0) {
+        container.classList.add("hidden");
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML = resultats.map(m => `<div class="autocompleteItem">${m.nom}</div>`).join("");
+    container.classList.remove("hidden");
+
+    container.querySelectorAll(".autocompleteItem").forEach((item, i) => {
+
+        item.addEventListener("mousedown", (event) => {
+
+            event.preventDefault();
+
+            document.getElementById("checklistMagasinInput").value = resultats[i].nom;
+            container.classList.add("hidden");
+
+        });
+
+    });
+
+}
+
 function saveChecklistItem() {
 
     const input = document.getElementById("checklistInput");
@@ -500,7 +554,10 @@ function saveChecklistItem() {
 
     const categorieId = currentBulkCategorieId;
 
-    const newItems = addMultipleChecklistItems(currentChecklistEnvieId, lignes, categorieId, currentAssignedTo);
+    const magasin = document.getElementById("checklistMagasinInput")?.value.trim() || null;
+    const url = document.getElementById("checklistUrlInput")?.value.trim() || null;
+
+    const newItems = addMultipleChecklistItems(currentChecklistEnvieId, lignes, categorieId, currentAssignedTo, magasin, url);
 
     document.getElementById("checklistModal").classList.add("hidden");
 
@@ -520,7 +577,6 @@ function saveChecklistItem() {
     showToast(`✓ ${lignes.length} élément${lignes.length > 1 ? "s" : ""} ajouté${lignes.length > 1 ? "s" : ""}`);
 
 }
-
 
 
 
