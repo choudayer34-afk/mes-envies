@@ -1,4 +1,4 @@
-import { updatePersonneDateNaissance, calculerAgeDepuisNaissance } from "./storage.js";
+import { getPersonnes, calculerAgeDepuisNaissance } from "./storage.js";
 
 export function renderVoyageursWidget(containerId) {
 
