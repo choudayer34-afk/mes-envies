@@ -1,4 +1,5 @@
-import { searchLocation } from "./location.js";
+
+import { searchLocation, getVilleDepuisCoordonnees } from "./location.js";
 
 const CITIZENKID_VILLES = ["paris", "lyon", "marseille", "lille", "bordeaux", "nantes", "toulouse", "strasbourg", "nice"];
 
@@ -169,7 +170,58 @@ function renderSuggestionsAgendaLocal(resultats) {
 
 }
 
+function utiliserPositionActuelle() {
+
+    if (!("geolocation" in navigator))
+        return;
+
+    const bouton = document.getElementById("agendaLocalBtnPosition");
+    const libelleInitial = bouton?.textContent;
+
+    if (bouton) {
+        bouton.disabled = true;
+        bouton.textContent = "📍 Localisation...";
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        async (position) => {
+
+            const { latitude, longitude } = position.coords;
+            const ville = await getVilleDepuisCoordonnees(latitude, longitude);
+
+            if (ville) {
+
+                agendaLocalLieuChoisi = { nom: ville, latitude, longitude };
+
+                document.getElementById("agendaLocalLieu").value = ville;
+                document.getElementById("agendaLocalBtnChercher").disabled = false;
+
+            }
+
+            if (bouton) {
+                bouton.disabled = false;
+                bouton.textContent = libelleInitial;
+            }
+
+        },
+
+        () => {
+
+            if (bouton) {
+                bouton.disabled = false;
+                bouton.textContent = libelleInitial;
+            }
+
+        }
+
+    );
+
+}
+
 export function initAgendaLocal() {
+
+
 
     const input = document.getElementById("agendaLocalLieu");
 
@@ -198,6 +250,8 @@ export function initAgendaLocal() {
         }, 400);
 
     });
+
+    document.getElementById("agendaLocalBtnPosition")?.addEventListener("click", utiliserPositionActuelle);
 
     input.addEventListener("blur", () => {
         setTimeout(() => document.getElementById("agendaLocalSuggestions")?.classList.add("hidden"), 150);
@@ -243,7 +297,7 @@ export function initAgendaLocal() {
         document.getElementById("agendaLocalModal")?.classList.add("hidden");
     });
 
-    document.getElementById("ideesMenuBtnAgenda")?.addEventListener("click", () => {
+      document.getElementById("ideesMenuBtnAgenda")?.addEventListener("click", () => {
 
         document.getElementById("ideesMenuModal")?.classList.add("hidden");
         document.getElementById("agendaLocalModal")?.classList.remove("hidden");
@@ -253,7 +307,10 @@ export function initAgendaLocal() {
         agendaLocalLieuChoisi = null;
         document.getElementById("agendaLocalBtnChercher").disabled = true;
 
+        utiliserPositionActuelle();
+
     });
+
 
 }
 
