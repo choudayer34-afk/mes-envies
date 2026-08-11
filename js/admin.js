@@ -11,7 +11,7 @@ import {
     getActiviteTypes, createActiviteType, updateActiviteType, deleteActiviteType, moveActiviteType,
     getCriteresVoyage, createCritereVoyage, updateCritereVoyage, deleteCritereVoyage, moveCritereVoyage
 } from "./storage.js";
-
+import { renderNouveautes } from "./plus.js";
 import { groupByCategorie } from "./checklist.js";
 import {
     getChecklistTemplates, getTemplate, createTemplate, renameTemplate, deleteTemplate,
@@ -114,6 +114,7 @@ export function initAdmin() {
             if (cible === "adminEnvieCategoriesModal") renderEnvieCategoriesList();
             if (cible === "adminActiviteTypesModal") renderActiviteTypesList();
             if (cible === "adminCriteresVoyageModal") renderCriteresVoyageList();
+            if (cible === "nouveautesModal") renderNouveautes();
 
         });
 
