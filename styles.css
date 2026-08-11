@@ -2412,3 +2412,21 @@ button {
     font-size:14px;
     line-height:1.6;
 }
+
+
+.envieReduireButton{
+    position:absolute;
+    top:14px;
+    right:44px;
+    background:none;
+    border:none;
+    font-size:18px;
+    color:var(--color-text-light);
+    cursor:pointer;
+    z-index:2;
+    padding:4px;
+}
+
+.envie-card-avec-photo .envieReduireButton{
+    color:white;
+}
