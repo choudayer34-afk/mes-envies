@@ -637,6 +637,30 @@ export function renamePersonne(id, nom) {
     updateDoc(doc(db, "foyers", getFoyerId(), "personnes", id), { nom }).catch(console.error);
 }
 
+export function updatePersonneDateNaissance(id, dateNaissance) {
+    updateDoc(doc(db, "foyers", getFoyerId(), "personnes", id), { dateNaissance: dateNaissance || null }).catch(console.error);
+}
+
+export function calculerAgeDepuisNaissance(dateNaissance, dateReference = new Date()) {
+
+    if (!dateNaissance)
+        return null;
+
+    const naissance = new Date(dateNaissance);
+    const reference = new Date(dateReference);
+
+    let age = reference.getFullYear() - naissance.getFullYear();
+
+    const moisPasse = reference.getMonth() - naissance.getMonth();
+
+    if (moisPasse < 0 || (moisPasse === 0 && reference.getDate() < naissance.getDate())) {
+        age--;
+    }
+
+    return age;
+
+}
+
 export function deletePersonne(id) {
     deleteDoc(doc(db, "foyers", getFoyerId(), "personnes", id)).catch(console.error);
 }
