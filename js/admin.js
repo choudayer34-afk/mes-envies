@@ -99,49 +99,32 @@ export function initAdmin() {
 
     document.getElementById("showFoyerCodeButton").addEventListener("click", showFoyerCode);
 
-        document.querySelectorAll("#adminMenu .categorieChip").forEach(chip => {
+       document.querySelectorAll(".adminTuile[data-modal]").forEach(tuile => {
 
-        chip.addEventListener("click", () => {
+        tuile.addEventListener("click", () => {
 
-            document.querySelectorAll("#adminMenu .categorieChip")
-                .forEach(c => c.classList.remove("active"));
+            document.getElementById("adminModal").classList.add("hidden");
+            document.getElementById(tuile.dataset.modal)?.classList.remove("hidden");
 
-            chip.classList.add("active");
+            const cible = tuile.dataset.modal;
 
-            const target = chip.dataset.target;
+            if (cible === "adminTemplatesModal") renderTemplatesList();
+            if (cible === "adminCategoriesModal") renderCategoriesList();
+            if (cible === "adminPersonnesModal") renderPersonnesList();
+            if (cible === "adminEnvieCategoriesModal") renderEnvieCategoriesList();
+            if (cible === "adminActiviteTypesModal") renderActiviteTypesList();
+            if (cible === "adminCriteresVoyageModal") renderCriteresVoyageList();
 
-            document.getElementById("adminChecklistTemplates")
-                .classList.toggle("hidden", target !== "templates");
-           document.getElementById("adminPromptRegion")
-    ?.classList.toggle("hidden", target !== "promptRegion");
+        });
 
-            document.getElementById("adminActiviteTypes")?.classList.toggle("hidden", target !== "activiteTypes");
-            document.getElementById("adminCriteresVoyage")?.classList.toggle("hidden", target !== "criteresVoyage");
+    });
 
-            if (target === "activiteTypes") renderActiviteTypesList();
-            if (target === "criteresVoyage") renderCriteresVoyageList();
+    document.querySelectorAll(".adminSousRetour").forEach(bouton => {
 
-            
+        bouton.addEventListener("click", () => {
 
-            document.getElementById("adminChecklistCategories")
-                .classList.toggle("hidden", target !== "categories");
-
-            document.getElementById("adminPersonnesFoyer")
-                .classList.toggle("hidden", target !== "personnes");
-
-            document.getElementById("adminEnvieCategories")
-                .classList.toggle("hidden", target !== "envieCategories");
-            document.getElementById("adminExternalTools")
-                .classList.toggle("hidden", target !== "external");
-
-            if (target === "envieCategories")
-                renderEnvieCategoriesList();
-
-            if (target === "categories")
-                renderCategoriesList();
-
-            if (target === "personnes")
-                renderPersonnesList();
+            bouton.closest(".modal-overlay").classList.add("hidden");
+            document.getElementById("adminModal").classList.remove("hidden");
 
         });
 
@@ -326,7 +309,6 @@ function renderTemplateItemsFromList(items) {
 /* ---------- Panneau principal ---------- */
 
 function openAdmin() {
-    renderTemplatesList();
     renderItemCategorieOptions();
     document.getElementById("adminModal").classList.remove("hidden");
 }
