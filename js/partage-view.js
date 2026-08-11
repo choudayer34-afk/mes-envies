@@ -36,17 +36,21 @@ async function init() {
         const snap = await getDoc(doc(db, "foyers", foyerId, "envies", envieId));
 
         if (!snap.exists() || !snap.data().partagePublic) {
-            container.innerHTML = `<div class="emptyState">Ce voyage n'est plus partagé ou n'existe pas.</div>`;
+            container.innerHTML = `<div class="emptyState">Ce contenu n'est plus partagé ou n'existe pas.</div>`;
             return;
         }
 
-        const voyage = { id: snap.id, ...snap.data() };
+        const projetOuVoyage = { id: snap.id, ...snap.data() };
 
         const q = query(collection(db, "foyers", foyerId, "envies"), where("voyageId", "==", envieId));
         const enfantsSnap = await getDocs(q);
         const enfants = enfantsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        renderVoyagePartage(voyage, enfants, container);
+        if (projetOuVoyage.contexte === "maison") {
+            renderProjetMaisonPartage(projetOuVoyage, enfants, container);
+        } else {
+            renderVoyagePartage(projetOuVoyage, enfants, container);
+        }
 
     } catch (err) {
 
@@ -223,6 +227,131 @@ function renderVoyagePartage(voyage, enfants, container) {
             container.appendChild(createCartePartage(envie));
         });
 
+    }
+
+}
+
+function renderProjetMaisonPartage(projet, enfants, container) {
+
+    container.innerHTML = `
+        ${projet.photoCouverture ? `<img src="${projet.photoCouverture}" style="width:100%;border-radius:16px;margin-bottom:16px;">` : ""}
+        <h2>🛠️ ${projet.titre}</h2>
+        ${projet.description ? `<p style="color:var(--color-text-light);margin-bottom:20px;">${projet.description}</p>` : ""}
+    `;
+
+    const taches = [projet, ...enfants];
+    let auMoinsUneSection = false;
+
+    taches.forEach(tache => {
+
+        const emoji = getCategorieById(tache.categorie)?.emoji || "🛠️";
+        let contenuHtml = "";
+
+        if ((tache.checklist || []).length > 0) {
+
+            contenuHtml += `<div class="checklistCategorieHeader">✅ Checklist</div>`;
+
+            tache.checklist.forEach(item => {
+
+                contenuHtml += `
+                    <div class="checklistRow">
+                        <label class="checkLabel">
+                            <input type="checkbox" disabled ${item.checked ? "checked" : ""}>
+                            <span style="${item.checked ? "text-decoration:line-through;color:var(--color-text-light);" : ""}">
+                                ${item.texte}${item.magasin ? ` <small class="assignBadge">🏬 ${item.magasin}</small>` : ""}
+                            </span>
+                        </label>
+                    </div>
+                `;
+
+            });
+
+        }
+
+        if ((tache.peinture?.murs || []).length > 0) {
+
+            const surfaceMurs = tache.peinture.murs.reduce((t, m) => t + m.largeur * m.hauteur, 0);
+
+            contenuHtml += `
+                <div class="checklistCategorieHeader">🎨 Peinture</div>
+                <div class="peintureResultat">
+                    <span class="peintureResultatSurface">📐 Surface murs : <strong>${surfaceMurs.toFixed(2)} m²</strong></span>
+                </div>
+            `;
+
+        }
+
+        if ((tache.bois?.planches || []).length > 0) {
+
+            const nbPlanches = tache.bois.planches.reduce((t, p) => t + p.quantite, 0);
+
+            contenuHtml += `
+                <div class="checklistCategorieHeader">🪵 Bois</div>
+                <div class="peintureResultat">
+                    <span class="peintureResultatSurface">🪵 ${nbPlanches} planche${nbPlanches > 1 ? "s" : ""} au total</span>
+                </div>
+            `;
+
+        }
+
+        if ((tache.comparateur?.produits || []).length > 0) {
+
+            contenuHtml += `<div class="checklistCategorieHeader">🔍 Comparateur de produits</div>`;
+
+            tache.comparateur.produits.forEach(produit => {
+
+                contenuHtml += `
+                    <div class="comparateurCard${produit.retenu ? " retenu" : ""}">
+                        <div class="comparateurCardInfo">
+                            <div class="comparateurCardTitre">${produit.nom}${produit.retenu ? " 🏆" : ""}</div>
+                            <div class="comparateurCardMeta">${produit.prix != null ? `💰 ${produit.prix} €` : ""}${produit.magasin ? ` · 🏬 ${produit.magasin}` : ""}</div>
+                        </div>
+                    </div>
+                `;
+
+            });
+
+        }
+
+        if ((tache.devis?.entries || []).length > 0) {
+
+            contenuHtml += `<div class="checklistCategorieHeader">📋 Devis</div>`;
+
+            tache.devis.entries.forEach(entree => {
+
+                contenuHtml += `
+                    <div class="comparateurCard${entree.retenu ? " retenu" : ""}">
+                        <div class="comparateurCardInfo">
+                            <div class="comparateurCardTitre">${entree.societe || "Devis"}${entree.retenu ? " 🏆" : ""}</div>
+                            <div class="comparateurCardMeta">${entree.prix != null ? `💰 ${entree.prix} €` : ""}</div>
+                        </div>
+                    </div>
+                `;
+
+            });
+
+        }
+
+        if (!contenuHtml && !tache.description)
+            return;
+
+        auMoinsUneSection = true;
+
+        const blocTache = document.createElement("div");
+        blocTache.style.marginBottom = "28px";
+
+        blocTache.innerHTML = `
+            <div class="carnetActiviteTitre">${emoji} ${tache.titre}</div>
+            ${tache.description ? `<p class="carnetActiviteDescription">${tache.description}</p>` : ""}
+            ${contenuHtml}
+        `;
+
+        container.appendChild(blocTache);
+
+    });
+
+    if (!auMoinsUneSection) {
+        container.innerHTML += `<div class="emptyState">Rien à afficher pour ce projet pour l'instant.</div>`;
     }
 
 }
