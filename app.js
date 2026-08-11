@@ -47,7 +47,7 @@ import { initModeSync } from "./js/storage.js";
 import { initMagasinsSync } from "./js/storage.js";
 import { initSocietesSync } from "./js/storage.js";
 import { initAgendaLocal } from "./js/agenda-local.js";
-
+import { initToggleReduction } from "./js/ui.js";
 import { initIdeesMenu } from "./js/ideesmenu.js";
 import { initModeBascule, appliquerAffichageMode } from "./js/ui.js";
 import { assurerCategorieProjetMaison } from "./js/storage.js";
@@ -129,7 +129,7 @@ function init() {
         initMagasinsSync(() => {});
 
        initSocietesSync(() => {});
-
+initToggleReduction();
 initModeSync(() => {
     modePret = true;
     tryRenderEnvies();
