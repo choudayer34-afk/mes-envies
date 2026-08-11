@@ -2,7 +2,7 @@ import { getCurrentEnvieId } from "./envie.js";
 
 import { showToast } from "./toast.js";
 import { uploadToCloudinary, compresserImageAvantEnvoi } from "./photos.js";
-import { getEnvies, updateEnvieComparateur, getMagasins, rememberMagasin } from "./storage.js";
+import { getEnvies, updateEnvieComparateur, getMagasins, rememberMagasin, synchroniserChecklistDepuisProduit } from "./storage.js";
 
 let avisEnCours = 0;
 let produitEnCoursId = null;
@@ -137,16 +137,30 @@ function creerCarteProduit(envie, comparateur, produit) {
     }
 
 
-    card.querySelector(".comparateurRetenuButton").addEventListener("click", () => {
+card.querySelector(".comparateurRetenuButton").addEventListener("click", () => {
+
+        const nouvelEtat = !produit.retenu;
 
         const nouveauxProduits = comparateur.produits.map(p => ({
             ...p,
-            retenu: p.id === produit.id ? !p.retenu : false
+            retenu: p.id === produit.id ? nouvelEtat : false
         }));
 
         const nouveauComparateur = { ...comparateur, produits: nouveauxProduits };
 
         updateEnvieComparateur(envie.id, nouveauComparateur);
+
+        comparateur.produits.forEach(p => {
+
+            const etaitRetenu = p.retenu;
+            const estRetenuMaintenant = p.id === produit.id ? nouvelEtat : false;
+
+            if (etaitRetenu !== estRetenuMaintenant) {
+                synchroniserChecklistDepuisProduit(envie.id, p, estRetenuMaintenant);
+            }
+
+        });
+
         renderComparateur({ ...envie, comparateur: nouveauComparateur });
 
     });
