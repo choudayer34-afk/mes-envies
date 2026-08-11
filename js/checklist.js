@@ -206,6 +206,7 @@ function ouvrirEditionChecklistItem(envieId, item) {
     document.getElementById("checklistEditTexteInput").value = item.texte;
     document.getElementById("checklistEditMagasinInput").value = item.magasin || "";
     document.getElementById("checklistEditUrlInput").value = item.url || "";
+    document.getElementById("checklistEditQuantiteInput").value = item.quantite || 1;
 
     document.getElementById("checklistEditItemModal")?.classList.remove("hidden");
 
@@ -475,10 +476,11 @@ const labelPourQui = document.getElementById("checklistPersonnesSelector")?.prev
             return;
         }
 
-        const magasin = document.getElementById("checklistEditMagasinInput").value.trim() || null;
+              const magasin = document.getElementById("checklistEditMagasinInput").value.trim() || null;
         const url = document.getElementById("checklistEditUrlInput").value.trim() || null;
+        const quantite = parseInt(document.getElementById("checklistEditQuantiteInput").value, 10) || 1;
 
-        updateChecklistItem(checklistItemEnCoursEdition.envieId, checklistItemEnCoursEdition.itemId, { texte, magasin, url });
+        updateChecklistItem(checklistItemEnCoursEdition.envieId, checklistItemEnCoursEdition.itemId, { texte, magasin, url, quantite });
 
         if (magasin) {
             rememberMagasin(magasin);
@@ -780,7 +782,7 @@ function applyTemplate(templateId) {
                 texte: item.texte,
                 quantite: quantiteAvecJours,
                 categorieId: item.categorieId,
-                assignedTo: envie.personnesIds || [],
+                assignedTo: getPersonnes().map(p => p.id), 
                 parPersonne: true,
                 checked: false,
                 checkedBy: {}
