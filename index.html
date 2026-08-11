@@ -752,6 +752,32 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div id="checklistEditItemModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <h2>✏️ Modifier l'élément</h2>
+
+        <label class="fieldTitle">Texte</label>
+        <input type="text" id="checklistEditTexteInput" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Magasin (optionnel)</label>
+        <div style="position:relative;">
+            <input type="text" id="checklistEditMagasinInput" placeholder="Ex: Leroy Merlin" class="numberInput" autocomplete="off">
+            <div id="checklistEditMagasinSuggestions" class="autocompleteSuggestions hidden"></div>
+        </div>
+
+        <label class="fieldTitle" style="margin-top:12px;">Lien (optionnel)</label>
+        <input type="text" id="checklistEditUrlInput" placeholder="https://..." class="numberInput">
+
+        <div class="modal-actions">
+            <button id="cancelChecklistEditItem">Annuler</button>
+            <button id="saveChecklistEditItem">Enregistrer</button>
+        </div>
+
+    </div>
+
+</div>
 
 <div id="ficheOverlay" class="modal-overlay hidden">
 
