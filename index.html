@@ -2003,6 +2003,10 @@ document.addEventListener("DOMContentLoaded", () => {
             🛣️ Trouver une étape sur la route
         </button>
 
+<button id="ideesMenuBtnAgenda" class="secondaryButton" style="width:100%;margin-top:10px;">
+    🎉 Agenda local
+</button>
+
     </div>
 
 </div>
@@ -2174,6 +2178,42 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+
+<div id="agendaLocalModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeAgendaLocal" class="backButton">← Retour</button>
+
+        <h2>🎉 Agenda local</h2>
+
+        <label class="fieldTitle">Lieu</label>
+        <div style="position:relative;">
+            <input type="text" id="agendaLocalLieu" placeholder="Ville ou village..." class="numberInput" autocomplete="off">
+            <div id="agendaLocalSuggestions" class="autocompleteSuggestions hidden"></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
+            <div>
+                <label class="fieldTitle">Du</label>
+                <input type="date" id="agendaLocalDateDebut" class="numberInput">
+            </div>
+            <div>
+                <label class="fieldTitle">Au (optionnel)</label>
+                <input type="date" id="agendaLocalDateFin" class="numberInput">
+            </div>
+        </div>
+
+        <button id="agendaLocalBtnChercher" class="primaryButton" style="width:100%;margin-top:16px;" disabled>
+            🔍 Voir les liens
+        </button>
+
+        <div id="agendaLocalResultats" style="margin-top:16px;"></div>
+
+    </div>
+
+</div>
+
 <div id="tableauSaisieModal" class="modal-overlay hidden">
 
     <div class="modal" style="max-width:95vw;width:1400px;">
