@@ -282,6 +282,25 @@ export function openEvaluationAccordion() {
 
 }
 
+export function openChecklistAccordion() {
+
+    const section = document.getElementById("checklistSection");
+    const header = document.querySelector('.accordionHeader[data-target="checklistSection"]');
+
+    if (!section || !header)
+        return;
+
+    section.classList.remove("hidden");
+
+    const icon = header.querySelector(".accordionIcon");
+
+    if (icon) {
+        icon.textContent = "▾";
+    }
+
+}
+
+
 export function initFicheDelete() {
 
     document.getElementById("deleteFromFicheButton").addEventListener("click", () => {
