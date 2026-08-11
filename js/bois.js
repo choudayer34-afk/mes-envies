@@ -9,7 +9,8 @@ function getBois(envie) {
     return {
         planches: envie.bois?.planches || [],
         stockLongueur: envie.bois?.stockLongueur || null,
-        stockLargeur: envie.bois?.stockLargeur || null
+        stockLargeur: envie.bois?.stockLargeur || null,
+        stocksBruts: envie.bois?.stocksBruts || []
     };
 
 }
@@ -26,6 +27,7 @@ export function renderBoisCalculateur(envie) {
 
     renderPlanchesListe(envie, bois);
     renderResultat(bois);
+    renderStocksListe(envie, bois);
 
     const longueurInput = document.getElementById("boisStockLongueur");
     const largeurInput = document.getElementById("boisStockLargeur");
@@ -100,6 +102,47 @@ function calculerBois(planches) {
     return { volumeM3, surfaceM2, nombreTotal };
 
 }
+
+function renderStocksListe(envie, bois) {
+
+    const container = document.getElementById("boisStocksListe");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    if (bois.stocksBruts.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun modèle de planche brute ajouté.</div>`;
+        return;
+    }
+
+    bois.stocksBruts.forEach(stock => {
+
+        const row = document.createElement("div");
+        row.className = "checklistRow";
+
+        row.innerHTML = `
+            <span>${stock.quantite}× planche ${stock.longueur} × ${stock.largeur} cm</span>
+            <button class="deleteChecklistButton" title="Supprimer">🗑️</button>
+        `;
+
+        row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
+
+            const nouveauxStocks = bois.stocksBruts.filter(s => s.id !== stock.id);
+            const nouveauBois = { ...bois, stocksBruts: nouveauxStocks };
+
+            updateEnvieBois(envie.id, nouveauBois);
+            renderBoisCalculateur({ ...envie, bois: nouveauBois });
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+}
+
 
 function renderResultat(bois) {
 
@@ -206,6 +249,124 @@ function decouperPlanches(stock, piecesDemandees) {
             const h = tientNormal ? piece.largeur : piece.longueur;
 
             meilleur = { planche: nouvellePlanche, rectIndex: 0, w, h, rotated: !tientNormal, rect };
+
+        }
+
+        const { planche, rectIndex, w, h, rect } = meilleur;
+
+        planche.placements.push({
+            id: piece.id, nom: piece.nom,
+            x: rect.x, y: rect.y, w, h, rotated: meilleur.rotated
+        });
+
+        planche.libres.splice(rectIndex, 1);
+
+        const largeurRestante = rect.w - w;
+        const hauteurRestante = rect.h - h;
+
+        if (largeurRestante > 0) {
+            planche.libres.push({ x: rect.x + w, y: rect.y, w: largeurRestante, h: h });
+        }
+
+        if (hauteurRestante > 0) {
+            planche.libres.push({ x: rect.x, y: rect.y + h, w: rect.w, h: hauteurRestante });
+        }
+
+    });
+
+    return { planchesUtilisees, nonPlacees };
+
+}
+
+function decouperPlanchesMultiStock(stocksDisponibles, piecesDemandees) {
+
+    const pool = [];
+
+    stocksDisponibles.forEach(stock => {
+        for (let i = 0; i < stock.quantite; i++) {
+            pool.push({ longueur: stock.longueur, largeur: stock.largeur });
+        }
+    });
+
+    pool.sort((a, b) => (a.longueur * a.largeur) - (b.longueur * b.largeur));
+
+    const unites = [];
+    piecesDemandees.forEach(p => {
+        for (let i = 0; i < p.quantite; i++) unites.push({ id: p.id, nom: p.nom, longueur: p.longueur, largeur: p.largeur });
+    });
+
+    unites.sort((a, b) => (b.longueur * b.largeur) - (a.longueur * a.largeur));
+
+    const planchesUtilisees = [];
+    const nonPlacees = [];
+
+    unites.forEach(piece => {
+
+        let meilleur = null;
+
+        planchesUtilisees.forEach(planche => {
+
+            planche.libres.forEach((rect, idx) => {
+
+                if (piece.longueur <= rect.w && piece.largeur <= rect.h) {
+                    const gaspillage = rect.w * rect.h - piece.longueur * piece.largeur;
+                    if (!meilleur || gaspillage < meilleur.gaspillage) {
+                        meilleur = { planche, rectIndex: idx, w: piece.longueur, h: piece.largeur, rotated: false, gaspillage, rect };
+                    }
+                }
+
+                if (piece.largeur <= rect.w && piece.longueur <= rect.h) {
+                    const gaspillage = rect.w * rect.h - piece.longueur * piece.largeur;
+                    if (!meilleur || gaspillage < meilleur.gaspillage) {
+                        meilleur = { planche, rectIndex: idx, w: piece.largeur, h: piece.longueur, rotated: true, gaspillage, rect };
+                    }
+                }
+
+            });
+
+        });
+
+        if (!meilleur) {
+
+            let indexPoolChoisi = -1;
+            let dimsChoisies = null;
+
+            for (let i = 0; i < pool.length; i++) {
+
+                const stock = pool[i];
+
+                const tientNormal = piece.longueur <= stock.longueur && piece.largeur <= stock.largeur;
+                const tientPivote = piece.largeur <= stock.longueur && piece.longueur <= stock.largeur;
+
+                if (tientNormal || tientPivote) {
+                    indexPoolChoisi = i;
+                    dimsChoisies = { rotated: !tientNormal };
+                    break;
+                }
+
+            }
+
+            if (indexPoolChoisi === -1) {
+                nonPlacees.push(piece);
+                return;
+            }
+
+            const stockChoisi = pool.splice(indexPoolChoisi, 1)[0];
+
+            const nouvellePlanche = {
+                stockLongueur: stockChoisi.longueur,
+                stockLargeur: stockChoisi.largeur,
+                libres: [{ x: 0, y: 0, w: stockChoisi.longueur, h: stockChoisi.largeur }],
+                placements: []
+            };
+
+            planchesUtilisees.push(nouvellePlanche);
+
+            const rect = nouvellePlanche.libres[0];
+            const w = dimsChoisies.rotated ? piece.largeur : piece.longueur;
+            const h = dimsChoisies.rotated ? piece.longueur : piece.largeur;
+
+            meilleur = { planche: nouvellePlanche, rectIndex: 0, w, h, rotated: dimsChoisies.rotated, rect };
 
         }
 
@@ -349,14 +510,8 @@ function calculerEtAfficherDecoupe(envie, bois) {
     if (!container)
         return;
 
-    const longueurInput = document.getElementById("boisStockLongueur");
-    const largeurInput = document.getElementById("boisStockLargeur");
-
-    const stockLongueur = parseFloat(longueurInput.value);
-    const stockLargeur = parseFloat(largeurInput.value);
-
-    if (!stockLongueur || !stockLargeur) {
-        showToast("Renseigne les dimensions de la planche brute");
+    if (bois.stocksBruts.length === 0) {
+        showToast("Ajoute au moins un modèle de planche brute");
         return;
     }
 
@@ -365,21 +520,16 @@ function calculerEtAfficherDecoupe(envie, bois) {
         return;
     }
 
-    const nouveauBois = { ...bois, stockLongueur, stockLargeur };
-    updateEnvieBois(envie.id, nouveauBois);
-
     const groupesEpaisseur = [...new Set(bois.planches.map(p => p.epaisseur))];
 
     let html = "";
 
-groupesEpaisseur.forEach(epaisseur => {
+    groupesEpaisseur.forEach(epaisseur => {
 
         const piecesGroupe = bois.planches.filter(p => p.epaisseur === epaisseur);
 
-      const piecesPourAlgo = piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }));
-
-       const { planchesUtilisees, nonPlacees } = decouperPlanches(
-            { longueur: stockLongueur, largeur: stockLargeur },
+        const { planchesUtilisees, nonPlacees } = decouperPlanchesMultiStock(
+            bois.stocksBruts,
             piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }))
         );
 
@@ -388,18 +538,18 @@ groupesEpaisseur.forEach(epaisseur => {
 
         if (nonPlacees.length === 0) {
 
-            html += `<span class="peintureResultatSurface">✅ Épaisseur ${epaisseur} mm : ça passe avec <strong>${planchesUtilisees.length} planche${planchesUtilisees.length > 1 ? "s" : ""} brute${planchesUtilisees.length > 1 ? "s" : ""}</strong> de ${stockLongueur}×${stockLargeur} cm</span>`;
+            html += `<span class="peintureResultatSurface">✅ Épaisseur ${epaisseur} mm : ${planchesUtilisees.length} planche${planchesUtilisees.length > 1 ? "s" : ""} brute${planchesUtilisees.length > 1 ? "s" : ""} de ton stock utilisée${planchesUtilisees.length > 1 ? "s" : ""}</span>`;
 
         } else {
 
-            html += `<span class="peintureResultatSurface">❌ Épaisseur ${epaisseur} mm : ${nonPlacees.length} pièce${nonPlacees.length > 1 ? "s" : ""} ne rentre${nonPlacees.length > 1 ? "nt" : ""} pas, même seule, dans ${stockLongueur}×${stockLargeur} cm : ${nonPlacees.map(p => p.nom).join(", ")}</span>`;
+            html += `<span class="peintureResultatSurface">❌ Épaisseur ${epaisseur} mm : stock insuffisant — ${nonPlacees.length} pièce${nonPlacees.length > 1 ? "s" : ""} non placée${nonPlacees.length > 1 ? "s" : ""} : ${nonPlacees.map(p => p.nom).join(", ")}</span>`;
 
         }
 
         html += `</div>`;
 
         planchesUtilisees.forEach((planche, i) => {
-            html += renderDiagrammePlanche({ longueur: stockLongueur, largeur: stockLargeur }, planche, i);
+            html += renderDiagrammePlanche({ longueur: planche.stockLongueur, largeur: planche.stockLargeur }, planche, i);
         });
 
         html += `</div>`;
@@ -560,6 +710,42 @@ document.getElementById("ajouterBoisAchatsButton")?.addEventListener("click", aj
         renderBoisCalculateur({ ...envie, bois: nouveauBois });
 
         showToast(etaitEnEdition ? "✓ Planche modifiée" : "✓ Planche ajoutée");
+
+    });
+
+document.getElementById("addBoisStockButton")?.addEventListener("click", () => {
+
+        const longueurInput = document.getElementById("boisStockLongueur");
+        const largeurInput = document.getElementById("boisStockLargeur");
+        const quantiteInput = document.getElementById("boisStockQuantite");
+
+        const longueur = parseFloat(longueurInput.value);
+        const largeur = parseFloat(largeurInput.value);
+        const quantite = parseInt(quantiteInput.value) || 1;
+
+        if (!longueur || !largeur) {
+            showToast("Renseigne longueur et largeur");
+            return;
+        }
+
+        const envie = getEnvieCourante();
+
+        if (!envie)
+            return;
+
+        const bois = getBois(envie);
+
+        const nouveauStock = { id: crypto.randomUUID(), longueur, largeur, quantite };
+
+        const nouveauBois = { ...bois, stocksBruts: [...bois.stocksBruts, nouveauStock] };
+
+        updateEnvieBois(envie.id, nouveauBois);
+
+        longueurInput.value = "";
+        largeurInput.value = "";
+        quantiteInput.value = "1";
+
+        renderBoisCalculateur({ ...envie, bois: nouveauBois });
 
     });
 
