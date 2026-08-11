@@ -713,6 +713,11 @@ export function appliquerAffichageMode() {
 
     const mode = getModeActif();
 
+    const modeIcone = mode === "maison" ? "🏠" : "✈️";
+
+    document.getElementById("btnEnvieModeIcone")?.replaceChildren(document.createTextNode(modeIcone));
+    document.getElementById("btnEnvieCompactModeIcone")?.replaceChildren(document.createTextNode(modeIcone));
+
     document.querySelectorAll("#modeBascule .itemTypeChip").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.mode === mode);
     });
