@@ -429,6 +429,35 @@ function createActionGroupCard(groupe) {
 
 }
 
+export function afficherVersionCache() {
+
+    const span = document.getElementById("versionCacheLabel");
+
+    if (!span || !("serviceWorker" in navigator))
+        return;
+
+    navigator.serviceWorker.addEventListener("message", (event) => {
+
+        if (event.data?.type === "VERSION") {
+            span.textContent = event.data.version;
+        }
+
+    });
+
+    if (navigator.serviceWorker.controller) {
+
+        navigator.serviceWorker.controller.postMessage({ type: "GET_VERSION" });
+
+    } else {
+
+        navigator.serviceWorker.ready.then((registration) => {
+            registration.active?.postMessage({ type: "GET_VERSION" });
+        });
+
+    }
+
+}
+
 export function initToggleReduction() {
 
     document.getElementById("btnToggleReductionGlobale")?.addEventListener("click", () => {
