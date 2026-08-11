@@ -289,13 +289,18 @@ export function computeQuantite(item, envie) {
     const personnes = (envie.personnesIds || []).length || 1;
     const jours = getDureeJours(envie.date);
 
-    if (item.type === "parPersonne")
-        return item.quantite * personnes;
+    let quantite = item.quantite;
 
-    if (item.type === "parJour")
-        return item.quantite * jours;
+    if (item.parJour) {
+        quantite *= jours;
+    }
 
-    return item.quantite;
+    if (item.parPersonne) {
+        quantite *= personnes;
+    }
+
+    return quantite;
 
 }
+
 
