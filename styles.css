@@ -260,7 +260,7 @@ main{
 #aProposModal,#tetrisModal, #guideModal,#gameboyMenuModal,
 #breakoutModal,#taquinModal,#demineurModal,
 #memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal,
-#agendaLocalModal,
+#agendaLocalModal,#rapportModal,
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal
 {
     z-index:2100;
