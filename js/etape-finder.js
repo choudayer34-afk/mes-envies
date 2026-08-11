@@ -5,7 +5,7 @@ import { searchLocation, useCurrentLocation } from "./location.js";
 import { renderMultiSelectCollapsible } from "./multiselect.js";
 import { renderVoyageursWidget, getVoyageursData, formatVoyageursTexte, formatVoyageursCozycozy } from "./voyageurs.js";
 import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
-import { trouverPoiSurItineraire, getCategoriesPoi, annulerRecherchePoi, rechercheAnnuleeReset } from "./poi-route.js";
+import { trouverPoiSurItineraire, getCategoriesPoi, annulerRecherchePoi, rechercheAnnuleeReset, calculerItinerairesAlternatifs } from "./poi-route.js";
 
 
 let etapesTrouvees = [];
@@ -14,6 +14,9 @@ let lieuDepart = null;
 let lieuArrivee = null;
 let etapePeriodeChoisie = null;
 let trajetTotalActuel = null;
+let itinerairesDisponibles = [];
+let itineraireChoisiIndex = 0;
+let carteItinerairesInstance = null;
 
 const activitesSelectionnees = new Set();
 const criteresSelectionnes = new Set();
@@ -699,22 +702,132 @@ async function tenterInitialiserSliderTroncon() {
     const debutSlider = document.getElementById("poiTroncconDebut");
     const finSlider = document.getElementById("poiTroncconFin");
     const info = document.getElementById("poiTroncconInfo");
+    const listeContainer = document.getElementById("etapeItinerairesListe");
+    const mapContainer = document.getElementById("etapeItinerairesMapContainer");
 
     if (!debutSlider || !finSlider || !info)
         return;
 
-    info.textContent = "Calcul du trajet total...";
+    info.textContent = "Calcul des itinéraires...";
+    if (listeContainer) listeContainer.innerHTML = "";
+    if (mapContainer) mapContainer.style.display = "none";
 
-    const trajet = await calculerTrajetOSRM(lieuDepart.latitude, lieuDepart.longitude, lieuArrivee.latitude, lieuArrivee.longitude);
+    itinerairesDisponibles = await calculerItinerairesAlternatifs(lieuDepart, lieuArrivee);
 
-    if (!trajet) {
-        info.textContent = "Trajet total indisponible — la recherche portera sur l'intégralité par défaut.";
+    if (itinerairesDisponibles.length === 0) {
+        info.textContent = "Trajet indisponible — la recherche portera sur l'intégralité par défaut.";
         return;
     }
 
-    trajetTotalActuel = trajet;
+    itineraireChoisiIndex = 0;
 
-    const totalKm = Math.max(1, Math.round(trajet.distanceKm));
+    afficherItineraires();
+    appliquerItineraireChoisi();
+
+}
+
+function afficherItineraires() {
+
+    const mapContainer = document.getElementById("etapeItinerairesMapContainer");
+    const listeContainer = document.getElementById("etapeItinerairesListe");
+
+    if (!mapContainer || !listeContainer)
+        return;
+
+    const couleurs = ["#3E7CB1", "#4C9F70", "#E4572E"];
+
+    mapContainer.style.display = itinerairesDisponibles.length > 0 ? "block" : "none";
+
+    listeContainer.innerHTML = itinerairesDisponibles.map((route, i) => `
+        <button type="button" class="secondaryButton itineraireChoixButton" data-index="${i}" style="width:100%;margin-bottom:8px;text-align:left;border-left:6px solid ${couleurs[i % couleurs.length]};">
+            Itinéraire ${i + 1} — ${Math.round(route.distanceKm)} km, ${formatDureeTrajet(route.dureeMin)}
+        </button>
+    `).join("");
+
+    listeContainer.querySelectorAll(".itineraireChoixButton").forEach((bouton, i) => {
+
+        bouton.style.opacity = i === itineraireChoisiIndex ? "1" : "0.55";
+        bouton.style.fontWeight = i === itineraireChoisiIndex ? "700" : "400";
+
+        bouton.addEventListener("click", () => {
+
+            itineraireChoisiIndex = Number(bouton.dataset.index);
+            afficherItineraires();
+            appliquerItineraireChoisi();
+
+        });
+
+    });
+
+    if (itinerairesDisponibles.length > 0) {
+        dessinerCarteItineraires();
+    }
+
+}
+
+function dessinerCarteItineraires() {
+
+    const mapContainer = document.getElementById("etapeItinerairesMapContainer");
+
+    if (!mapContainer)
+        return;
+
+    if (carteItinerairesInstance) {
+        carteItinerairesInstance.remove();
+        carteItinerairesInstance = null;
+    }
+
+    carteItinerairesInstance = L.map("etapeItinerairesMapContainer");
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors",
+        maxZoom: 19
+    }).addTo(carteItinerairesInstance);
+
+    const couleurs = ["#3E7CB1", "#4C9F70", "#E4572E"];
+    const bounds = [];
+
+    itinerairesDisponibles.forEach((route, i) => {
+
+        const latlngs = route.geometry.map(p => [p.lat, p.lon]);
+        const estChoisi = i === itineraireChoisiIndex;
+
+        const ligne = L.polyline(latlngs, {
+            color: couleurs[i % couleurs.length],
+            weight: estChoisi ? 6 : 3,
+            opacity: estChoisi ? 0.95 : 0.5
+        }).addTo(carteItinerairesInstance);
+
+        ligne.on("click", () => {
+            itineraireChoisiIndex = i;
+            afficherItineraires();
+            appliquerItineraireChoisi();
+        });
+
+        latlngs.forEach(p => bounds.push(p));
+
+    });
+
+    if (bounds.length > 0) {
+        carteItinerairesInstance.fitBounds(bounds, { padding: [20, 20] });
+    }
+
+}
+
+function appliquerItineraireChoisi() {
+
+    const route = itinerairesDisponibles[itineraireChoisiIndex];
+
+    if (!route)
+        return;
+
+    trajetTotalActuel = route;
+
+    const debutSlider = document.getElementById("poiTroncconDebut");
+    const finSlider = document.getElementById("poiTroncconFin");
+    const info = document.getElementById("poiTroncconInfo");
+
+    const totalKm = Math.max(1, Math.round(route.distanceKm));
 
     debutSlider.min = 0;
     debutSlider.max = totalKm;
@@ -724,7 +837,7 @@ async function tenterInitialiserSliderTroncon() {
     finSlider.max = totalKm;
     finSlider.value = totalKm;
 
-    info.textContent = `Trajet total : ${totalKm} km · ${formatDureeTrajet(trajet.dureeMin)}`;
+    info.textContent = `Itinéraire choisi : ${totalKm} km · ${formatDureeTrajet(route.dureeMin)}`;
 
     mettreAJourLabelsTroncon();
 
@@ -882,9 +995,11 @@ document.getElementById("poiTroncconDebut")?.addEventListener("input", () => {
         const maxKmValeur = parseFloat(document.getElementById("poiTroncconFin")?.value);
         const maxKm = isNaN(maxKmValeur) || maxKmValeur === 0 ? Infinity : maxKmValeur;
 
+        const routeChoisie = itinerairesDisponibles[itineraireChoisiIndex];
+
         const resultat = await trouverPoiSurItineraire(lieuDepart, lieuArrivee, rayonKm, categoriesActives, (msg) => {
             resultEl.innerHTML = `<div class="emptyState">🔍 ${msg}</div>`;
-        }, minKm, maxKm);
+        }, minKm, maxKm, routeChoisie?.geometry || null);
 
         if (resultat.erreur) {
             resultEl.innerHTML = `<div class="emptyState">❌ ${resultat.erreur}</div>`;
