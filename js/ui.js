@@ -447,11 +447,55 @@ function createEnvieCard(envie) {
 
     card.addEventListener("click", () => {
         openEnvie(envie.id, null);
-
     });
 
     const estContainer = isContainer(envie.categorie);
     const estReduite = estContainer && (cartesEtatIndividuel.has(envie.id) ? cartesEtatIndividuel.get(envie.id) : modeReduitGlobal);
+
+    if (estReduite) {
+
+        const { statut, pourcentage, realises, total } = computeContainerStatus(envie);
+
+        let infoCompacte;
+
+        if (statut === "planifie" && envie.date?.start) {
+
+            const jours = Math.ceil((new Date(envie.date.start) - new Date()) / (1000 * 60 * 60 * 24));
+            infoCompacte = `${jours} j`;
+
+        } else {
+
+            infoCompacte = `${pourcentage}%`;
+
+        }
+
+        if (total > 0) {
+            infoCompacte += ` · ${realises}/${total} tâches`;
+        }
+
+        card.classList.add("envie-card-reduite");
+
+        card.innerHTML = `
+            <div class="envieReduiteLigne">
+                <span class="envieReduiteTitre">${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
+                <span class="envieReduiteInfo">${infoCompacte}</span>
+                <button class="envieReduireButtonInline" title="Développer">▸</button>
+            </div>
+        `;
+
+        card.querySelector(".envieReduireButtonInline").addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            cartesEtatIndividuel.set(envie.id, false);
+
+            renderEnvies();
+
+        });
+
+        return card;
+
+    }
 
     let statutHtml = "";
 
@@ -493,7 +537,7 @@ function createEnvieCard(envie) {
     }
 
 
-    if (estContainer && envie.photoCouverture && !estReduite) {
+    if (estContainer && envie.photoCouverture) {
         card.style.backgroundImage = `linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.45)), url(${envie.photoCouverture})`;
         card.classList.add("envie-card-avec-photo");
         const pos = envie.photoCouverturePosition || { x: 50, y: 50 };
@@ -501,7 +545,7 @@ function createEnvieCard(envie) {
     }
 
     const boutonReduireHtml = estContainer
-        ? `<button class="envieReduireButton" title="${estReduite ? "Développer" : "Réduire"}">${estReduite ? "▸" : "▾"}</button>`
+        ? `<button class="envieReduireButton" title="Réduire">▾</button>`
         : "";
 
     card.innerHTML = `
@@ -520,8 +564,8 @@ function createEnvieCard(envie) {
             ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
         ${statutHtml}
-        ${estReduite ? "" : calculerPucesMaison(envie)}
-        ${estReduite ? "" : calculerNomsTachesRestantes(envie)}
+        ${calculerPucesMaison(envie)}
+        ${calculerNomsTachesRestantes(envie)}
         <div class="envieActions">
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
@@ -531,8 +575,7 @@ function createEnvieCard(envie) {
 
         event.stopPropagation();
 
-        const etatActuel = cartesEtatIndividuel.has(envie.id) ? cartesEtatIndividuel.get(envie.id) : modeReduitGlobal;
-        cartesEtatIndividuel.set(envie.id, !etatActuel);
+        cartesEtatIndividuel.set(envie.id, true);
 
         renderEnvies();
 
