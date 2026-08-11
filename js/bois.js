@@ -210,6 +210,54 @@ function decouperPlanches(stock, piecesDemandees) {
 
 }
 
+function trouverTaillePlancheOptimale(pieces, pasCm = 5, maxCote = 400) {
+
+    if (pieces.length === 0)
+        return null;
+
+    let pieceReference = pieces[0];
+
+    pieces.forEach(p => {
+        if (Math.max(p.longueur, p.largeur) > Math.max(pieceReference.longueur, pieceReference.largeur)) {
+            pieceReference = p;
+        }
+    });
+
+    let longueur = Math.ceil(Math.max(pieceReference.longueur, pieceReference.largeur) / pasCm) * pasCm;
+    let largeur = Math.ceil(Math.min(pieceReference.longueur, pieceReference.largeur) / pasCm) * pasCm;
+
+    let grandirLargeur = true;
+    let iterations = 0;
+
+    while (iterations < 400) {
+
+        const { planchesUtilisees, nonPlacees } = decouperPlanches({ longueur, largeur }, pieces);
+
+        if (planchesUtilisees.length === 1 && nonPlacees.length === 0) {
+            return { longueur, largeur };
+        }
+
+        if (longueur >= maxCote && largeur >= maxCote) {
+            return null;
+        }
+
+        if (grandirLargeur && largeur < maxCote) {
+            largeur += pasCm;
+        } else if (longueur < maxCote) {
+            longueur += pasCm;
+        } else if (largeur < maxCote) {
+            largeur += pasCm;
+        }
+
+        grandirLargeur = !grandirLargeur;
+        iterations++;
+
+    }
+
+    return null;
+
+}
+
 function renderDiagrammePlanche(stock, planche, index) {
 
     const couleurs = ["#6FAFC4", "#F2A65A", "#8FBF7F", "#D97C7C", "#B08FD1", "#E0C25A"];
@@ -299,16 +347,27 @@ function calculerEtAfficherDecoupe(envie, bois) {
 
     let html = "";
 
-    groupesEpaisseur.forEach(epaisseur => {
+groupesEpaisseur.forEach(epaisseur => {
 
         const piecesGroupe = bois.planches.filter(p => p.epaisseur === epaisseur);
 
+        const piecesPourAlgo = piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }));
+
         const { planchesUtilisees, nonPlacees } = decouperPlanches(
             { longueur: stockLongueur, largeur: stockLargeur },
-            piecesGroupe.map(p => ({ id: p.id, nom: p.nom || "Pièce", longueur: p.longueur, largeur: p.largeur, quantite: p.quantite }))
+            piecesPourAlgo
         );
 
+        const tailleOptimale = trouverTaillePlancheOptimale(piecesPourAlgo);
+
         html += `<div style="margin-bottom:20px;">`;
+
+        if (tailleOptimale) {
+            html += `<div class="peintureResultat" style="margin-bottom:10px;background:#FFF6E5;">
+                <span class="peintureResultatSurface">💡 Planche optimale pour l'épaisseur ${epaisseur} mm, si tu dois l'acheter : <strong>${tailleOptimale.longueur} × ${tailleOptimale.largeur} cm</strong></span>
+            </div>`;
+        }
+
         html += `<div class="peintureResultat" style="margin-bottom:10px;">`;
 
         if (nonPlacees.length === 0) {
