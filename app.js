@@ -10,6 +10,8 @@
 
 "use strict";
 import { initAgenda } from "./js/agenda.js";
+import { initChangelogSync } from "./js/storage.js";
+import { renderNouveautes } from "./js/plus.js";
 import { initEnvieCategoriesSync } from "./js/storage.js";
 import { initHomeMeteo } from "./js/ui.js";
 import { initPromptModal } from "./js/envie.js";
@@ -134,7 +136,7 @@ initModeSync(() => {
     appliquerAffichageMode();
 });
 
-
+initChangelogSync(() => renderNouveautes());
 initEnviesSync(() => {
 
     enviesPretes = true;
