@@ -45,7 +45,7 @@ function renderInboxList() {
     if (!container)
         return;
 
-    const envies = getEnvies().filter(isUntriaged);
+    const envies = getEnvies().filter(e => isUntriaged(e) && e.contexte === getModeActif());
 
     const badge = document.getElementById("inboxBadge");
 
