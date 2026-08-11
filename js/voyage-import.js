@@ -2,7 +2,8 @@ import { searchLocation } from "./location.js";
 import { showToast } from "./toast.js";
 import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } from "./storage.js";
 import { getDureeJours } from "./periode.js";
-import { getPersonnes } from "./storage.js";
+import { getPersonnes, calculerAgeDepuisNaissance } from "./storage.js";
+
 
 let modeTriRapport = "pertinence";
 const categoriesRepliees = new Set();
@@ -56,15 +57,22 @@ function formatPersonnesVoyage(personnesIds) {
     if (!personnesIds || personnesIds.length === 0)
         return "";
 
-    const personnes = getPersonnes();
+    const personnes = getPersonnes().filter(p => personnesIds.includes(p.id));
 
-    const noms = personnesIds
-        .map(id => personnes.find(p => p.id === id)?.nom)
-        .filter(Boolean);
+    const ages = personnes.map(p => calculerAgeDepuisNaissance(p.dateNaissance));
+    const enfants = ages.filter(age => age !== null && age < 18).sort((a, b) => a - b);
+    const adultes = personnes.length - enfants.length;
 
-    return noms.join(", ");
+    let texte = `${adultes} adulte${adultes > 1 ? "s" : ""}`;
+
+    if (enfants.length > 0) {
+        texte += `, ${enfants.length} enfant${enfants.length > 1 ? "s" : ""} (${enfants.map(a => `${a} an${a > 1 ? "s" : ""}`).join(", ")})`;
+    }
+
+    return texte;
 
 }
+
 
 function formatCategoriesParDefaut() {
 
