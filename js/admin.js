@@ -22,6 +22,9 @@ import {
     renamePersonne, deletePersonne
 } from "./storage.js";
 import { showFoyerCode } from "./auth.js";
+import { showToast } from "./toast.js";
+import { getFoyerId } from "./auth.js";
+import { desactiverPartagePublic } from "./storage.js";
 
 let currentTemplateId = null;
 let currentItemType = "fixe";
@@ -118,6 +121,7 @@ export function initAdmin() {
             if (cible === "adminCriteresVoyageModal") renderCriteresVoyageList();
             if (cible === "nouveautesModal") renderNouveautes();
             if (cible === "rapportModal") renderRapport();
+            if (cible === "adminPartagesModal") renderPartagesActifs();
 
         });
 
@@ -978,3 +982,58 @@ function initRapport() {
 
 }
 
+function renderPartagesActifs() {
+
+    const container = document.getElementById("adminPartagesListe");
+    const partages = getEnvies().filter(e => e.partagePublic === true);
+
+    container.innerHTML = "";
+
+    if (partages.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun partage actif pour l'instant.</div>`;
+        return;
+    }
+
+    partages.forEach(envie => {
+
+        const estContainer = isContainer(envie.categorie);
+        const estMaison = envie.contexte === "maison";
+
+        const emoji = estContainer
+            ? (estMaison ? "🛠️" : "🧳")
+            : (getCategorieById(envie.categorie)?.emoji || "💡");
+
+        const lienUrl = `${window.location.origin}/partage.html?foyer=${getFoyerId()}&id=${envie.id}`;
+
+        const row = document.createElement("div");
+        row.className = "templateRow";
+
+        row.innerHTML = `
+            <div class="templateRowNom">${emoji} ${envie.titre}</div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton copierLienPartageAdmin">📋</button>
+                <button class="actionButton deleteButton desactiverPartageAdmin">🔒</button>
+            </div>
+        `;
+
+        row.querySelector(".copierLienPartageAdmin").addEventListener("click", async () => {
+            await navigator.clipboard.writeText(lienUrl);
+            showToast("✓ Lien copié");
+        });
+
+        row.querySelector(".desactiverPartageAdmin").addEventListener("click", () => {
+
+            if (!window.confirm(`Désactiver le partage de "${envie.titre}" ?`))
+                return;
+
+            desactiverPartagePublic(envie.id);
+            renderPartagesActifs();
+            showToast("✓ Partage désactivé");
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+}
