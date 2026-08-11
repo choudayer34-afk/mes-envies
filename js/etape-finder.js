@@ -13,6 +13,7 @@ let miniMap = null;
 let lieuDepart = null;
 let lieuArrivee = null;
 let etapePeriodeChoisie = null;
+let trajetTotalActuel = null;
 
 const activitesSelectionnees = new Set();
 const criteresSelectionnes = new Set();
@@ -97,8 +98,8 @@ export function ouvrirEtapeFinder() {
     renderMultiSelectCollapsible("etapeCriteresContainer", getCriteresVoyage(), criteresSelectionnes, () => {});
     renderVoyageursWidget("etapeVoyageursContainer");
 
-    setupAutocompleteChamp("etapeDepart", "etapeDepartSuggestions", (place) => { lieuDepart = place; });
-    setupAutocompleteChamp("etapeArrivee", "etapeArriveeSuggestions", (place) => { lieuArrivee = place; });
+setupAutocompleteChamp("etapeDepart", "etapeDepartSuggestions", (place) => { lieuDepart = place; tenterInitialiserSliderTroncon(); });
+    setupAutocompleteChamp("etapeArrivee", "etapeArriveeSuggestions", (place) => { lieuArrivee = place; tenterInitialiserSliderTroncon(); });
 
     document.getElementById("etapeFinderJsonStep").classList.add("hidden");
     document.getElementById("etapeFinderFormStep").classList.remove("hidden");
@@ -690,6 +691,66 @@ async function calculerTrajetOSRM(lat1, lon1, lat2, lon2) {
 
 }
 
+async function tenterInitialiserSliderTroncon() {
+
+    if (!lieuDepart?.latitude || !lieuArrivee?.latitude)
+        return;
+
+    const debutSlider = document.getElementById("poiTroncconDebut");
+    const finSlider = document.getElementById("poiTroncconFin");
+    const info = document.getElementById("poiTroncconInfo");
+
+    if (!debutSlider || !finSlider || !info)
+        return;
+
+    info.textContent = "Calcul du trajet total...";
+
+    const trajet = await calculerTrajetOSRM(lieuDepart.latitude, lieuDepart.longitude, lieuArrivee.latitude, lieuArrivee.longitude);
+
+    if (!trajet) {
+        info.textContent = "Trajet total indisponible — la recherche portera sur l'intégralité par défaut.";
+        return;
+    }
+
+    trajetTotalActuel = trajet;
+
+    const totalKm = Math.max(1, Math.round(trajet.distanceKm));
+
+    debutSlider.min = 0;
+    debutSlider.max = totalKm;
+    debutSlider.value = 0;
+
+    finSlider.min = 0;
+    finSlider.max = totalKm;
+    finSlider.value = totalKm;
+
+    info.textContent = `Trajet total : ${totalKm} km · ${formatDureeTrajet(trajet.dureeMin)}`;
+
+    mettreAJourLabelsTroncon();
+
+}
+
+function mettreAJourLabelsTroncon() {
+
+    const debutSlider = document.getElementById("poiTroncconDebut");
+    const finSlider = document.getElementById("poiTroncconFin");
+
+    if (!debutSlider || !finSlider || !trajetTotalActuel)
+        return;
+
+    const totalKm = parseFloat(debutSlider.max) || 1;
+
+    const kmDebut = parseFloat(debutSlider.value);
+    const kmFin = parseFloat(finSlider.value);
+
+    const dureeDebut = Math.round((kmDebut / totalKm) * trajetTotalActuel.dureeMin);
+    const dureeFin = Math.round((kmFin / totalKm) * trajetTotalActuel.dureeMin);
+
+    document.getElementById("poiTroncconDebutLabel").textContent = `${kmDebut} km · ${formatDureeTrajet(dureeDebut)}`;
+    document.getElementById("poiTroncconFinLabel").textContent = `${kmFin} km · ${formatDureeTrajet(dureeFin)}`;
+
+}
+
 function buildLienGoogleMapsApp(depart, etape, arrivee) {
 
     if (!etape.latitude || !etape.longitude)
@@ -764,7 +825,32 @@ function ouvrirGoogleMapsEtape(etape) {
 }
 
 export function initPoiRoute() {
+document.getElementById("poiTroncconDebut")?.addEventListener("input", () => {
 
+        const debutSlider = document.getElementById("poiTroncconDebut");
+        const finSlider = document.getElementById("poiTroncconFin");
+
+        if (parseFloat(debutSlider.value) > parseFloat(finSlider.value)) {
+            debutSlider.value = finSlider.value;
+        }
+
+        mettreAJourLabelsTroncon();
+
+    });
+
+    document.getElementById("poiTroncconFin")?.addEventListener("input", () => {
+
+        const debutSlider = document.getElementById("poiTroncconDebut");
+        const finSlider = document.getElementById("poiTroncconFin");
+
+        if (parseFloat(finSlider.value) < parseFloat(debutSlider.value)) {
+            finSlider.value = debutSlider.value;
+        }
+
+        mettreAJourLabelsTroncon();
+
+    });
+        
     document.getElementById("chercherPoiRouteButton")?.addEventListener("click", async () => {
 
         if (!lieuDepart?.latitude || !lieuArrivee?.latitude) {
@@ -792,9 +878,13 @@ export function initPoiRoute() {
 
         document.getElementById("annulerPoiButton").addEventListener("click", annulerRecherchePoi);
 
-                const resultat = await trouverPoiSurItineraire(lieuDepart, lieuArrivee, rayonKm, categoriesActives, (msg) => {
+    const minKm = parseFloat(document.getElementById("poiTroncconDebut")?.value) || 0;
+        const maxKmValeur = parseFloat(document.getElementById("poiTroncconFin")?.value);
+        const maxKm = isNaN(maxKmValeur) || maxKmValeur === 0 ? Infinity : maxKmValeur;
+
+        const resultat = await trouverPoiSurItineraire(lieuDepart, lieuArrivee, rayonKm, categoriesActives, (msg) => {
             resultEl.innerHTML = `<div class="emptyState">🔍 ${msg}</div>`;
-        });
+        }, minKm, maxKm);
 
         if (resultat.erreur) {
             resultEl.innerHTML = `<div class="emptyState">❌ ${resultat.erreur}</div>`;
