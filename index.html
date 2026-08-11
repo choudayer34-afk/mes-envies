@@ -602,7 +602,24 @@ document.addEventListener("DOMContentLoaded", () => {
 <label class="fieldTitle">Rayon autour de la route</label>
 <input id="poiRayonInput" type="number" value="1" step="0.5" min="0.5" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
 
+
+
 <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;">
+<label class="fieldTitle" style="margin-top:10px;">Chercher entre :</label>
+<div id="poiTroncconInfo" style="font-size:13px;color:var(--color-text-light);margin-bottom:8px;">Choisis un départ et une arrivée pour activer le tronçon.</div>
+
+<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-light);">
+    <span>Début du tronçon</span>
+    <span id="poiTroncconDebutLabel">0 km</span>
+</div>
+<input type="range" id="poiTroncconDebut" min="0" max="0" value="0" step="1" style="width:100%;">
+
+<div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-light);margin-top:10px;">
+    <span>Fin du tronçon</span>
+    <span id="poiTroncconFinLabel">— km</span>
+</div>
+<input type="range" id="poiTroncconFin" min="0" max="0" value="0" step="1" style="width:100%;margin-bottom:14px;">
+    
 <div class="checklistRow">
     <label class="checkLabel">
         <input type="checkbox" class="poiCategorieCheckbox" value="village" checked>
