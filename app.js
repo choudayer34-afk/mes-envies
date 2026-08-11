@@ -70,7 +70,7 @@ import {
 } from "./js/modal.js";
 import { initDateModal } from "./js/periode.js";
 import { initAuth } from "./js/auth.js";
-
+import { initAchatsMaison } from "./js/ui.js";
 import { initVoyage } from "./js/voyage.js";
 import { initCarte } from "./js/carte.js";
 import { initEnviesSync } from "./js/storage.js";
@@ -120,7 +120,8 @@ function init() {
    initRechercheAccueil();
         initIdeesMenu();
     initModeBascule();
-
+initAchatsMaison();
+ 
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
     initActivitesVoyageAssistantSync(() => {});
