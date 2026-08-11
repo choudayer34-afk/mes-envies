@@ -413,7 +413,7 @@ function openTemplateEdit(id) {
     document.getElementById("templateNomInput").value = template.nom;
 
     document.querySelectorAll(".itemTypeChip").forEach(c => c.classList.remove("active"));
-    document.querySelector('.itemTypeChip[data-type="fixe"]').classList.add("active");
+
 
     renderItemCategorieOptions();
     renderTemplateItems();
