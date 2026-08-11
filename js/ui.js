@@ -440,6 +440,126 @@ export function initToggleReduction() {
 
 }
 
+export function initRechercheAccueil() {
+
+    const input = document.getElementById("rechercheAccueilInput");
+
+    if (!input)
+        return;
+
+    input.addEventListener("input", () => {
+
+        const requete = input.value.trim().toLowerCase();
+
+        if (requete.length < 2) {
+            document.getElementById("rechercheAccueilSuggestions")?.classList.add("hidden");
+            return;
+        }
+
+        renderRechercheAccueilResultats(requete);
+
+    });
+
+    input.addEventListener("focus", () => {
+
+        const requete = input.value.trim().toLowerCase();
+
+        if (requete.length >= 2) {
+            renderRechercheAccueilResultats(requete);
+        }
+
+    });
+
+    input.addEventListener("blur", () => {
+        setTimeout(() => document.getElementById("rechercheAccueilSuggestions")?.classList.add("hidden"), 150);
+    });
+
+}
+
+function renderRechercheAccueilResultats(requete) {
+
+    const container = document.getElementById("rechercheAccueilSuggestions");
+
+    if (!container)
+        return;
+
+    const modeActif = getModeActif();
+
+    const conteneursNonTermines = getEnvies().filter(e =>
+        e.contexte === modeActif &&
+        isContainer(e.categorie) &&
+        computeContainerStatus(e).statut !== "termine"
+    );
+
+    const resultats = [];
+
+    conteneursNonTermines.forEach(conteneur => {
+
+        if (conteneur.titre.toLowerCase().includes(requete)) {
+
+            resultats.push({
+                id: conteneur.id,
+                titre: conteneur.titre,
+                type: "conteneur",
+                emoji: modeActif === "maison" ? "🛠️" : "🧳"
+            });
+
+        }
+
+        getEnvies()
+            .filter(e => e.voyageId === conteneur.id)
+            .forEach(enfant => {
+
+                if (enfant.titre.toLowerCase().includes(requete)) {
+
+                    resultats.push({
+                        id: enfant.id,
+                        titre: enfant.titre,
+                        type: "sous-tache",
+                        emoji: getCategorieById(enfant.categorie)?.emoji || "💡",
+                        parent: conteneur.titre
+                    });
+
+                }
+
+            });
+
+    });
+
+    if (resultats.length === 0) {
+
+        container.innerHTML = `<div class="autocompleteItem" style="color:var(--color-text-light);">Aucun résultat</div>`;
+        container.classList.remove("hidden");
+        return;
+
+    }
+
+    container.innerHTML = resultats.slice(0, 15).map((r, i) => `
+        <div class="autocompleteItem" data-index="${i}">
+            ${r.emoji} ${r.titre}
+            ${r.type === "sous-tache" ? `<div style="font-size:11px;color:var(--color-text-light);">dans ${r.parent}</div>` : ""}
+        </div>
+    `).join("");
+
+    container.classList.remove("hidden");
+
+    container.querySelectorAll(".autocompleteItem").forEach((item, i) => {
+
+        item.addEventListener("mousedown", (event) => {
+
+            event.preventDefault();
+
+            container.classList.add("hidden");
+            document.getElementById("rechercheAccueilInput").value = "";
+
+            openEnvie(resultats[i].id, null);
+
+        });
+
+    });
+
+}
+
 function createEnvieCard(envie) {
 
     const card = document.createElement("div");
