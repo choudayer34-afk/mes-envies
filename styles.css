@@ -2471,3 +2471,7 @@ button {
     flex-shrink:0;
     padding:4px;
 }
+
+.envieCardDragHandleInline{
+    flex-shrink:0;
+}
