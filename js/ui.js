@@ -7,7 +7,7 @@ import { getModeActif, basculerMode } from "./storage.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem, assurerListeLibreCourses } from "./storage.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion, openChecklistAccordion } from "./envie.js";
-
+import { normaliserTexte } from "./utils.js";
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
 let modeReduitGlobal = false;
@@ -507,12 +507,14 @@ export function initRechercheAccueil() {
 
 }
 
-function renderRechercheAccueilResultats(requete) {
+function renderRechercheAccueilResultats(requeteBrute) {
 
     const container = document.getElementById("rechercheAccueilSuggestions");
 
     if (!container)
         return;
+
+    const requete = normaliserTexte(requeteBrute);
 
     const modeActif = getModeActif();
 
@@ -526,7 +528,7 @@ function renderRechercheAccueilResultats(requete) {
 
     conteneursNonTermines.forEach(conteneur => {
 
-        if (conteneur.titre.toLowerCase().includes(requete)) {
+        if (normaliserTexte(conteneur.titre).includes(requete)) {
 
             resultats.push({
                 id: conteneur.id,
@@ -541,7 +543,7 @@ function renderRechercheAccueilResultats(requete) {
             .filter(e => e.voyageId === conteneur.id)
             .forEach(enfant => {
 
-                if (enfant.titre.toLowerCase().includes(requete)) {
+                if (normaliserTexte(enfant.titre).includes(requete)) {
 
                     resultats.push({
                         id: enfant.id,
