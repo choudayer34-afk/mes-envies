@@ -54,6 +54,7 @@ export function initOutils() {
         initRunner();
     initSnake();
     initNback();
+    initPlatformer();
     initBreakout();
 initTetris();
 initTaquin();
@@ -1963,7 +1964,8 @@ const CARTOUCHES_GAMEBOY = [
     { nom: "Empileur de blocs", emoji: "🧱", couleur: "#6B4C9A", modal: "tetrisModal", demarrer: () => demarrerTetris() },
         { nom: "Taquin", emoji: "🧩", couleur: "#B5854B", modal: "taquinModal", demarrer: () => demarrerTaquin(3) },
     { nom: "Démineur", emoji: "💣", couleur: "#4A4A52", modal: "demineurModal", demarrer: () => demarrerDemineur("facile") },
-        { nom: "Suite de chiffres", emoji: "🔢", couleur: "#3E7CB1", modal: "memChiffresModal", demarrer: () => demarrerMemoireChiffres() }
+        { nom: "Suite de chiffres", emoji: "🔢", couleur: "#3E7CB1", modal: "memChiffresModal", demarrer: () => demarrerMemoireChiffres() },
+            { nom: "Aventure Pixel", emoji: "🏃", couleur: "#D9822B", modal: "platformerModal", demarrer: () => demarrerPlatformer() }
 
 ];
 
@@ -4282,3 +4284,417 @@ function avancerNback() {
 
 }
 
+/* ---------- Aventure Pixel — plateforme façon jeu vintage (Game Boy) ---------- */
+
+const PLAT_SOL = 184;
+const PLAT_GRAVITE = 0.5;
+const PLAT_VITESSE_MAX_CHUTE = 12;
+const PLAT_LARGEUR_JOUEUR = 12;
+const PLAT_HAUTEUR_JOUEUR = 14;
+
+const PLAT_NIVEAU = {
+    longueur: 2400,
+    plateformes: [
+        { x: 200, y: 140, largeur: 60 },
+        { x: 340, y: 110, largeur: 50 },
+        { x: 480, y: 150, largeur: 70 },
+        { x: 650, y: 120, largeur: 50 },
+        { x: 820, y: 150, largeur: 90 },
+        { x: 1000, y: 100, largeur: 60 },
+        { x: 1150, y: 150, largeur: 60 },
+        { x: 1300, y: 130, largeur: 70 },
+        { x: 1500, y: 150, largeur: 90 },
+        { x: 1700, y: 110, largeur: 50 },
+        { x: 1850, y: 150, largeur: 70 },
+        { x: 2050, y: 130, largeur: 100 }
+    ],
+    trous: [
+        { x: 560, largeur: 60 },
+        { x: 1250, largeur: 50 },
+        { x: 1950, largeur: 60 }
+    ],
+    ennemis: [
+        { x: 300, xMin: 280, xMax: 380, y: PLAT_SOL, direction: 1 },
+        { x: 700, xMin: 680, xMax: 780, y: PLAT_SOL, direction: 1 },
+        { x: 900, xMin: 850, xMax: 950, y: 150, direction: 1, surPlateforme: true },
+        { x: 1400, xMin: 1350, xMax: 1450, y: PLAT_SOL, direction: 1 },
+        { x: 1800, xMin: 1750, xMax: 1850, y: PLAT_SOL, direction: 1 },
+        { x: 2100, xMin: 2050, xMax: 2150, y: PLAT_SOL, direction: 1 }
+    ],
+    pieces: [
+        { x: 220, y: 110 }, { x: 350, y: 80 }, { x: 500, y: 120 },
+        { x: 660, y: 90 }, { x: 840, y: 120 }, { x: 1010, y: 70 },
+        { x: 1160, y: 120 }, { x: 1320, y: 100 }, { x: 1520, y: 120 },
+        { x: 1710, y: 80 }, { x: 1870, y: 120 }, { x: 2070, y: 100 },
+        { x: 2200, y: 150 }, { x: 2280, y: 150 }
+    ],
+    drapeauX: 2350
+};
+
+let platCtx = null;
+let platAnimId = null;
+let platState = null;
+
+function resoudreCollisionSolPlateforme(joueur, plateformes, solY) {
+
+    let y = joueur.y + joueur.vy;
+    let vy = joueur.vy;
+    let onGround = false;
+
+    const piedsAvant = joueur.y + joueur.hauteur;
+    const piedsApres = y + joueur.hauteur;
+
+    if (piedsApres >= solY && vy >= 0) {
+        y = solY - joueur.hauteur;
+        vy = 0;
+        onGround = true;
+    }
+
+    if (vy >= 0 && !onGround) {
+
+        plateformes.forEach(p => {
+
+            const chevaucheX = joueur.x + joueur.largeur > p.x && joueur.x < p.x + p.largeur;
+
+            if (chevaucheX && piedsAvant <= p.y + 1 && piedsApres >= p.y) {
+                y = p.y - joueur.hauteur;
+                vy = 0;
+                onGround = true;
+            }
+
+        });
+
+    }
+
+    return { y, vy, onGround };
+
+}
+
+function estAuDessusDuVide(x, largeur) {
+
+    return PLAT_NIVEAU.trous.some(trou =>
+        x + largeur > trou.x && x < trou.x + trou.largeur
+    );
+
+}
+
+function initPlatformer() {
+
+    const canvas = document.getElementById("platformerCanvas");
+
+    if (!canvas)
+        return;
+
+    platCtx = canvas.getContext("2d");
+
+    const touches = { gauche: false, droite: false };
+
+    const definirTouche = (touche, actif) => {
+        touches[touche] = actif;
+    };
+
+    const sauter = () => {
+
+        if (!platState) {
+            demarrerPlatformer();
+            return;
+        }
+
+        if (platState.gameOver) {
+            demarrerPlatformer();
+            return;
+        }
+
+        if (platState.joueur.onGround) {
+            platState.joueur.vy = -8.5;
+            platState.joueur.onGround = false;
+        }
+
+    };
+
+    ["mousedown", "touchstart"].forEach(evt => {
+        document.getElementById("platBtnLeft")?.addEventListener(evt, (e) => { e.preventDefault(); definirTouche("gauche", true); });
+        document.getElementById("platBtnRight")?.addEventListener(evt, (e) => { e.preventDefault(); definirTouche("droite", true); });
+    });
+
+    ["mouseup", "mouseleave", "touchend"].forEach(evt => {
+        document.getElementById("platBtnLeft")?.addEventListener(evt, () => definirTouche("gauche", false));
+        document.getElementById("platBtnRight")?.addEventListener(evt, () => definirTouche("droite", false));
+    });
+
+    document.getElementById("platBtnA")?.addEventListener("click", sauter);
+    document.getElementById("platBtnStart")?.addEventListener("click", demarrerPlatformer);
+    canvas.addEventListener("pointerdown", sauter);
+
+    document.addEventListener("keydown", (event) => {
+
+        if (document.getElementById("platformerModal")?.classList.contains("hidden"))
+            return;
+
+        if (event.code === "ArrowLeft") { event.preventDefault(); definirTouche("gauche", true); }
+        if (event.code === "ArrowRight") { event.preventDefault(); definirTouche("droite", true); }
+        if (event.code === "Space" || event.code === "ArrowUp") { event.preventDefault(); sauter(); }
+
+    });
+
+    document.addEventListener("keyup", (event) => {
+        if (event.code === "ArrowLeft") definirTouche("gauche", false);
+        if (event.code === "ArrowRight") definirTouche("droite", false);
+    });
+
+    platState = { touches };
+
+    document.querySelector("#platformerModal .outilFermerButton")?.addEventListener("click", () => {
+
+        if (platAnimId) {
+            cancelAnimationFrame(platAnimId);
+            platAnimId = null;
+        }
+
+        document.getElementById("gameboyMenuModal")?.classList.remove("hidden");
+
+    });
+
+}
+
+function demarrerPlatformer() {
+
+    if (platAnimId) {
+        cancelAnimationFrame(platAnimId);
+    }
+
+    platState = {
+        touches: platState?.touches || { gauche: false, droite: false },
+        joueur: { x: 20, y: PLAT_SOL - PLAT_HAUTEUR_JOUEUR, largeur: PLAT_LARGEUR_JOUEUR, hauteur: PLAT_HAUTEUR_JOUEUR, vy: 0, onGround: true, regardeDroite: true },
+        camera: 0,
+        pieces: PLAT_NIVEAU.pieces.map(p => ({ ...p, ramassee: false })),
+        ennemis: PLAT_NIVEAU.ennemis.map(e => ({ ...e, vivant: true })),
+        score: 0,
+        vies: 3,
+        gameOver: false,
+        victoire: false,
+        invulnerableJusqua: 0
+    };
+
+    document.getElementById("platformerFinOverlay")?.classList.add("hidden");
+    majScorePlatformer();
+
+    bouclerPlatformer();
+
+}
+
+function majScorePlatformer() {
+
+    const overlay = document.getElementById("platformerScoreOverlay");
+
+    if (overlay && platState) {
+        overlay.textContent = `💰 ${platState.score} · ❤️ ${platState.vies}`;
+    }
+
+}
+
+function terminerPlatformer(victoire) {
+
+    platState.gameOver = true;
+    platState.victoire = victoire;
+
+    document.getElementById("platformerFinTitre").textContent = victoire ? "🏁 Niveau terminé !" : "💀 Perdu !";
+    document.getElementById("platformerFinScore").textContent = `Score : ${platState.score}`;
+    document.getElementById("platformerFinOverlay")?.classList.remove("hidden");
+
+}
+
+function bouclerPlatformer(timestamp) {
+
+    if (!platCtx || !platState || !platState.joueur)
+        return;
+
+    const canvas = document.getElementById("platformerCanvas");
+    const s = platState;
+    const j = s.joueur;
+
+    if (!s.gameOver) {
+
+        if (s.touches.gauche) {
+            j.x -= 2.2;
+            j.regardeDroite = false;
+        }
+
+        if (s.touches.droite) {
+            j.x += 2.2;
+            j.regardeDroite = true;
+        }
+
+        j.x = Math.max(0, Math.min(j.x, PLAT_NIVEAU.longueur - j.largeur));
+
+        j.vy = Math.min(j.vy + PLAT_GRAVITE, PLAT_VITESSE_MAX_CHUTE);
+
+        const auDessusDuVide = estAuDessusDuVide(j.x, j.largeur);
+
+        if (auDessusDuVide) {
+
+            j.y += j.vy;
+            j.onGround = false;
+
+            if (j.y > canvas.height + 40) {
+
+                s.vies--;
+                majScorePlatformer();
+
+                if (s.vies <= 0) {
+                    terminerPlatformer(false);
+                } else {
+                    j.x = Math.max(0, j.x - 150);
+                    j.y = PLAT_SOL - j.hauteur;
+                    j.vy = 0;
+                    j.onGround = true;
+                    s.invulnerableJusqua = timestamp + 800;
+                }
+
+            }
+
+        } else {
+
+            const resultat = resoudreCollisionSolPlateforme(j, PLAT_NIVEAU.plateformes, PLAT_SOL);
+            j.y = resultat.y;
+            j.vy = resultat.vy;
+            j.onGround = resultat.onGround;
+
+        }
+
+        s.ennemis.forEach(e => {
+
+            if (!e.vivant)
+                return;
+
+            e.x += 1 * e.direction;
+
+            if (e.x <= e.xMin || e.x + 12 >= e.xMax) {
+                e.direction *= -1;
+            }
+
+            const collisionX = j.x + j.largeur > e.x && j.x < e.x + 12;
+            const collisionY = j.y + j.hauteur > e.y - 12 && j.y < e.y;
+
+            if (collisionX && collisionY && timestamp > (s.invulnerableJusqua || 0)) {
+
+                const vientDuDessus = j.vy > 0 && (j.y + j.hauteur - e.y) < 8;
+
+                if (vientDuDessus) {
+
+                    e.vivant = false;
+                    j.vy = -6;
+                    s.score += 10;
+                    majScorePlatformer();
+
+                } else {
+
+                    s.vies--;
+                    majScorePlatformer();
+
+                    if (s.vies <= 0) {
+                        terminerPlatformer(false);
+                    } else {
+                        j.x = Math.max(0, j.x - 100);
+                        s.invulnerableJusqua = timestamp + 800;
+                    }
+
+                }
+
+            }
+
+        });
+
+        s.pieces.forEach(p => {
+
+            if (p.ramassee)
+                return;
+
+            const collision = j.x + j.largeur > p.x && j.x < p.x + 10 && j.y + j.hauteur > p.y && j.y < p.y + 10;
+
+            if (collision) {
+                p.ramassee = true;
+                s.score += 5;
+                majScorePlatformer();
+            }
+
+        });
+
+        if (j.x + j.largeur >= PLAT_NIVEAU.drapeauX) {
+            terminerPlatformer(true);
+        }
+
+        s.camera = Math.max(0, Math.min(j.x - canvas.width / 3, PLAT_NIVEAU.longueur - canvas.width));
+
+    }
+
+    platCtx.fillStyle = "#9BBC0F";
+    platCtx.fillRect(0, 0, canvas.width, canvas.height);
+
+    platCtx.fillStyle = "#0F380F";
+
+    for (let x = -50; x < canvas.width + 50; x += 60) {
+        const xMonde = Math.floor((x + s.camera) / 60) * 60 - s.camera;
+        platCtx.globalAlpha = 0.15;
+        platCtx.fillRect(xMonde, 30, 30, 20);
+    }
+    platCtx.globalAlpha = 1;
+
+    let segmentDebut = 0;
+
+    PLAT_NIVEAU.trous.forEach(trou => {
+
+        platCtx.fillStyle = "#0F380F";
+        platCtx.fillRect(segmentDebut - s.camera, PLAT_SOL, trou.x - segmentDebut, canvas.height - PLAT_SOL);
+        segmentDebut = trou.x + trou.largeur;
+
+    });
+
+    platCtx.fillRect(segmentDebut - s.camera, PLAT_SOL, PLAT_NIVEAU.longueur - segmentDebut, canvas.height - PLAT_SOL);
+
+    platCtx.fillStyle = "#306230";
+
+    PLAT_NIVEAU.plateformes.forEach(p => {
+        platCtx.fillRect(p.x - s.camera, p.y, p.largeur, 8);
+    });
+
+    platCtx.fillStyle = "#E0C25A";
+
+    s.pieces.forEach(p => {
+        if (!p.ramassee) {
+            platCtx.beginPath();
+            platCtx.arc(p.x - s.camera + 5, p.y + 5, 5, 0, Math.PI * 2);
+            platCtx.fill();
+        }
+    });
+
+    platCtx.fillStyle = "#0F380F";
+
+    s.ennemis.forEach(e => {
+        if (e.vivant) {
+            platCtx.fillRect(e.x - s.camera, e.y - 12, 12, 12);
+        }
+    });
+
+    platCtx.fillStyle = "#306230";
+    platCtx.fillRect(PLAT_NIVEAU.drapeauX - s.camera, PLAT_SOL - 60, 4, 60);
+    platCtx.beginPath();
+    platCtx.moveTo(PLAT_NIVEAU.drapeauX - s.camera + 4, PLAT_SOL - 60);
+    platCtx.lineTo(PLAT_NIVEAU.drapeauX - s.camera + 20, PLAT_SOL - 52);
+    platCtx.lineTo(PLAT_NIVEAU.drapeauX - s.camera + 4, PLAT_SOL - 44);
+    platCtx.fill();
+
+    const clignote = j.vy && timestamp < (s.invulnerableJusqua || 0) && Math.floor(timestamp / 100) % 2 === 0;
+
+    if (!clignote) {
+        platCtx.fillStyle = "#0F380F";
+        platCtx.fillRect(j.x - s.camera, j.y, j.largeur, j.hauteur);
+    }
+
+    if (s.gameOver) {
+        return;
+    }
+
+    platAnimId = requestAnimationFrame(bouclerPlatformer);
+
+}
