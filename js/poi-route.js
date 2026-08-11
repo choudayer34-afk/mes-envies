@@ -113,13 +113,13 @@ async function chercherPoiAutourPoint(point, rayonM, tags) {
 }
 
 
-export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress, minKm = 0, maxKm = Infinity) {
+export async function trouverPoiSurItineraire(depart, arrivee, rayonKm, categoriesActives, onProgress, minKm = 0, maxKm = Infinity, trajetPredefinit = null) {
 
     onProgress?.("Calcul de l'itinéraire...");
 
-    const trajetComplet = await calculerItineraireOSRM(depart, arrivee);
+    const trajetComplet = trajetPredefinit || await calculerItineraireOSRM(depart, arrivee);
 
-    if (!trajetComplet) {
+    if (!trajetComplet || trajetComplet.length === 0) {
         return { erreur: "Impossible de calculer l'itinéraire." };
     }
 
@@ -217,6 +217,31 @@ async function calculerItineraireOSRM(depart, arrivee) {
         return null;
 
     return data.routes[0].geometry.coordinates.map(([lon, lat]) => ({ lat, lon }));
+
+}
+
+export async function calculerItinerairesAlternatifs(depart, arrivee) {
+
+    try {
+
+        const url = `https://router.project-osrm.org/route/v1/driving/${depart.longitude},${depart.latitude};${arrivee.longitude},${arrivee.latitude}?overview=full&geometries=geojson&alternatives=true`;
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.code !== "Ok" || !data.routes?.length)
+            return [];
+
+        return data.routes.slice(0, 3).map(route => ({
+            geometry: route.geometry.coordinates.map(([lon, lat]) => ({ lat, lon })),
+            distanceKm: route.distance / 1000,
+            dureeMin: Math.round(route.duration / 60)
+        }));
+
+    } catch (err) {
+        console.error("Erreur calcul itinéraires alternatifs: " + err.message);
+        return [];
+    }
 
 }
 
