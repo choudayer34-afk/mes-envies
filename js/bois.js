@@ -1,5 +1,5 @@
 import { getCurrentEnvieId } from "./envie.js";
-import { getEnvies, updateEnvieBois } from "./storage.js";
+import { getEnvies, updateEnvieBois, setChecklistItems } from "./storage.js";
 import { showToast } from "./toast.js";
 
 let plancheEnCoursEditionId = null;
@@ -433,8 +433,66 @@ function ouvrirEditionPlanche(planche) {
 
 }
 
-export function initBoisCalculateur() {
+function ajouterPlanchesAuxAchats() {
 
+    const envie = getEnvieCourante();
+
+    if (!envie)
+        return;
+
+    const bois = getBois(envie);
+
+    if (bois.planches.length === 0) {
+        showToast("Aucune planche à ajouter");
+        return;
+    }
+
+    const checklistActuelle = envie.checklist || [];
+    const nouveauxItems = [];
+
+    bois.planches.forEach(planche => {
+
+        for (let i = 0; i < planche.quantite; i++) {
+
+            const origineId = `${planche.id}_${i}`;
+
+            const dejaPresent = checklistActuelle.some(item => item.origineBoisId === origineId);
+
+            if (dejaPresent)
+                continue;
+
+            nouveauxItems.push({
+                id: crypto.randomUUID(),
+                texte: `${planche.nom || "Planche"} — ${planche.longueur} × ${planche.largeur} cm, ${planche.epaisseur} mm`,
+                quantite: 1,
+                categorieId: null,
+                assignedTo: [],
+                parPersonne: false,
+                checked: false,
+                checkedBy: {},
+                magasin: null,
+                url: null,
+                origineBoisId: origineId
+            });
+
+        }
+
+    });
+
+    if (nouveauxItems.length === 0) {
+        showToast("Toutes les planches sont déjà dans la checklist");
+        return;
+    }
+
+    setChecklistItems(envie.id, [...checklistActuelle, ...nouveauxItems]);
+
+    showToast(`✓ ${nouveauxItems.length} ligne${nouveauxItems.length > 1 ? "s" : ""} ajoutée${nouveauxItems.length > 1 ? "s" : ""} à la checklist`);
+
+}
+
+export function initBoisCalculateur() {
+document.getElementById("ajouterBoisAchatsButton")?.addEventListener("click", ajouterPlanchesAuxAchats);
+    
  document.getElementById("addBoisPlancheButton")?.addEventListener("click", () => {
 
         const nomInput = document.getElementById("boisPlancheNom");
