@@ -2430,3 +2430,41 @@ button {
 .envie-card-avec-photo .envieReduireButton{
     color:white;
 }
+
+.envie-card-reduite{
+    padding:0;
+}
+
+.envieReduiteLigne{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 16px;
+}
+
+.envieReduiteTitre{
+    font-size:14px;
+    font-weight:600;
+    color:var(--color-text);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    flex:1;
+}
+
+.envieReduiteInfo{
+    font-size:12px;
+    color:var(--color-text-light);
+    white-space:nowrap;
+    flex-shrink:0;
+}
+
+.envieReduireButtonInline{
+    background:none;
+    border:none;
+    font-size:16px;
+    color:var(--color-text-light);
+    cursor:pointer;
+    flex-shrink:0;
+    padding:4px;
+}
