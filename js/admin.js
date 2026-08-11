@@ -8,6 +8,7 @@ import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
 import { isContainer } from "./envie.js";
 import { computeContainerStatus } from "./progress.js";
+import { getEnvies } from "./storage.js";
 
 import {
     getActiviteTypes, createActiviteType, updateActiviteType, deleteActiviteType, moveActiviteType,
