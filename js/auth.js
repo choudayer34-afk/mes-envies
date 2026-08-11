@@ -76,7 +76,18 @@ authReady.then(() => {
             return;
         }
 
-        currentFoyerId = await resolveFoyer(user.uid);
+       try {
+
+            currentFoyerId = await resolveFoyer(user.uid);
+
+        } catch (error) {
+
+            console.error("Erreur lecture du foyer : " + error.code + " — " + error.message);
+            document.getElementById("authError")?.textContent && (document.getElementById("authError").textContent = "Erreur d'accès à tes données (permissions Firestore). Contacte l'administrateur.");
+            showLoginScreen();
+            return;
+
+        }
 
         if (!currentFoyerId) {
             showFoyerScreen();
