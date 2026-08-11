@@ -29,6 +29,12 @@ export function renderChecklist(envie) {
         toggleVue.style.display = envie.contexte === "maison" ? "none" : "flex";
     }
 
+    const header = document.querySelector('.accordionHeader[data-target="checklistSection"] span');
+
+    if (header) {
+        header.textContent = envie.contexte === "maison" ? "🛒 À acheter" : "🧳 À emporter";
+    }
+
     if (envie.contexte === "maison" && viewMode === "personne") {
         viewMode = "categorie";
     }
@@ -334,7 +340,7 @@ function renderPersonneSelector(container, selected, onChange) {
 
 export function initChecklistModal() {
 
-           document.getElementById("addChecklistButton").addEventListener("click", () => {
+document.getElementById("addChecklistButton").addEventListener("click", () => {
 
         currentChecklistEnvieId = getCurrentEnvieId();
         currentAssignedTo = [];
@@ -342,6 +348,16 @@ export function initChecklistModal() {
 
         document.getElementById("checklistInput").value = "";
     
+        const envieActuelle = getEnvies().find(e => e.id === currentChecklistEnvieId);
+        const estMaison = envieActuelle?.contexte === "maison";
+
+        const labelPourQui = document.getElementById("checklistPersonnesSelector")?.previousElementSibling;
+
+        if (labelPourQui) {
+            labelPourQui.style.display = estMaison ? "none" : "block";
+        }
+
+        document.getElementById("checklistPersonnesSelector").style.display = estMaison ? "none" : "";
 
         refreshCreationSelector();
         renderBulkCategorieSelector();
