@@ -2510,3 +2510,13 @@ button {
     color:var(--color-text);
     text-align:center;
 }
+
+.achatGroupeTitreCliquable{
+    cursor:pointer;
+    text-decoration:underline;
+    text-decoration-color:transparent;
+}
+
+.achatGroupeTitreCliquable:active{
+    text-decoration-color:currentColor;
+}
