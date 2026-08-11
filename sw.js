@@ -169,3 +169,11 @@ async function reseauPuisCacheNavigation(request) {
     }
 
 }
+
+self.addEventListener('message', (event) => {
+
+    if (event.data?.type === 'GET_VERSION') {
+        event.source.postMessage({ type: 'VERSION', version: CACHE_NAME });
+    }
+
+});
