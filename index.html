@@ -1855,6 +1855,10 @@ document.addEventListener("DOMContentLoaded", () => {
             ℹ️ À propos
         </button>
 
+        <button id="plusBtnNouveautes" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+    🆕 Nouveautés de l'app
+</button>
+
     </div>
 
 </div>
@@ -1978,6 +1982,20 @@ document.addEventListener("DOMContentLoaded", () => {
         </ul>
 
         <p style="color:var(--color-text-light);font-size:13px;margin-top:16px;">Développée en famille, pour la famille.</p>
+
+    </div>
+
+</div>
+
+    <div id="nouveautesModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeNouveautes" class="backButton">← Retour</button>
+
+        <h2>🆕 Nouveautés de l'app</h2>
+
+        <div id="nouveautesListe"></div>
 
     </div>
 
