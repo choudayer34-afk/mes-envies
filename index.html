@@ -1476,7 +1476,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span class="adminTuileEmoji">🔑</span>
                 <span class="adminTuileLabel">Mon compte</span>
             </button>
-
+<button class="adminTuile" data-modal="adminPartagesModal">
+    <span class="adminTuileEmoji">🔗</span>
+    <span class="adminTuileLabel">Partages actifs</span>
+</button>
 <button class="adminTuile" data-modal="rapportModal">
     <span class="adminTuileEmoji">📊</span>
     <span class="adminTuileLabel">Rapport</span>
@@ -1584,7 +1587,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     </div>
 </div>
-
+<div id="adminPartagesModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>🔗 Partages actifs</h2>
+        <div id="adminPartagesListe"></div>
+    </div>
+</div>
 <div id="adminActiviteTypesModal" class="modal-overlay hidden">
     <div class="modal">
         <button class="backButton adminSousRetour">← Retour</button>
