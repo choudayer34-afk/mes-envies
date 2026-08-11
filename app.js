@@ -16,6 +16,7 @@ import { initEnvieCategoriesSync } from "./js/storage.js";
 import { initHomeMeteo } from "./js/ui.js";
 import { initPromptModal } from "./js/envie.js";
 import { initPhotos } from "./js/photos.js";
+import { initRechercheAccueil } from "./js/ui.js";
 import { initJeux } from "./js/jeux.js";
 import { initFichesSurvieCustomSync } from "./js/storage.js";
 import { initSurvieEditor } from "./js/survie.js";
@@ -116,7 +117,7 @@ function init() {
     initAlbum();
     initPoiRoute();
     initTableauSaisie();
-   
+   initRechercheAccueil();
         initIdeesMenu();
     initModeBascule();
 
