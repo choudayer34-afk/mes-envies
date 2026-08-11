@@ -1574,6 +1574,19 @@ document.addEventListener("DOMContentLoaded", () => {
 <label class="fieldTitle">Catégorie</label>
 <div id="checklistCategorieBulkSelector" class="categorieSelector fiche"></div>
 
+        <div id="checklistAchatFields" style="display:none;">
+
+    <label class="fieldTitle" style="margin-top:12px;">Magasin (optionnel)</label>
+    <div style="position:relative;">
+        <input type="text" id="checklistMagasinInput" placeholder="Ex: Leroy Merlin" class="numberInput" autocomplete="off">
+        <div id="checklistMagasinSuggestions" class="autocompleteSuggestions hidden"></div>
+    </div>
+
+    <label class="fieldTitle" style="margin-top:12px;">Lien (optionnel)</label>
+    <input type="text" id="checklistUrlInput" placeholder="https://..." class="numberInput">
+
+</div>
+        
 <label class="fieldTitle">Pour qui ?</label>
 <div id="checklistPersonnesSelector" class="categorieSelector fiche"></div>
 
