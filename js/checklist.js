@@ -10,7 +10,7 @@ import { setChecklistItems } from "./storage.js";
 
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
-import { computeQuantite } from "./periode.js";
+import { computeQuantite , getDureeJours} from "./periode.js";
 import {
     addMultipleChecklistItems, createChecklistCategory
 } from "./storage.js";
@@ -104,10 +104,41 @@ function renderByPersonne(items, envie, checklist) {
         return;
     }
 
+    const itemsTous = items.filter(i => !i.assignedTo?.length);
+
+    if (itemsTous.length > 0) {
+
+        const tousHeader = document.createElement("div");
+        tousHeader.className = "checklistCategorieHeader";
+        tousHeader.textContent = "👥 Tous";
+        checklist.appendChild(tousHeader);
+
+        groupByCategorie(itemsTous, categories).forEach(group => {
+
+            if (group.categorie !== undefined) {
+
+                const subHeader = document.createElement("div");
+                subHeader.className = "checklistSousCategorieHeader";
+                subHeader.textContent = group.categorie
+                    ? `${group.categorie.emoji} ${group.categorie.nom}`
+                    : "Sans catégorie";
+
+                checklist.appendChild(subHeader);
+
+            }
+
+            group.items.forEach(item => {
+                checklist.appendChild(createChecklistRow(item, envie, null));
+            });
+
+        });
+
+    }
+
     personnes.forEach(personne => {
 
         const concernes = items.filter(
-            i => !i.assignedTo?.length || i.assignedTo.includes(personne.id)
+            i => i.assignedTo?.length && i.assignedTo.includes(personne.id)
         );
 
         if (concernes.length === 0)
@@ -141,6 +172,7 @@ function renderByPersonne(items, envie, checklist) {
     });
 
 }
+
 
 
 export function groupByCategorie(items, categories) {
@@ -737,12 +769,16 @@ function applyTemplate(templateId) {
 
     const nouveauxItems = template.items.map(item => {
 
-        if (item.type === "parPersonne") {
+        if (item.parPersonne) {
+
+            const quantiteAvecJours = item.parJour
+                ? item.quantite * getDureeJours(envie.date)
+                : item.quantite;
 
             return {
                 id: crypto.randomUUID(),
                 texte: item.texte,
-                quantite: item.quantite,
+                quantite: quantiteAvecJours,
                 categorieId: item.categorieId,
                 assignedTo: envie.personnesIds || [],
                 parPersonne: true,
@@ -775,6 +811,7 @@ function applyTemplate(templateId) {
     showToast(`✓ Modèle "${template.nom}" appliqué`);
 
 }
+
 
 
 function formatProgressBadge(item) {
