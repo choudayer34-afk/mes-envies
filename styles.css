@@ -2523,3 +2523,11 @@ button {
 .achatGroupeTitreCliquable:active{
     text-decoration-color:currentColor;
 }
+
+.kpiLigneCliquable{
+    cursor:pointer;
+}
+
+.kpiDetailItem{
+    cursor:pointer;
+}
