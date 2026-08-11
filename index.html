@@ -1322,150 +1322,189 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </div>
 
+
 <div id="adminModal" class="modal-overlay hidden">
 
     <div class="modal">
 
         <button id="closeAdmin" class="backButton">← Retour</button>
 
-        <h2>⚙️ Paramètres</h2>
+        <h2>⚙️ Administration</h2>
 
-        <div class="fieldTitle">Éléments administrables</div>
+        <div class="adminTuilesGrid">
 
-        <div id="adminMenu" class="categorieSelector fiche">
-            <button class="categorieChip active" type="button" data-target="templates">🧳 Modèles de checklist</button>
-            <button class="categorieChip" type="button" data-target="categories">🏷️ Catégories de checklist</button>
-            <button class="categorieChip" type="button" data-target="personnes">👤 Personnes du foyer</button>
-        <button class="categorieChip" type="button" data-target="envieCategories">🎯 Catégories d'envie</button>
-        <button class="categorieChip" type="button" data-target="external">🔗 Outils externes</button>
-        <button class="categorieChip" type="button" data-target="promptRegion">🧭 Prompt région</button>
-<button class="categorieChip" type="button" data-target="activiteTypes">🏞️ Types d'activités</button>
-<button class="categorieChip" type="button" data-target="criteresVoyage">✅ Critères voyage</button>
+            <button class="adminTuile" data-modal="adminTemplatesModal">
+                <span class="adminTuileEmoji">🧳</span>
+                <span class="adminTuileLabel">Modèles de checklist</span>
+            </button>
 
+            <button class="adminTuile" data-modal="adminCategoriesModal">
+                <span class="adminTuileEmoji">🏷️</span>
+                <span class="adminTuileLabel">Catégories de checklist</span>
+            </button>
 
+            <button class="adminTuile" data-modal="adminPersonnesModal">
+                <span class="adminTuileEmoji">👤</span>
+                <span class="adminTuileLabel">Personnes du foyer</span>
+            </button>
 
-        </div>
+            <button class="adminTuile" data-modal="adminEnvieCategoriesModal">
+                <span class="adminTuileEmoji">🎯</span>
+                <span class="adminTuileLabel">Catégories d'envie</span>
+            </button>
 
-        <div id="adminChecklistTemplates" class="adminSection">
+            <button class="adminTuile" data-modal="adminExternalModal">
+                <span class="adminTuileEmoji">🔗</span>
+                <span class="adminTuileLabel">Outils externes</span>
+            </button>
 
-            <div id="templatesList"></div>
+            <button class="adminTuile" data-modal="adminActiviteTypesModal">
+                <span class="adminTuileEmoji">🏞️</span>
+                <span class="adminTuileLabel">Types d'activités</span>
+            </button>
 
-            <button id="addTemplateButton" class="secondaryButton">
-                ➕ Nouveau modèle
+            <button class="adminTuile" data-modal="adminCriteresVoyageModal">
+                <span class="adminTuileEmoji">✅</span>
+                <span class="adminTuileLabel">Critères voyage</span>
+            </button>
+
+            <button class="adminTuile" data-modal="adminCompteModal">
+                <span class="adminTuileEmoji">🔑</span>
+                <span class="adminTuileLabel">Mon compte</span>
             </button>
 
         </div>
 
-        <div id="adminChecklistCategories" class="adminSection hidden">
-
-            <div id="checklistCategoriesList"></div>
-
-            <button id="addChecklistCategorieButton" class="secondaryButton">
-                ➕ Nouvelle catégorie
-            </button>
-
-        </div>
-
-        <div id="adminPersonnesFoyer" class="adminSection hidden">
-
-            <div id="personnesList"></div>
-
-            <button id="addPersonneButton" class="secondaryButton">
-                ➕ Nouvelle personne
-            </button>
-
-        </div>
-<div id="adminEnvieCategories" class="adminSection hidden">
-
-    <div id="envieCategoriesList"></div>
-
-    <button id="addEnvieCategorieButton" class="secondaryButton">
-        ➕ Nouvelle catégorie
-    </button>
-
-</div>
-<div id="adminExternalTools" class="adminSection hidden">
-
-    <div class="templateRow">
-        <div class="templateRowNom">🔥 Firebase Console</div>
-        <div class="templateRowActions">
-            <a href="https://console.firebase.google.com/project/mes-envies-21527/overview" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
-        </div>
-    </div>
-
-    <div class="templateRow">
-        <div class="templateRowNom">☁️ Cloudflare Pages</div>
-        <div class="templateRowActions">
-            <a href="https://dash.cloudflare.com" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
-        </div>
-    </div>
-
-    <div class="templateRow">
-        <div class="templateRowNom">🖼️ Cloudinary</div>
-        <div class="templateRowActions">
-            <a href="https://console.cloudinary.com/console/c-wz4fkcbs/media_explorer" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
-        </div>
-    </div>
-
-    <div class="templateRow">
-        <div class="templateRowNom">🐙 Dépôt GitHub</div>
-        <div class="templateRowActions">
-            <a href="https://github.com/choudayer34-afk/mes-envies" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
-        </div>
-    </div>
-
-    <div class="templateRow">
-        <div class="templateRowNom">🗺️ Nominatim / OpenStreetMap</div>
-        <div class="templateRowActions">
-            <a href="https://www.openstreetmap.org" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
-        </div>
-    </div>
-
-    <div class="templateRow">
-        <div class="templateRowNom">🌤️ Open-Meteo</div>
-        <div class="templateRowActions">
-            <a href="https://open-meteo.com" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
-        </div>
     </div>
 
 </div>
 
-<div id="adminActiviteTypes" class="adminSection hidden">
-    <div id="activiteTypesList"></div>
-    <button id="fusionnerActiviteTypesButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
-    🔄 Compléter avec les nouveaux types par défaut
-</button>
-
-    <button id="addActiviteTypeButton" class="secondaryButton">➕ Nouveau type d'activité</button>
+<div id="adminTemplatesModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>🧳 Modèles de checklist</h2>
+        <div id="templatesList"></div>
+        <button id="addTemplateButton" class="secondaryButton">➕ Nouveau modèle</button>
+    </div>
 </div>
 
-<div id="adminCriteresVoyage" class="adminSection hidden">
-    <div id="criteresVoyageList"></div>
-    <button id="fusionnerCriteresVoyageButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
-    🔄 Compléter avec les nouveaux critères par défaut
-</button>
-
-    <button id="addCritereVoyageButton" class="secondaryButton">➕ Nouveau critère</button>
+<div id="adminCategoriesModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>🏷️ Catégories de checklist</h2>
+        <div id="checklistCategoriesList"></div>
+        <button id="addChecklistCategorieButton" class="secondaryButton">➕ Nouvelle catégorie</button>
+    </div>
 </div>
 
-        <button id="showFoyerCodeButton" class="secondaryButton" style="margin-top:24px;">
-            🔑 Voir le code du foyer
+<div id="adminPersonnesModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>👤 Personnes du foyer</h2>
+        <div id="personnesList"></div>
+        <button id="addPersonneButton" class="secondaryButton">➕ Nouvelle personne</button>
+    </div>
+</div>
+
+<div id="adminEnvieCategoriesModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>🎯 Catégories d'envie</h2>
+        <div id="envieCategoriesList"></div>
+        <button id="addEnvieCategorieButton" class="secondaryButton">➕ Nouvelle catégorie</button>
+    </div>
+</div>
+
+<div id="adminExternalModal" class="modal-overlay hidden">
+    <div class="modal">
+
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>🔗 Outils externes</h2>
+
+        <div class="templateRow">
+            <div class="templateRowNom">🔥 Firebase Console</div>
+            <div class="templateRowActions">
+                <a href="https://console.firebase.google.com/project/mes-envies-21527/overview" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+            </div>
+        </div>
+
+        <div class="templateRow">
+            <div class="templateRowNom">☁️ Cloudflare Pages</div>
+            <div class="templateRowActions">
+                <a href="https://dash.cloudflare.com" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+            </div>
+        </div>
+
+        <div class="templateRow">
+            <div class="templateRowNom">🖼️ Cloudinary</div>
+            <div class="templateRowActions">
+                <a href="https://console.cloudinary.com/console/c-wz4fkcbs/media_explorer" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+            </div>
+        </div>
+
+        <div class="templateRow">
+            <div class="templateRowNom">🐙 Dépôt GitHub</div>
+            <div class="templateRowActions">
+                <a href="https://github.com/choudayer34-afk/mes-envies" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+            </div>
+        </div>
+
+        <div class="templateRow">
+            <div class="templateRowNom">🗺️ Nominatim / OpenStreetMap</div>
+            <div class="templateRowActions">
+                <a href="https://www.openstreetmap.org" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+            </div>
+        </div>
+
+        <div class="templateRow">
+            <div class="templateRowNom">🌤️ Open-Meteo</div>
+            <div class="templateRowActions">
+                <a href="https://open-meteo.com" target="_blank" class="actionButton editButton" style="text-decoration:none;display:flex;align-items:center;justify-content:center;">Ouvrir</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="adminActiviteTypesModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>🏞️ Types d'activités</h2>
+        <div id="activiteTypesList"></div>
+        <button id="fusionnerActiviteTypesButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            🔄 Compléter avec les nouveaux types par défaut
         </button>
-
-        <button id="logoutButton" class="secondaryButton" style="margin-top:24px;">
-            🚪 Se déconnecter
-        </button>
-<button
-    type="button"
-    id="debugToggleBtn"
-    onclick="toggleDebug()"
-    style="margin-top:20px;background:none;border:1px solid #ccc;border-radius:10px;padding:8px 14px;font-size:13px;color:#888;">
-    🐞 Debug: OFF
-</button>
+        <button id="addActiviteTypeButton" class="secondaryButton">➕ Nouveau type d'activité</button>
     </div>
-
 </div>
 
+<div id="adminCriteresVoyageModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>✅ Critères voyage</h2>
+        <div id="criteresVoyageList"></div>
+        <button id="fusionnerCriteresVoyageButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            🔄 Compléter avec les nouveaux critères par défaut
+        </button>
+        <button id="addCritereVoyageButton" class="secondaryButton">➕ Nouveau critère</button>
+    </div>
+</div>
+
+<div id="adminCompteModal" class="modal-overlay hidden">
+    <div class="modal">
+        <button class="backButton adminSousRetour">← Retour</button>
+        <h2>🔑 Mon compte</h2>
+        <button id="showFoyerCodeButton" class="secondaryButton" style="margin-top:10px;">🔑 Voir le code du foyer</button>
+        <button id="logoutButton" class="secondaryButton" style="margin-top:24px;">🚪 Se déconnecter</button>
+        <button
+            type="button"
+            id="debugToggleBtn"
+            onclick="toggleDebug()"
+            style="margin-top:20px;background:none;border:1px solid #ccc;border-radius:10px;padding:8px 14px;font-size:13px;color:#888;">
+            🐞 Debug: OFF
+        </button>
+    </div>
+</div>
 
 <div id="templateEditModal" class="modal-overlay hidden">
 
