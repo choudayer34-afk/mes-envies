@@ -943,7 +943,7 @@ export function synchroniserChecklistDepuisProduit(envieId, produit, retenu) {
 
 }
 
-export function addMultipleTemplateItems(templateId, textes, categorieId = null, type = "fixe", quantite = 1) {
+export function addMultipleTemplateItems(templateId, textes, categorieId = null, parJour = false, parPersonne = false, quantite = 1) {
 
     const template = templatesCache.find(t => t.id === templateId);
 
@@ -953,7 +953,8 @@ export function addMultipleTemplateItems(templateId, textes, categorieId = null,
     const newItems = textes.map(texte => ({
         id: crypto.randomUUID(),
         texte,
-        type,
+        parJour,
+        parPersonne,
         categorieId,
         quantite
     }));
@@ -963,6 +964,8 @@ export function addMultipleTemplateItems(templateId, textes, categorieId = null,
     }).catch(console.error);
 
 }
+
+
 export function setChecklistItems(envieId, checklist) {
     patchEnvie(envieId, { checklist });
 }
