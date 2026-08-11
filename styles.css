@@ -260,7 +260,8 @@ main{
 #aProposModal,#tetrisModal, #guideModal,#gameboyMenuModal,
 #breakoutModal,#taquinModal,#demineurModal,
 #memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal,
-#agendaLocalModal
+#agendaLocalModal,
+#adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal
 {
     z-index:2100;
 }
@@ -2474,4 +2475,38 @@ button {
 
 .envieCardDragHandleInline{
     flex-shrink:0;
+}
+
+.adminTuilesGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+    margin-top:16px;
+}
+
+.adminTuile{
+    background:var(--color-card);
+    border:1px solid var(--color-border);
+    border-radius:var(--radius-medium);
+    padding:24px 12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+}
+
+.adminTuile:active{
+    transform:scale(.97);
+}
+
+.adminTuileEmoji{
+    font-size:32px;
+}
+
+.adminTuileLabel{
+    font-size:14px;
+    font-weight:600;
+    color:var(--color-text);
+    text-align:center;
 }
