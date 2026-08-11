@@ -1,3 +1,5 @@
+import { updatePersonneDateNaissance, calculerAgeDepuisNaissance } from "./storage.js";
+
 export function renderVoyageursWidget(containerId) {
 
     const container = document.getElementById(containerId);
@@ -25,8 +27,7 @@ export function renderVoyageursWidget(containerId) {
 
     const enfantsInput = container.querySelector(".voyageursEnfants");
     const agesContainer = container.querySelector(".voyageursAgesContainer");
-
-    function renderAges() {
+function renderAges() {
 
         const nb = parseInt(enfantsInput.value, 10) || 0;
 
@@ -46,6 +47,11 @@ export function renderVoyageursWidget(containerId) {
         row.style.flexWrap = "wrap";
         row.style.marginBottom = "10px";
 
+        const agesConnus = getPersonnes()
+            .map(p => calculerAgeDepuisNaissance(p.dateNaissance))
+            .filter(age => age !== null && age < 18)
+            .sort((a, b) => a - b);
+
         for (let i = 0; i < nb; i++) {
 
             const input = document.createElement("input");
@@ -55,6 +61,10 @@ export function renderVoyageursWidget(containerId) {
             input.placeholder = `Âge ${i + 1}`;
             input.className = "voyageursAgeInput";
             input.style = "width:80px;height:44px;padding:0 10px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;text-align:center;";
+
+            if (agesConnus[i] !== undefined) {
+                input.value = agesConnus[i];
+            }
 
             row.appendChild(input);
 
