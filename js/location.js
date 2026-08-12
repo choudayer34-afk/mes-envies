@@ -45,11 +45,22 @@ export function initLocation() {
         (place) => { selectedLieu = place; }
     );
 
-    setupAutocomplete(
+     setupAutocomplete(
         document.getElementById("ficheLieu"),
         document.getElementById("fichelieuSuggestions"),
-        (place) => { updateEnvieLieu(getCurrentEnvieId(), place); }
+        (place) => {
+
+            updateEnvieLieu(getCurrentEnvieId(), place);
+
+            const envieActuelle = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+            if (envieActuelle) {
+                renderLieuActions({ ...envieActuelle, lieu: place });
+            }
+
+        }
     );
+
 
     const btnLocate = document.getElementById("btnLocate");
 
@@ -107,13 +118,15 @@ export function initLocation() {
 
             document.getElementById("ficheOverlay").classList.add("hidden");
 
-            openMapPicker((place) => {
+         openMapPicker((place) => {
 
-                updateEnvieLieu(getCurrentEnvieId(), place);
+            updateEnvieLieu(getCurrentEnvieId(), place);
+            renderLieuActions({ ...envie, lieu: place });
 
-                document.getElementById("ficheOverlay").classList.remove("hidden");
+            document.getElementById("ficheOverlay").classList.remove("hidden");
 
-            }, envie?.lieu);
+        }, envie?.lieu);
+
 
         });
 
