@@ -1,6 +1,7 @@
 import { getCurrentEnvieId } from "./envie.js";
 import { getEnvies } from "./storage.js";
 import { showToast } from "./toast.js";
+import { uploadToCloudinary } from "./photos.js";
 
 let photoBaseChoisie = null;
 
@@ -190,18 +191,19 @@ async function genererPromptEtImages() {
 
         prompt += `\n`;
 
-        boutonGenerer.textContent = "⏳ Génération du montage...";
+         boutonGenerer.textContent = "⏳ Génération et envoi du montage...";
         boutonGenerer.disabled = true;
 
         try {
 
             const canvas = await genererCollageProduits(produitsSelectionnes);
 
-            const blobUrl = await new Promise(resolve => {
-                canvas.toBlob(blob => resolve(URL.createObjectURL(blob)), "image/png");
-            });
+            const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+            const fichier = new File([blob], "montage-produits.png", { type: "image/png" });
 
-            imagesAEnvoyer.push({ label: "Montage des produits", url: blobUrl });
+            const result = await uploadToCloudinary(fichier);
+
+            imagesAEnvoyer.push({ label: "Montage des produits", url: result.secure_url });
 
         } catch (err) {
 
@@ -215,6 +217,8 @@ async function genererPromptEtImages() {
 
         boutonGenerer.textContent = "✨ Générer le prompt";
         boutonGenerer.disabled = false;
+
+
 
     }
 
@@ -232,10 +236,18 @@ async function genererPromptEtImages() {
         </div>
     `).join("");
 
+    const encode = encodeURIComponent(prompt);
+
+    document.getElementById("simIALiensRapides").innerHTML = `
+        <a href="https://chatgpt.com/?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">💬 ChatGPT</a>
+        <a href="https://gemini.google.com/app?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">✨ Gemini</a>
+    `;
+
     document.getElementById("simIAResultat").style.display = "block";
     document.getElementById("simIAResultat").scrollIntoView({ behavior: "smooth" });
 
 }
+
 
 export function initSimulationIA() {
 
