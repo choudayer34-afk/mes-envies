@@ -382,6 +382,45 @@ async function reverseGeocode(latitude, longitude) {
 
 }
 
+function ouvrirGoogleMaps(texte) {
+
+    const requeteEncodee = encodeURIComponent(texte);
+    const urlWeb = `https://www.google.com/maps/search/?api=1&query=${requeteEncodee}`;
+
+    const ua = navigator.userAgent || "";
+    const estIOS = /iPad|iPhone|iPod/.test(ua);
+    const estAndroid = /Android/.test(ua);
+
+    if (estAndroid) {
+
+        window.location.href = `intent://maps/search/?api=1&query=${requeteEncodee}#Intent;scheme=https;package=com.google.android.apps.maps;S.browser_fallback_url=${encodeURIComponent(urlWeb)};end`;
+        return;
+
+    }
+
+    if (estIOS) {
+
+        const debut = Date.now();
+
+        window.location.href = `comgooglemaps://?q=${requeteEncodee}`;
+
+        setTimeout(() => {
+
+            if (Date.now() - debut < 2000) {
+                window.location.href = urlWeb;
+            }
+
+        }, 1500);
+
+        return;
+
+    }
+
+    window.open(urlWeb, "_blank", "noopener");
+
+}
+
+
 export function renderLieuActions(envie) {
 
     const container = document.getElementById("ficheLieuActions");
@@ -442,17 +481,18 @@ export function renderLieuActions(envie) {
 
         });
 
-        const googleRechercheButton = document.createElement("a");
+                const googleRechercheButton = document.createElement("button");
+        googleRechercheButton.type = "button";
         googleRechercheButton.className = "secondaryButton lieuActionButton";
         googleRechercheButton.textContent = "🔍 Chercher sur Google Maps";
-        googleRechercheButton.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(texte)}`;
-        googleRechercheButton.target = "_blank";
-        googleRechercheButton.rel = "noopener";
+
+        googleRechercheButton.addEventListener("click", () => {
+            ouvrirGoogleMaps(texte);
+        });
 
         container.appendChild(googleRechercheButton);
         container.appendChild(localiserButton);
 
-      
 
     }
 
