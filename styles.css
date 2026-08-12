@@ -2532,3 +2532,7 @@ button {
 .kpiDetailItem{
     cursor:pointer;
 }
+
+#onboardingModal{
+    z-index:3500;
+}
