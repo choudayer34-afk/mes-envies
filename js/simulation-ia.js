@@ -243,6 +243,16 @@ async function genererPromptEtImages() {
         <a href="https://gemini.google.com/app?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">✨ Gemini</a>
     `;
 
+    if (!navigator.share) {
+        document.getElementById("partagerImagesNatifButton").style.display = "none";
+    } else {
+        document.getElementById("partagerImagesNatifButton").style.display = "block";
+    }
+
+    document.getElementById("partagerImagesNatifButton").onclick = () => {
+        partagerImagesNatif(imagesAEnvoyer, prompt);
+    };
+
     document.getElementById("simIAResultat").style.display = "block";
     document.getElementById("simIAResultat").scrollIntoView({ behavior: "smooth" });
 
