@@ -2183,6 +2183,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <button id="plusBtnNouveautes" class="secondaryButton" style="width:100%;margin-bottom:10px;">
     🆕 Nouveautés de l'app
 </button>
+<button id="plusBtnRevoirOnboarding" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+    👋 Revoir la présentation
+</button>
 
     </div>
 
@@ -2280,6 +2283,55 @@ document.addEventListener("DOMContentLoaded", () => {
                     <li>Tout est synchronisé en famille en temps réel — pas besoin de recharger la page.</li>
                 </ul>
             </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="onboardingModal" class="modal-overlay hidden">
+
+    <div class="modal" style="text-align:center;">
+
+        <div id="onboardingSlides">
+
+            <div class="onboardingSlide" data-slide="0">
+                <div style="font-size:60px;margin:20px 0;">🧡</div>
+                <h2>EnVie</h2>
+                <p style="font-size:16px;color:var(--color-text-light);margin-top:10px;">Ne perdez plus une idée, jusqu'au bout du rêve.</p>
+            </div>
+
+            <div class="onboardingSlide hidden" data-slide="1">
+                <div style="font-size:50px;margin:20px 0;">✈️ 🏠</div>
+                <h2>Deux univers, une seule appli</h2>
+                <p style="font-size:15px;color:var(--color-text-light);margin-top:10px;">Bascule à tout moment entre tes voyages et tes projets maison, en haut de l'accueil.</p>
+            </div>
+
+            <div class="onboardingSlide hidden" data-slide="2">
+                <div style="font-size:16px;margin:20px 0;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;">
+                    <span style="background:#EEF4F6;padding:10px 16px;border-radius:14px;">💡 Idée</span>
+                    <span>→</span>
+                    <span style="background:#EEF4F6;padding:10px 16px;border-radius:14px;">🧳 Projet</span>
+                    <span>→</span>
+                    <span style="background:#EEF4F6;padding:10px 16px;border-radius:14px;">✅ Tâches</span>
+                </div>
+                <h2 style="margin-top:10px;">Le mécanisme central</h2>
+                <p style="font-size:15px;color:var(--color-text-light);margin-top:10px;">Une idée notée peut devenir un voyage ou un projet, découpé en tâches qu'on coche au fur et à mesure.</p>
+            </div>
+
+            <div class="onboardingSlide hidden" data-slide="3">
+                <div style="font-size:50px;margin:20px 0;">🚀</div>
+                <h2>À toi de jouer</h2>
+                <p style="font-size:15px;color:var(--color-text-light);margin-top:10px;">Tu peux tout redécouvrir en détail depuis 🧰 Plus → 📖 Guide d'utilisation.</p>
+            </div>
+
+        </div>
+
+        <div id="onboardingDots" style="display:flex;justify-content:center;gap:8px;margin:20px 0;"></div>
+
+        <div style="display:flex;gap:10px;">
+            <button id="onboardingPasser" class="secondaryButton" style="flex:1;">Passer</button>
+            <button id="onboardingSuivant" class="primaryButton" style="flex:1;">Suivant</button>
         </div>
 
     </div>
