@@ -1708,9 +1708,14 @@ document.addEventListener("DOMContentLoaded", () => {
             <label class="fieldTitle">Prompt à copier</label>
             <textarea id="simIAPromptTexte" rows="8" readonly style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:14px;box-sizing:border-box;"></textarea>
 
-            <button id="copierPromptIAButton" class="secondaryButton" style="width:100%;margin-top:10px;">
+                     <button id="copierPromptIAButton" class="secondaryButton" style="width:100%;margin-top:10px;">
                 📋 Copier le prompt
             </button>
+
+            <p style="font-size:12px;color:var(--color-text-light);margin-top:14px;">⚠️ Le prompt s'ouvre pré-rempli, mais tu dois quand même joindre toi-même les images téléchargées ci-dessus (aucune IA n'accepte de pièces jointes via un simple lien).</p>
+
+            <div id="simIALiensRapides" style="display:flex;gap:10px;margin-top:6px;"></div>
+
 
         </div>
 
