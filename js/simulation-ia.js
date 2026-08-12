@@ -175,33 +175,29 @@ async function genererPromptEtImages() {
     });
 
 
-    const description = document.getElementById("simIADescription").value.trim();
+       const description = document.getElementById("simIADescription").value.trim();
 
-    let prompt = `Voici une photo que je souhaite modifier.\n\n`;
+    let prompt = `Tu es un assistant spécialisé en retouche photo réaliste pour l'aménagement intérieur et l'aide à la décision avant travaux ou achat.\n\n`;
 
-    if (description) {
-        prompt += `Modification souhaitée : ${description}\n\n`;
-    }
+    prompt += `Contexte : cette photo fait partie d'un projet de rénovation/aménagement à la maison. L'objectif est de visualiser un résultat réaliste avant de s'engager dans un achat ou des travaux — pas une image artistique, un aperçu fidèle.\n\n`;
+
+    prompt += `Photo 1 jointe : la zone à modifier, telle qu'elle est actuellement.\n`;
 
     const imagesAEnvoyer = [{ label: "Photo de base", url: photoBaseChoisie }];
 
     const boutonGenerer = document.getElementById("genererPromptIAButton");
 
-    if (produitsSelectionnes.length === 1) {
+     if (produitsSelectionnes.length === 1) {
 
         const p = produitsSelectionnes[0];
-        prompt += `Ajoute l'élément visible sur la deuxième photo ("${p.nom}") sur la première photo. Positionnement souhaité : ${p.position}.\n\n`;
+        prompt += `Photo 2 jointe : l'élément "${p.nom}" à intégrer sur la photo 1.\n\n`;
+
         imagesAEnvoyer.push({ label: p.nom, url: p.photoUrl });
 
     } else if (produitsSelectionnes.length > 1) {
 
-        prompt += `La deuxième photo est un montage regroupant plusieurs produits, chacun étiqueté avec son nom. Ajoute-les sur la première photo comme suit :\n`;
+        prompt += `Photo 2 jointe : un montage regroupant plusieurs éléments, chacun étiqueté avec son nom, à intégrer sur la photo 1.\n\n`;
 
-        produitsSelectionnes.forEach(p => {
-            prompt += `- "${p.nom}" : ${p.position}\n`;
-        });
-
-        prompt += `\n`;
 
          boutonGenerer.textContent = "⏳ Génération et envoi du montage...";
         boutonGenerer.disabled = true;
@@ -215,9 +211,10 @@ async function genererPromptEtImages() {
 
             const result = await uploadToCloudinary(fichier);
 
-            imagesAEnvoyer.push({ label: "Montage des produits", url: result.secure_url });
+                 imagesAEnvoyer.push({ label: "Montage des produits", url: result.secure_url });
 
         } catch (err) {
+
 
             console.error("Erreur génération du montage: " + err.message);
             showToast("❌ Impossible de générer le montage (photo produit inaccessible)");
@@ -234,7 +231,22 @@ async function genererPromptEtImages() {
 
     }
 
-    prompt += `Merci de générer une image réaliste du résultat, en conservant le style, la perspective et l'éclairage de la photo d'origine.`;
+     prompt += `Ce que je veux que tu fasses :\n`;
+
+    if (description) {
+        prompt += `- Modification générale : ${description}\n`;
+    }
+
+    produitsSelectionnes.forEach(p => {
+        prompt += `- Intègre "${p.nom}" — positionnement souhaité : ${p.position}. Base-toi sur les repères visibles dans la photo (prises, meubles, fenêtres, sol...) pour le placement, pas sur une mesure exacte que tu ne peux pas garantir.\n`;
+    });
+
+    prompt += `\nContraintes :\n`;
+    prompt += `- Conserve fidèlement le style, la perspective, l'éclairage et les proportions de la photo d'origine.\n`;
+    prompt += `- Ne modifie rien d'autre que ce qui est demandé.\n`;
+    prompt += `- Si un positionnement demandé ne te semble pas clair ou réalisable tel quel, indique-le plutôt que d'improviser.\n\n`;
+
+    prompt += `Résultat attendu : une image réaliste, comme une photo retouchée — pas une image générée de toutes pièces.`;
 
     document.getElementById("simIAPromptTexte").value = prompt;
 
