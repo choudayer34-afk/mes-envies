@@ -47,6 +47,7 @@ import {
 } from "./js/storage.js";
 import { initModeSync } from "./js/storage.js";
 import { initSimulationIA } from "./js/simulation-ia.js";
+import { initOnboarding, initIndicesContextuels } from "./js/onboarding.js";
 
 import { initMagasinsSync } from "./js/storage.js";
 import { initSocietesSync } from "./js/storage.js";
@@ -270,6 +271,9 @@ initDevis();
     document.getElementById("closeInbox").addEventListener("click", () => {
         document.getElementById("inboxModal").classList.add("hidden");
     });
+
+    initOnboarding();
+    initIndicesContextuels();
 
     log("Application prête.");
 
