@@ -1244,7 +1244,29 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
-        
+        <div class="accordion">
+
+    <button
+        class="accordionHeader"
+        data-target="simulationIASection">
+        <span>🖼️ Simulation IA</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div
+        id="simulationIASection"
+        class="accordionContent hidden">
+
+        <p style="font-size:13px;color:var(--color-text-light);">Prépare un prompt et les images à envoyer à ChatGPT, Gemini ou une autre IA pour visualiser un changement sur cette pièce.</p>
+
+        <button id="ouvrirSimulationIAButton" class="secondaryButton" style="width:100%;">
+            ✨ Préparer une simulation
+        </button>
+
+    </div>
+
+</div>
+
         <div class="accordion">
 
             <button
@@ -1651,6 +1673,52 @@ document.addEventListener("DOMContentLoaded", () => {
         <div id="adminPartagesListe"></div>
     </div>
 </div>
+
+<div id="simulationIAModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="outilFermerButton backButton">← Retour</button>
+
+        <h2>🖼️ Simulation avec une IA</h2>
+
+        <label class="fieldTitle">1. Photo de base</label>
+        <div id="simIABasePhotos" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:14px;"></div>
+
+        <label class="fieldTitle">2. Produits retenus à intégrer (optionnel)</label>
+        <div id="simIAProduitsListe" style="margin-bottom:14px;"></div>
+
+        <label class="fieldTitle">3. Ce que tu veux changer ou améliorer</label>
+        <textarea
+            id="simIADescription"
+            rows="3"
+            placeholder="Ex: Repeindre ce mur en RAL 9010 blanc pur, moderniser cet escalier avec une rampe noire mate..."
+            style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:16px;box-sizing:border-box;resize:vertical;"
+        ></textarea>
+
+        <button id="genererPromptIAButton" class="primaryButton" style="width:100%;margin-top:14px;">
+            ✨ Générer le prompt
+        </button>
+
+        <div id="simIAResultat" style="margin-top:16px;display:none;">
+
+            <label class="fieldTitle">Images à envoyer à l'IA</label>
+            <div id="simIAImagesAEnvoyer" style="display:flex;gap:14px;margin-bottom:14px;flex-wrap:wrap;"></div>
+
+            <label class="fieldTitle">Prompt à copier</label>
+            <textarea id="simIAPromptTexte" rows="8" readonly style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:14px;box-sizing:border-box;"></textarea>
+
+            <button id="copierPromptIAButton" class="secondaryButton" style="width:100%;margin-top:10px;">
+                📋 Copier le prompt
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
 <div id="adminActiviteTypesModal" class="modal-overlay hidden">
     <div class="modal">
         <button class="backButton adminSousRetour">← Retour</button>
