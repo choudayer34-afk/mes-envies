@@ -284,3 +284,44 @@ export function initSimulationIA() {
     });
 
 }
+
+async function partagerImagesNatif(imagesAEnvoyer, prompt) {
+
+    if (!navigator.share || !navigator.canShare) {
+        showToast("Partage natif non disponible sur cet appareil");
+        return;
+    }
+
+    try {
+
+        const fichiers = await Promise.all(imagesAEnvoyer.map(async (img, i) => {
+
+            const reponse = await fetch(img.url);
+            const blob = await reponse.blob();
+
+            return new File([blob], `envie-simulation-${i + 1}.png`, { type: blob.type || "image/png" });
+
+        }));
+
+        if (!navigator.canShare({ files: fichiers })) {
+            showToast("Ton appareil ne peut pas partager ces images");
+            return;
+        }
+
+        await navigator.share({
+            files: fichiers,
+            title: "Simulation EnVie",
+            text: prompt
+        });
+
+    } catch (err) {
+
+        if (err.name !== "AbortError") {
+            console.error("Erreur partage natif: " + err.message);
+            showToast("❌ Échec du partage");
+        }
+
+    }
+
+}
+
