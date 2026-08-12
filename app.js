@@ -46,6 +46,7 @@ import {
     initFamilleImportantSync
 } from "./js/storage.js";
 import { initModeSync } from "./js/storage.js";
+import { initSimulationIA } from "./js/simulation-ia.js";
 
 import { initMagasinsSync } from "./js/storage.js";
 import { initSocietesSync } from "./js/storage.js";
@@ -122,7 +123,8 @@ function init() {
         initIdeesMenu();
     initModeBascule();
 afficherVersionCache();
- 
+     initSimulationIA();
+
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
     initActivitesVoyageAssistantSync(() => {});
