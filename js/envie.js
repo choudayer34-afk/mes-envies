@@ -16,6 +16,7 @@ import { getEnvieCategories, isContainerCategory } from "./storage.js";
 import { renderComparateur } from "./comparateur.js";
 import { renderDevis } from "./devis.js";
 import { getEnvies, updateEnvieCategorie, updateEnvie, updateEnvieDescription } from "./storage.js";
+import { renderSimulationIA } from "./simulation-ia.js";
 
 let currentEnvieId = null;
 
@@ -77,6 +78,7 @@ document.getElementById("ficheModeIcone").textContent = envie.contexte === "mais
      renderBoisCalculateur(envie);
     renderComparateur(envie);
     renderDevis(envie);
+    renderSimulationIA(envie);
     renderUrls(envie);
 
        
