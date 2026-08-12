@@ -392,22 +392,29 @@ export function renderLieuActions(envie) {
     container.innerHTML = "";
 
     const { latitude, longitude, adresse, nom } = envie.lieu || {};
+    const texte = adresse || nom;
 
-    if (!latitude || !longitude) {
+    if (!latitude && !texte) {
         return;
     }
+
+    const aCoordonnees = !!(latitude && longitude);
 
     const googleButton = document.createElement("a");
     googleButton.className = "secondaryButton lieuActionButton";
     googleButton.textContent = "🧭 Google Maps";
-    googleButton.href = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+    googleButton.href = aCoordonnees
+        ? `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`
+        : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(texte)}`;
     googleButton.target = "_blank";
     googleButton.rel = "noopener";
 
     const wazeButton = document.createElement("a");
     wazeButton.className = "secondaryButton lieuActionButton";
     wazeButton.textContent = "🚗 Waze";
-    wazeButton.href = `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`;
+    wazeButton.href = aCoordonnees
+        ? `https://waze.com/ul?ll=${latitude},${longitude}&navigate=yes`
+        : `https://waze.com/ul?q=${encodeURIComponent(texte)}&navigate=yes`;
     wazeButton.target = "_blank";
     wazeButton.rel = "noopener";
 
@@ -418,10 +425,10 @@ export function renderLieuActions(envie) {
 
     copyButton.addEventListener("click", async () => {
 
-        const texte = adresse || nom || `${latitude}, ${longitude}`;
+        const texteACopier = texte || `${latitude}, ${longitude}`;
 
         try {
-            await navigator.clipboard.writeText(texte);
+            await navigator.clipboard.writeText(texteACopier);
             copyButton.textContent = "✓ Copié";
         } catch {
             copyButton.textContent = "Échec";
@@ -438,6 +445,7 @@ export function renderLieuActions(envie) {
     container.appendChild(copyButton);
 
 }
+
 
 export function openMapPicker(onLieuChoisi, lieuExistant = null) {
 
