@@ -398,9 +398,66 @@ export function renderLieuActions(envie) {
         return;
     }
 
-    const aCoordonnees = !!(latitude && longitude);
+       const aCoordonnees = !!(latitude && longitude);
+
+    if (!aCoordonnees) {
+
+        const localiserButton = document.createElement("button");
+        localiserButton.type = "button";
+        localiserButton.className = "secondaryButton lieuActionButton";
+        localiserButton.textContent = "🔄 Rechercher les coordonnées GPS";
+
+        localiserButton.addEventListener("click", async () => {
+
+            localiserButton.textContent = "⏳ Recherche...";
+
+            const resultats = await searchLocation(texte);
+
+            if (resultats.length === 0) {
+
+                showToast("Aucune coordonnée trouvée pour ce texte");
+                localiserButton.textContent = "🔄 Rechercher les coordonnées GPS";
+                return;
+
+            }
+
+            const trouve = resultats[0];
+
+            const nouveauLieu = {
+                nom,
+                adresse,
+                latitude: parseFloat(trouve.lat),
+                longitude: parseFloat(trouve.lon)
+            };
+
+            updateEnvieLieu(getCurrentEnvieId(), nouveauLieu);
+
+            const envieActuelle = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+            if (envieActuelle) {
+                renderLieuActions({ ...envieActuelle, lieu: nouveauLieu });
+            }
+
+            showToast("✓ Coordonnées trouvées et enregistrées");
+
+        });
+
+        const googleRechercheButton = document.createElement("a");
+        googleRechercheButton.className = "secondaryButton lieuActionButton";
+        googleRechercheButton.textContent = "🔍 Chercher sur Google Maps";
+        googleRechercheButton.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(texte)}`;
+        googleRechercheButton.target = "_blank";
+        googleRechercheButton.rel = "noopener";
+
+        container.appendChild(googleRechercheButton);
+        container.appendChild(localiserButton);
+
+      
+
+    }
 
     const googleButton = document.createElement("a");
+
     googleButton.className = "secondaryButton lieuActionButton";
     googleButton.textContent = "🧭 Google Maps";
     googleButton.href = aCoordonnees
