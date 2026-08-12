@@ -49,27 +49,38 @@ function renderBasePhotosSimulation(envie) {
 
 }
 
-function renderProduitsSimulation(envie) {
+function renderElementsSimulation(envie) {
 
     const container = document.getElementById("simIAProduitsListe");
-    const produits = (envie.comparateur?.produits || []).filter(p => p.photoUrl);
 
-    if (produits.length === 0) {
-        container.innerHTML = `<div class="emptyState">Aucun produit avec photo dans le comparateur de cette tâche.</div>`;
+    const produitsRetenus = (envie.comparateur?.produits || []).filter(p => p.photoUrl && p.retenu);
+    const produitsAutres = (envie.comparateur?.produits || []).filter(p => p.photoUrl && !p.retenu);
+    const photosIdee = envie.photos || [];
+
+    const elements = [
+        ...produitsRetenus.map(p => ({ id: `produit_${p.id}`, nom: `${p.nom} 🏆`, photoUrl: p.photoUrl })),
+        ...produitsAutres.map(p => ({ id: `produit_${p.id}`, nom: p.nom, photoUrl: p.photoUrl })),
+        ...photosIdee.map(photo => ({ id: `photo_${photo.id}`, nom: photo.description || "Photo de la tâche", photoUrl: photo.url }))
+    ];
+
+    if (elements.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucun produit ou photo disponible dans cette tâche.</div>`;
         return;
     }
 
-    container.innerHTML = produits.map(produit => `
+    container.innerHTML = elements.map(el => `
         <div class="checklistRow" style="flex-direction:column;align-items:stretch;gap:6px;">
             <label class="checkLabel">
-                <input type="checkbox" class="simIAProduitCheckbox" data-id="${produit.id}" ${produit.retenu ? "checked" : ""}>
-                <span>${produit.nom}${produit.retenu ? " 🏆" : ""}</span>
+                <input type="checkbox" class="simIAElementCheckbox" data-id="${el.id}" data-photo="${el.photoUrl}" data-nom="${el.nom}">
+                <img src="${el.photoUrl.replace('/upload/', '/upload/w_60,h_60,c_fill,q_auto/')}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;">
+                <span>${el.nom}</span>
             </label>
-            <input type="text" class="numberInput simIAProduitPosition" data-id="${produit.id}" placeholder="Où le positionner ? (ex: en haut du mur, à droite de la fenêtre...)">
+            <input type="text" class="numberInput simIAElementPosition" data-id="${el.id}" placeholder="Où le positionner ? (ex: en haut du mur, à droite de la fenêtre...)">
         </div>
     `).join("");
 
 }
+
 
 function chargerImage(url) {
 
@@ -147,21 +158,22 @@ async function genererPromptEtImages() {
         return;
     }
 
+ 
+
     const produitsSelectionnes = [];
 
-    document.querySelectorAll(".simIAProduitCheckbox:checked").forEach(checkbox => {
+    document.querySelectorAll(".simIAElementCheckbox:checked").forEach(checkbox => {
 
-        const id = checkbox.dataset.id;
-        const produit = envie.comparateur.produits.find(p => p.id === id);
-        const positionInput = document.querySelector(`.simIAProduitPosition[data-id="${id}"]`);
+        const positionInput = document.querySelector(`.simIAElementPosition[data-id="${checkbox.dataset.id}"]`);
 
         produitsSelectionnes.push({
-            nom: produit.nom,
-            photoUrl: produit.photoUrl,
+            nom: checkbox.dataset.nom,
+            photoUrl: checkbox.dataset.photo,
             position: positionInput?.value.trim() || "à un endroit approprié"
         });
 
     });
+
 
     const description = document.getElementById("simIADescription").value.trim();
 
@@ -271,8 +283,9 @@ export function initSimulationIA() {
         document.getElementById("simIAResultat").style.display = "none";
         document.getElementById("simIADescription").value = "";
 
-        renderBasePhotosSimulation(envie);
-        renderProduitsSimulation(envie);
+            renderBasePhotosSimulation(envie);
+        renderElementsSimulation(envie);
+
 
         document.getElementById("simulationIAModal")?.classList.remove("hidden");
 
