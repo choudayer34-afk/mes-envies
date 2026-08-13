@@ -193,6 +193,7 @@ function openPhotoViewer(envieId, photo) {
     document.getElementById("toggleMesurePhotoButton").textContent = "📏 Mesurer";
 
     renderMesuresSVG(photo.mesures || []);
+    renderListeMesures(photo.mesures || []);
 
     modal.classList.remove("hidden");
 
@@ -214,6 +215,49 @@ function renderMesuresSVG(mesures) {
         `;
 
     }).join("");
+
+}
+
+function renderListeMesures(mesures) {
+
+    const container = document.getElementById("photoViewerMesuresListe");
+    const boutonEnregistrer = document.getElementById("enregistrerPhotoMesureeButton");
+
+    if (!container)
+        return;
+
+    boutonEnregistrer?.classList.toggle("hidden", mesures.length === 0);
+
+    if (mesures.length === 0) {
+        container.innerHTML = "";
+        return;
+    }
+
+    container.innerHTML = mesures.map(m => `
+        <div style="display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.1);border-radius:8px;padding:6px 10px;margin-bottom:6px;">
+            <span style="color:white;display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span style="width:14px;height:14px;border-radius:50%;background:${m.couleur};display:inline-block;border:1px solid rgba(255,255,255,.5);"></span>
+                ${m.distance} ${m.unite}
+            </span>
+            <button class="mesureDeleteButton" data-id="${m.id}" title="Supprimer" style="background:none;border:none;font-size:16px;cursor:pointer;">🗑️</button>
+        </div>
+    `).join("");
+
+    container.querySelectorAll(".mesureDeleteButton").forEach(bouton => {
+
+        bouton.addEventListener("click", () => {
+
+            const { envie, photo } = getPhotoActuelleDuViewer();
+
+            const nouvellesMesures = (photo.mesures || []).filter(m => m.id !== bouton.dataset.id);
+
+            updatePhotoMesures(envie.id, photo.id, nouvellesMesures);
+            renderMesuresSVG(nouvellesMesures);
+            renderListeMesures(nouvellesMesures);
+
+        });
+
+    });
 
 }
 
@@ -252,6 +296,82 @@ function ouvrirFormulaireMesure() {
     document.getElementById("mesureValeurInput").value = "";
 
     document.getElementById("mesurePhotoModal").classList.remove("hidden");
+
+}
+
+function genererPhotoAvecMesures(photo) {
+
+    return new Promise((resolve, reject) => {
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+
+        img.onload = () => {
+
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+
+            (photo.mesures || []).forEach(m => {
+
+                const x1 = m.x1 / 100 * canvas.width;
+                const y1 = m.y1 / 100 * canvas.height;
+                const x2 = m.x2 / 100 * canvas.width;
+                const y2 = m.y2 / 100 * canvas.height;
+
+                const rayon = 0.009 * canvas.width;
+                const epaisseur = 0.006 * canvas.width;
+                const tailleTexte = 0.032 * canvas.width;
+                const contour = m.couleur.toLowerCase() === "#ffffff" ? "#000000" : "#ffffff";
+
+                ctx.strokeStyle = m.couleur;
+                ctx.lineWidth = epaisseur;
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.stroke();
+
+                [[x1, y1], [x2, y2]].forEach(([x, y]) => {
+                    ctx.fillStyle = m.couleur;
+                    ctx.beginPath();
+                    ctx.arc(x, y, rayon, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                const texte = `${m.distance} ${m.unite}`;
+                const milieuX = (x1 + x2) / 2;
+                const milieuY = (y1 + y2) / 2 - tailleTexte * 0.5;
+
+                ctx.font = `700 ${tailleTexte}px sans-serif`;
+                ctx.textAlign = "center";
+                ctx.lineWidth = epaisseur;
+                ctx.strokeStyle = contour;
+                ctx.strokeText(texte, milieuX, milieuY);
+                ctx.fillStyle = m.couleur;
+                ctx.fillText(texte, milieuX, milieuY);
+
+            });
+
+            canvas.toBlob(blob => {
+
+                if (blob) {
+                    resolve(blob);
+                } else {
+                    reject(new Error("Échec de génération de l'image"));
+                }
+
+            }, "image/jpeg", 0.9);
+
+        };
+
+        img.onerror = () => reject(new Error("Impossible de charger la photo"));
+
+        img.src = photo.url;
+
+    });
 
 }
 
@@ -343,10 +463,11 @@ function initMesurePhoto() {
             couleur: couleurMesureChoisie
         };
 
-        const nouvellesMesures = [...(photo.mesures || []), nouvelleMesure];
+const nouvellesMesures = [...(photo.mesures || []), nouvelleMesure];
 
         updatePhotoMesures(envie.id, photo.id, nouvellesMesures);
         renderMesuresSVG(nouvellesMesures);
+        renderListeMesures(nouvellesMesures);
 
         pointsMesureEnCours = [];
         document.getElementById("mesurePhotoModal").classList.add("hidden");
@@ -358,6 +479,45 @@ function initMesurePhoto() {
 
     });
 
+    document.getElementById("enregistrerPhotoMesureeButton")?.addEventListener("click", async () => {
+
+        const { envie, photo } = getPhotoActuelleDuViewer();
+
+        if (!envie || !photo || !(photo.mesures || []).length)
+            return;
+
+        showToast("📤 Enregistrement en cours...");
+
+        try {
+
+            const blob = await genererPhotoAvecMesures(photo);
+            const fichier = new File([blob], "photo-mesures.jpg", { type: "image/jpeg" });
+
+            const result = await uploadToCloudinary(fichier);
+
+            const nouvellePhoto = {
+                id: crypto.randomUUID(),
+                url: result.secure_url,
+                publicId: result.public_id,
+                description: photo.description ? `${photo.description} (avec mesures)` : "Avec mesures"
+            };
+
+            const toutesPhotos = [...(envie.photos || []), nouvellePhoto];
+
+            updateEnviePhotos(envie.id, toutesPhotos);
+            renderPhotosGrid({ ...envie, photos: toutesPhotos });
+
+            showToast("✓ Nouvelle photo enregistrée avec les mesures");
+
+        } catch (err) {
+
+            console.error("Erreur enregistrement photo mesurée: " + err.message);
+            showToast("❌ Échec de l'enregistrement");
+
+        }
+
+    });
+    
 }
 
 function getPhotoActuelleDuViewer() {
