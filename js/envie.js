@@ -127,6 +127,21 @@ async function renderFicheMeteo(envie) {
 
 export function initFicheDescription() {
 
+    document.getElementById("effacerDescriptionButton")?.addEventListener("click", () => {
+
+        const champ = document.getElementById("ficheDescription");
+
+        if (!champ.value.trim())
+            return;
+
+        if (!window.confirm("Effacer toute la description ? C'est enregistré immédiatement, sans retour possible."))
+            return;
+
+        champ.value = "";
+        updateEnvieDescription(getCurrentEnvieId(), "");
+
+    });
+    
     document.getElementById("ficheDescription").addEventListener("change", (event) => {
 
         updateEnvieDescription(getCurrentEnvieId(), event.target.value.trim());
