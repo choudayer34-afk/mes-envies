@@ -263,7 +263,7 @@ main{
 #agendaLocalModal,#rapportModal,
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
 #adminPartagesModal, #platformerModal, #simulationIAModal,
-#croquisEditorModal
+#croquisEditorModal, #mesurePhotoModal
 {
     z-index:2100;
 }
@@ -2651,3 +2651,17 @@ button {
     align-items:center;
     gap:8px;
 }
+
+.mesureCouleurSwatch{
+    width:32px;
+    height:32px;
+    border-radius:50%;
+    cursor:pointer;
+    border:3px solid transparent;
+    box-sizing:border-box;
+}
+
+.mesureCouleurSwatch.active{
+    border-color:#333;
+}
+
