@@ -1452,6 +1452,52 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+
+<div id="croquisEditorModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button class="backButton" id="closeCroquisEditor">← Retour</button>
+
+        <h2 id="croquisEditorTitre">📐 Croquis</h2>
+
+        <div id="croquisApercu" style="margin-bottom:16px;"></div>
+
+        <div id="croquisFermetureInfo" style="font-size:13px;text-align:center;margin-bottom:10px;"></div>
+
+        <label class="fieldTitle">Murs</label>
+        <div id="croquisMursListe"></div>
+
+        <div id="croquisAjoutMurForm" style="margin-top:12px;">
+
+            <input type="number" id="croquisMurLongueur" placeholder="Longueur de ce mur (cm)" class="numberInput" style="margin-bottom:8px;">
+
+            <div id="croquisAngleFields" class="hidden">
+
+                <label class="checkLabel" style="margin-bottom:8px;">
+                    <input type="checkbox" id="croquisAngleNonDroitCheckbox">
+                    <span>Ce coin n'est pas droit (90°)</span>
+                </label>
+
+                <input type="number" id="croquisDiagonaleInput" placeholder="Diagonale mesurée entre le début du mur précédent et la fin de celui-ci (cm)" class="numberInput hidden" style="margin-bottom:8px;">
+
+                <label class="checkLabel" style="margin-bottom:8px;">
+                    <input type="checkbox" id="croquisConcaveCheckbox">
+                    <span>Ce coin rentre vers l'intérieur (pièce en L)</span>
+                </label>
+
+            </div>
+
+            <button id="ajouterMurButton" class="secondaryButton" style="width:100%;">
+                ➕ Ajouter ce mur
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 <div id="dateModal" class="modal-overlay hidden">
 
     <div class="modal">
