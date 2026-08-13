@@ -387,17 +387,17 @@ const RUBRIQUES_GEREES = [
     { id: "periode", sectionId: "periodeSection", emoji: "📅", label: "Période", aDuContenu: e => !!e.date?.start },
     { id: "voyage", sectionId: "voyageSection", emoji: "🧳", label: "Voyage/Projet", aDuContenu: e => isContainer(e.categorie) || !!e.voyageId },
     { id: "lieu", sectionId: "lieuSection", emoji: "📍", label: "Lieu", aDuContenu: e => !!e.lieu?.nom },
-    { id: "evaluation", sectionId: "evaluationSection", emoji: "⭐", label: "Évaluation", aDuContenu: e => !!(e.evaluation?.note || e.evaluation?.enfants || e.evaluation?.difficulte) },
+   { id: "evaluation", sectionId: "evaluationSection", emoji: "🎚️", label: "Évaluation", aDuContenu: e => !!(e.evaluation?.note || e.evaluation?.enfants || e.evaluation?.difficulte) },
     { id: "photos", sectionId: "photosSection", emoji: "📷", label: "Photos", aDuContenu: e => (e.photos || []).length > 0 },
     { id: "description", sectionId: "ficheDescriptionSection", emoji: "📝", label: "Description", aDuContenu: e => !!e.description },
-    { id: "checklist", sectionId: "checklistSection", emoji: "✅", label: "Checklist", aDuContenu: e => (e.checklist || []).length > 0 },
+   { id: "checklist", sectionId: "checklistSection", emoji: "☐", label: "Checklist", aDuContenu: e => (e.checklist || []).length > 0 },
     { id: "liens", sectionId: "lienSection", emoji: "🔗", label: "Liens", aDuContenu: e => (e.urls || []).length > 0 },
     { id: "peinture", sectionId: "peintureSection", emoji: "🎨", label: "Peinture", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.peinture?.murs || []).length > 0 },
     { id: "bois", sectionId: "boisSection", emoji: "🪵", label: "Bois", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.bois?.planches || []).length > 0 },
-    { id: "comparateur", sectionId: "comparateurSection", emoji: "🔍", label: "Comparateur", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.comparateur?.produits || []).length > 0 },
-    { id: "devis", sectionId: "devisSection", emoji: "📋", label: "Devis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.devis?.entries || []).length > 0 },
+    { id: "comparateur", sectionId: "comparateurSection", emoji: "⚖️", label: "Comparateur", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.comparateur?.produits || []).length > 0 },
+    { id: "devis", sectionId: "devisSection", emoji: "🧾", label: "Devis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.devis?.entries || []).length > 0 },
     { id: "croquis", sectionId: "croquisSection", emoji: "📐", label: "Croquis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.croquis || []).length > 0 },
-    { id: "simulationIA", sectionId: "simulationIASection", emoji: "🖼️", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false }
+   { id: "simulationIA", sectionId: "simulationIASection", emoji: "🪄", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false }
 ];
 
 function estRubriqueVisible(rubrique, envie) {
