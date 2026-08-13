@@ -153,3 +153,106 @@ export function initIndicesContextuels() {
     });
 
 }
+
+const RUBRIQUE_ONBOARDING = {
+
+    peinture: {
+        version: 1,
+        titre: "🎨 Peinture",
+        aQuoiCaSert: "Calcule automatiquement la quantité de peinture nécessaire à partir des dimensions de tes murs.",
+        commentCaSutilise: "Ajoute chaque mur (largeur × hauteur), déduis les ouvertures (portes, fenêtres) si besoin, choisis le nombre de couches — le nombre de litres à acheter s'affiche directement."
+    },
+
+    bois: {
+        version: 1,
+        titre: "🪵 Bois",
+        aQuoiCaSert: "T'aide à calculer combien de bois acheter et comment découper tes planches brutes sans gaspillage.",
+        commentCaSutilise: "Liste les pièces à découper (longueur, largeur, épaisseur), indique les planches brutes que tu as ou comptes acheter — un schéma de découpe optimisé s'affiche."
+    },
+
+    comparateur: {
+        version: 1,
+        titre: "⚖️ Comparateur",
+        aQuoiCaSert: "Compare plusieurs produits avant d'acheter, sans perdre le fil de tes recherches.",
+        commentCaSutilise: "Ajoute chaque option avec prix, photo, avis. Marque ton choix final avec 🏆 — il passe alors automatiquement dans ta liste À acheter."
+    },
+
+    devis: {
+        version: 1,
+        titre: "🧾 Devis",
+        aQuoiCaSert: "Suit tes demandes de devis auprès des artisans, du premier contact jusqu'à la décision.",
+        commentCaSutilise: "Ajoute une société (scanne sa carte de visite pour aller plus vite), suis son statut (à contacter, RDV, devis reçu), et marque celui que tu retiens."
+    },
+
+    croquis: {
+        version: 1,
+        titre: "📐 Croquis",
+        aQuoiCaSert: "Dessine un mur ou une pièce à l'échelle réelle, même si les angles ne sont pas droits, pour y positionner des éléments avec leurs vraies dimensions.",
+        commentCaSutilise: "Ajoute tes murs un par un avec leur longueur. Pour un coin qui n'est pas droit, indique la diagonale mesurée plutôt qu'un angle. Place ensuite tes éléments par clic ou par distance précise."
+    },
+
+    simulationIA: {
+        version: 1,
+        titre: "🪄 Simulation IA",
+        aQuoiCaSert: "Prépare tout ce qu'il faut (photo + description + éventuels produits) pour demander à une IA (ChatGPT, Gemini...) de visualiser un changement avant de te lancer.",
+        commentCaSutilise: "Choisis une photo de base, coche éventuellement des produits/photos à intégrer en précisant où, décris ce que tu veux changer — le prompt et les images à envoyer sont générés pour toi."
+    },
+
+    checklist: {
+        version: 1,
+        titre: "☐ Checklist",
+        aQuoiCaSert: "Ta liste d'achats ou de tâches pour ce projet, organisée par catégorie ou par personne.",
+        commentCaSutilise: "Ajoute des éléments un par un ou depuis un modèle réutilisable. Coche au fur et à mesure — les éléments faits descendent en bas, les catégories entièrement cochées passent tout en bas de la liste."
+    },
+
+    evaluation: {
+        version: 1,
+        titre: "🎚️ Évaluation",
+        aQuoiCaSert: "Garde une trace de ton ressenti une fois l'expérience vécue (note, difficulté, adapté aux enfants...).",
+        commentCaSutilise: "Renseigne les critères après coup — utile pour te souvenir plus tard si tu recommencerais, ou pour comparer plusieurs idées similaires."
+    }
+
+};
+
+export function afficherOnboardingRubriqueSiNecessaire(rubriqueId, callbackApresFermeture) {
+
+    const contenu = RUBRIQUE_ONBOARDING[rubriqueId];
+
+    if (!contenu) {
+        callbackApresFermeture?.();
+        return;
+    }
+
+    const cle = `rubrique_${rubriqueId}_v${contenu.version}`;
+
+    if (getIndicesVus().includes(cle)) {
+        callbackApresFermeture?.();
+        return;
+    }
+
+    document.getElementById("rubriqueOnboardingTitre").textContent = contenu.titre;
+    document.getElementById("rubriqueOnboardingSert").textContent = contenu.aQuoiCaSert;
+    document.getElementById("rubriqueOnboardingUtilise").textContent = contenu.commentCaSutilise;
+
+    const modal = document.getElementById("rubriqueOnboardingModal");
+    modal.classList.remove("hidden");
+
+    const boutonPasser = document.getElementById("rubriqueOnboardingPasser");
+    const boutonCompris = document.getElementById("rubriqueOnboardingCompris");
+
+    function fermer() {
+
+        marquerIndiceVu(cle);
+        modal.classList.add("hidden");
+
+        boutonPasser.removeEventListener("click", fermer);
+        boutonCompris.removeEventListener("click", fermer);
+
+        callbackApresFermeture?.();
+
+    }
+
+    boutonPasser.addEventListener("click", fermer);
+    boutonCompris.addEventListener("click", fermer);
+
+}
