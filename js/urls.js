@@ -16,7 +16,7 @@ export function renderUrls(envie) {
         div.className = "urlItem";
 
         div.innerHTML = `
-            <a href="${link.url}" target="_blank">${link.url}</a>
+            <a href="${link.url}" target="_blank">${link.nom || link.url}</a>
             <button class="deleteUrlButton">🗑️</button>
         `;
 
@@ -59,9 +59,10 @@ function saveCurrentUrl() {
     if (!url)
         return;
 
+    const nom = document.getElementById("urlNomInput").value.trim() || null;
     const id = crypto.randomUUID();
 
-    addUrlStorage(currentUrlEnvieId, url);
+    addUrlStorage(currentUrlEnvieId, url, nom);
 
     document.getElementById("urlModal").classList.add("hidden");
 
@@ -71,7 +72,7 @@ function saveCurrentUrl() {
 
         const optimisticEnvie = {
             ...envie,
-            urls: [...(envie.urls || []), { id, url, createdAt: Date.now() }]
+            urls: [...(envie.urls || []), { id, url, nom, createdAt: Date.now() }]
         };
 
         renderUrls(optimisticEnvie);
