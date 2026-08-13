@@ -828,14 +828,21 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="fieldTitle" style="margin-top:12px;">Quantité</label>
         <input type="number" id="checklistEditQuantiteInput" min="1" class="numberInput">
 
-        <label class="fieldTitle" style="margin-top:12px;">Magasin (optionnel)</label>
-        <div style="position:relative;">
-            <input type="text" id="checklistEditMagasinInput" placeholder="Ex: Leroy Merlin" class="numberInput" autocomplete="off">
-            <div id="checklistEditMagasinSuggestions" class="autocompleteSuggestions hidden"></div>
-        </div>
+        <div id="checklistEditChampsAchat">
 
-        <label class="fieldTitle" style="margin-top:12px;">Lien (optionnel)</label>
-        <input type="text" id="checklistEditUrlInput" placeholder="https://..." class="numberInput">
+            <label class="fieldTitle" style="margin-top:12px;">Magasin (optionnel)</label>
+            <div style="position:relative;">
+                <input type="text" id="checklistEditMagasinInput" placeholder="Ex: Leroy Merlin" class="numberInput" autocomplete="off">
+                <div id="checklistEditMagasinSuggestions" class="autocompleteSuggestions hidden"></div>
+            </div>
+
+            <label class="fieldTitle" style="margin-top:12px;">Lien (optionnel)</label>
+            <input type="text" id="checklistEditUrlInput" placeholder="https://..." class="numberInput">
+
+            <label class="fieldTitle" style="margin-top:12px;">Quantité</label>
+            <input type="number" id="checklistEditQuantiteInput" min="1" class="numberInput">
+
+        </div>
 
         <div class="modal-actions">
             <button id="cancelChecklistEditItem">Annuler</button>
