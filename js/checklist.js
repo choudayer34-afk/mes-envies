@@ -26,7 +26,22 @@ let derniereEnvieIdChecklist = null;
 let categorieOuverteId = null;
 let personnesOuvertes = new Set();
 let categorieOuvertePersonne = {};
+const PALETTE_CATEGORIES = ["#D97C7C", "#E7A94C", "#8FBF7F", "#6FAFC4", "#8A6FBF", "#4FB0A5", "#D98CB3"];
 
+function couleurCategorie(categorieId) {
+
+    if (!categorieId)
+        return "#B0B8BE";
+
+    let hash = 0;
+
+    for (let i = 0; i < categorieId.length; i++) {
+        hash = (hash * 31 + categorieId.charCodeAt(i)) % PALETTE_CATEGORIES.length;
+    }
+
+    return PALETTE_CATEGORIES[Math.abs(hash) % PALETTE_CATEGORIES.length];
+
+}
 
 export function renderChecklist(envie) {
 
@@ -127,7 +142,14 @@ header.innerHTML = `
 
         });
 
-        checklist.appendChild(header);
+         checklist.appendChild(header);
+        
+        if (envie.contexte === "maison") {
+            header.style.borderLeft = `4px solid ${couleurCategorie(group.categorie?.id)}`;
+            header.style.paddingLeft = "10px";
+        }
+        
+       
 
         if (!estOuverte)
             return;
@@ -244,8 +266,14 @@ personneHeader.innerHTML = `
 
             });
 
+            
             sousContainer.appendChild(subHeader);
 
+            if (envie.contexte === "maison") {
+                subHeader.style.borderLeft = `4px solid ${couleurCategorie(group.categorie?.id)}`;
+                subHeader.style.paddingLeft = "10px";
+            }
+            
             if (!estOuverteCat)
                 return;
 
