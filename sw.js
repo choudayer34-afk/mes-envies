@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v86';
+const CACHE_NAME = 'envie-cache-v87';
 
 
  
@@ -18,6 +18,7 @@ const APP_SHELL = [
     './js/onboarding.js',
     './js/envie.js',
     './js/checklist.js',
+ './js/todo.js',
     './js/location.js',
     './js/periode.js',
     './js/voyage.js',
