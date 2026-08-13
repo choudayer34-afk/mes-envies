@@ -8,7 +8,7 @@ import { searchLocation } from "./location.js";
 import { supprimerVoyageEtContenu } from "./storage.js";
 import { closeFiche } from "./envie.js";
 import { openModalConteneurSelonMode } from "./modal.js";
-
+import { updateEnvieStatutManuel } from "./storage.js";
 import { openModalVoyageContext } from "./modal.js";
 
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp, calculerDistancesEtapes } from "./itineraire.js";
@@ -156,6 +156,30 @@ couvertureRow.innerHTML = envie.photoCouverture ? `
     `;
     container.appendChild(statutBox);
 
+    const statutManuelRow = document.createElement("div");
+    statutManuelRow.className = "itemTypeToggle";
+    statutManuelRow.style.marginTop = "10px";
+
+    statutManuelRow.innerHTML = `
+        <button type="button" class="itemTypeChip statutManuelChip ${!envie.statutManuel ? "active" : ""}" data-statut="">🤖 Auto</button>
+        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "planifie" ? "active" : ""}" data-statut="planifie">📋 À faire</button>
+        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "en_cours" ? "active" : ""}" data-statut="en_cours">🔄 En cours</button>
+        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "termine" ? "active" : ""}" data-statut="termine">✅ Terminé</button>
+    `;
+
+    statutManuelRow.querySelectorAll(".statutManuelChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            updateEnvieStatutManuel(envie.id, chip.dataset.statut || null);
+            renderVoyageSection({ ...envie, statutManuel: chip.dataset.statut || null });
+
+        });
+
+    });
+
+    container.appendChild(statutManuelRow);
+    
         const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today && !(estMaison && e.realise));
 
