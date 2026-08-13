@@ -102,7 +102,7 @@ gererAccordeonsVides(envie);
 
 
 }
-async function renderFicheMeteo(envie) {
+export async function renderFicheMeteo(envie) {
 
     const container = document.getElementById("ficheMeteoWidget");
 
