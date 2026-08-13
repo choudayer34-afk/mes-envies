@@ -14,6 +14,10 @@ export function getChangelog() {
     return [...changelogCache].sort((a, b) => (b.date || 0) - (a.date || 0));
 }
 
+export function updateEnvieRubriquesEtat(id, rubriquesEtatManuel) {
+    patchEnvie(id, { rubriquesEtatManuel });
+}
+
 export function initChangelogSync(onChange) {
 
     const foyerId = getFoyerId();
