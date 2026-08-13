@@ -1468,31 +1468,38 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="fieldTitle">Murs</label>
         <div id="croquisMursListe"></div>
 
-        <div id="croquisAjoutMurForm" style="margin-top:12px;">
+          <div id="croquisAjoutMurForm" style="margin-top:12px;">
+
+            <input type="text" id="croquisMurNom" placeholder="Nom du mur (optionnel, ex: Mur du fond)" class="numberInput" style="margin-bottom:8px;">
 
             <input type="number" id="croquisMurLongueur" placeholder="Longueur de ce mur (cm)" class="numberInput" style="margin-bottom:8px;">
 
             <div id="croquisAngleFields" class="hidden">
 
-                <label class="checkLabel" style="margin-bottom:8px;">
-                    <input type="checkbox" id="croquisAngleNonDroitCheckbox">
-                    <span>Ce coin n'est pas droit (90°)</span>
-                </label>
+                <div class="checklistRow">
+                    <label class="checkLabel">
+                        <input type="checkbox" id="croquisAngleNonDroitCheckbox">
+                        <span>Ce coin n'est pas droit (90°)</span>
+                    </label>
+                </div>
 
-                <input type="number" id="croquisDiagonaleInput" placeholder="Diagonale mesurée entre le début du mur précédent et la fin de celui-ci (cm)" class="numberInput hidden" style="margin-bottom:8px;">
+                <input type="number" id="croquisDiagonaleInput" placeholder="Diagonale mesurée entre le début du mur précédent et la fin de celui-ci (cm)" class="numberInput hidden" style="margin:8px 0;">
 
-                <label class="checkLabel" style="margin-bottom:8px;">
-                    <input type="checkbox" id="croquisConcaveCheckbox">
-                    <span>Ce coin rentre vers l'intérieur (pièce en L)</span>
-                </label>
+                <div class="checklistRow">
+                    <label class="checkLabel">
+                        <input type="checkbox" id="croquisConcaveCheckbox">
+                        <span>Ce coin rentre vers l'intérieur (pièce en L)</span>
+                    </label>
+                </div>
 
             </div>
 
-            <button id="ajouterMurButton" class="secondaryButton" style="width:100%;">
+            <button id="ajouterMurButton" class="secondaryButton" style="width:100%;margin-top:8px;">
                 ➕ Ajouter ce mur
             </button>
 
         </div>
+
 
     </div>
 
