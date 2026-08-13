@@ -44,8 +44,14 @@ export function initModal() {
     document.getElementById("cancelModal")
         .addEventListener("click", closeModal);
 
+    
     renderCreationCategorieSelector();
 
+    document.getElementById("envieInput")?.addEventListener("input", () => {
+    document.getElementById("envieInput").classList.remove("champEnErreur");
+    document.getElementById("envieInputErreur")?.classList.add("hidden");
+});
+    
     document.getElementById("saveEnvie")
         .addEventListener("click", saveCurrentEnvie);
         
@@ -210,9 +216,20 @@ function saveCurrentEnvie() {
 
         const input = document.getElementById("envieInput");
         const titre = input.value.trim();
+        const erreur = document.getElementById("envieInputErreur");
 
-        if (!titre)
+        if (!titre) {
+
+            input.classList.add("champEnErreur");
+            erreur?.classList.remove("hidden");
+            input.focus();
+
             return;
+
+        }
+
+        input.classList.remove("champEnErreur");
+        erreur?.classList.add("hidden");
 
         if (currentEditId) {
 
