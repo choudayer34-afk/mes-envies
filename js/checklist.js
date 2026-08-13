@@ -441,7 +441,7 @@ export function formatAssignLabel(assignedTo) {
 
 /* ---------- Sélecteur de personnes réutilisable ---------- */
 
-function renderPersonneSelector(container, selected, onChange) {
+export function renderPersonneSelector(container, selected, onChange) {
 
     container.innerHTML = "";
 
