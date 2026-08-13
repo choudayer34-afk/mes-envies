@@ -157,14 +157,17 @@ export function initAdmin() {
 
     /* ---------- Modèles ---------- */
 
-    document.getElementById("addTemplateButton").addEventListener("click", () => {
+  document.getElementById("addTemplateButton").addEventListener("click", () => {
 
         const nom = prompt("Nom du modèle (ex : Randonnée) :");
 
         if (!nom || !nom.trim())
             return;
 
-        const template = createTemplate(nom.trim());
+        const estMaison = window.confirm("Ce modèle est-il pour un projet MAISON ?\n\nOK = Maison\nAnnuler = Voyage");
+        const contexte = estMaison ? "maison" : "voyage";
+
+        const template = createTemplate(nom.trim(), contexte);
 
         renderTemplatesList();
         openTemplateEdit(template.id);
@@ -365,9 +368,9 @@ function renderTemplatesList() {
         const row = document.createElement("div");
         row.className = "templateRow";
 
-        row.innerHTML = `
+       row.innerHTML = `
             <div class="templateRowNom">
-                🧳 ${template.nom}
+                ${template.contexte === "maison" ? "🛠️" : "🧳"} ${template.nom}
                 <small>(${template.items.length} élément${template.items.length > 1 ? "s" : ""})</small>
             </div>
             <div class="templateRowActions">
