@@ -21,7 +21,7 @@ let currentAssignItemId = null;
 let viewMode = "categorie";
 let currentBulkCategorieId = null;
 let checklistItemEnCoursEdition = null;
-
+let currentAssignCallback = null;
 let derniereEnvieIdChecklist = null;
 let categorieOuverteId = null;
 let personnesOuvertes = new Set();
@@ -287,14 +287,19 @@ export function groupByCategorie(items, categories) {
 
 }
 
-function ouvrirEditionChecklistItem(envieId, item) {
+export function ouvrirEditionChecklistItem(envieId, item, onSave = null) {
 
-    checklistItemEnCoursEdition = { envieId, itemId: item.id };
+    checklistItemEnCoursEdition = { envieId, itemId: item.id, onSave };
 
     document.getElementById("checklistEditTexteInput").value = item.texte;
-    document.getElementById("checklistEditMagasinInput").value = item.magasin || "";
-    document.getElementById("checklistEditUrlInput").value = item.url || "";
-    document.getElementById("checklistEditQuantiteInput").value = item.quantite || 1;
+
+    document.getElementById("checklistEditChampsAchat")?.classList.toggle("hidden", !!onSave);
+
+    if (!onSave) {
+        document.getElementById("checklistEditMagasinInput").value = item.magasin || "";
+        document.getElementById("checklistEditUrlInput").value = item.url || "";
+        document.getElementById("checklistEditQuantiteInput").value = item.quantite || 1;
+    }
 
     document.getElementById("checklistEditItemModal")?.classList.remove("hidden");
 
@@ -391,7 +396,7 @@ function createChecklistRow(item, envie, personneContext = null) {
 
 
 
-function formatAssignLabel(assignedTo) {
+export function formatAssignLabel(assignedTo) {
 
     if (!assignedTo || assignedTo.length === 0)
         return "Tous";
@@ -540,13 +545,21 @@ const labelPourQui = document.getElementById("checklistPersonnesSelector")?.prev
         document.getElementById("assignModal").classList.add("hidden");
     });
 
-    document.getElementById("validateAssign").addEventListener("click", () => {
+document.getElementById("validateAssign").addEventListener("click", () => {
 
-        updateChecklistItemAssignment(currentChecklistEnvieId, currentAssignItemId, currentAssignedTo);
+        if (currentAssignCallback) {
+
+            currentAssignCallback([...currentAssignedTo]);
+            currentAssignCallback = null;
+
+        } else {
+
+            updateChecklistItemAssignment(currentChecklistEnvieId, currentAssignItemId, currentAssignedTo);
+            openEnvie(currentChecklistEnvieId);
+
+        }
 
         document.getElementById("assignModal").classList.add("hidden");
-
-        openEnvie(currentChecklistEnvieId);
 
     });
     
@@ -554,7 +567,7 @@ const labelPourQui = document.getElementById("checklistPersonnesSelector")?.prev
         document.getElementById("checklistEditItemModal")?.classList.add("hidden");
     });
 
-    document.getElementById("saveChecklistEditItem")?.addEventListener("click", () => {
+ document.getElementById("saveChecklistEditItem")?.addEventListener("click", () => {
 
         if (!checklistItemEnCoursEdition)
             return;
@@ -566,23 +579,31 @@ const labelPourQui = document.getElementById("checklistPersonnesSelector")?.prev
             return;
         }
 
-              const magasin = document.getElementById("checklistEditMagasinInput").value.trim() || null;
-        const url = document.getElementById("checklistEditUrlInput").value.trim() || null;
-        const quantite = parseInt(document.getElementById("checklistEditQuantiteInput").value, 10) || 1;
+        if (checklistItemEnCoursEdition.onSave) {
 
-        updateChecklistItem(checklistItemEnCoursEdition.envieId, checklistItemEnCoursEdition.itemId, { texte, magasin, url, quantite });
+            checklistItemEnCoursEdition.onSave(texte);
 
-        if (magasin) {
-            rememberMagasin(magasin);
+        } else {
+
+            const magasin = document.getElementById("checklistEditMagasinInput").value.trim() || null;
+            const url = document.getElementById("checklistEditUrlInput").value.trim() || null;
+            const quantite = parseInt(document.getElementById("checklistEditQuantiteInput").value, 10) || 1;
+
+            updateChecklistItem(checklistItemEnCoursEdition.envieId, checklistItemEnCoursEdition.itemId, { texte, magasin, url, quantite });
+
+            if (magasin) {
+                rememberMagasin(magasin);
+            }
+
+            const envie = getEnvies().find(e => e.id === checklistItemEnCoursEdition.envieId);
+
+            if (envie) {
+                renderChecklist(envie);
+            }
+
         }
 
         document.getElementById("checklistEditItemModal")?.classList.add("hidden");
-
-        const envie = getEnvies().find(e => e.id === checklistItemEnCoursEdition.envieId);
-
-        if (envie) {
-            renderChecklist(envie);
-        }
 
         showToast("✓ Élément modifié");
 
@@ -785,11 +806,12 @@ function saveChecklistItem() {
 
 /* ---------- Modale attribution (édition) ---------- */
 
-function openAssignModal(envieId, item) {
+export function openAssignModal(envieId, item, onSave = null) {
 
     currentChecklistEnvieId = envieId;
     currentAssignItemId = item.id;
     currentAssignedTo = item.assignedTo ? [...item.assignedTo] : [];
+    currentAssignCallback = onSave;
 
     refreshAssignSelector();
 
