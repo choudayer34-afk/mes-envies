@@ -96,6 +96,24 @@ function renderListe(envie, comparateur) {
 
 }
 
+function formatDimensionsProduit(produit) {
+
+    if (produit.longueur || produit.largeur || produit.hauteur) {
+
+        const parties = [];
+
+        if (produit.longueur) parties.push(`L:${produit.longueur}`);
+        if (produit.largeur) parties.push(`l:${produit.largeur}`);
+        if (produit.hauteur) parties.push(`H:${produit.hauteur}`);
+
+        return `📐 ${parties.join(" ")} cm`;
+
+    }
+
+    return produit.dimensions ? `📐 ${produit.dimensions}` : null;
+
+}
+
 function creerCarteProduit(envie, comparateur, produit) {
 
     const card = document.createElement("div");
@@ -107,7 +125,7 @@ function creerCarteProduit(envie, comparateur, produit) {
 
     const metaBits = [
         produit.prix != null ? `💰 ${produit.prix} €` : null,
-        produit.dimensions ? `📐 ${produit.dimensions}` : null,
+        formatDimensionsProduit(produit),
         produit.magasin ? `🏬 ${produit.magasin}` : null
     ].filter(Boolean).join(" · ");
 
@@ -243,7 +261,9 @@ function ouvrirModalProduit(produit = null) {
 
     document.getElementById("comparateurNom").value = produit?.nom || "";
     document.getElementById("comparateurPrix").value = produit?.prix ?? "";
-    document.getElementById("comparateurDimensions").value = produit?.dimensions || "";
+   document.getElementById("comparateurLongueur").value = produit?.longueur || "";
+    document.getElementById("comparateurLargeur").value = produit?.largeur || "";
+    document.getElementById("comparateurHauteur").value = produit?.hauteur || "";
     document.getElementById("comparateurMagasin").value = produit?.magasin || "";
     document.getElementById("comparateurUrl").value = produit?.url || "";
     document.getElementById("comparateurRemarque").value = produit?.remarque || "";
@@ -409,7 +429,9 @@ document.getElementById("saveComparateurProduit")?.addEventListener("click", () 
         const donneesProduit = {
             nom,
             prix: isNaN(prixSaisi) ? null : prixSaisi,
-            dimensions: document.getElementById("comparateurDimensions").value.trim(),
+          longueur: parseFloat(document.getElementById("comparateurLongueur").value) || null,
+            largeur: parseFloat(document.getElementById("comparateurLargeur").value) || null,
+            hauteur: parseFloat(document.getElementById("comparateurHauteur").value) || null,
             magasin: document.getElementById("comparateurMagasin").value.trim(),
             avis: avisEnCours || null,
             url: document.getElementById("comparateurUrl").value.trim(),
