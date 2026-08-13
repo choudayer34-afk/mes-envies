@@ -2665,3 +2665,6 @@ button {
     border-color:#333;
 }
 
+#rubriqueOnboardingModal{
+    z-index:2200;
+}
