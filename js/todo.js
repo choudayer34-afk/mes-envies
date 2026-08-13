@@ -1,6 +1,6 @@
 import { getEnvies, updateEnvieChecklistTodo, getChecklistCategories } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
-import { groupByCategorie } from "./checklist.js";
+import { groupByCategorie, ouvrirEditionChecklistItem, openAssignModal, formatAssignLabel } from "./checklist.js";
 import { showToast } from "./toast.js";
 import { makeRowDraggable } from "./dragdrop.js";
 
@@ -81,40 +81,53 @@ function renderTodoListe(envie) {
         if (!estOuverte)
             return;
 
-        group.items.forEach(item => {
-            container.appendChild(creerLigneTodo(item));
+group.items.forEach(item => {
+            container.appendChild(creerLigneTodo(item, envie));
         });
 
     });
 
 }
 
-function creerLigneTodo(item) {
+function creerLigneTodo(item, envie) {
 
     const row = document.createElement("div");
     row.className = "checklistRow";
     row.dataset.dragId = item.id;
 
+    const assignLabel = formatAssignLabel(item.assignedTo);
+
     row.innerHTML = `
         <span class="dragHandle" style="cursor:grab;padding-right:8px;">⠿</span>
         <label class="checkLabel">
             <input type="checkbox" ${item.checked ? "checked" : ""}>
-            <span style="${item.checked ? "text-decoration:line-through;color:var(--color-text-light);" : ""}">${item.texte}</span>
+            <span>
+                <span style="${item.checked ? "text-decoration:line-through;color:var(--color-text-light);" : ""}">${item.texte}</span>
+                <small class="assignBadge">${assignLabel}</small>
+            </span>
         </label>
+        <button class="iconSmallButton editTodoButton" title="Modifier">✏️</button>
+        <button class="assignItemButton" title="Attribuer">👤</button>
         <button class="deleteChecklistButton" title="Supprimer">🗑️</button>
     `;
 
-    row.querySelector("input").addEventListener("change", (event) => {
+    function sauvegarderItem(champs) {
 
         const envieActuelle = getEnvieCourante();
 
         const nouveauxItems = (envieActuelle.checklistTodo || []).map(i =>
-            i.id === item.id ? { ...i, checked: event.target.checked } : i
+            i.id === item.id ? { ...i, ...champs } : i
         );
 
         updateEnvieChecklistTodo(envieActuelle.id, nouveauxItems);
         renderTodoListe({ ...envieActuelle, checklistTodo: nouveauxItems });
 
+        return nouveauxItems;
+
+    }
+
+    row.querySelector("input").addEventListener("change", (event) => {
+        sauvegarderItem({ checked: event.target.checked });
     });
 
     row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
@@ -124,6 +137,26 @@ function creerLigneTodo(item) {
 
         updateEnvieChecklistTodo(envieActuelle.id, nouveauxItems);
         renderTodoListe({ ...envieActuelle, checklistTodo: nouveauxItems });
+
+    });
+
+    row.querySelector(".editTodoButton").addEventListener("click", (event) => {
+
+        event.stopPropagation();
+
+        ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte) => {
+            sauvegarderItem({ texte: nouveauTexte });
+        });
+
+    });
+
+    row.querySelector(".assignItemButton").addEventListener("click", (event) => {
+
+        event.stopPropagation();
+
+        openAssignModal(envie.id, item, (nouvelAssignedTo) => {
+            sauvegarderItem({ assignedTo: nouvelAssignedTo });
+        });
 
     });
 
@@ -225,11 +258,12 @@ export function initTodo() {
 
         const envie = getEnvieCourante();
 
-        const nouveauxItems = lignes.map(texte => ({
+const nouveauxItems = lignes.map(texte => ({
             id: crypto.randomUUID(),
             texte,
             categorieId: currentBulkCategorieTodoId,
-            checked: false
+            checked: false,
+            assignedTo: []
         }));
 
         const tousLesItems = [...(envie.checklistTodo || []), ...nouveauxItems];
