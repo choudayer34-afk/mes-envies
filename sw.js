@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v84';
+const CACHE_NAME = 'envie-cache-v85';
 
 
  
@@ -28,6 +28,7 @@ const APP_SHELL = [
     './js/grouping.js',
     './js/dragdrop.js',
     './js/agenda.js',
+ './js/pulltorefresh.js',
     './js/meteo.js',
     './js/photos.js',
     './js/promptgen.js',
