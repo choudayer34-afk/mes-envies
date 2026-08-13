@@ -1296,6 +1296,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     <button
         class="accordionHeader"
+        data-target="croquisSection">
+        <span>📐 Croquis</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div
+        id="croquisSection"
+        class="accordionContent hidden">
+
+        <div id="croquisListe"></div>
+
+        <button id="addCroquisButton" class="secondaryButton" style="width:100%;margin-top:10px;">
+            ➕ Nouveau croquis
+        </button>
+
+    </div>
+
+</div>
+        
+        <div class="accordion">
+
+    <button
+        class="accordionHeader"
         data-target="peintureSection">
         <span>🎨 Calculateur de peinture</span>
         <span class="accordionIcon">▾</span>
