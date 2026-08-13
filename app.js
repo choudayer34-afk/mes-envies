@@ -73,7 +73,7 @@ import {
 } from "./js/modal.js";
 import { initDateModal } from "./js/periode.js";
 import { initAuth } from "./js/auth.js";
-
+import { initCroquis } from "./js/croquis.js";
 import { initVoyage } from "./js/voyage.js";
 import { initCarte } from "./js/carte.js";
 import { initEnviesSync } from "./js/storage.js";
@@ -125,7 +125,7 @@ function init() {
     initModeBascule();
 afficherVersionCache();
      initSimulationIA();
-
+initCroquis();
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
     initActivitesVoyageAssistantSync(() => {});
