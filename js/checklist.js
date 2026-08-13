@@ -114,9 +114,9 @@ function renderByCategorie(items, envie, checklist) {
         header.type = "button";
         header.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
 
-        header.innerHTML = `
+header.innerHTML = `
             <span>${group.categorie ? `${group.categorie.emoji} ${group.categorie.nom}` : "Sans catégorie"}</span>
-            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${group.items.length}</span>
+            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${group.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
 
         header.addEventListener("click", () => {
@@ -192,9 +192,9 @@ function renderByPersonne(items, envie, checklist) {
         personneHeader.type = "button";
         personneHeader.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
 
-        personneHeader.innerHTML = `
+personneHeader.innerHTML = `
             <span>${groupePersonne.emoji} ${groupePersonne.nom}</span>
-            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${total}</span>
+            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${total} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
 
         personneHeader.addEventListener("click", () => {
@@ -231,9 +231,9 @@ function renderByPersonne(items, envie, checklist) {
             subHeader.type = "button";
             subHeader.className = "checklistSousCategorieHeader checklistCategorieHeaderCliquable";
 
-            subHeader.innerHTML = `
+ subHeader.innerHTML = `
                 <span>${group.categorie ? `${group.categorie.emoji} ${group.categorie.nom}` : "Sans catégorie"}</span>
-                <span class="checklistCategorieCompteur">${completeCat ? "✅ " : ""}${cochesCat}/${group.items.length}</span>
+                <span class="checklistCategorieCompteur">${completeCat ? "✅ " : ""}${cochesCat}/${group.items.length} <span class="accordionIcon">${estOuverteCat ? "▾" : "▸"}</span></span>
             `;
 
             subHeader.addEventListener("click", () => {
