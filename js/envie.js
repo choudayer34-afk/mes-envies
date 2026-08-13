@@ -450,9 +450,26 @@ function gererAccordeonsVides(envie) {
         if (!visible)
             return;
 
-        const header = accordion.querySelector(".accordionHeader");
+      const header = accordion.querySelector(".accordionHeader");
 
         if (header && !header.querySelector(".retirerRubriqueButton")) {
+
+            let wrapperDroite = header.querySelector(".accordionHeaderDroite");
+
+            if (!wrapperDroite) {
+
+                const icon = header.querySelector(".accordionIcon");
+                wrapperDroite = document.createElement("span");
+                wrapperDroite.className = "accordionHeaderDroite";
+
+                if (icon) {
+                    header.insertBefore(wrapperDroite, icon);
+                    wrapperDroite.appendChild(icon);
+                } else {
+                    header.appendChild(wrapperDroite);
+                }
+
+            }
 
             const retirerBtn = document.createElement("button");
             retirerBtn.type = "button";
@@ -474,7 +491,7 @@ function gererAccordeonsVides(envie) {
 
             });
 
-            header.appendChild(retirerBtn);
+            wrapperDroite.appendChild(retirerBtn);
 
         }
 
