@@ -506,8 +506,8 @@ export function initFoyerDataSync(onChange) {
 
     const foyerId = getFoyerId();
 
-    onSnapshot(collection(db, "foyers", foyerId, "checklistTemplates"), (snap) => {
-        templatesCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+   onSnapshot(collection(db, "foyers", foyerId, "checklistTemplates"), (snap) => {
+        templatesCache = snap.docs.map(d => ({ id: d.id, ...d.data(), contexte: d.data().contexte || "voyage" }));
         onChange();
     });
 
@@ -538,17 +538,16 @@ export function getTemplate(id) {
     return templatesCache.find(t => t.id === id);
 }
 
-export function createTemplate(nom) {
+export function createTemplate(nom, contexte = "voyage") {
 
     const id = crypto.randomUUID();
 
-    setDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", id), { nom, items: [] })
+    setDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", id), { nom, items: [], contexte })
         .catch(console.error);
 
-    return { id, nom, items: [] };
+    return { id, nom, items: [], contexte };
 
 }
-
 export function renameTemplate(id, nom) {
     updateDoc(doc(db, "foyers", getFoyerId(), "checklistTemplates", id), { nom }).catch(console.error);
 }
