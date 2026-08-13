@@ -3,6 +3,7 @@ import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
 
 let croquisEnCoursId = null;
+let murEnCoursEditionIndex = null;
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
@@ -104,7 +105,11 @@ function construireSVGContour(murs, elements) {
 
         const milieuX = (p1.x + p2.x) / 2, milieuY = (p1.y + p2.y) / 2;
 
-        svg += `<text x="${milieuX.toFixed(1)}" y="${(milieuY - 8).toFixed(1)}" font-size="11" text-anchor="middle" fill="#2C4A3E" font-weight="600">${murs[i].longueur} cm</text>`;
+                const nomMur = murs[i].nom || `Mur ${i + 1}`;
+
+        svg += `<text x="${milieuX.toFixed(1)}" y="${(milieuY - 14).toFixed(1)}" font-size="10" text-anchor="middle" fill="#2C4A3E" font-weight="700">${nomMur}</text>`;
+        svg += `<text x="${milieuX.toFixed(1)}" y="${(milieuY - 2).toFixed(1)}" font-size="10" text-anchor="middle" fill="#2C4A3E">${murs[i].longueur} cm</text>`;
+
 
     }
 
@@ -240,7 +245,7 @@ function renderCroquisListe(envie) {
 
 function formaterInfoMur(mur, index) {
 
-    let info = `Mur ${index + 1} : ${mur.longueur} cm`;
+    let info = `${mur.nom || "Mur " + (index + 1)} : ${mur.longueur} cm`;
 
     if (mur.diagonale) info += ` · diagonale ${mur.diagonale} cm`;
     if (mur.concave) info += ` · coin en L`;
@@ -248,6 +253,7 @@ function formaterInfoMur(mur, index) {
     return info;
 
 }
+
 
 function sauvegarderMurs(nouveauxMurs) {
 
@@ -281,16 +287,17 @@ function rafraichirEditeurCroquis(envie) {
 
         row.innerHTML = `
             <span>${formaterInfoMur(mur, index)}</span>
+            <button class="iconSmallButton" title="Modifier">✏️</button>
             <button class="deleteChecklistButton" title="Supprimer">🗑️</button>
         `;
+
+        row.querySelector(".iconSmallButton").addEventListener("click", () => {
+            ouvrirEditionMur(index);
+        });
 
         row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
 
             const nouveauxMurs = croquis.murs.filter((_, i) => i !== index);
-
-            if (nouveauxMurs[index]) {
-                nouveauxMurs[index] = { ...nouveauxMurs[index], diagonale: null, concave: false };
-            }
 
             sauvegarderMurs(nouveauxMurs);
 
@@ -320,25 +327,62 @@ function rafraichirEditeurCroquis(envie) {
         fermetureInfo.textContent = "";
     }
 
-    document.getElementById("croquisAngleFields").classList.toggle("hidden", croquis.murs.length === 0);
+    document.getElementById("croquisAngleFields").classList.toggle("hidden", croquis.murs.length === 0 && murEnCoursEditionIndex === null);
 
 }
 
-function ouvrirEditeurCroquis(croquisId) {
+function reinitialiserFormulaireMur() {
 
-    croquisEnCoursId = croquisId;
+    murEnCoursEditionIndex = null;
 
+    document.getElementById("croquisMurNom").value = "";
     document.getElementById("croquisMurLongueur").value = "";
     document.getElementById("croquisAngleNonDroitCheckbox").checked = false;
     document.getElementById("croquisDiagonaleInput").value = "";
     document.getElementById("croquisDiagonaleInput").classList.add("hidden");
     document.getElementById("croquisConcaveCheckbox").checked = false;
+    document.getElementById("ajouterMurButton").textContent = "➕ Ajouter ce mur";
+
+}
+
+function ouvrirEditionMur(index) {
+
+    const envie = getEnvieCourante();
+    const croquis = getCroquisActuel(envie);
+    const mur = croquis.murs[index];
+
+    murEnCoursEditionIndex = index;
+
+    document.getElementById("croquisMurNom").value = mur.nom || "";
+    document.getElementById("croquisMurLongueur").value = mur.longueur;
+
+    document.getElementById("croquisAngleFields").classList.toggle("hidden", index === 0);
+
+    document.getElementById("croquisAngleNonDroitCheckbox").checked = !!mur.diagonale;
+    document.getElementById("croquisDiagonaleInput").value = mur.diagonale || "";
+    document.getElementById("croquisDiagonaleInput").classList.toggle("hidden", !mur.diagonale);
+    document.getElementById("croquisConcaveCheckbox").checked = !!mur.concave;
+
+    document.getElementById("ajouterMurButton").textContent = "💾 Enregistrer les modifications";
+
+    document.getElementById("croquisMurNom")?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+}
+
+
+function ouvrirEditeurCroquis(croquisId) {
+
+    croquisEnCoursId = croquisId;
+
+    reinitialiserFormulaireMur();
 
     rafraichirEditeurCroquis(getEnvieCourante());
 
     document.getElementById("croquisEditorModal")?.classList.remove("hidden");
 
 }
+
+
 
 export function initCroquis() {
 
