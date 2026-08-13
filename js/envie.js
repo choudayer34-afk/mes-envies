@@ -526,18 +526,20 @@ export function initFicheFab() {
 
     const bouton = document.getElementById("ficheFabButton");
     const menu = document.getElementById("ficheFabMenu");
+    const overlay = document.getElementById("ficheFabOverlay");
 
-    if (!bouton || !menu)
+    if (!bouton || !menu || !overlay)
         return;
 
-    bouton.addEventListener("click", (event) => {
+    function fermerCamembert() {
 
-        event.stopPropagation();
+        overlay.classList.add("hidden");
+        menu.classList.add("hidden");
+        bouton.classList.remove("ficheFabButtonCentre");
 
-        if (!menu.classList.contains("hidden")) {
-            menu.classList.add("hidden");
-            return;
-        }
+    }
+
+    function ouvrirCamembert() {
 
         const envieId = document.getElementById("ficheFabAjout").dataset.envieId;
         const envie = getEnvies().find(e => e.id === envieId);
@@ -550,16 +552,17 @@ export function initFicheFab() {
             return !estRubriqueVisible(r, envie);
         });
 
+        if (disponibles.length === 0)
+            return;
+
         menu.innerHTML = "";
 
-        const rayon = 100;
-        const angleDebut = 180;
-        const angleFin = 270;
+        const rayon = 130;
         const n = disponibles.length;
 
         disponibles.forEach((rubrique, i) => {
 
-            const angle = n === 1 ? (angleDebut + angleFin) / 2 : angleDebut + (angleFin - angleDebut) * (i / (n - 1));
+            const angle = (360 / n) * i - 90;
             const rad = angle * Math.PI / 180;
 
             const x = Math.cos(rad) * rayon;
@@ -580,7 +583,7 @@ export function initFicheFab() {
 
                 gererAccordeonsVides(envieMaj);
 
-                menu.classList.add("hidden");
+                fermerCamembert();
 
                 setTimeout(() => {
                     document.getElementById(rubrique.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -592,17 +595,25 @@ export function initFicheFab() {
 
         });
 
+        overlay.classList.remove("hidden");
         menu.classList.remove("hidden");
+        bouton.classList.add("ficheFabButtonCentre");
 
-    });
+    }
 
-    document.addEventListener("click", (event) => {
+    bouton.addEventListener("click", (event) => {
 
-        if (!event.target.closest("#ficheFabAjout")) {
-            menu.classList.add("hidden");
+        event.stopPropagation();
+
+        if (bouton.classList.contains("ficheFabButtonCentre")) {
+            fermerCamembert();
+        } else {
+            ouvrirCamembert();
         }
 
     });
+
+    overlay.addEventListener("click", fermerCamembert);
 
 }
 
