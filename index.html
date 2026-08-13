@@ -1195,7 +1195,24 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div class="accordion">
 
+    <button class="accordionHeader" data-target="todoSection">
+        <span>🗒️ À faire</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div id="todoSection" class="accordionContent hidden">
+
+        <button id="addTodoButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+            ➕ Ajouter une tâche
+        </button>
+
+        <div id="todoContainer"></div>
+
+    </div>
+
+</div>
 <div class="accordion">
 
     <button
@@ -2054,6 +2071,25 @@ document.addEventListener("DOMContentLoaded", () => {
 <div id="imageAgrandieModal" class="modal-overlay hidden">
     <img id="imageAgrandieSrc" src="" style="max-width:92vw;max-height:92vh;border-radius:12px;margin:auto;">
     <button id="closeImageAgrandie" style="position:fixed;top:20px;right:20px;font-size:28px;background:none;border:none;color:white;">✕</button>
+</div>
+    <div id="todoAddModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <h2>🗒️ Ajouter des tâches</h2>
+
+        <textarea id="todoInput" rows="4" placeholder="Une tâche par ligne" style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:16px;box-sizing:border-box;resize:vertical;margin-bottom:12px;"></textarea>
+
+        <label class="fieldTitle">Catégorie (optionnel)</label>
+        <div id="todoCategorieSelector" class="categorieSelector fiche"></div>
+
+        <div class="modal-actions" style="margin-top:14px;">
+            <button id="cancelTodoAdd">Annuler</button>
+            <button id="saveTodoAdd" class="primaryButton">Ajouter</button>
+        </div>
+
+    </div>
+
 </div>
 <div id="photoDescriptionModal" class="modal-overlay hidden">
 
