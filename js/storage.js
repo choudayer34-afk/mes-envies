@@ -18,6 +18,10 @@ export function updateEnvieRubriquesEtat(id, rubriquesEtatManuel) {
     patchEnvie(id, { rubriquesEtatManuel });
 }
 
+export function updateEnvieChecklistTodo(id, checklistTodo) {
+    patchEnvie(id, { checklistTodo });
+}
+
 export function initChangelogSync(onChange) {
 
     const foyerId = getFoyerId();
