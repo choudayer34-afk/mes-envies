@@ -277,8 +277,8 @@ function ouvrirFormulaireMesure() {
 
     const container = document.getElementById("mesureCouleursChoix");
 
-    container.innerHTML = COULEURS_MESURE.map((couleur, i) => `
-        <div class="mesureCouleurSwatch${i === 0 ? " active" : ""}" data-couleur="${couleur}" style="background:${couleur};"></div>
+ container.innerHTML = COULEURS_MESURE.map((couleur, i) => `
+        <div class="mesureCouleurSwatch${i === 0 ? " active" : ""}" data-couleur="${couleur}" style="background:${couleur};box-shadow:inset 0 0 0 1px rgba(0,0,0,.35);"></div>
     `).join("");
 
     container.querySelectorAll(".mesureCouleurSwatch").forEach(swatch => {
