@@ -2668,3 +2668,24 @@ button {
 #rubriqueOnboardingModal{
     z-index:2200;
 }
+
+.pullToRefreshIndicateur{
+    position:fixed;
+    top:-60px;
+    left:50%;
+    width:200px;
+    margin-left:-100px;
+    text-align:center;
+    box-sizing:border-box;
+    background:white;
+    padding:10px 18px;
+    border-radius:999px;
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+    font-size:13px;
+    font-weight:600;
+    color:var(--color-text);
+    z-index:3600;
+    opacity:0;
+    transition:opacity .15s;
+    pointer-events:none;
+}
