@@ -4,6 +4,9 @@ import { showToast } from "./toast.js";
 
 let croquisEnCoursId = null;
 let murEnCoursEditionIndex = null;
+let modePositionElement = "clic";
+let elementEnCoursEditionIndex = null;
+let dernierTransformSVG = null;
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
@@ -68,15 +71,7 @@ function construirePolygone(murs) {
 
 }
 
-function construireSVGContour(murs, elements) {
-
-    const taille = 320;
-
-    if (!murs || murs.length === 0) {
-        return `<div class="emptyState">Ajoute au moins un mur pour voir le contour.</div>`;
-    }
-
-    const { points, ecartFermeture } = construirePolygone(murs);
+function calculerTransformSVG(points, taille, marge) {
 
     const xs = points.map(p => p.x);
     const ys = points.map(p => p.y);
@@ -86,16 +81,33 @@ function construireSVGContour(murs, elements) {
     const largeurReelle = Math.max(1, maxX - minX);
     const hauteurReelle = Math.max(1, maxY - minY);
 
-    const marge = 40;
     const echelle = Math.min((taille - marge * 2) / largeurReelle, (taille - marge * 2) / hauteurReelle);
 
     const decalageX = marge - minX * echelle + (taille - marge * 2 - largeurReelle * echelle) / 2;
     const decalageY = marge - minY * echelle + (taille - marge * 2 - hauteurReelle * echelle) / 2;
 
-    const versEcran = (p) => ({ x: p.x * echelle + decalageX, y: p.y * echelle + decalageY });
+    return { echelle, decalageX, decalageY, taille };
+
+}
+
+function construireSVGContour(murs, elements) {
+
+    const taille = 320;
+    const marge = 40;
+
+    if (!murs || murs.length === 0) {
+        dernierTransformSVG = null;
+        return `<div class="emptyState">Ajoute au moins un mur pour voir le contour.</div>`;
+    }
+
+    const { points, ecartFermeture } = construirePolygone(murs);
+    const transform = calculerTransformSVG(points, taille, marge);
+    dernierTransformSVG = { ...transform, points };
+
+    const versEcran = (p) => ({ x: p.x * transform.echelle + transform.decalageX, y: p.y * transform.echelle + transform.decalageY });
     const pointsEcran = points.map(versEcran);
 
-    let svg = `<svg viewBox="0 0 ${taille} ${taille}" style="width:100%;max-width:360px;height:auto;background:#F4F4F4;border-radius:8px;border:1px solid var(--color-border);display:block;margin:0 auto;">`;
+    let svg = `<svg id="croquisSVG" viewBox="0 0 ${taille} ${taille}" style="width:100%;max-width:360px;height:auto;background:#F4F4F4;border-radius:8px;border:1px solid var(--color-border);display:block;margin:0 auto;cursor:crosshair;">`;
 
     for (let i = 0; i < pointsEcran.length - 1; i++) {
 
@@ -104,12 +116,10 @@ function construireSVGContour(murs, elements) {
         svg += `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="#2C4A3E" stroke-width="4" stroke-linecap="round"/>`;
 
         const milieuX = (p1.x + p2.x) / 2, milieuY = (p1.y + p2.y) / 2;
-
-                const nomMur = murs[i].nom || `Mur ${i + 1}`;
+        const nomMur = murs[i].nom || `Mur ${i + 1}`;
 
         svg += `<text x="${milieuX.toFixed(1)}" y="${(milieuY - 14).toFixed(1)}" font-size="10" text-anchor="middle" fill="#2C4A3E" font-weight="700">${nomMur}</text>`;
         svg += `<text x="${milieuX.toFixed(1)}" y="${(milieuY - 2).toFixed(1)}" font-size="10" text-anchor="middle" fill="#2C4A3E">${murs[i].longueur} cm</text>`;
-
 
     }
 
@@ -126,11 +136,11 @@ function construireSVGContour(murs, elements) {
     (elements || []).forEach(el => {
 
         const coin = versEcran({ x: el.x - el.largeur / 2, y: el.y - el.profondeur / 2 });
-        const w = el.largeur * echelle;
-        const h = el.profondeur * echelle;
+        const w = el.largeur * transform.echelle;
+        const h = el.profondeur * transform.echelle;
 
         svg += `<g transform="rotate(${el.rotation || 0} ${(coin.x + w / 2).toFixed(1)} ${(coin.y + h / 2).toFixed(1)})">`;
-        svg += `<rect x="${coin.x.toFixed(1)}" y="${coin.y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#6FAFC4" opacity="0.8" stroke="#3E7CB1" stroke-width="1.5"/>`;
+        svg += `<rect x="${coin.x.toFixed(1)}" y="${coin.y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="#6FAFC4" opacity="0.85" stroke="#3E7CB1" stroke-width="1.5"/>`;
         svg += `<text x="${(coin.x + w / 2).toFixed(1)}" y="${(coin.y + h / 2).toFixed(1)}" font-size="10" text-anchor="middle" dominant-baseline="middle" fill="white" font-weight="600">${el.nom}</text>`;
         svg += `</g>`;
 
@@ -141,6 +151,122 @@ function construireSVGContour(murs, elements) {
     return svg;
 
 }
+
+function calculerPositionDepuisMur(points, indexMur, distanceLeLong, distancePerpendiculaire) {
+
+    const p1 = points[indexMur];
+    const p2 = points[indexMur + 1];
+
+    const dx = p2.x - p1.x, dy = p2.y - p1.y;
+    const longueurMur = Math.sqrt(dx * dx + dy * dy);
+    const dirX = dx / longueurMur, dirY = dy / longueurMur;
+
+    const baseX = p1.x + dirX * distanceLeLong;
+    const baseY = p1.y + dirY * distanceLeLong;
+
+    const normale1 = { x: -dirY, y: dirX };
+    const normale2 = { x: dirY, y: -dirX };
+
+    const cx = points.reduce((s, p) => s + p.x, 0) / points.length;
+    const cy = points.reduce((s, p) => s + p.y, 0) / points.length;
+
+    const versCentroidX = cx - baseX, versCentroidY = cy - baseY;
+    const produit1 = normale1.x * versCentroidX + normale1.y * versCentroidY;
+    const normaleInterieure = produit1 > 0 ? normale1 : normale2;
+
+    return {
+        x: baseX + normaleInterieure.x * distancePerpendiculaire,
+        y: baseY + normaleInterieure.y * distancePerpendiculaire
+    };
+
+}
+
+function reinitialiserFormulaireElement() {
+
+    elementEnCoursEditionIndex = null;
+
+    document.getElementById("croquisElementNom").value = "";
+    document.getElementById("croquisElementLargeur").value = "";
+    document.getElementById("croquisElementProfondeur").value = "";
+    document.getElementById("croquisElementRotationCheckbox").checked = false;
+    document.getElementById("ajouterElementDistanceButton").textContent = "➕ Ajouter l'élément ici";
+
+}
+
+function ajouterOuModifierElement(x, y) {
+
+    const nom = document.getElementById("croquisElementNom").value.trim();
+    const largeur = parseFloat(document.getElementById("croquisElementLargeur").value);
+    const profondeur = parseFloat(document.getElementById("croquisElementProfondeur").value);
+    const rotation = document.getElementById("croquisElementRotationCheckbox").checked ? 90 : 0;
+
+    if (!nom || !largeur || !profondeur) {
+        showToast("Renseigne le nom et les dimensions de l'élément");
+        return;
+    }
+
+    const envie = getEnvieCourante();
+    const croquis = getCroquisActuel(envie);
+
+    let nouveauxElements;
+
+    if (elementEnCoursEditionIndex !== null) {
+
+        nouveauxElements = croquis.elements.map((el, i) =>
+            i === elementEnCoursEditionIndex ? { ...el, nom, largeur, profondeur, rotation, x, y } : el
+        );
+
+    } else {
+
+        nouveauxElements = [...(croquis.elements || []), {
+            id: crypto.randomUUID(), nom, largeur, profondeur, rotation, x, y
+        }];
+
+    }
+
+    const liste = getCroquisListe(envie).map(c =>
+        c.id === croquisEnCoursId ? { ...c, elements: nouveauxElements } : c
+    );
+
+    updateEnvieCroquis(envie.id, liste);
+    reinitialiserFormulaireElement();
+    rafraichirEditeurCroquis({ ...envie, croquis: liste });
+
+    showToast("✓ Élément positionné");
+
+}
+
+function ouvrirEditionElement(index) {
+
+    const envie = getEnvieCourante();
+    const croquis = getCroquisActuel(envie);
+    const el = croquis.elements[index];
+
+    elementEnCoursEditionIndex = index;
+
+    document.getElementById("croquisElementNom").value = el.nom;
+    document.getElementById("croquisElementLargeur").value = el.largeur;
+    document.getElementById("croquisElementProfondeur").value = el.profondeur;
+    document.getElementById("croquisElementRotationCheckbox").checked = el.rotation === 90;
+    document.getElementById("ajouterElementDistanceButton").textContent = "💾 Enregistrer (en mode distance précise)";
+
+    document.getElementById("croquisElementNom")?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+}
+
+function renderMurReferenceSelect(croquis) {
+
+    const select = document.getElementById("croquisMurReference");
+
+    if (!select)
+        return;
+
+    select.innerHTML = croquis.murs.map((mur, i) =>
+        `<option value="${i}">${mur.nom || "Mur " + (i + 1)}</option>`
+    ).join("");
+
+}
+
 
 /* ---------- Rubrique + liste des croquis ---------- */
 
@@ -327,6 +453,45 @@ function rafraichirEditeurCroquis(envie) {
         fermetureInfo.textContent = "";
     }
 
+    const elementsListeContainer = document.getElementById("croquisElementsListe");
+    elementsListeContainer.innerHTML = "";
+
+    (croquis.elements || []).forEach((el, index) => {
+
+        const row = document.createElement("div");
+        row.className = "checklistRow";
+
+        row.innerHTML = `
+            <span>${el.nom} — ${el.largeur} × ${el.profondeur} cm${el.rotation ? ` (tourné 90°)` : ""}</span>
+            <button class="iconSmallButton" title="Modifier">✏️</button>
+            <button class="deleteChecklistButton" title="Supprimer">🗑️</button>
+        `;
+
+        row.querySelector(".iconSmallButton").addEventListener("click", () => {
+            ouvrirEditionElement(index);
+        });
+
+        row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
+
+            const nouveauxElements = croquis.elements.filter((_, i) => i !== index);
+
+            const liste = getCroquisListe(envie).map(c =>
+                c.id === croquisEnCoursId ? { ...c, elements: nouveauxElements } : c
+            );
+
+            updateEnvieCroquis(envie.id, liste);
+            rafraichirEditeurCroquis({ ...envie, croquis: liste });
+
+        });
+
+        elementsListeContainer.appendChild(row);
+
+    });
+
+    renderMurReferenceSelect(croquis);
+
+    document.getElementById("croquisAjoutElementForm").classList.toggle("hidden", croquis.murs.length < 3);
+
     document.getElementById("croquisAngleFields").classList.toggle("hidden", croquis.murs.length === 0 && murEnCoursEditionIndex === null);
 
 }
@@ -375,6 +540,7 @@ function ouvrirEditeurCroquis(croquisId) {
     croquisEnCoursId = croquisId;
 
     reinitialiserFormulaireMur();
+    reinitialiserFormulaireElement(); 
 
     rafraichirEditeurCroquis(getEnvieCourante());
 
@@ -411,6 +577,57 @@ export function initCroquis() {
         renderCroquisListe({ ...envie, croquis: nouvelleListe });
 
         showToast("✓ Croquis créé");
+
+    });
+    document.querySelectorAll("#croquisModePositionToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            document.querySelectorAll("#croquisModePositionToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            modePositionElement = chip.dataset.mode;
+
+            document.getElementById("croquisPositionClicInfo").classList.toggle("hidden", modePositionElement !== "clic");
+            document.getElementById("croquisPositionDistanceFields").classList.toggle("hidden", modePositionElement !== "distance");
+
+        });
+
+    });
+
+    document.getElementById("croquisApercu")?.addEventListener("click", (event) => {
+
+        const svg = event.target.closest("#croquisSVG");
+
+        if (!svg || modePositionElement !== "clic" || !dernierTransformSVG)
+            return;
+
+        const rect = svg.getBoundingClientRect();
+        const svgX = (event.clientX - rect.left) / rect.width * dernierTransformSVG.taille;
+        const svgY = (event.clientY - rect.top) / rect.height * dernierTransformSVG.taille;
+
+        const reelX = (svgX - dernierTransformSVG.decalageX) / dernierTransformSVG.echelle;
+        const reelY = (svgY - dernierTransformSVG.decalageY) / dernierTransformSVG.echelle;
+
+        ajouterOuModifierElement(reelX, reelY);
+
+    });
+
+    document.getElementById("ajouterElementDistanceButton")?.addEventListener("click", () => {
+
+        if (!dernierTransformSVG)
+            return;
+
+        const indexMur = parseInt(document.getElementById("croquisMurReference").value, 10);
+        const distanceLeLong = parseFloat(document.getElementById("croquisDistanceLeLong").value) || 0;
+        const distancePerpendiculaire = parseFloat(document.getElementById("croquisDistancePerpendiculaire").value) || 0;
+
+        const position = calculerPositionDepuisMur(dernierTransformSVG.points, indexMur, distanceLeLong, distancePerpendiculaire);
+
+        ajouterOuModifierElement(position.x, position.y);
+
+        document.getElementById("croquisDistanceLeLong").value = "";
+        document.getElementById("croquisDistancePerpendiculaire").value = "";
 
     });
 
