@@ -1,7 +1,20 @@
 import { getEnvies } from "./storage.js";
 import { getDureeJours } from "./periode.js";
 
+
 export function computeContainerStatus(container) {
+
+    const resultat = computeContainerStatusAuto(container);
+
+    if (container.statutManuel) {
+        return { ...resultat, statut: container.statutManuel };
+    }
+
+    return resultat;
+
+}
+
+function computeContainerStatusAuto(container) {
 
     const enfants = getEnvies().filter(e => e.voyageId === container.id);
     const total = enfants.length;
