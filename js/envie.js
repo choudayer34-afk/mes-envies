@@ -19,6 +19,8 @@ import { getEnvies, updateEnvieCategorie, updateEnvie, updateEnvieDescription } 
 import { renderSimulationIA } from "./simulation-ia.js";
 import { renderCroquisSection } from "./croquis.js";
 import { updateEnvieRubriquesEtat } from "./storage.js";
+import { afficherOnboardingRubriqueSiNecessaire } from "./onboarding.js";
+
 let currentEnvieId = null;
 
 export function getCurrentEnvieId() {
@@ -575,7 +577,7 @@ export function initFicheFab() {
             item.title = rubrique.label;
             item.textContent = rubrique.emoji;
 
-            item.addEventListener("click", (e) => {
+       item.addEventListener("click", (e) => {
 
                 e.stopPropagation();
 
@@ -585,9 +587,13 @@ export function initFicheFab() {
 
                 fermerCamembert();
 
-                setTimeout(() => {
-                    document.getElementById(rubrique.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                }, 100);
+                afficherOnboardingRubriqueSiNecessaire(rubrique.id, () => {
+
+                    setTimeout(() => {
+                        document.getElementById(rubrique.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }, 100);
+
+                });
 
             });
 
