@@ -2033,18 +2033,19 @@ document.addEventListener("DOMContentLoaded", () => {
        <h2 id="comparateurModalTitre">Produit à comparer</h2>
 
         <label class="fieldTitle">Nom</label>
-        <input type="text" id="comparateurNom" placeholder="Ex: Étagère Ivar" class="numberInput">
+  <input type="text" id="comparateurNom" placeholder="Ex: Étagère Ivar" class="numberInput">
 
-        <label class="fieldTitle" style="margin-top:12px;">Prix (€)</label>
-        <input type="number" id="comparateurPrix" placeholder="0" step="0.01" min="0" class="numberInput">
+<input type="number" id="comparateurPrix" placeholder="Prix (€)" step="0.01" min="0" class="numberInput" style="margin-top:8px;">
 
-        <label class="fieldTitle" style="margin-top:12px;">Dimensions</label>
-        <input type="text" id="comparateurDimensions" placeholder="Ex: 120 x 60 x 75 cm" class="numberInput">
+<label class="fieldTitle" style="margin-top:8px;">Dimensions (optionnel)</label>
+<div class="peintureAddRow">
+    <input type="number" id="comparateurLongueur" placeholder="Longueur (cm)" class="numberInput">
+    <input type="number" id="comparateurLargeur" placeholder="Largeur (cm)" class="numberInput">
+    <input type="number" id="comparateurHauteur" placeholder="Hauteur (cm)" class="numberInput">
+</div>
 
-     <label class="fieldTitle" style="margin-top:12px;">Magasin</label>
-<div style="position:relative;">
-    <input type="text" id="comparateurMagasin" placeholder="Ex: Ikea, Leroy Merlin..." class="numberInput" autocomplete="off">
-    <div id="comparateurMagasinSuggestions" class="autocompleteSuggestions hidden"></div>
+<input type="text" id="comparateurMagasin" placeholder="Magasin (optionnel)" class="numberInput" autocomplete="off" style="margin-top:8px;">
+<div id="comparateurMagasinSuggestions" class="autocompleteSuggestions hidden"></div>
 </div>
 
         <label class="fieldTitle" style="margin-top:12px;">Avis</label>
