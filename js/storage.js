@@ -382,14 +382,14 @@ export function updateEnvieEvaluation(id, critere, valeur) {
 
 }
 
-export function addUrl(id, url) {
+export function addUrl(id, url, nom = null) {
 
     const envie = enviesCache.find(e => e.id === id);
 
     if (!envie)
         return;
 
-    const urls = [...(envie.urls || []), { id: crypto.randomUUID(), url, createdAt: Date.now() }];
+    const urls = [...(envie.urls || []), { id: crypto.randomUUID(), url, nom, createdAt: Date.now() }];
 
     patchEnvie(id, { urls });
 
