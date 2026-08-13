@@ -1,6 +1,6 @@
 import { getEnvies, updateEnvieChecklistTodo, getChecklistCategories, getPersonnes } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
-import { groupByCategorie, ouvrirEditionChecklistItem, openAssignModal, formatAssignLabel } from "./checklist.js";
+import { groupByCategorie, ouvrirEditionChecklistItem, openAssignModal, formatAssignLabel, renderPersonneSelector } from "./checklist.js";
 import { showToast } from "./toast.js";
 import { makeRowDraggable } from "./dragdrop.js";
 
@@ -10,6 +10,7 @@ let currentBulkCategorieTodoId = null;
 let viewModeTodo = "categorie";
 let personnesOuvertesTodo = new Set();
 let categorieOuvertePersonneTodo = {};
+let currentAssignedToTodo = [];
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
@@ -373,12 +374,14 @@ export function initTodo() {
 
     });
 
-    document.getElementById("addTodoButton")?.addEventListener("click", () => {
+   document.getElementById("addTodoButton")?.addEventListener("click", () => {
 
         currentBulkCategorieTodoId = null;
+        currentAssignedToTodo = [];
         document.getElementById("todoInput").value = "";
 
         renderTodoCategorieSelector();
+        renderTodoAssignSelector();
 
         document.getElementById("todoAddModal")?.classList.remove("hidden");
 
@@ -397,12 +400,12 @@ export function initTodo() {
 
         const envie = getEnvieCourante();
 
-        const nouveauxItems = lignes.map(texte => ({
+const nouveauxItems = lignes.map(texte => ({
             id: crypto.randomUUID(),
             texte,
             categorieId: currentBulkCategorieTodoId,
             checked: false,
-            assignedTo: []
+            assignedTo: [...currentAssignedToTodo]
         }));
 
         const tousLesItems = [...(envie.checklistTodo || []), ...nouveauxItems];
@@ -415,6 +418,20 @@ export function initTodo() {
 
         showToast(`✓ ${lignes.length} tâche${lignes.length > 1 ? "s" : ""} ajoutée${lignes.length > 1 ? "s" : ""}`);
 
+    });
+
+}
+
+function renderTodoAssignSelector() {
+
+    const container = document.getElementById("todoAssignSelector");
+
+    if (!container)
+        return;
+
+    renderPersonneSelector(container, currentAssignedToTodo, (nouvelleSelection) => {
+        currentAssignedToTodo = nouvelleSelection;
+        renderTodoAssignSelector();
     });
 
 }
