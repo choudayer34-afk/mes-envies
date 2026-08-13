@@ -1,4 +1,4 @@
-import { getEnvies, updateEnvieChecklistTodo, getChecklistCategories } from "./storage.js";
+import { getEnvies, updateEnvieChecklistTodo, getChecklistCategories, getPersonnes } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { groupByCategorie, ouvrirEditionChecklistItem, openAssignModal, formatAssignLabel } from "./checklist.js";
 import { showToast } from "./toast.js";
@@ -7,6 +7,9 @@ import { makeRowDraggable } from "./dragdrop.js";
 let categorieOuverteTodoId = null;
 let derniereEnvieIdTodo = null;
 let currentBulkCategorieTodoId = null;
+let viewModeTodo = "categorie";
+let personnesOuvertesTodo = new Set();
+let categorieOuvertePersonneTodo = {};
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
@@ -30,6 +33,8 @@ export function renderTodoSection(envie) {
     if (envie.id !== derniereEnvieIdTodo) {
         derniereEnvieIdTodo = envie.id;
         categorieOuverteTodoId = null;
+        personnesOuvertesTodo = new Set();
+        categorieOuvertePersonneTodo = {};
     }
 
     renderTodoListe(envie);
@@ -44,7 +49,6 @@ function renderTodoListe(envie) {
         return;
 
     const items = envie.checklistTodo || [];
-    const categories = getChecklistCategories();
 
     container.innerHTML = "";
 
@@ -53,6 +57,17 @@ function renderTodoListe(envie) {
         return;
     }
 
+    if (viewModeTodo === "personne") {
+        renderTodoParPersonne(items, envie, container);
+    } else {
+        renderTodoParCategorie(items, envie, container);
+    }
+
+}
+
+function renderTodoParCategorie(items, envie, container) {
+
+    const categories = getChecklistCategories();
     const groupes = groupByCategorie(items, categories);
 
     groupes.forEach(group => {
@@ -81,8 +96,113 @@ function renderTodoListe(envie) {
         if (!estOuverte)
             return;
 
-group.items.forEach(item => {
+        group.items.forEach(item => {
             container.appendChild(creerLigneTodo(item, envie));
+        });
+
+    });
+
+}
+
+function renderTodoParPersonne(items, envie, container) {
+
+    const personnes = getPersonnes();
+    const categories = getChecklistCategories();
+
+    if (personnes.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucune personne du foyer créée pour l'instant.</div>`;
+        return;
+    }
+
+    const groupesPersonnes = [];
+
+    const itemsTous = items.filter(i => !i.assignedTo?.length);
+
+    if (itemsTous.length > 0) {
+        groupesPersonnes.push({ id: "tous", nom: "Tous", emoji: "👥", items: itemsTous });
+    }
+
+    personnes.forEach(personne => {
+
+        const concernes = items.filter(i => i.assignedTo?.length && i.assignedTo.includes(personne.id));
+
+        if (concernes.length > 0) {
+            groupesPersonnes.push({ id: personne.id, nom: personne.nom, emoji: "👤", items: concernes });
+        }
+
+    });
+
+    groupesPersonnes.forEach(groupePersonne => {
+
+        const complete = estGroupeComplet(groupePersonne.items);
+        const coches = groupePersonne.items.filter(i => i.checked).length;
+        const total = groupePersonne.items.length;
+        const estOuverte = personnesOuvertesTodo.has(groupePersonne.id);
+
+        const personneHeader = document.createElement("button");
+        personneHeader.type = "button";
+        personneHeader.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
+
+        personneHeader.innerHTML = `
+            <span>${groupePersonne.emoji} ${groupePersonne.nom}</span>
+            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${total} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
+        `;
+
+        personneHeader.addEventListener("click", () => {
+
+            if (estOuverte) {
+                personnesOuvertesTodo.delete(groupePersonne.id);
+            } else {
+                personnesOuvertesTodo.add(groupePersonne.id);
+            }
+
+            renderTodoListe(envie);
+
+        });
+
+        container.appendChild(personneHeader);
+
+        if (!estOuverte)
+            return;
+
+        const sousContainer = document.createElement("div");
+        sousContainer.className = "checklistPersonneSousListe";
+        container.appendChild(sousContainer);
+
+        const groupesCategories = groupByCategorie(groupePersonne.items, categories);
+
+        groupesCategories.forEach(group => {
+
+            const cle = cleCategorie(group.categorie);
+            const completeCat = estGroupeComplet(group.items);
+            const estOuverteCat = categorieOuvertePersonneTodo[groupePersonne.id] === cle;
+            const cochesCat = group.items.filter(i => i.checked).length;
+
+            const subHeader = document.createElement("button");
+            subHeader.type = "button";
+            subHeader.className = "checklistSousCategorieHeader checklistCategorieHeaderCliquable";
+
+            subHeader.innerHTML = `
+                <span>${group.categorie ? `${group.categorie.emoji} ${group.categorie.nom}` : "Sans catégorie"}</span>
+                <span class="checklistCategorieCompteur">${completeCat ? "✅ " : ""}${cochesCat}/${group.items.length} <span class="accordionIcon">${estOuverteCat ? "▾" : "▸"}</span></span>
+            `;
+
+            subHeader.addEventListener("click", () => {
+
+                categorieOuvertePersonneTodo[groupePersonne.id] = estOuverteCat ? null : cle;
+                renderTodoListe(envie);
+
+            });
+
+            sousContainer.appendChild(subHeader);
+
+            if (!estOuverteCat)
+                return;
+
+            group.items.forEach(item => {
+                sousContainer.appendChild(creerLigneTodo(item, envie));
+            });
+
         });
 
     });
@@ -99,7 +219,7 @@ function creerLigneTodo(item, envie) {
 
     row.innerHTML = `
         <span class="dragHandle" style="cursor:grab;padding-right:8px;">⠿</span>
-        <label class="checkLabel">
+        <label class="checkLabel" style="width:auto;flex:1;min-width:0;">
             <input type="checkbox" ${item.checked ? "checked" : ""}>
             <span>
                 <span style="${item.checked ? "text-decoration:line-through;color:var(--color-text-light);" : ""}">${item.texte}</span>
@@ -234,6 +354,25 @@ function renderTodoCategorieSelector() {
 
 export function initTodo() {
 
+    document.querySelectorAll('#todoViewToggle .itemTypeChip').forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            document.querySelectorAll('#todoViewToggle .itemTypeChip').forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            viewModeTodo = chip.dataset.view;
+
+            const envie = getEnvieCourante();
+
+            if (envie) {
+                renderTodoListe(envie);
+            }
+
+        });
+
+    });
+
     document.getElementById("addTodoButton")?.addEventListener("click", () => {
 
         currentBulkCategorieTodoId = null;
@@ -258,7 +397,7 @@ export function initTodo() {
 
         const envie = getEnvieCourante();
 
-const nouveauxItems = lignes.map(texte => ({
+        const nouveauxItems = lignes.map(texte => ({
             id: crypto.randomUUID(),
             texte,
             categorieId: currentBulkCategorieTodoId,
