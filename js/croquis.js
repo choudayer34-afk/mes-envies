@@ -430,7 +430,7 @@ export function initCroquis() {
         document.getElementById("croquisDiagonaleInput").classList.toggle("hidden", !event.target.checked);
     });
 
-    document.getElementById("ajouterMurButton")?.addEventListener("click", () => {
+        document.getElementById("ajouterMurButton")?.addEventListener("click", () => {
 
         const longueur = parseFloat(document.getElementById("croquisMurLongueur").value);
 
@@ -441,31 +441,42 @@ export function initCroquis() {
 
         const envie = getEnvieCourante();
         const croquis = getCroquisActuel(envie);
+        const nom = document.getElementById("croquisMurNom").value.trim();
 
-        const nouveauMur = { id: crypto.randomUUID(), longueur };
+        const indexConcerne = murEnCoursEditionIndex !== null ? murEnCoursEditionIndex : croquis.murs.length;
 
-        if (croquis.murs.length > 0) {
+        const donneesAngle = {};
+
+        if (indexConcerne > 0) {
 
             const angleNonDroit = document.getElementById("croquisAngleNonDroitCheckbox").checked;
             const diagonale = parseFloat(document.getElementById("croquisDiagonaleInput").value);
             const concave = document.getElementById("croquisConcaveCheckbox").checked;
 
-            if (angleNonDroit && diagonale > 0) {
-                nouveauMur.diagonale = diagonale;
-            }
-
-            nouveauMur.concave = concave;
+            donneesAngle.diagonale = (angleNonDroit && diagonale > 0) ? diagonale : null;
+            donneesAngle.concave = concave;
 
         }
 
-        sauvegarderMurs([...croquis.murs, nouveauMur]);
+        let nouveauxMurs;
 
-        document.getElementById("croquisMurLongueur").value = "";
-        document.getElementById("croquisAngleNonDroitCheckbox").checked = false;
-        document.getElementById("croquisDiagonaleInput").value = "";
-        document.getElementById("croquisDiagonaleInput").classList.add("hidden");
-        document.getElementById("croquisConcaveCheckbox").checked = false;
+        if (murEnCoursEditionIndex !== null) {
+
+            nouveauxMurs = croquis.murs.map((m, i) =>
+                i === murEnCoursEditionIndex ? { ...m, nom, longueur, ...donneesAngle } : m
+            );
+
+        } else {
+
+            nouveauxMurs = [...croquis.murs, { id: crypto.randomUUID(), nom, longueur, ...donneesAngle }];
+
+        }
+
+        sauvegarderMurs(nouveauxMurs);
+
+        reinitialiserFormulaireMur();
 
     });
+
 
 }
