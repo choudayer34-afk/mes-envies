@@ -16,7 +16,7 @@ export function renderSimulationIA(envie) {
 
 }
 
-function getEnvieCourante() {
+export function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
 }
 
@@ -282,26 +282,30 @@ async function genererPromptEtImages() {
 
 }
 
+   export function ouvrirSimulationIA(descriptionPrefill = "") {
+
+    const envie = getEnvieCourante();
+
+    if (!envie)
+        return;
+
+    document.getElementById("simIAResultat").style.display = "none";
+    document.getElementById("simIADescription").value = descriptionPrefill;
+
+    renderBasePhotosSimulation(envie);
+    renderElementsSimulation(envie);
+
+    document.getElementById("simulationIAModal")?.classList.remove("hidden");
+
+}
 
 export function initSimulationIA() {
 
-    document.getElementById("ouvrirSimulationIAButton")?.addEventListener("click", () => {
-
-        const envie = getEnvieCourante();
-
-        if (!envie)
-            return;
-
-        document.getElementById("simIAResultat").style.display = "none";
-        document.getElementById("simIADescription").value = "";
-
-            renderBasePhotosSimulation(envie);
-        renderElementsSimulation(envie);
-
-
-        document.getElementById("simulationIAModal")?.classList.remove("hidden");
-
+document.getElementById("ouvrirSimulationIAButton")?.addEventListener("click", () => {
+        ouvrirSimulationIA();
     });
+    
+ 
 
     document.getElementById("genererPromptIAButton")?.addEventListener("click", genererPromptEtImages);
 
