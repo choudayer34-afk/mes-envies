@@ -3,6 +3,7 @@
 import { updateEnvieLieu, getEnvies } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { openMapSingleLieu } from "./carte.js";
+import { renderFicheMeteo } from "./envie.js";
 
 let selectedLieu = { nom: "", adresse: "", latitude: null, longitude: null };
 let debounceTimer = null;
@@ -45,7 +46,7 @@ export function initLocation() {
         (place) => { selectedLieu = place; }
     );
 
-     setupAutocomplete(
+setupAutocomplete(
         document.getElementById("ficheLieu"),
         document.getElementById("fichelieuSuggestions"),
         (place) => {
@@ -56,6 +57,7 @@ export function initLocation() {
 
             if (envieActuelle) {
                 renderLieuActions({ ...envieActuelle, lieu: place });
+                renderFicheMeteo({ ...envieActuelle, lieu: place });
             }
 
         }
@@ -98,11 +100,22 @@ export function initLocation() {
 
     const btnLocateFiche = document.getElementById("btnLocateFiche");
 
-    if (btnLocateFiche) {
+  if (btnLocateFiche) {
         btnLocateFiche.addEventListener("click", () => {
             useCurrentLocation(
                 document.getElementById("ficheLieu"),
-                (place) => { updateEnvieLieu(getCurrentEnvieId(), place); },
+                (place) => {
+
+                    updateEnvieLieu(getCurrentEnvieId(), place);
+
+                    const envieActuelle = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+                    if (envieActuelle) {
+                        renderLieuActions({ ...envieActuelle, lieu: place });
+                        renderFicheMeteo({ ...envieActuelle, lieu: place });
+                    }
+
+                },
                 btnLocateFiche
             );
         });
@@ -118,10 +131,14 @@ export function initLocation() {
 
             document.getElementById("ficheOverlay").classList.add("hidden");
 
-         openMapPicker((place) => {
+ openMapPicker((place) => {
 
             updateEnvieLieu(getCurrentEnvieId(), place);
+
+            document.getElementById("ficheLieu").value = place.nom;
+
             renderLieuActions({ ...envie, lieu: place });
+            renderFicheMeteo({ ...envie, lieu: place });
 
             document.getElementById("ficheOverlay").classList.remove("hidden");
 
