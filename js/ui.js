@@ -5,12 +5,14 @@ import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getModeActif, basculerMode } from "./storage.js";
 
 import { makeRowDraggable } from "./dragdrop.js";
-import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem, assurerListeLibreCourses } from "./storage.js";
+
+import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem, assurerListeLibreCourses, updateEnvieChecklistTodo } from "./storage.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion, openChecklistAccordion } from "./envie.js";
 import { normaliserTexte } from "./utils.js";
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
 
 let modeReduitGlobal = false;
+let tachesOuvert = true;
 const cartesEtatIndividuel = new Map();
 let vueAchats = "projet";
 function isUntriaged(envie) {
@@ -135,6 +137,7 @@ function renderHomeSections() {
     });
 
 renderAchatsMaison();
+    renderMesTachesSection();
  if (modeActif === "maison") {
         renderCollapsibleSection("actionSection", "actionContainer", "🔔 En attente d'action", calculerGroupesActionsMaison(), createActionGroupCard, true);
     } else {
@@ -847,7 +850,152 @@ export function renderAchatsMaison() {
 
 }
 
-    
+    function calculerMesTaches() {
+
+    const modeActif = getModeActif();
+
+    const conteneurs = getEnvies().filter(e => e.contexte === modeActif && isContainer(e.categorie));
+
+    const items = [];
+
+    conteneurs.forEach(conteneur => {
+
+        const taches = [conteneur, ...getEnvies().filter(e => e.voyageId === conteneur.id)];
+
+        taches.forEach(tache => {
+
+            (tache.checklistTodo || []).forEach(item => {
+
+                if (!item.checked) {
+
+                    items.push({
+                        envieId: tache.id,
+                        itemId: item.id,
+                        texte: item.texte,
+                        projetTitre: conteneur.titre,
+                        projetEmoji: getCategorieById(conteneur.categorie)?.emoji || (modeActif === "maison" ? "🛠️" : "🧳")
+                    });
+
+                }
+
+            });
+
+        });
+
+    });
+
+    return items;
+
+}
+
+function creerGroupeTaches(titreGroupe, items) {
+
+    const bloc = document.createElement("div");
+    bloc.className = "actionGroupCard";
+
+    bloc.innerHTML = `
+        <div class="actionGroupTitre">${titreGroupe} (${items.length})</div>
+        ${items.map(item => `
+            <label class="checkLabel tacheCheckLabel" data-envie-id="${item.envieId}" data-item-id="${item.itemId}" style="display:flex;align-items:center;gap:8px;padding:6px 0;">
+                <input type="checkbox">
+                <span>${item.texte}</span>
+            </label>
+        `).join("")}
+    `;
+
+    bloc.querySelectorAll(".tacheCheckLabel input").forEach(checkbox => {
+
+        checkbox.addEventListener("change", (event) => {
+
+            const label = event.target.closest(".tacheCheckLabel");
+            const envieId = label.dataset.envieId;
+            const itemId = label.dataset.itemId;
+
+            const envie = getEnvies().find(e => e.id === envieId);
+            const nouveauxItems = (envie.checklistTodo || []).map(i =>
+                i.id === itemId ? { ...i, checked: true } : i
+            );
+
+            updateEnvieChecklistTodo(envieId, nouveauxItems);
+
+            setTimeout(renderMesTachesSection, 300);
+
+        });
+
+    });
+
+    return bloc;
+
+}
+
+export function renderMesTachesSection() {
+
+    const section = document.getElementById("tachesSection");
+
+    if (!section)
+        return;
+
+    const items = calculerMesTaches();
+
+    if (items.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    section.classList.remove("hidden");
+
+    let header = section.querySelector(".homeSectionHeader");
+    let content = document.getElementById("tachesContainer");
+
+    if (!header || !content) {
+
+        header = document.createElement("button");
+        header.type = "button";
+        header.className = "homeSectionHeader";
+
+        content = document.createElement("div");
+        content.id = "tachesContainer";
+        content.className = "homeSectionContent";
+
+        section.innerHTML = "";
+        section.appendChild(header);
+        section.appendChild(content);
+
+        header.addEventListener("click", () => {
+
+            tachesOuvert = !tachesOuvert;
+            content.classList.toggle("hidden", !tachesOuvert);
+
+            const icon = header.querySelector(".accordionIcon");
+            icon.textContent = tachesOuvert ? "▾" : "▸";
+
+        });
+
+    }
+
+    content.classList.toggle("hidden", !tachesOuvert);
+
+    header.innerHTML = `<span>🗒️ Mes tâches (${items.length})</span><span class="accordionIcon">${tachesOuvert ? "▾" : "▸"}</span>`;
+
+    content.innerHTML = "";
+
+    const groupes = new Map();
+
+    items.forEach(item => {
+
+        if (!groupes.has(item.projetTitre)) {
+            groupes.set(item.projetTitre, { emoji: item.projetEmoji, items: [] });
+        }
+
+        groupes.get(item.projetTitre).items.push(item);
+
+    });
+
+    groupes.forEach((groupe, titre) => {
+        content.appendChild(creerGroupeTaches(`${groupe.emoji} ${titre}`, groupe.items));
+    });
+
+}
 
 
 function createEnvieCard(envie) {
