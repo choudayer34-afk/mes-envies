@@ -28,6 +28,7 @@ import { initCatalogue } from "./js/catalogue.js";
 import { initRegionFinder } from "./js/region.js";
 import { initPromptRegionSync } from "./js/storage.js";
 import { openModalVoyage } from "./js/modal.js";
+import { initFicheFab } from "./js/envie.js";
 import { initVoyageImport } from "./js/voyage-import.js";
 import { getCurrentEnvieId } from "./js/envie.js";
 import { renderChecklist } from "./js/checklist.js";
@@ -126,6 +127,7 @@ function init() {
 afficherVersionCache();
      initSimulationIA();
 initCroquis();
+ initFicheFab();
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
     initActivitesVoyageAssistantSync(() => {});
