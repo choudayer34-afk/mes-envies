@@ -17,6 +17,7 @@ import { renderComparateur } from "./comparateur.js";
 import { renderDevis } from "./devis.js";
 import { getEnvies, updateEnvieCategorie, updateEnvie, updateEnvieDescription } from "./storage.js";
 import { renderSimulationIA } from "./simulation-ia.js";
+import { renderCroquisSection } from "./croquis.js";
 
 let currentEnvieId = null;
 
@@ -79,6 +80,7 @@ document.getElementById("ficheModeIcone").textContent = envie.contexte === "mais
     renderComparateur(envie);
     renderDevis(envie);
     renderSimulationIA(envie);
+    renderCroquisSection(envie);
     renderUrls(envie);
 
        
