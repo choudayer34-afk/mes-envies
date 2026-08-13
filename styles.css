@@ -2586,27 +2586,50 @@ button {
     display:flex;
     align-items:center;
     justify-content:center;
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    z-index:2160;
+    transition:transform .2s ease;
+}
+
+.ficheFabButtonCentre{
+    top:50%;
+    left:50%;
+    bottom:auto;
+    right:auto;
+    transform:translate(-50%,-50%) rotate(45deg);
+}
+
+.ficheFabOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.4);
+    z-index:2140;
 }
 
 .ficheFabMenu{
-    position:absolute;
-    bottom:28px;
-    right:28px;
+    position:fixed;
+    top:50%;
+    left:50%;
     width:0;
     height:0;
+    z-index:2155;
 }
 
 .ficheFabMenuItem{
     position:absolute;
     top:0;
     left:0;
-    width:48px;
-    height:48px;
+    width:52px;
+    height:52px;
+    margin-left:-26px;
+    margin-top:-26px;
     border-radius:50%;
     background:white;
     border:2px solid #6FAFC4;
-    font-size:20px;
-    box-shadow:0 2px 8px rgba(0,0,0,.2);
+    font-size:22px;
+    box-shadow:0 2px 8px rgba(0,0,0,.25);
     cursor:pointer;
     display:flex;
     align-items:center;
