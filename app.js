@@ -10,6 +10,7 @@
 
 "use strict";
 import { initAgenda } from "./js/agenda.js";
+import { initPullToRefresh } from "./js/pulltorefresh.js";
 import { initChangelogSync } from "./js/storage.js";
 import { renderNouveautes } from "./js/plus.js";
 import { initEnvieCategoriesSync } from "./js/storage.js";
@@ -136,7 +137,7 @@ initCroquis();
     initHebergementEquipementsSync(() => {});
     initFamilleImportantSync(() => {});
         initMagasinsSync(() => {});
-
+initPullToRefresh();
        initSocietesSync(() => {});
 initToggleReduction();
 initModeSync(() => {
