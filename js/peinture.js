@@ -1,5 +1,6 @@
 import { getCurrentEnvieId, openEnvie } from "./envie.js";
 import { getEnvies, updateEnviePeinture } from "./storage.js";
+import { ouvrirSimulationIA } from "./simulation-ia.js";
 import { showToast } from "./toast.js";
 
 const RENDEMENT_PAR_DEFAUT = 10;
@@ -11,7 +12,8 @@ function getPeinture(envie) {
         murs: envie.peinture?.murs || [],
         ouvertures: envie.peinture?.ouvertures || [],
         couches: envie.peinture?.couches || COUCHES_PAR_DEFAUT,
-        rendement: envie.peinture?.rendement || RENDEMENT_PAR_DEFAUT
+        rendement: envie.peinture?.rendement || RENDEMENT_PAR_DEFAUT,
+        couleurs: envie.peinture?.couleurs || []
     };
 
 }
@@ -28,6 +30,7 @@ export function renderPeintureCalculateur(envie) {
 
     renderMursListe(envie, peinture);
     renderOuverturesListe(envie, peinture);
+    renderCouleursListe(envie, peinture);
 
     document.querySelectorAll("#peintureCouchesToggle .itemTypeChip").forEach(chip => {
         chip.classList.toggle("active", Number(chip.dataset.couches) === peinture.couches);
@@ -165,6 +168,52 @@ function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
 }
 
+function renderCouleursListe(envie, peinture) {
+
+    const container = document.getElementById("peintureCouleursListe");
+
+    if (!container)
+        return;
+
+    if (peinture.couleurs.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucune couleur ajoutée pour l'instant.</div>`;
+        return;
+    }
+
+    container.innerHTML = "";
+
+    peinture.couleurs.forEach(couleur => {
+
+        const row = document.createElement("div");
+        row.className = "checklistRow";
+
+        row.innerHTML = `
+            <span>${couleur.nom}</span>
+            <button class="iconSmallButton essayerCouleurButton" title="Essayer avec Simulation IA">🪄</button>
+            <button class="deleteChecklistButton" title="Supprimer">🗑️</button>
+        `;
+
+        row.querySelector(".essayerCouleurButton").addEventListener("click", () => {
+            ouvrirSimulationIA(`Repeindre ce mur en ${couleur.nom}.`);
+        });
+
+        row.querySelector(".deleteChecklistButton").addEventListener("click", () => {
+
+            const envieActuelle = getEnvieCourante();
+            const nouvellesCouleurs = getPeinture(envieActuelle).couleurs.filter(c => c.id !== couleur.id);
+            const nouvellePeinture = { ...getPeinture(envieActuelle), couleurs: nouvellesCouleurs };
+
+            updateEnviePeinture(envieActuelle.id, nouvellePeinture);
+            renderPeintureCalculateur({ ...envieActuelle, peinture: nouvellePeinture });
+
+        });
+
+        container.appendChild(row);
+
+    });
+
+}
+
 export function initPeintureCalculateur() {
 
     document.getElementById("addPeintureMurButton")?.addEventListener("click", () => {
@@ -281,6 +330,30 @@ export function initPeintureCalculateur() {
         const nouvellePeinture = { ...peinture, rendement: parseFloat(event.target.value) || RENDEMENT_PAR_DEFAUT };
 
         updateEnviePeinture(envie.id, nouvellePeinture);
+        renderPeintureCalculateur({ ...envie, peinture: nouvellePeinture });
+
+    });
+
+    document.getElementById("ajouterPeintureCouleurButton")?.addEventListener("click", () => {
+
+        const input = document.getElementById("peintureCouleurInput");
+        const nom = input.value.trim();
+
+        if (!nom) {
+            showToast("Renseigne un nom ou un code RAL");
+            return;
+        }
+
+        const envie = getEnvieCourante();
+        const peinture = getPeinture(envie);
+
+        const nouvellesCouleurs = [...peinture.couleurs, { id: crypto.randomUUID(), nom }];
+        const nouvellePeinture = { ...peinture, couleurs: nouvellesCouleurs };
+
+        updateEnviePeinture(envie.id, nouvellePeinture);
+
+        input.value = "";
+
         renderPeintureCalculateur({ ...envie, peinture: nouvellePeinture });
 
     });
