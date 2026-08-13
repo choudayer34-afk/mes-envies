@@ -577,13 +577,22 @@ export function initFicheFab() {
             item.title = rubrique.label;
             item.textContent = rubrique.emoji;
 
-       item.addEventListener("click", (e) => {
+item.addEventListener("click", (e) => {
 
                 e.stopPropagation();
 
                 const envieMaj = definirEtatRubrique(envie, rubrique.id, "visible");
 
                 gererAccordeonsVides(envieMaj);
+
+                const contenuSection = document.getElementById(rubrique.sectionId);
+                const iconeAccordion = contenuSection?.closest(".accordion")?.querySelector(".accordionIcon");
+
+                contenuSection?.classList.remove("hidden");
+
+                if (iconeAccordion) {
+                    iconeAccordion.textContent = "▾";
+                }
 
                 fermerCamembert();
 
