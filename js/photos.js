@@ -504,8 +504,10 @@ const nouvellesMesures = [...(photo.mesures || []), nouvelleMesure];
 
             const toutesPhotos = [...(envie.photos || []), nouvellePhoto];
 
-            updateEnviePhotos(envie.id, toutesPhotos);
+    updateEnviePhotos(envie.id, toutesPhotos);
             renderPhotosGrid({ ...envie, photos: toutesPhotos });
+
+            document.getElementById("photoViewerModal").classList.add("hidden");
 
             showToast("✓ Nouvelle photo enregistrée avec les mesures");
 
