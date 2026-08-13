@@ -2536,3 +2536,31 @@ button {
 #onboardingModal{
     z-index:3500;
 }
+
+.checklistCategorieHeaderCliquable{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    width:100%;
+    background:none;
+    border:none;
+    padding:0;
+    cursor:pointer;
+    text-align:left;
+    font-family:inherit;
+}
+
+.checklistCategorieCompteur{
+    font-size:12px;
+    font-weight:600;
+    text-transform:none;
+    letter-spacing:normal;
+    color:var(--color-text-light);
+    flex-shrink:0;
+    margin-left:10px;
+    white-space:nowrap;
+}
+
+.checklistPersonneSousListe{
+    padding-left:4px;
+}
