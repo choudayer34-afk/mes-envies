@@ -1769,3 +1769,17 @@ export function updateChecklistItem(envieId, itemId, fields) {
 
 }
 
+export function updatePhotoMesures(envieId, photoId, mesures) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const photos = (envie.photos || []).map(p =>
+        p.id === photoId ? { ...p, mesures } : p
+    );
+
+    patchEnvie(envieId, { photos });
+
+}
