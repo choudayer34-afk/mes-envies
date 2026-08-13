@@ -157,76 +157,67 @@ export function initIndicesContextuels() {
 const RUBRIQUE_ONBOARDING = {
 
     peinture: {
-        version: 1,
         titre: "🎨 Peinture",
         aQuoiCaSert: "Calcule automatiquement la quantité de peinture nécessaire à partir des dimensions de tes murs.",
         commentCaSutilise: "Ajoute chaque mur (largeur × hauteur), déduis les ouvertures (portes, fenêtres) si besoin, choisis le nombre de couches — le nombre de litres à acheter s'affiche directement."
     },
 
     bois: {
-        version: 1,
         titre: "🪵 Bois",
         aQuoiCaSert: "T'aide à calculer combien de bois acheter et comment découper tes planches brutes sans gaspillage.",
-        commentCaSutilise: "Liste les pièces à découper (longueur, largeur, épaisseur), indique les planches brutes que tu as ou comptes acheter — un schéma de découpe optimisé s'affiche."
+        commentCaSutilise: "Liste les pièces à découper (longueur, largeur, épaisseur), puis indique les modèles de planches brutes que tu as ou comptes acheter (plusieurs tailles et quantités possibles) — un schéma de découpe optimisé s'affiche, en respectant ton stock réel. Tu peux aussi basculer tes planches directement dans ta liste À acheter."
     },
 
     comparateur: {
-        version: 1,
         titre: "⚖️ Comparateur",
         aQuoiCaSert: "Compare plusieurs produits avant d'acheter, sans perdre le fil de tes recherches.",
         commentCaSutilise: "Ajoute chaque option avec prix, photo, avis. Marque ton choix final avec 🏆 — il passe alors automatiquement dans ta liste À acheter."
     },
 
     devis: {
-        version: 1,
         titre: "🧾 Devis",
         aQuoiCaSert: "Suit tes demandes de devis auprès des artisans, du premier contact jusqu'à la décision.",
         commentCaSutilise: "Ajoute une société (scanne sa carte de visite pour aller plus vite), suis son statut (à contacter, RDV, devis reçu), et marque celui que tu retiens."
     },
 
     croquis: {
-        version: 1,
         titre: "📐 Croquis",
         aQuoiCaSert: "Dessine un mur ou une pièce à l'échelle réelle, même si les angles ne sont pas droits, pour y positionner des éléments avec leurs vraies dimensions.",
-        commentCaSutilise: "Ajoute tes murs un par un avec leur longueur. Pour un coin qui n'est pas droit, indique la diagonale mesurée plutôt qu'un angle. Place ensuite tes éléments par clic ou par distance précise."
+        commentCaSutilise: "Ajoute tes murs un par un avec leur longueur. Pour un coin qui n'est pas droit, indique la diagonale mesurée plutôt qu'un angle ; pour une pièce en L, signale le coin qui rentre. Place ensuite tes éléments par clic ou par distance précise — tu peux ensuite les glisser directement sur le plan et régler leur rotation au degré près. Tu peux créer plusieurs croquis nommés et les dupliquer."
     },
 
     simulationIA: {
-        version: 1,
         titre: "🪄 Simulation IA",
-        aQuoiCaSert: "Prépare tout ce qu'il faut (photo + description + éventuels produits) pour demander à une IA (ChatGPT, Gemini...) de visualiser un changement avant de te lancer.",
-        commentCaSutilise: "Choisis une photo de base, coche éventuellement des produits/photos à intégrer en précisant où, décris ce que tu veux changer — le prompt et les images à envoyer sont générés pour toi."
+        aQuoiCaSert: "Prépare tout ce qu'il faut (photo + description + éléments choisis) pour demander à une IA (ChatGPT, Gemini...) de visualiser un changement avant de te lancer.",
+        commentCaSutilise: "Choisis une photo de base, coche les produits (retenus ou non) ou les photos à intégrer en précisant où, décris ce que tu veux changer — le prompt et les images à envoyer sont générés pour toi, avec un lancement direct vers ChatGPT/Gemini ou un partage natif sur mobile."
     },
 
     checklist: {
-        version: 1,
         titre: "☐ Checklist",
         aQuoiCaSert: "Ta liste d'achats ou de tâches pour ce projet, organisée par catégorie ou par personne.",
-        commentCaSutilise: "Ajoute des éléments un par un ou depuis un modèle réutilisable. Coche au fur et à mesure — les éléments faits descendent en bas, les catégories entièrement cochées passent tout en bas de la liste."
+        commentCaSutilise: "Ajoute des éléments un par un ou depuis un modèle réutilisable, avec magasin et lien optionnels. Coche au fur et à mesure — les éléments faits descendent en bas, les catégories entièrement cochées passent tout en bas de la liste."
     },
 
     evaluation: {
-        version: 1,
         titre: "🎚️ Évaluation",
         aQuoiCaSert: "Garde une trace de ton ressenti une fois l'expérience vécue (note, difficulté, adapté aux enfants...).",
         commentCaSutilise: "Renseigne les critères après coup — utile pour te souvenir plus tard si tu recommencerais, ou pour comparer plusieurs idées similaires."
+    },
+
+    photos: {
+        titre: "📷 Photos",
+        aQuoiCaSert: "Stocke les photos de cette idée ou tâche, et peut aussi servir à prendre des mesures réelles directement dessus.",
+        commentCaSutilise: "Ajoute une ou plusieurs photos, touche-en une pour l'ouvrir en plein écran (légende, définir comme couverture repositionnable, partager). Le bouton '📏 Mesurer' te permet de tracer des traits sur la photo et d'indiquer leur vraie distance (cm ou m) et une couleur — utile pour visualiser des cotes. Tu peux ensuite enregistrer une copie annotée comme nouvelle photo, sans toucher à l'originale."
     }
 
 };
 
-export function afficherOnboardingRubriqueSiNecessaire(rubriqueId, callbackApresFermeture) {
+export function afficherConfirmationAjoutRubrique(rubriqueId, onConfirmer, onAnnuler) {
 
     const contenu = RUBRIQUE_ONBOARDING[rubriqueId];
 
     if (!contenu) {
-        callbackApresFermeture?.();
-        return;
-    }
-
-    const cle = `rubrique_${rubriqueId}_v${contenu.version}`;
-
-    if (getIndicesVus().includes(cle)) {
-        callbackApresFermeture?.();
+        onConfirmer();
         return;
     }
 
@@ -240,19 +231,25 @@ export function afficherOnboardingRubriqueSiNecessaire(rubriqueId, callbackApres
     const boutonPasser = document.getElementById("rubriqueOnboardingPasser");
     const boutonCompris = document.getElementById("rubriqueOnboardingCompris");
 
-    function fermer() {
+    function nettoyer() {
 
-        marquerIndiceVu(cle);
+        boutonPasser.removeEventListener("click", surPasser);
+        boutonCompris.removeEventListener("click", surCompris);
         modal.classList.add("hidden");
-
-        boutonPasser.removeEventListener("click", fermer);
-        boutonCompris.removeEventListener("click", fermer);
-
-        callbackApresFermeture?.();
 
     }
 
-    boutonPasser.addEventListener("click", fermer);
-    boutonCompris.addEventListener("click", fermer);
+    function surPasser() {
+        nettoyer();
+        onAnnuler?.();
+    }
+
+    function surCompris() {
+        nettoyer();
+        onConfirmer();
+    }
+
+    boutonPasser.addEventListener("click", surPasser);
+    boutonCompris.addEventListener("click", surCompris);
 
 }
