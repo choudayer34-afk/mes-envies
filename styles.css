@@ -2705,3 +2705,8 @@ button {
     align-items:center;
     justify-content:center;
 }
+
+.champEnErreur{
+    border-color:#D9534F !important;
+    background:#FDF1F0;
+}
