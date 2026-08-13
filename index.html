@@ -1209,9 +1209,14 @@ document.addEventListener("DOMContentLoaded", () => {
         <span class="accordionIcon">▾</span>
     </button>
 
-    <div id="todoSection" class="accordionContent hidden">
+   <div id="todoSection" class="accordionContent hidden">
 
-        <button id="addTodoButton" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+        <div class="itemTypeToggle" id="todoViewToggle">
+            <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
+            <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
+        </div>
+
+        <button id="addTodoButton" class="secondaryButton" style="width:100%;margin-bottom:10px;margin-top:10px;">
             ➕ Ajouter une tâche
         </button>
 
