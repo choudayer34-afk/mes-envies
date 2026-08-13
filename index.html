@@ -312,13 +312,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     <div class="modal">
 
-        <h2>Nouvelle envie</h2>
+<h2>Nouvelle envie</h2>
 
+        <label class="fieldTitle">Titre <span style="color:#D9534F;">*</span></label>
         <input
             id="envieInput"
             type="text"
             placeholder="Mon envie..."
         >
+        <div id="envieInputErreur" class="hidden" style="color:#D9534F;font-size:12px;margin-top:4px;">Ce champ est obligatoire.</div>
 
         <label class="fieldTitle">
             Catégorie
