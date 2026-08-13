@@ -3,6 +3,8 @@ import { getEnvies, updateEnvieBois, setChecklistItems } from "./storage.js";
 import { showToast } from "./toast.js";
 
 let plancheEnCoursEditionId = null;
+let dragEnCoursPlan = null;
+let dernierTransformPlan = null;
 
 function getBois(envie) {
 
@@ -25,9 +27,10 @@ export function renderBoisCalculateur(envie) {
 
     const bois = getBois(envie);
 
-    renderPlanchesListe(envie, bois);
+renderPlanchesListe(envie, bois);
     renderResultat(bois);
     renderStocksListe(envie, bois);
+    renderPlanApercu(envie);
 
     const longueurInput = document.getElementById("boisStockLongueur");
     const largeurInput = document.getElementById("boisStockLargeur");
@@ -640,6 +643,252 @@ function ajouterPlanchesAuxAchats() {
 
 }
 
+function getPositionsPlan(envie) {
+    return envie.bois?.planPositions || {};
+}
+
+function genererUnitesPieces(planches) {
+
+    const unites = [];
+
+    planches.forEach(p => {
+        for (let i = 0; i < p.quantite; i++) {
+            unites.push({
+                uniqueId: `${p.id}_${i}`,
+                nom: p.nom || "Pièce",
+                longueur: p.longueur,
+                largeur: p.largeur
+            });
+        }
+    });
+
+    return unites;
+
+}
+
+function calculerDispositionAuto(unites) {
+
+    const colonnes = Math.max(1, Math.ceil(Math.sqrt(unites.length)));
+    const maxTaille = Math.max(...unites.map(u => Math.max(u.longueur, u.largeur)), 30);
+    const pas = maxTaille * 1.3;
+
+    const positions = {};
+
+    unites.forEach((u, i) => {
+
+        const col = i % colonnes;
+        const row = Math.floor(i / colonnes);
+
+        positions[u.uniqueId] = {
+            x: col * pas + pas / 2,
+            y: row * pas + pas / 2,
+            rotation: 0
+        };
+
+    });
+
+    const lignes = Math.ceil(unites.length / colonnes);
+
+    return { positions, largeurTotale: colonnes * pas, hauteurTotale: lignes * pas };
+
+}
+
+function construireSVGPlan(envie, bois) {
+
+    const unites = genererUnitesPieces(bois.planches);
+
+    if (unites.length === 0) {
+        dernierTransformPlan = null;
+        return `<div class="emptyState">Ajoute des pièces à découper ci-dessus pour construire le plan.</div>`;
+    }
+
+    let positions = getPositionsPlan(envie);
+
+    const idsConnus = Object.keys(positions);
+    const idsAttendus = unites.map(u => u.uniqueId);
+    const manqueDesPositions = idsAttendus.some(id => !idsConnus.includes(id)) || idsConnus.length !== idsAttendus.length;
+
+    let largeurTotale, hauteurTotale;
+
+    if (manqueDesPositions) {
+
+        const disposition = calculerDispositionAuto(unites);
+        positions = disposition.positions;
+        largeurTotale = disposition.largeurTotale;
+        hauteurTotale = disposition.hauteurTotale;
+
+        updateEnvieBois(envie.id, { ...bois, planPositions: positions });
+
+    } else {
+
+        largeurTotale = Math.max(...unites.map(u => (positions[u.uniqueId]?.x || 0) + Math.max(u.longueur, u.largeur)), 100);
+        hauteurTotale = Math.max(...unites.map(u => (positions[u.uniqueId]?.y || 0) + Math.max(u.longueur, u.largeur)), 100);
+
+    }
+
+    const taille = 320;
+    const marge = 20;
+    const echelle = Math.min((taille - marge * 2) / largeurTotale, (taille - marge * 2) / hauteurTotale);
+
+    dernierTransformPlan = { echelle, marge, taille, positions, unites };
+
+    let svg = `<svg id="boisPlanSVG" viewBox="0 0 ${taille} ${taille}" style="width:100%;max-width:360px;height:auto;background:#F4F4F4;border-radius:8px;border:1px solid var(--color-border);display:block;margin:0 auto;touch-action:none;">`;
+
+    const couleurs = ["#C9A876", "#B08D5B", "#D9BE94", "#A67C52"];
+
+    unites.forEach((u, i) => {
+
+        const pos = positions[u.uniqueId];
+        const w = u.longueur * echelle;
+        const h = u.largeur * echelle;
+        const cx = pos.x * echelle + marge;
+        const cy = pos.y * echelle + marge;
+        const enTrainDeGlisser = dragEnCoursPlan?.uniqueId === u.uniqueId;
+
+        svg += `<g class="boisPlanElementGroup" data-unique-id="${u.uniqueId}" style="cursor:${enTrainDeGlisser ? "grabbing" : "grab"};" transform="rotate(${pos.rotation || 0} ${cx.toFixed(1)} ${cy.toFixed(1)})">`;
+        svg += `<rect x="${(cx - w / 2).toFixed(1)}" y="${(cy - h / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${enTrainDeGlisser ? "#8A6D3A" : couleurs[i % couleurs.length]}" stroke="#6B4F2A" stroke-width="1.5"/>`;
+        svg += `<text x="${cx.toFixed(1)}" y="${cy.toFixed(1)}" font-size="8.5" text-anchor="middle" dominant-baseline="middle" fill="white" font-weight="700" style="pointer-events:none;">${u.nom}</text>`;
+        svg += `</g>`;
+
+    });
+
+    svg += `</svg>`;
+
+    return svg;
+
+}
+
+function attacherInteractionsPlan() {
+
+    const svg = document.getElementById("boisPlanSVG");
+
+    if (!svg)
+        return;
+
+    svg.querySelectorAll(".boisPlanElementGroup").forEach(groupe => {
+
+        groupe.addEventListener("pointerdown", (event) => {
+
+            event.preventDefault();
+
+            const uniqueId = groupe.dataset.uniqueId;
+            const pos = dernierTransformPlan.positions[uniqueId];
+
+            dragEnCoursPlan = {
+                uniqueId,
+                startClientX: event.clientX,
+                startClientY: event.clientY,
+                startX: pos.x,
+                startY: pos.y,
+                xActuel: pos.x,
+                yActuel: pos.y
+            };
+
+        });
+
+        groupe.addEventListener("dblclick", (event) => {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const uniqueId = groupe.dataset.uniqueId;
+            const envieActuelle = getEnvieCourante();
+            const bois = getBois(envieActuelle);
+            const positions = getPositionsPlan(envieActuelle);
+
+            const nouvelleRotation = ((positions[uniqueId]?.rotation || 0) + 90) % 360;
+
+            const nouvellesPositions = { ...positions, [uniqueId]: { ...positions[uniqueId], rotation: nouvelleRotation } };
+            const nouveauBois = { ...bois, planPositions: nouvellesPositions };
+
+            updateEnvieBois(envieActuelle.id, nouveauBois);
+            renderPlanApercu({ ...envieActuelle, bois: nouveauBois });
+
+        });
+
+    });
+
+}
+
+function reafficherPendantDragPlan(envie) {
+
+    const bois = getBois(envie);
+
+    const positionsAffichees = {
+        ...getPositionsPlan(envie),
+        [dragEnCoursPlan.uniqueId]: { ...getPositionsPlan(envie)[dragEnCoursPlan.uniqueId], x: dragEnCoursPlan.xActuel, y: dragEnCoursPlan.yActuel }
+    };
+
+    document.getElementById("boisPlanApercu").innerHTML = construireSVGPlan(envie, { ...bois, planPositions: positionsAffichees });
+    attacherInteractionsPlan();
+
+}
+
+function initDragPlan() {
+
+    document.addEventListener("pointermove", (event) => {
+
+        if (!dragEnCoursPlan || !dernierTransformPlan)
+            return;
+
+        const svg = document.getElementById("boisPlanSVG");
+
+        if (!svg)
+            return;
+
+        const rect = svg.getBoundingClientRect();
+        const facteurEcran = dernierTransformPlan.taille / rect.width;
+
+        const deltaXReel = (event.clientX - dragEnCoursPlan.startClientX) * facteurEcran / dernierTransformPlan.echelle;
+        const deltaYReel = (event.clientY - dragEnCoursPlan.startClientY) * facteurEcran / dernierTransformPlan.echelle;
+
+        dragEnCoursPlan.xActuel = Math.max(0, dragEnCoursPlan.startX + deltaXReel);
+        dragEnCoursPlan.yActuel = Math.max(0, dragEnCoursPlan.startY + deltaYReel);
+
+        reafficherPendantDragPlan(getEnvieCourante());
+
+    });
+
+    document.addEventListener("pointerup", () => {
+
+        if (!dragEnCoursPlan)
+            return;
+
+        const envie = getEnvieCourante();
+        const bois = getBois(envie);
+        const positions = getPositionsPlan(envie);
+
+        const nouvellesPositions = {
+            ...positions,
+            [dragEnCoursPlan.uniqueId]: { ...positions[dragEnCoursPlan.uniqueId], x: dragEnCoursPlan.xActuel, y: dragEnCoursPlan.yActuel }
+        };
+
+        const nouveauBois = { ...bois, planPositions: nouvellesPositions };
+
+        updateEnvieBois(envie.id, nouveauBois);
+
+        dragEnCoursPlan = null;
+
+        renderPlanApercu({ ...envie, bois: nouveauBois });
+
+    });
+
+}
+
+function renderPlanApercu(envie) {
+
+    const container = document.getElementById("boisPlanApercu");
+
+    if (!container)
+        return;
+
+    const bois = getBois(envie);
+
+    container.innerHTML = construireSVGPlan(envie, bois);
+    attacherInteractionsPlan();
+
+}
+
 export function initBoisCalculateur() {
 document.getElementById("ajouterBoisAchatsButton")?.addEventListener("click", ajouterPlanchesAuxAchats);
     
@@ -713,6 +962,27 @@ document.getElementById("ajouterBoisAchatsButton")?.addEventListener("click", aj
 
     });
 
+    initDragPlan();
+
+    document.getElementById("reinitialiserPlanButton")?.addEventListener("click", () => {
+
+        const envie = getEnvieCourante();
+        const bois = getBois(envie);
+        const unites = genererUnitesPieces(bois.planches);
+
+        if (unites.length === 0) {
+            showToast("Ajoute d'abord des pièces à découper");
+            return;
+        }
+
+        const disposition = calculerDispositionAuto(unites);
+        const nouveauBois = { ...bois, planPositions: disposition.positions };
+
+        updateEnvieBois(envie.id, nouveauBois);
+        renderPlanApercu({ ...envie, bois: nouveauBois });
+
+    });
+    
 document.getElementById("addBoisStockButton")?.addEventListener("click", () => {
 
         const longueurInput = document.getElementById("boisStockLongueur");
