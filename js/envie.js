@@ -18,7 +18,7 @@ import { renderDevis } from "./devis.js";
 import { getEnvies, updateEnvieCategorie, updateEnvie, updateEnvieDescription } from "./storage.js";
 import { renderSimulationIA } from "./simulation-ia.js";
 import { renderCroquisSection } from "./croquis.js";
-
+import { updateEnvieRubriquesEtat } from "./storage.js";
 let currentEnvieId = null;
 
 export function getCurrentEnvieId() {
@@ -201,7 +201,7 @@ function renderCategorieSelector(envie) {
 export function closeFiche() {
 
     document.getElementById("ficheOverlay").classList.add("hidden");
-
+document.getElementById("ficheFabAjout")?.classList.add("hidden");
     if (returnToContainerId) {
 
         const containerId = returnToContainerId;
@@ -383,85 +383,209 @@ export function isLogementCategory(categorieId) {
     return cat?.label?.toLowerCase().includes("logement") || false;
 }
 
+const RUBRIQUES_GEREES = [
+    { id: "periode", sectionId: "periodeSection", emoji: "📅", label: "Période", aDuContenu: e => !!e.date?.start },
+    { id: "voyage", sectionId: "voyageSection", emoji: "🧳", label: "Voyage/Projet", aDuContenu: e => isContainer(e.categorie) || !!e.voyageId },
+    { id: "lieu", sectionId: "lieuSection", emoji: "📍", label: "Lieu", aDuContenu: e => !!e.lieu?.nom },
+    { id: "evaluation", sectionId: "evaluationSection", emoji: "⭐", label: "Évaluation", aDuContenu: e => !!(e.evaluation?.note || e.evaluation?.enfants || e.evaluation?.difficulte) },
+    { id: "photos", sectionId: "photosSection", emoji: "📷", label: "Photos", aDuContenu: e => (e.photos || []).length > 0 },
+    { id: "description", sectionId: "ficheDescriptionSection", emoji: "📝", label: "Description", aDuContenu: e => !!e.description },
+    { id: "checklist", sectionId: "checklistSection", emoji: "✅", label: "Checklist", aDuContenu: e => (e.checklist || []).length > 0 },
+    { id: "liens", sectionId: "lienSection", emoji: "🔗", label: "Liens", aDuContenu: e => (e.urls || []).length > 0 },
+    { id: "peinture", sectionId: "peintureSection", emoji: "🎨", label: "Peinture", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.peinture?.murs || []).length > 0 },
+    { id: "bois", sectionId: "boisSection", emoji: "🪵", label: "Bois", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.bois?.planches || []).length > 0 },
+    { id: "comparateur", sectionId: "comparateurSection", emoji: "🔍", label: "Comparateur", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.comparateur?.produits || []).length > 0 },
+    { id: "devis", sectionId: "devisSection", emoji: "📋", label: "Devis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.devis?.entries || []).length > 0 },
+    { id: "croquis", sectionId: "croquisSection", emoji: "📐", label: "Croquis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.croquis || []).length > 0 },
+    { id: "simulationIA", sectionId: "simulationIASection", emoji: "🖼️", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false }
+];
+
+function estRubriqueVisible(rubrique, envie) {
+
+    const etatManuel = envie.rubriquesEtatManuel?.[rubrique.id];
+
+    if (etatManuel === "visible")
+        return true;
+
+    if (etatManuel === "cachee")
+        return false;
+
+    try {
+        return rubrique.aDuContenu(envie);
+    } catch (err) {
+        console.error("Erreur vérification contenu pour " + rubrique.id + ": " + err.message);
+        return false;
+    }
+
+}
+
+function definirEtatRubrique(envie, rubriqueId, etat) {
+
+    const nouvelEtat = { ...(envie.rubriquesEtatManuel || {}), [rubriqueId]: etat };
+    updateEnvieRubriquesEtat(envie.id, nouvelEtat);
+
+    return { ...envie, rubriquesEtatManuel: nouvelEtat };
+
+}
+
 function gererAccordeonsVides(envie) {
 
-        const accordeonsAVerifier = [
-        { sectionId: "periodeSection", aDuContenu: () => !!envie.date?.start },
-      { sectionId: "voyageSection", aDuContenu: () => isContainer(envie.categorie) || !!envie.voyageId },
-        { sectionId: "lieuSection", aDuContenu: () => !!envie.lieu?.nom },
-        { sectionId: "evaluationSection", aDuContenu: () => !!(envie.evaluation?.note || envie.evaluation?.enfants || envie.evaluation?.difficulte) },
-        { sectionId: "photosSection", aDuContenu: () => (envie.photos || []).length > 0 },
-        { sectionId: "ficheDescriptionSection", aDuContenu: () => !!envie.description },
-        { sectionId: "checklistSection", aDuContenu: () => (envie.checklist || []).length > 0 },
-        { sectionId: "lienSection", aDuContenu: () => (envie.urls || []).length > 0 },
-        { sectionId: "peintureSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.peinture?.murs || []).length > 0 },
-        { sectionId: "boisSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.bois?.planches || []).length > 0 },
-        { sectionId: "comparateurSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.comparateur?.produits || []).length > 0 },
-            { sectionId: "devisSection", estPertinent: () => envie.contexte === "maison", aDuContenu: () => (envie.devis?.entries || []).length > 0 }
-    ];
+    RUBRIQUES_GEREES.forEach(rubrique => {
 
-
-    const zoneAjout = document.getElementById("ficheAjoutRubriques");
-    zoneAjout.innerHTML = "";
-
-        accordeonsAVerifier.forEach(({ sectionId, aDuContenu }) => {
-
-        const section = document.getElementById(sectionId);
+        const section = document.getElementById(rubrique.sectionId);
         const accordion = section?.closest(".accordion");
 
-               if (!accordion)
+        if (!accordion)
             return;
 
-        if (typeof estPertinent === "function" && !estPertinent()) {
+        if (typeof rubrique.estPertinent === "function" && !rubrique.estPertinent(envie)) {
             accordion.classList.add("hidden");
             return;
         }
 
+        const visible = estRubriqueVisible(rubrique, envie);
 
-        const dejaOuvertManuel = accordion.dataset.forceVisible === "true";
+        accordion.classList.toggle("hidden", !visible);
 
-        let contenuPresent = false;
-
-        try {
-            contenuPresent = aDuContenu();
-        } catch (err) {
-            console.error("Erreur vérification contenu pour " + sectionId + ": " + err.message);
-            contenuPresent = false;
-        }
-
-        if (contenuPresent || dejaOuvertManuel) {
-            accordion.classList.remove("hidden");
+        if (!visible)
             return;
+
+        const header = accordion.querySelector(".accordionHeader");
+
+        if (header && !header.querySelector(".retirerRubriqueButton")) {
+
+            const retirerBtn = document.createElement("button");
+            retirerBtn.type = "button";
+            retirerBtn.className = "retirerRubriqueButton";
+            retirerBtn.title = "Retirer cette rubrique";
+            retirerBtn.textContent = "✕";
+
+            retirerBtn.addEventListener("click", (event) => {
+
+                event.stopPropagation();
+
+                if (!window.confirm(`Retirer la rubrique "${rubrique.label}" de cette fiche ?\n\nTes données existantes ne sont pas supprimées — tu pourras la rajouter plus tard depuis le bouton +.`))
+                    return;
+
+                const envieActuelle = getEnvies().find(e => e.id === envie.id);
+                const envieMaj = definirEtatRubrique(envieActuelle, rubrique.id, "cachee");
+
+                gererAccordeonsVides(envieMaj);
+
+            });
+
+            header.appendChild(retirerBtn);
+
         }
-
-        accordion.classList.add("hidden");
-
-        const label = accordion.querySelector(".accordionHeader span")?.textContent || "Ajouter";
-
-        const bouton = document.createElement("button");
-        bouton.type = "button";
-        bouton.className = "ajoutRubriqueButton";
-        bouton.textContent = `+ ${label}`;
-
-        bouton.addEventListener("click", () => {
-
-            accordion.dataset.forceVisible = "true";
-            accordion.classList.remove("hidden");
-
-            const contentSection = document.getElementById(sectionId);
-            contentSection.classList.remove("hidden");
-
-            const icon = accordion.querySelector(".accordionIcon");
-            if (icon) icon.textContent = "▾";
-
-            bouton.remove();
-
-        });
-
-        zoneAjout.appendChild(bouton);
 
     });
 
+    renderFabRubriques(envie);
+
+}
+
+function renderFabRubriques(envie) {
+
+    const fab = document.getElementById("ficheFabAjout");
+
+    if (!fab)
+        return;
+
+    const disponibles = RUBRIQUES_GEREES.filter(r => {
+
+        if (typeof r.estPertinent === "function" && !r.estPertinent(envie))
+            return false;
+
+        return !estRubriqueVisible(r, envie);
+
+    });
+
+    fab.classList.toggle("hidden", disponibles.length === 0);
+    fab.dataset.envieId = envie.id;
+
+}
+
+export function initFicheFab() {
+
+    const bouton = document.getElementById("ficheFabButton");
+    const menu = document.getElementById("ficheFabMenu");
+
+    if (!bouton || !menu)
+        return;
+
+    bouton.addEventListener("click", (event) => {
+
+        event.stopPropagation();
+
+        if (!menu.classList.contains("hidden")) {
+            menu.classList.add("hidden");
+            return;
+        }
+
+        const envieId = document.getElementById("ficheFabAjout").dataset.envieId;
+        const envie = getEnvies().find(e => e.id === envieId);
+
+        if (!envie)
+            return;
+
+        const disponibles = RUBRIQUES_GEREES.filter(r => {
+            if (typeof r.estPertinent === "function" && !r.estPertinent(envie)) return false;
+            return !estRubriqueVisible(r, envie);
+        });
+
+        menu.innerHTML = "";
+
+        const rayon = 100;
+        const angleDebut = 180;
+        const angleFin = 270;
+        const n = disponibles.length;
+
+        disponibles.forEach((rubrique, i) => {
+
+            const angle = n === 1 ? (angleDebut + angleFin) / 2 : angleDebut + (angleFin - angleDebut) * (i / (n - 1));
+            const rad = angle * Math.PI / 180;
+
+            const x = Math.cos(rad) * rayon;
+            const y = Math.sin(rad) * rayon;
+
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "ficheFabMenuItem";
+            item.style.transform = `translate(${x}px, ${y}px)`;
+            item.title = rubrique.label;
+            item.textContent = rubrique.emoji;
+
+            item.addEventListener("click", (e) => {
+
+                e.stopPropagation();
+
+                const envieMaj = definirEtatRubrique(envie, rubrique.id, "visible");
+
+                gererAccordeonsVides(envieMaj);
+
+                menu.classList.add("hidden");
+
+                setTimeout(() => {
+                    document.getElementById(rubrique.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 100);
+
+            });
+
+            menu.appendChild(item);
+
+        });
+
+        menu.classList.remove("hidden");
+
+    });
+
+    document.addEventListener("click", (event) => {
+
+        if (!event.target.closest("#ficheFabAjout")) {
+            menu.classList.add("hidden");
+        }
+
+    });
 
 }
 
