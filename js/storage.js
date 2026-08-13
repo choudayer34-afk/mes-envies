@@ -90,6 +90,10 @@ export function updateEnvieDevis(id, devis) {
     patchEnvie(id, { devis });
 }
 
+export function updateEnvieCroquis(id, croquis) {
+    patchEnvie(id, { croquis });
+}
+
 export function rememberMagasin(nom) {
 
     const nomPropre = nom.trim();
