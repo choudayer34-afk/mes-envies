@@ -19,7 +19,7 @@ import { getEnvies, updateEnvieCategorie, updateEnvie, updateEnvieDescription } 
 import { renderSimulationIA } from "./simulation-ia.js";
 import { renderCroquisSection } from "./croquis.js";
 import { updateEnvieRubriquesEtat } from "./storage.js";
-import { afficherOnboardingRubriqueSiNecessaire } from "./onboarding.js";
+import { afficherConfirmationAjoutRubrique } from "./onboarding.js";
 
 let currentEnvieId = null;
 
@@ -581,28 +581,38 @@ item.addEventListener("click", (e) => {
 
                 e.stopPropagation();
 
-                const envieMaj = definirEtatRubrique(envie, rubrique.id, "visible");
-
-                gererAccordeonsVides(envieMaj);
-
-                const contenuSection = document.getElementById(rubrique.sectionId);
-                const iconeAccordion = contenuSection?.closest(".accordion")?.querySelector(".accordionIcon");
-
-                contenuSection?.classList.remove("hidden");
-
-                if (iconeAccordion) {
-                    iconeAccordion.textContent = "▾";
-                }
-
                 fermerCamembert();
 
-                afficherOnboardingRubriqueSiNecessaire(rubrique.id, () => {
+                afficherConfirmationAjoutRubrique(
 
-                    setTimeout(() => {
-                        document.getElementById(rubrique.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" });
-                    }, 100);
+                    rubrique.id,
 
-                });
+                    () => {
+
+                        const envieMaj = definirEtatRubrique(envie, rubrique.id, "visible");
+
+                        gererAccordeonsVides(envieMaj);
+
+                        const contenuSection = document.getElementById(rubrique.sectionId);
+                        const iconeAccordion = contenuSection?.closest(".accordion")?.querySelector(".accordionIcon");
+
+                        contenuSection?.classList.remove("hidden");
+
+                        if (iconeAccordion) {
+                            iconeAccordion.textContent = "▾";
+                        }
+
+                        setTimeout(() => {
+                            document.getElementById(rubrique.sectionId)?.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }, 100);
+
+                    },
+
+                    () => {
+                        // Annulé : rien à appliquer, la rubrique reste masquée comme avant
+                    }
+
+                );
 
             });
 
