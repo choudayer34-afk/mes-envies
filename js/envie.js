@@ -20,6 +20,7 @@ import { renderSimulationIA } from "./simulation-ia.js";
 import { renderCroquisSection } from "./croquis.js";
 import { updateEnvieRubriquesEtat } from "./storage.js";
 import { afficherConfirmationAjoutRubrique } from "./onboarding.js";
+import { renderTodoSection } from "./todo.js";
 
 let currentEnvieId = null;
 
@@ -83,6 +84,7 @@ document.getElementById("ficheModeIcone").textContent = envie.contexte === "mais
     renderDevis(envie);
     renderSimulationIA(envie);
     renderCroquisSection(envie);
+    renderTodoSection(envie);
     renderUrls(envie);
 
        
@@ -399,7 +401,8 @@ const RUBRIQUES_GEREES = [
     { id: "comparateur", sectionId: "comparateurSection", emoji: "⚖️", label: "Comparateur", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.comparateur?.produits || []).length > 0 },
     { id: "devis", sectionId: "devisSection", emoji: "🧾", label: "Devis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.devis?.entries || []).length > 0 },
     { id: "croquis", sectionId: "croquisSection", emoji: "📐", label: "Croquis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.croquis || []).length > 0 },
-   { id: "simulationIA", sectionId: "simulationIASection", emoji: "🪄", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false }
+   { id: "simulationIA", sectionId: "simulationIASection", emoji: "🪄", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false },
+    { id: "todo", sectionId: "todoSection", emoji: "🗒️", label: "À faire", aDuContenu: e => (e.checklistTodo || []).length > 0 }
 ];
 
 function estRubriqueVisible(rubrique, envie) {
