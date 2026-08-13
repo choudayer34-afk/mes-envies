@@ -1500,6 +1500,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
         </div>
 
+<label class="fieldTitle" style="margin-top:20px;">Éléments</label>
+<div id="croquisElementsListe"></div>
+
+<div id="croquisAjoutElementForm" style="margin-top:12px;">
+
+    <input type="text" id="croquisElementNom" placeholder="Nom de l'élément (ex: Baignoire)" class="numberInput" style="margin-bottom:8px;">
+
+    <div class="peintureAddRow" style="margin-bottom:8px;">
+        <input type="number" id="croquisElementLargeur" placeholder="Largeur (cm)" class="numberInput">
+        <input type="number" id="croquisElementProfondeur" placeholder="Profondeur (cm)" class="numberInput">
+    </div>
+
+    <div class="checklistRow">
+        <label class="checkLabel">
+            <input type="checkbox" id="croquisElementRotationCheckbox">
+            <span>Tourner à 90°</span>
+        </label>
+    </div>
+
+    <div class="itemTypeToggle" id="croquisModePositionToggle" style="margin:10px 0;">
+        <button type="button" class="itemTypeChip active" data-mode="clic">📍 Clic sur le plan</button>
+        <button type="button" class="itemTypeChip" data-mode="distance">📏 Distance précise</button>
+    </div>
+
+    <div id="croquisPositionClicInfo" class="emptyState">Remplis les dimensions ci-dessus, puis touche l'endroit voulu directement sur le plan.</div>
+
+    <div id="croquisPositionDistanceFields" class="hidden">
+
+        <label class="fieldTitle">Mur de référence</label>
+        <select id="croquisMurReference" class="categorieSelect" style="margin-bottom:8px;"></select>
+
+        <div class="peintureAddRow">
+            <input type="number" id="croquisDistanceLeLong" placeholder="Distance depuis le début du mur (cm)" class="numberInput">
+            <input type="number" id="croquisDistancePerpendiculaire" placeholder="Distance depuis ce mur (cm)" class="numberInput">
+        </div>
+
+        <button id="ajouterElementDistanceButton" class="secondaryButton" style="width:100%;margin-top:8px;">
+            ➕ Ajouter l'élément ici
+        </button>
+
+    </div>
+
+</div>
+
 
     </div>
 
