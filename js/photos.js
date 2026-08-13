@@ -1,10 +1,15 @@
-import { updateEnviePhotos, updatePhotoDescription, getEnvies, updateEnviePhotoCouverture } from "./storage.js";
+import { updateEnviePhotos, updatePhotoDescription, getEnvies, updateEnviePhotoCouverture, updatePhotoMesures } from "./storage.js";
 import { getCurrentEnvieId, openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
 import { renderVoyageSection } from "./voyage.js";
 
 const CLOUD_NAME = "wz4fkcbs";
 const UPLOAD_PRESET = "Envies";
+const COULEURS_MESURE = ["#D97C7C", "#3E7CB1", "#2C7A4B", "#E7A94C", "#8A6FBF", "#222222"];
+
+let modeMesureActif = false;
+let pointsMesureEnCours = [];
+let couleurMesureChoisie = COULEURS_MESURE[0];
 
 export function initPhotos() {
 
@@ -182,7 +187,179 @@ function openPhotoViewer(envieId, photo) {
     modal.dataset.photoId = photo.id;
     modal.dataset.photoUrl = photo.url;
 
+    modeMesureActif = false;
+    pointsMesureEnCours = [];
+    document.getElementById("photoViewerMesureInfo").classList.add("hidden");
+    document.getElementById("toggleMesurePhotoButton").textContent = "📏 Mesurer";
+
+    renderMesuresSVG(photo.mesures || []);
+
     modal.classList.remove("hidden");
+
+}
+
+function renderMesuresSVG(mesures) {
+
+    const svg = document.getElementById("photoViewerMesuresSVG");
+
+    svg.innerHTML = mesures.map(m => `
+        <line x1="${m.x1}" y1="${m.y1}" x2="${m.x2}" y2="${m.y2}" stroke="${m.couleur}" stroke-width="0.6"/>
+        <circle cx="${m.x1}" cy="${m.y1}" r="0.9" fill="${m.couleur}"/>
+        <circle cx="${m.x2}" cy="${m.y2}" r="0.9" fill="${m.couleur}"/>
+        <text x="${(m.x1 + m.x2) / 2}" y="${(m.y1 + m.y2) / 2 - 1.5}" font-size="3.2" fill="${m.couleur}" text-anchor="middle" font-weight="700" style="paint-order:stroke;stroke:white;stroke-width:0.6px;">${m.distance} ${m.unite}</text>
+    `).join("");
+
+}
+
+function reinitialiserModeMesure() {
+
+    modeMesureActif = false;
+    pointsMesureEnCours = [];
+
+    document.getElementById("photoViewerMesureInfo").classList.add("hidden");
+    document.getElementById("toggleMesurePhotoButton").textContent = "📏 Mesurer";
+
+}
+
+function ouvrirFormulaireMesure() {
+
+    couleurMesureChoisie = COULEURS_MESURE[0];
+
+    const container = document.getElementById("mesureCouleursChoix");
+
+    container.innerHTML = COULEURS_MESURE.map((couleur, i) => `
+        <div class="mesureCouleurSwatch${i === 0 ? " active" : ""}" data-couleur="${couleur}" style="background:${couleur};"></div>
+    `).join("");
+
+    container.querySelectorAll(".mesureCouleurSwatch").forEach(swatch => {
+
+        swatch.addEventListener("click", () => {
+
+            container.querySelectorAll(".mesureCouleurSwatch").forEach(s => s.classList.remove("active"));
+            swatch.classList.add("active");
+            couleurMesureChoisie = swatch.dataset.couleur;
+
+        });
+
+    });
+
+    document.getElementById("mesureValeurInput").value = "";
+
+    document.getElementById("mesurePhotoModal").classList.remove("hidden");
+
+}
+
+function initMesurePhoto() {
+
+    document.getElementById("toggleMesurePhotoButton")?.addEventListener("click", () => {
+
+        modeMesureActif = !modeMesureActif;
+        pointsMesureEnCours = [];
+
+        const info = document.getElementById("photoViewerMesureInfo");
+
+        if (modeMesureActif) {
+
+            document.getElementById("toggleMesurePhotoButton").textContent = "✕ Arrêter";
+            info.textContent = "Touche un premier point sur la photo";
+            info.classList.remove("hidden");
+
+        } else {
+
+            reinitialiserModeMesure();
+
+        }
+
+    });
+
+    document.getElementById("photoViewerImageWrapper")?.addEventListener("click", (event) => {
+
+        if (!modeMesureActif)
+            return;
+
+        const wrapper = document.getElementById("photoViewerImageWrapper");
+        const rect = wrapper.getBoundingClientRect();
+
+        const xPct = (event.clientX - rect.left) / rect.width * 100;
+        const yPct = (event.clientY - rect.top) / rect.height * 100;
+
+        pointsMesureEnCours.push({ x: xPct, y: yPct });
+
+        if (pointsMesureEnCours.length === 2) {
+
+            document.getElementById("photoViewerMesureInfo").classList.add("hidden");
+            ouvrirFormulaireMesure();
+
+        } else {
+
+            document.getElementById("photoViewerMesureInfo").textContent = "Touche le deuxième point";
+
+        }
+
+    });
+
+    document.getElementById("annulerMesureButton")?.addEventListener("click", () => {
+
+        pointsMesureEnCours = [];
+        document.getElementById("mesurePhotoModal").classList.add("hidden");
+
+        if (modeMesureActif) {
+            document.getElementById("photoViewerMesureInfo").textContent = "Touche un premier point sur la photo";
+            document.getElementById("photoViewerMesureInfo").classList.remove("hidden");
+        }
+
+    });
+
+    document.getElementById("validerMesureButton")?.addEventListener("click", () => {
+
+        const distance = parseFloat(document.getElementById("mesureValeurInput").value);
+
+        if (!distance || distance <= 0) {
+            showToast("Renseigne une distance valide");
+            return;
+        }
+
+        const unite = document.getElementById("mesureUniteSelect").value;
+
+        const { envie, photo } = getPhotoActuelleDuViewer();
+
+        if (!envie || !photo)
+            return;
+
+        const nouvelleMesure = {
+            id: crypto.randomUUID(),
+            x1: pointsMesureEnCours[0].x,
+            y1: pointsMesureEnCours[0].y,
+            x2: pointsMesureEnCours[1].x,
+            y2: pointsMesureEnCours[1].y,
+            distance,
+            unite,
+            couleur: couleurMesureChoisie
+        };
+
+        const nouvellesMesures = [...(photo.mesures || []), nouvelleMesure];
+
+        updatePhotoMesures(envie.id, photo.id, nouvellesMesures);
+        renderMesuresSVG(nouvellesMesures);
+
+        pointsMesureEnCours = [];
+        document.getElementById("mesurePhotoModal").classList.add("hidden");
+
+        document.getElementById("photoViewerMesureInfo").textContent = "Touche un premier point sur la photo";
+        document.getElementById("photoViewerMesureInfo").classList.remove("hidden");
+
+        showToast("✓ Mesure ajoutée");
+
+    });
+
+}
+
+function getPhotoActuelleDuViewer() {
+
+    const modal = document.getElementById("photoViewerModal");
+    const envie = getEnvies().find(e => e.id === modal.dataset.envieId);
+
+    return { envie, photo: envie?.photos?.find(p => p.id === modal.dataset.photoId) };
 
 }
 
@@ -240,6 +417,7 @@ export function initPhotoViewer() {
 
     });
 
+        initMesurePhoto();
 }
 
 
