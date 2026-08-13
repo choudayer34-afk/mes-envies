@@ -262,7 +262,8 @@ main{
 #memChiffresModal, #memMotsModal,#memVisagesModal, #nbackModal,
 #agendaLocalModal,#rapportModal,
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
-#adminPartagesModal, #platformerModal, #simulationIAModal
+#adminPartagesModal, #platformerModal, #simulationIAModal,
+#croquisEditorModal
 {
     z-index:2100;
 }
