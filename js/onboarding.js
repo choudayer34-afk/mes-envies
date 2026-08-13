@@ -208,6 +208,12 @@ const RUBRIQUE_ONBOARDING = {
         titre: "📷 Photos",
         aQuoiCaSert: "Stocke les photos de cette idée ou tâche, et peut aussi servir à prendre des mesures réelles directement dessus.",
         commentCaSutilise: "Ajoute une ou plusieurs photos, touche-en une pour l'ouvrir en plein écran (légende, définir comme couverture repositionnable, partager). Le bouton '📏 Mesurer' te permet de tracer des traits sur la photo et d'indiquer leur vraie distance (cm ou m) et une couleur — utile pour visualiser des cotes. Tu peux ensuite enregistrer une copie annotée comme nouvelle photo, sans toucher à l'originale."
+    },
+
+    todo: {
+        titre: "🗒️ À faire",
+        aQuoiCaSert: "Une liste de tâches séparée de la checklist d'achats — pour des étapes à accomplir dans un ordre précis, sur un voyage comme sur un projet maison.",
+        commentCaSutilise: "Ajoute tes tâches (une par ligne), avec une catégorie optionnelle. Glisse la poignée ⠿ pour réordonner tes tâches au sein d'une même catégorie — l'ordre compte ici, contrairement à la checklist d'achats."
     }
 
 };
