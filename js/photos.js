@@ -5,7 +5,7 @@ import { renderVoyageSection } from "./voyage.js";
 
 const CLOUD_NAME = "wz4fkcbs";
 const UPLOAD_PRESET = "Envies";
-const COULEURS_MESURE = ["#D97C7C", "#3E7CB1", "#2C7A4B", "#E7A94C", "#8A6FBF", "#222222"];
+const COULEURS_MESURE = ["#D97C7C", "#3E7CB1", "#2C7A4B", "#E7A94C", "#8A6FBF", "#222222", "#FFFFFF"];
 
 let modeMesureActif = false;
 let pointsMesureEnCours = [];
@@ -202,12 +202,18 @@ function renderMesuresSVG(mesures) {
 
     const svg = document.getElementById("photoViewerMesuresSVG");
 
-    svg.innerHTML = mesures.map(m => `
-        <line x1="${m.x1}" y1="${m.y1}" x2="${m.x2}" y2="${m.y2}" stroke="${m.couleur}" stroke-width="0.6"/>
-        <circle cx="${m.x1}" cy="${m.y1}" r="0.9" fill="${m.couleur}"/>
-        <circle cx="${m.x2}" cy="${m.y2}" r="0.9" fill="${m.couleur}"/>
-        <text x="${(m.x1 + m.x2) / 2}" y="${(m.y1 + m.y2) / 2 - 1.5}" font-size="3.2" fill="${m.couleur}" text-anchor="middle" font-weight="700" style="paint-order:stroke;stroke:white;stroke-width:0.6px;">${m.distance} ${m.unite}</text>
-    `).join("");
+   svg.innerHTML = mesures.map(m => {
+
+        const contour = m.couleur.toLowerCase() === "#ffffff" ? "#000000" : "#ffffff";
+
+        return `
+            <line x1="${m.x1}" y1="${m.y1}" x2="${m.x2}" y2="${m.y2}" stroke="${m.couleur}" stroke-width="0.6"/>
+            <circle cx="${m.x1}" cy="${m.y1}" r="0.9" fill="${m.couleur}"/>
+            <circle cx="${m.x2}" cy="${m.y2}" r="0.9" fill="${m.couleur}"/>
+            <text x="${(m.x1 + m.x2) / 2}" y="${(m.y1 + m.y2) / 2 - 1.5}" font-size="3.2" fill="${m.couleur}" text-anchor="middle" font-weight="700" style="paint-order:stroke;stroke:${contour};stroke-width:0.6px;">${m.distance} ${m.unite}</text>
+        `;
+
+    }).join("");
 
 }
 
