@@ -1512,12 +1512,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <input type="number" id="croquisElementProfondeur" placeholder="Profondeur (cm)" class="numberInput">
     </div>
 
-    <div class="checklistRow">
-        <label class="checkLabel">
-            <input type="checkbox" id="croquisElementRotationCheckbox">
-            <span>Tourner à 90°</span>
-        </label>
-    </div>
+<label class="fieldTitle" style="margin-top:8px;">Rotation</label>
+    <input type="range" id="croquisElementRotationSlider" min="0" max="359" value="0" style="width:100%;">
+    <div id="croquisElementRotationValeur" style="text-align:center;font-size:13px;color:var(--color-text-light);margin-bottom:8px;">0°</div>
 
     <div class="itemTypeToggle" id="croquisModePositionToggle" style="margin:10px 0;">
         <button type="button" class="itemTypeChip active" data-mode="clic">📍 Clic sur le plan</button>
