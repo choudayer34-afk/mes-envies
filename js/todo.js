@@ -146,13 +146,42 @@ function renderTodoParEtape(items, envie, container) {
 
         header.innerHTML = `
             <span>📋 ${groupe.nom}</span>
-            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${groupe.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
+            <span class="checklistCategorieCompteur">
+                ${groupe.cle !== "sans-etape" ? `<button type="button" class="iconSmallButton renommerEtapeButton" title="Renommer l'étape" style="margin-right:6px;">✏️</button>` : ""}
+                ${complete ? "✅ " : ""}${coches}/${groupe.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span>
+            </span>
         `;
 
         header.addEventListener("click", () => {
             etapeOuverteTodoId = estOuverte ? null : groupe.cle;
             renderTodoListe(envie);
         });
+
+        const boutonRenommer = header.querySelector(".renommerEtapeButton");
+
+        if (boutonRenommer) {
+
+            boutonRenommer.addEventListener("click", (event) => {
+
+                event.stopPropagation();
+
+                const nouveauNom = prompt("Renommer cette étape :", groupe.nom);
+
+                if (!nouveauNom || !nouveauNom.trim() || nouveauNom.trim() === groupe.nom)
+                    return;
+
+                const envieActuelle = getEnvieCourante();
+
+                const nouveauxItems = (envieActuelle.checklistTodo || []).map(i =>
+                    i.etape === groupe.nom ? { ...i, etape: nouveauNom.trim() } : i
+                );
+
+                updateEnvieChecklistTodo(envieActuelle.id, nouveauxItems);
+                renderTodoListe({ ...envieActuelle, checklistTodo: nouveauxItems });
+
+            });
+
+        }
 
         container.appendChild(header);
 
@@ -334,8 +363,8 @@ row.querySelector(".editTodoButton").addEventListener("click", (event) => {
 
         event.stopPropagation();
 
-        ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte, nouvelleDate) => {
-            sauvegarderItem({ texte: nouveauTexte, date: nouvelleDate });
+ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte, nouvelleDate, nouvelleEtape) => {
+            sauvegarderItem({ texte: nouveauTexte, date: nouvelleDate, etape: nouvelleEtape });
         });
 
     });
