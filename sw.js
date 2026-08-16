@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v94';
+const CACHE_NAME = 'envie-cache-v95';
 
 
  
@@ -9,6 +9,7 @@ const APP_SHELL = [
     './manifest.json',
     './js/firebase.js',
     './js/auth.js',
+ './js/billets.js',
     './js/croquis.js',
     './js/storage.js',
     './js/ui.js',
