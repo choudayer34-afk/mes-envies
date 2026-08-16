@@ -130,27 +130,6 @@ self.addEventListener('fetch', (event) => {
 });
 
 
-async function reseauPuisCacheNavigation(request) {
-
-    try {
-
-        const response = await fetch(request);
-
-        if (response.ok) {
-            const cache = await caches.open(CACHE_NAME);
-            cache.put('./index.html', response.clone()).catch(() => {});
-        }
-
-        return response;
-
-    } catch (err) {
-
-        const cached = await caches.match('./index.html');
-        return cached || Response.error();
-
-    }
-
-}
 
 
 async function reseauPuisCacheNavigation(request) {
@@ -169,6 +148,28 @@ async function reseauPuisCacheNavigation(request) {
     } catch (err) {
 
         const cached = await caches.match('./index.html');
+        return cached || Response.error();
+
+    }
+
+}
+
+async function reseauPuisCache(request) {
+
+    try {
+
+        const response = await fetch(request);
+
+        if (response.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, response.clone()).catch(() => {});
+        }
+
+        return response;
+
+    } catch (err) {
+
+        const cached = await caches.match(request);
         return cached || Response.error();
 
     }
