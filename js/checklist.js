@@ -547,9 +547,13 @@ export function renderPersonneSelector(container, selected, onChange) {
 /* ---------- Modale ajout élément (création) ---------- */
 
 export function initChecklistModal() {
-document.getElementById("checklistMasquerCochesToggle")?.addEventListener("change", (event) => {
 
-        masquerCoches = event.target.checked;
+    document.getElementById("checklistMasquerCochesToggle")?.addEventListener("click", () => {
+
+        masquerCoches = !masquerCoches;
+
+        const bouton = document.getElementById("checklistMasquerCochesToggle");
+        bouton.textContent = masquerCoches ? "👁️ Tout afficher" : "🙈 Masquer les éléments déjà cochés";
 
         const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
 
