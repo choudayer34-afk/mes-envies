@@ -930,9 +930,18 @@ export function synchroniserChecklistDepuisProduit(envieId, produit, retenu) {
         if (checklistActuelle.some(item => item.produitOrigineId === produit.id))
             return;
 
+const dimensionsTexte = [];
+
+        if (produit.longueur) dimensionsTexte.push(`L:${produit.longueur}`);
+        if (produit.largeur) dimensionsTexte.push(`l:${produit.largeur}`);
+        if (produit.hauteur) dimensionsTexte.push(`H:${produit.hauteur}`);
+
+        const suffixeDimensions = dimensionsTexte.length > 0 ? ` (${dimensionsTexte.join(" ")} cm)` : "";
+        const suffixePrix = produit.prix != null ? ` — ${produit.prix} €` : "";
+
         const nouvelItem = {
             id: crypto.randomUUID(),
-            texte: produit.prix != null ? `${produit.nom} (${produit.prix} €)` : produit.nom,
+            texte: `${produit.nom}${suffixeDimensions}${suffixePrix}`,
             quantite: 1,
             categorieId: null,
             assignedTo: [],
