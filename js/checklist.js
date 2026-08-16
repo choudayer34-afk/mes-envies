@@ -575,7 +575,7 @@ export function initChecklistModal() {
         tousDeplierChecklist = !tousDeplierChecklist;
 
         const bouton = document.getElementById("checklistToutDeplierButton");
-        bouton.textContent = tousDeplierChecklist ? "📕 Tout replier" : "📖 Tout déplier";
+        bouton.textContent = tousDeplierChecklist ? "📕" : "📖";
 
         const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
 
@@ -590,7 +590,7 @@ export function initChecklistModal() {
         masquerCoches = !masquerCoches;
 
         const bouton = document.getElementById("checklistMasquerCochesToggle");
-        bouton.textContent = masquerCoches ? "👁️ Tout afficher" : "🙈 Masquer les éléments déjà cochés";
+        bouton.textContent = masquerCoches ? "👁️" : "🙈";
 
         const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
 
