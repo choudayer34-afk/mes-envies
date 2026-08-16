@@ -846,6 +846,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         </div>
 
+        <div id="checklistEditChampsTodo" class="hidden">
+    <label class="fieldTitle" style="margin-top:12px;">Date (optionnelle)</label>
+    <input type="date" id="checklistEditDateInput" class="numberInput">
+</div>
+        
         <div class="modal-actions">
             <button id="cancelChecklistEditItem">Annuler</button>
             <button id="saveChecklistEditItem">Enregistrer</button>
@@ -1226,10 +1231,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
    <div id="todoSection" class="accordionContent hidden">
 
-        <div class="itemTypeToggle" id="todoViewToggle">
-            <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
-            <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
-        </div>
+<div class="itemTypeToggle" id="todoViewToggle">
+    <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Catégorie</button>
+    <button type="button" class="itemTypeChip" data-view="personne">👤 Personne</button>
+    <button type="button" class="itemTypeChip" data-view="etape">📋 Étape</button>
+</div>
 
         <button id="addTodoButton" class="secondaryButton" style="width:100%;margin-bottom:10px;margin-top:10px;">
             ➕ Ajouter une tâche
@@ -2125,7 +2131,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <label class="fieldTitle" style="margin-top:12px;">Attribuer à (optionnel)</label>
         <div id="todoAssignSelector" class="categorieSelector fiche"></div>
+        
+<label class="fieldTitle" style="margin-top:12px;">Étape (optionnel)</label>
+<input type="text" id="todoEtapeInput" placeholder="Ex: Passeport" class="numberInput">
 
+<label class="fieldTitle" style="margin-top:12px;">Date (optionnelle)</label>
+<input type="date" id="todoDateInput" class="numberInput">
+        
         <div class="modal-actions" style="margin-top:14px;">
             <button id="cancelTodoAdd">Annuler</button>
             <button id="saveTodoAdd" class="primaryButton">Ajouter</button>
