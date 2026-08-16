@@ -4,7 +4,7 @@ import { groupAndSort } from "./grouping.js";
 import { groupForAgenda } from "./grouping.js";
 import { getCategorieById, openEvaluationAccordion, openEnvie } from "./envie.js";
 
-
+ 
 export function initAgenda() {
 
     document.getElementById("btnAgenda").addEventListener("click", openAgenda);
