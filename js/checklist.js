@@ -347,9 +347,10 @@ export function ouvrirEditionChecklistItem(envieId, item, onSave = null) {
         document.getElementById("checklistEditUrlInput").value = item.url || "";
         document.getElementById("checklistEditQuantiteInput").value = item.quantite || 1;
 
-    } else {
+} else {
 
         document.getElementById("checklistEditDateInput").value = item.date || "";
+        document.getElementById("checklistEditEtapeInput").value = item.etape || "";
 
     }
 
@@ -634,7 +635,8 @@ document.getElementById("validateAssign").addEventListener("click", () => {
 if (checklistItemEnCoursEdition.onSave) {
 
             const date = document.getElementById("checklistEditDateInput")?.value || null;
-            checklistItemEnCoursEdition.onSave(texte, date);
+            const etape = document.getElementById("checklistEditEtapeInput")?.value.trim() || null;
+            checklistItemEnCoursEdition.onSave(texte, date, etape);
 
         } else {
 
