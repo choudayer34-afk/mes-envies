@@ -138,6 +138,7 @@ function renderHomeSections() {
 
 renderAchatsMaison();
     renderMesTachesSection();
+    renderBilletsAujourdhui();
  if (modeActif === "maison") {
         renderCollapsibleSection("actionSection", "actionContainer", "🔔 En attente d'action", calculerGroupesActionsMaison(), createActionGroupCard, true);
     } else {
@@ -996,7 +997,60 @@ export function renderMesTachesSection() {
     });
 
 }
+export function renderBilletsAujourdhui() {
 
+    const section = document.getElementById("billetsAujourdhuiSection");
+
+    if (!section)
+        return;
+
+    const aujourdhui = new Date().toISOString().split("T")[0];
+
+    const voyages = getEnvies().filter(e => e.contexte !== "maison" && isContainer(e.categorie));
+
+    const billetsDuJour = [];
+
+    voyages.forEach(voyage => {
+
+        (voyage.billets || []).forEach(billet => {
+
+            if (billet.dateDepart === aujourdhui) {
+                billetsDuJour.push({ ...billet, voyageId: voyage.id, voyageTitre: voyage.titre });
+            }
+
+        });
+
+    });
+
+    if (billetsDuJour.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    section.classList.remove("hidden");
+
+    const emojiParType = { avion: "✈️", train: "🚆", autre: "🎫" };
+
+    section.innerHTML = billetsDuJour.map(b => `
+        <div class="billetAujourdhuiCard">
+            <div><strong>${emojiParType[b.type] || "🎫"} Aujourd'hui — ${[b.compagnie, b.numeroVol].filter(Boolean).join(" ") || "Départ"}</strong></div>
+            <div>${b.heureDepart ? `🕐 ${b.heureDepart} — ` : ""}${b.voyageTitre}</div>
+            <div class="billetAujourdhuiActions">
+                <button class="voirBilletAujourdhuiButton" data-voyage-id="${b.voyageId}">📄 Ouvrir le voyage</button>
+                ${b.lienApp ? `<a href="${b.lienApp}" target="_blank">🔗 Ouvrir l'appli</a>` : ""}
+            </div>
+        </div>
+    `).join("");
+
+    section.querySelectorAll(".voirBilletAujourdhuiButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+            openEnvie(btn.dataset.voyageId, null);
+        });
+
+    });
+
+}
 
 function createEnvieCard(envie) {
 
