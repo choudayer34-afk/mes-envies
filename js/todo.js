@@ -15,6 +15,7 @@ let currentEtapeTodo = null;
 let currentDateTodo = null;
 let etapeOuverteTodoId = null;
 let masquerCochesTodo = false;
+let tousDeplierTodo = false;
 
 
 function getEnvieCourante() {
@@ -82,9 +83,9 @@ function renderTodoParCategorie(items, envie, container) {
 
 groupes.forEach(group => {
 
-        const cle = cleCategorie(group.categorie);
+const cle = cleCategorie(group.categorie);
         const complete = estGroupeComplet(group.items);
-        const estOuverte = categorieOuverteTodoId === cle;
+        const estOuverte = tousDeplierTodo || categorieOuverteTodoId === cle;
         const coches = group.items.filter(i => i.checked).length;
 
         const itemsAffiches = masquerCochesTodo ? group.items.filter(i => !i.checked) : group.items;
@@ -101,9 +102,17 @@ groupes.forEach(group => {
             <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${group.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
 
-        header.addEventListener("click", () => {
-            categorieOuverteTodoId = estOuverte ? null : cle;
+header.addEventListener("click", () => {
+
+            if (tousDeplierTodo) {
+                tousDeplierTodo = false;
+                categorieOuverteTodoId = cle;
+            } else {
+                categorieOuverteTodoId = categorieOuverteTodoId === cle ? null : cle;
+            }
+
             renderTodoListe(envie);
+
         });
 
         container.appendChild(header);
@@ -143,8 +152,8 @@ function renderTodoParEtape(items, envie, container) {
 
 groupes.forEach(groupe => {
 
-        const complete = estGroupeComplet(groupe.items);
-        const estOuverte = etapeOuverteTodoId === groupe.cle;
+const complete = estGroupeComplet(groupe.items);
+        const estOuverte = tousDeplierTodo || etapeOuverteTodoId === groupe.cle;
         const coches = groupe.items.filter(i => i.checked).length;
 
         const itemsAffiches = masquerCochesTodo ? groupe.items.filter(i => !i.checked) : groupe.items;
@@ -164,9 +173,17 @@ groupes.forEach(groupe => {
             </span>
         `;
 
-        header.addEventListener("click", () => {
-            etapeOuverteTodoId = estOuverte ? null : groupe.cle;
+header.addEventListener("click", () => {
+
+            if (tousDeplierTodo) {
+                tousDeplierTodo = false;
+                etapeOuverteTodoId = groupe.cle;
+            } else {
+                etapeOuverteTodoId = etapeOuverteTodoId === groupe.cle ? null : groupe.cle;
+            }
+
             renderTodoListe(envie);
+
         });
 
         const boutonRenommer = header.querySelector(".renommerEtapeButton");
@@ -247,7 +264,7 @@ function renderTodoParPersonne(items, envie, container) {
 const complete = estGroupeComplet(groupePersonne.items);
         const coches = groupePersonne.items.filter(i => i.checked).length;
         const total = groupePersonne.items.length;
-        const estOuverte = personnesOuvertesTodo.has(groupePersonne.id);
+        const estOuverte = tousDeplierTodo || personnesOuvertesTodo.has(groupePersonne.id);
 
         const itemsPersonneAffiches = masquerCochesTodo ? groupePersonne.items.filter(i => !i.checked) : groupePersonne.items;
 
@@ -263,17 +280,22 @@ const complete = estGroupeComplet(groupePersonne.items);
             <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${total} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
 
-        personneHeader.addEventListener("click", () => {
+personneHeader.addEventListener("click", () => {
 
-            if (estOuverte) {
-                personnesOuvertesTodo.delete(groupePersonne.id);
-            } else {
-                personnesOuvertesTodo.add(groupePersonne.id);
-            }
+    if (tousDeplierTodo) {
 
-            renderTodoListe(envie);
+        tousDeplierTodo = false;
+        personnesOuvertesTodo = new Set([groupePersonne.id]);
 
-        });
+    } else if (personnesOuvertesTodo.has(groupePersonne.id)) {
+        personnesOuvertesTodo.delete(groupePersonne.id);
+    } else {
+        personnesOuvertesTodo.add(groupePersonne.id);
+    }
+
+    renderTodoListe(envie);
+
+});
 
         container.appendChild(personneHeader);
 
@@ -290,7 +312,7 @@ const complete = estGroupeComplet(groupePersonne.items);
 
             const cle = cleCategorie(group.categorie);
             const completeCat = estGroupeComplet(group.items);
-            const estOuverteCat = categorieOuvertePersonneTodo[groupePersonne.id] === cle;
+            const estOuverteCat = tousDeplierTodo || categorieOuvertePersonneTodo[groupePersonne.id] === cle;
             const cochesCat = group.items.filter(i => i.checked).length;
 
             const subHeader = document.createElement("button");
@@ -302,12 +324,23 @@ const complete = estGroupeComplet(groupePersonne.items);
                 <span class="checklistCategorieCompteur">${completeCat ? "✅ " : ""}${cochesCat}/${group.items.length} <span class="accordionIcon">${estOuverteCat ? "▾" : "▸"}</span></span>
             `;
 
-            subHeader.addEventListener("click", () => {
+subHeader.addEventListener("click", () => {
 
-                categorieOuvertePersonneTodo[groupePersonne.id] = estOuverteCat ? null : cle;
-                renderTodoListe(envie);
+    if (tousDeplierTodo) {
 
-            });
+        tousDeplierTodo = false;
+        personnesOuvertesTodo = new Set([groupePersonne.id]);
+        categorieOuvertePersonneTodo[groupePersonne.id] = cle;
+
+    } else {
+
+        categorieOuvertePersonneTodo[groupePersonne.id] = categorieOuvertePersonneTodo[groupePersonne.id] === cle ? null : cle;
+
+    }
+
+    renderTodoListe(envie);
+
+});
 
             sousContainer.appendChild(subHeader);
 
@@ -471,6 +504,23 @@ function renderTodoCategorieSelector() {
 
 export function initTodo() {
 
+
+    document.getElementById("todoToutDeplierButton")?.addEventListener("click", () => {
+
+        tousDeplierTodo = !tousDeplierTodo;
+
+        const bouton = document.getElementById("todoToutDeplierButton");
+        bouton.textContent = tousDeplierTodo ? "📕 Tout replier" : "📖 Tout déplier";
+
+        const envie = getEnvieCourante();
+
+        if (envie) {
+            renderTodoListe(envie);
+        }
+
+    });
+
+    
 document.getElementById("todoMasquerCochesToggle")?.addEventListener("click", () => {
 
         masquerCochesTodo = !masquerCochesTodo;
