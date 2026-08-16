@@ -263,7 +263,7 @@ main{
 #agendaLocalModal,#rapportModal,
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
 #adminPartagesModal, #platformerModal, #simulationIAModal,
-#croquisEditorModal, #mesurePhotoModal, #todoAddModal
+#croquisEditorModal, #mesurePhotoModal, #todoAddModal, #billetAddModal
 {
     z-index:2100;
 }
@@ -2709,4 +2709,32 @@ button {
 .champEnErreur{
     border-color:#D9534F !important;
     background:#FDF1F0;
+}
+
+.billetAujourdhuiCard{
+    background:#FFF6E5;
+    border:2px solid #E7A94C;
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:10px;
+}
+
+.billetAujourdhuiActions{
+    display:flex;
+    gap:10px;
+    margin-top:8px;
+}
+
+.billetAujourdhuiActions button,
+.billetAujourdhuiActions a{
+    flex:1;
+    text-align:center;
+    text-decoration:none;
+    background:white;
+    border:1px solid #E7A94C;
+    border-radius:10px;
+    padding:8px;
+    font-size:13px;
+    color:var(--color-text);
+    cursor:pointer;
 }
