@@ -471,9 +471,12 @@ function renderTodoCategorieSelector() {
 
 export function initTodo() {
 
-    document.getElementById("todoMasquerCochesToggle")?.addEventListener("change", (event) => {
+document.getElementById("todoMasquerCochesToggle")?.addEventListener("click", () => {
 
-        masquerCochesTodo = event.target.checked;
+        masquerCochesTodo = !masquerCochesTodo;
+
+        const bouton = document.getElementById("todoMasquerCochesToggle");
+        bouton.textContent = masquerCochesTodo ? "👁️ Tout afficher" : "🙈 Masquer les tâches déjà cochées";
 
         const envie = getEnvieCourante();
 
