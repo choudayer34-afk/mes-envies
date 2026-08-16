@@ -510,7 +510,7 @@ export function initTodo() {
         tousDeplierTodo = !tousDeplierTodo;
 
         const bouton = document.getElementById("todoToutDeplierButton");
-        bouton.textContent = tousDeplierTodo ? "📕 Tout replier" : "📖 Tout déplier";
+        bouton.textContent = tousDeplierChecklist ? "📕" : "📖";
 
         const envie = getEnvieCourante();
 
@@ -526,7 +526,7 @@ document.getElementById("todoMasquerCochesToggle")?.addEventListener("click", ()
         masquerCochesTodo = !masquerCochesTodo;
 
         const bouton = document.getElementById("todoMasquerCochesToggle");
-        bouton.textContent = masquerCochesTodo ? "👁️ Tout afficher" : "🙈 Masquer les tâches déjà cochées";
+       bouton.textContent = masquerCoches ? "👁️" : "🙈";
 
         const envie = getEnvieCourante();
 
