@@ -339,11 +339,18 @@ export function ouvrirEditionChecklistItem(envieId, item, onSave = null) {
     document.getElementById("checklistEditTexteInput").value = item.texte;
 
     document.getElementById("checklistEditChampsAchat")?.classList.toggle("hidden", !!onSave);
+    document.getElementById("checklistEditChampsTodo")?.classList.toggle("hidden", !onSave);
 
     if (!onSave) {
+
         document.getElementById("checklistEditMagasinInput").value = item.magasin || "";
         document.getElementById("checklistEditUrlInput").value = item.url || "";
         document.getElementById("checklistEditQuantiteInput").value = item.quantite || 1;
+
+    } else {
+
+        document.getElementById("checklistEditDateInput").value = item.date || "";
+
     }
 
     document.getElementById("checklistEditItemModal")?.classList.remove("hidden");
@@ -624,9 +631,10 @@ document.getElementById("validateAssign").addEventListener("click", () => {
             return;
         }
 
-        if (checklistItemEnCoursEdition.onSave) {
+if (checklistItemEnCoursEdition.onSave) {
 
-            checklistItemEnCoursEdition.onSave(texte);
+            const date = document.getElementById("checklistEditDateInput")?.value || null;
+            checklistItemEnCoursEdition.onSave(texte, date);
 
         } else {
 
