@@ -1213,10 +1213,16 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="fieldTitle" style="margin-top:20px;">🧩 Plan d'assemblage</label>
 <p style="font-size:12px;color:var(--color-text-light);margin-bottom:8px;">Positionne tes pièces les unes par rapport aux autres pour visualiser le montage. Glisse pour déplacer, double-tape pour tourner à 90°.</p>
 
+<div class="itemTypeToggle" id="boisVuePlanToggle" style="margin-bottom:8px;">
+    <button type="button" class="itemTypeChip active" data-vue="dessus">📐 Dessus</button>
+    <button type="button" class="itemTypeChip" data-vue="face">📐 Face</button>
+    <button type="button" class="itemTypeChip" data-vue="cote">📐 Côté</button>
+</div>
+
 <div id="boisPlanApercu"></div>
 
 <button id="reinitialiserPlanButton" class="secondaryButton" style="width:100%;margin-top:8px;">
-    🔄 Réorganiser automatiquement
+    🔄 Réorganiser automatiquement (vue actuelle)
 </button>
 
     </div>
