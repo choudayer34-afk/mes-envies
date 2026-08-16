@@ -1155,10 +1155,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 class="accordionContent hidden">
 
                 <div class="itemTypeToggle" id="checklistViewToggle">
-                    <label class="checkLabel" style="margin:8px 0;">
-    <input type="checkbox" id="checklistMasquerCochesToggle">
-    <span>Masquer les éléments déjà cochés</span>
-</label>
+<button type="button" id="todoMasquerCochesToggle" class="secondaryButton" style="width:100%;text-align:left;margin:8px 0;">
+    🙈 Masquer les tâches déjà cochées
+</button>
                     <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
                     <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
                 </div>
@@ -1273,10 +1272,9 @@ document.addEventListener("DOMContentLoaded", () => {
     <button type="button" class="itemTypeChip" data-view="personne">👤 Personne</button>
     <button type="button" class="itemTypeChip" data-view="etape">📋 Étape</button>
 </div>
-<label class="checkLabel" style="margin:8px 0;">
-    <input type="checkbox" id="todoMasquerCochesToggle">
-    <span>Masquer les tâches déjà cochées</span>
-</label>
+<button type="button" id="checklistMasquerCochesToggle" class="secondaryButton" style="width:100%;text-align:left;margin:8px 0;">
+    🙈 Masquer les éléments déjà cochés
+</button>
         <button id="addTodoButton" class="secondaryButton" style="width:100%;margin-bottom:10px;margin-top:10px;">
             ➕ Ajouter une tâche
         </button>
