@@ -2,6 +2,7 @@ import { getCurrentEnvieId } from "./envie.js";
 import { getEnvies } from "./storage.js";
 import { showToast } from "./toast.js";
 import { uploadToCloudinary } from "./photos.js";
+let mesuresParPhoto = {};
 
 let photoBaseChoisie = null;
 
@@ -25,14 +26,20 @@ function renderBasePhotosSimulation(envie) {
     const container = document.getElementById("simIABasePhotos");
 
     photoBaseChoisie = null;
+    mesuresParPhoto = {};
 
     if (!envie.photos || envie.photos.length === 0) {
         container.innerHTML = `<div class="emptyState">Ajoute d'abord une photo dans la rubrique Photos de cette tâche.</div>`;
         return;
     }
 
+    envie.photos.forEach(photo => {
+        mesuresParPhoto[photo.url] = photo.mesures || [];
+    });
+
     container.innerHTML = envie.photos.map(photo => `
         <img src="${photo.url.replace('/upload/', '/upload/w_150,h_150,c_fill,q_auto/')}" data-url="${photo.url}" class="simIABasePhotoImg" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:pointer;border:3px solid transparent;box-sizing:border-box;">
+        ${photo.mesures?.length ? `<div style="font-size:10px;text-align:center;color:var(--color-text-light);">📏 ${photo.mesures.length} mesure(s)</div>` : ""}
     `).join("");
 
     container.querySelectorAll(".simIABasePhotoImg").forEach(img => {
@@ -49,6 +56,35 @@ function renderBasePhotosSimulation(envie) {
 
 }
 
+function formatDetailsProduitSimulation(produit) {
+
+    const parties = [];
+
+    if (produit.longueur || produit.largeur || produit.hauteur) {
+
+        const dims = [];
+        if (produit.longueur) dims.push(`L:${produit.longueur}`);
+        if (produit.largeur) dims.push(`l:${produit.largeur}`);
+        if (produit.hauteur) dims.push(`H:${produit.hauteur}`);
+
+        parties.push(`dimensions ${dims.join(" ")} cm`);
+
+    }
+
+    if (produit.prix != null) {
+        parties.push(`${produit.prix} €`);
+    }
+
+    if (produit.magasin) {
+        parties.push(`chez ${produit.magasin}`);
+    }
+
+    return parties.join(", ");
+
+}
+
+const detailsParElement = {};
+
 function renderElementsSimulation(envie) {
 
     const container = document.getElementById("simIAProduitsListe");
@@ -58,9 +94,9 @@ function renderElementsSimulation(envie) {
     const photosIdee = envie.photos || [];
 
     const elements = [
-        ...produitsRetenus.map(p => ({ id: `produit_${p.id}`, nom: `${p.nom} 🏆`, photoUrl: p.photoUrl })),
-        ...produitsAutres.map(p => ({ id: `produit_${p.id}`, nom: p.nom, photoUrl: p.photoUrl })),
-        ...photosIdee.map(photo => ({ id: `photo_${photo.id}`, nom: photo.description || "Photo de la tâche", photoUrl: photo.url }))
+        ...produitsRetenus.map(p => ({ id: `produit_${p.id}`, nom: `${p.nom} 🏆`, photoUrl: p.photoUrl, details: formatDetailsProduitSimulation(p) })),
+        ...produitsAutres.map(p => ({ id: `produit_${p.id}`, nom: p.nom, photoUrl: p.photoUrl, details: formatDetailsProduitSimulation(p) })),
+        ...photosIdee.map(photo => ({ id: `photo_${photo.id}`, nom: photo.description || "Photo de la tâche", photoUrl: photo.url, details: "" }))
     ];
 
     if (elements.length === 0) {
@@ -68,12 +104,14 @@ function renderElementsSimulation(envie) {
         return;
     }
 
+    elements.forEach(el => { detailsParElement[el.id] = el.details; });
+
     container.innerHTML = elements.map(el => `
         <div class="checklistRow" style="flex-direction:column;align-items:stretch;gap:6px;">
             <label class="checkLabel">
                 <input type="checkbox" class="simIAElementCheckbox" data-id="${el.id}" data-photo="${el.photoUrl}" data-nom="${el.nom}">
                 <img src="${el.photoUrl.replace('/upload/', '/upload/w_60,h_60,c_fill,q_auto/')}" style="width:40px;height:40px;object-fit:cover;border-radius:6px;flex-shrink:0;">
-                <span>${el.nom}</span>
+                <span>${el.nom}${el.details ? ` <small class="assignBadge">${el.details}</small>` : ""}</span>
             </label>
             <input type="text" class="numberInput simIAElementPosition" data-id="${el.id}" placeholder="Où le positionner ? (ex: en haut du mur, à droite de la fenêtre...)">
         </div>
@@ -162,13 +200,14 @@ async function genererPromptEtImages() {
 
     const produitsSelectionnes = [];
 
-    document.querySelectorAll(".simIAElementCheckbox:checked").forEach(checkbox => {
+document.querySelectorAll(".simIAElementCheckbox:checked").forEach(checkbox => {
 
         const positionInput = document.querySelector(`.simIAElementPosition[data-id="${checkbox.dataset.id}"]`);
 
         produitsSelectionnes.push({
             nom: checkbox.dataset.nom,
             photoUrl: checkbox.dataset.photo,
+            details: detailsParElement[checkbox.dataset.id] || "",
             position: positionInput?.value.trim() || "à un endroit approprié"
         });
 
@@ -181,7 +220,21 @@ async function genererPromptEtImages() {
 
     prompt += `Contexte : cette photo fait partie d'un projet de rénovation/aménagement à la maison. L'objectif est de visualiser un résultat réaliste avant de s'engager dans un achat ou des travaux — pas une image artistique, un aperçu fidèle.\n\n`;
 
-    prompt += `Photo 1 jointe : la zone à modifier, telle qu'elle est actuellement.\n`;
+prompt += `Photo 1 jointe : la zone à modifier, telle qu'elle est actuellement.\n`;
+
+    const mesuresBase = mesuresParPhoto[photoBaseChoisie] || [];
+
+    if (mesuresBase.length > 0) {
+
+        prompt += `Repères de mesure sur la photo de base (pour t'aider à évaluer l'échelle réelle — ces traits ne doivent PAS apparaître dans le résultat final) :\n`;
+
+        mesuresBase.forEach(m => {
+            prompt += `- un repère de ${m.distance} ${m.unite}\n`;
+        });
+
+        prompt += `\n`;
+
+    }
 
     const imagesAEnvoyer = [{ label: "Photo de base", url: photoBaseChoisie }];
 
@@ -237,8 +290,8 @@ async function genererPromptEtImages() {
         prompt += `- Modification générale : ${description}\n`;
     }
 
-    produitsSelectionnes.forEach(p => {
-        prompt += `- Intègre "${p.nom}" — positionnement souhaité : ${p.position}. Base-toi sur les repères visibles dans la photo (prises, meubles, fenêtres, sol...) pour le placement, pas sur une mesure exacte que tu ne peux pas garantir.\n`;
+produitsSelectionnes.forEach(p => {
+        prompt += `- Intègre "${p.nom}"${p.details ? ` (${p.details})` : ""} — positionnement souhaité : ${p.position}. Base-toi sur les repères visibles dans la photo (prises, meubles, fenêtres, sol...) pour le placement, pas sur une mesure exacte que tu ne peux pas garantir.\n`;
     });
 
     prompt += `\nContraintes :\n`;
