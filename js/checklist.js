@@ -351,6 +351,7 @@ export function ouvrirEditionChecklistItem(envieId, item, onSave = null) {
 
         document.getElementById("checklistEditDateInput").value = item.date || "";
         document.getElementById("checklistEditEtapeInput").value = item.etape || "";
+        document.getElementById("checklistEditLienInput").value = item.url || "";
 
     }
 
@@ -636,7 +637,8 @@ if (checklistItemEnCoursEdition.onSave) {
 
             const date = document.getElementById("checklistEditDateInput")?.value || null;
             const etape = document.getElementById("checklistEditEtapeInput")?.value.trim() || null;
-            checklistItemEnCoursEdition.onSave(texte, date, etape);
+            const url = document.getElementById("checklistEditLienInput")?.value.trim() || null;
+            checklistItemEnCoursEdition.onSave(texte, date, etape, url);
 
         } else {
 
