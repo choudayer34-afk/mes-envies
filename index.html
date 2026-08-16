@@ -288,6 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </section>
     <section id="tachesSection" class="inboxSection hidden"></section>
+    <div id="billetsAujourdhuiSection" class="hidden" style="margin-bottom:16px;"></div>
   <section id="actionSection" class="inboxSection hidden"></section>
     
     <button id="btnToggleReductionGlobale" class="secondaryButton" style="width:100%;margin-bottom:14px;">
@@ -1113,7 +1114,24 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
         </div>
+<div class="accordion">
 
+    <button class="accordionHeader" data-target="billetsSection">
+        <span>🎫 Billets & titres de transport</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div id="billetsSection" class="accordionContent hidden">
+
+        <div id="billetsListe"></div>
+
+        <button id="addBilletButton" class="secondaryButton" style="width:100%;margin-top:10px;">
+            ➕ Ajouter un billet
+        </button>
+
+    </div>
+
+</div>
         <div class="accordion">
 
             <button
@@ -1788,7 +1806,47 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div id="billetAddModal" class="modal-overlay hidden">
 
+    <div class="modal">
+
+        <h2>🎫 Ajouter un billet</h2>
+
+        <label class="fieldTitle">Type</label>
+        <div class="itemTypeToggle" id="billetTypeToggle">
+            <button type="button" class="itemTypeChip active" data-type="avion">✈️ Avion</button>
+            <button type="button" class="itemTypeChip" data-type="train">🚆 Train</button>
+            <button type="button" class="itemTypeChip" data-type="autre">🎫 Autre</button>
+        </div>
+
+        <label class="fieldTitle" style="margin-top:12px;">Compagnie (optionnel)</label>
+        <input type="text" id="billetCompagnie" placeholder="Ex: Air France" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Numéro de vol/train (optionnel)</label>
+        <input type="text" id="billetNumero" placeholder="Ex: AF1234" class="numberInput">
+
+        <div class="peintureAddRow" style="margin-top:12px;">
+            <input type="date" id="billetDate" class="numberInput">
+            <input type="time" id="billetHeure" class="numberInput">
+        </div>
+
+        <label class="fieldTitle" style="margin-top:12px;">Lien vers l'appli/site (optionnel)</label>
+        <input type="text" id="billetLien" placeholder="https://..." class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Fichier (photo ou PDF du billet)</label>
+        <div id="billetFichierApercu" style="margin-bottom:8px;"></div>
+        <input type="file" id="billetFichierInput" accept="image/*,application/pdf" hidden>
+        <button type="button" id="billetFichierButton" class="secondaryButton" style="width:100%;">📎 Choisir un fichier</button>
+        <small style="display:block;margin-top:6px;color:var(--color-text-light);">Stocké directement dans la fiche pour rester disponible hors-ligne — taille max ~700 Ko.</small>
+
+        <div class="modal-actions" style="margin-top:16px;">
+            <button id="cancelBilletAdd">Annuler</button>
+            <button id="saveBilletAdd" class="primaryButton">Ajouter</button>
+        </div>
+
+    </div>
+
+</div>
 <div id="adminTemplatesModal" class="modal-overlay hidden">
     <div class="modal">
         <button class="backButton adminSousRetour">← Retour</button>
