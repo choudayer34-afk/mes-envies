@@ -325,6 +325,7 @@ function creerLigneTodo(item, envie) {
                 <small class="assignBadge">${assignLabel}</small>
             </span>
         </label>
+        ${item.url ? `<a href="${item.url}" target="_blank" class="iconSmallButton" onclick="event.stopPropagation()">🔗</a>` : ""}
         <button class="iconSmallButton editTodoButton" title="Modifier">✏️</button>
         <button class="assignItemButton" title="Attribuer">👤</button>
         <button class="deleteChecklistButton" title="Supprimer">🗑️</button>
@@ -363,8 +364,8 @@ row.querySelector(".editTodoButton").addEventListener("click", (event) => {
 
         event.stopPropagation();
 
-ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte, nouvelleDate, nouvelleEtape) => {
-            sauvegarderItem({ texte: nouveauTexte, date: nouvelleDate, etape: nouvelleEtape });
+ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte, nouvelleDate, nouvelleEtape, nouveauLien) => {
+            sauvegarderItem({ texte: nouveauTexte, date: nouvelleDate, etape: nouvelleEtape, url: nouveauLien });
         });
 
     });
@@ -476,9 +477,10 @@ document.getElementById("addTodoButton")?.addEventListener("click", () => {
 
         currentBulkCategorieTodoId = null;
         currentAssignedToTodo = [];
-        document.getElementById("todoInput").value = "";
+document.getElementById("todoInput").value = "";
         document.getElementById("todoEtapeInput").value = "";
         document.getElementById("todoDateInput").value = "";
+        document.getElementById("todoLienInput").value = "";
 
         renderTodoCategorieSelector();
         renderTodoAssignSelector();
@@ -502,6 +504,7 @@ document.getElementById("addTodoButton")?.addEventListener("click", () => {
 
 const etape = document.getElementById("todoEtapeInput").value.trim() || null;
         const date = document.getElementById("todoDateInput").value || null;
+        const url = document.getElementById("todoLienInput").value.trim() || null;
 
         const nouveauxItems = lignes.map(texte => ({
             id: crypto.randomUUID(),
@@ -510,7 +513,8 @@ const etape = document.getElementById("todoEtapeInput").value.trim() || null;
             checked: false,
             assignedTo: [...currentAssignedToTodo],
             etape,
-            date
+            date,
+            url
         }));
 
         const tousLesItems = [...(envie.checklistTodo || []), ...nouveauxItems];
