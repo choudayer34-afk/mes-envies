@@ -162,6 +162,13 @@ const RUBRIQUE_ONBOARDING = {
         commentCaSutilise: "Ajoute chaque mur (largeur × hauteur), déduis les ouvertures (portes, fenêtres) si besoin, choisis le nombre de couches — le nombre de litres à acheter s'affiche directement."
     },
 
+    billets: {
+        titre: "🎫 Billets & titres de transport",
+        aQuoiCaSert: "Garde tes billets d'avion/train sous la main, même sans connexion — utile à l'aéroport ou dans le train si le réseau est mauvais.",
+        commentCaSutilise: "Ajoute une photo ou un PDF de ton billet, la date/heure de départ, et un lien vers l'appli de la compagnie si tu veux. Le jour J, une bannière apparaît sur l'accueil avec un accès direct."
+    },
+    
+
     bois: {
         titre: "🪵 Bois",
         aQuoiCaSert: "T'aide à calculer combien de bois acheter et comment découper tes planches brutes sans gaspillage.",
