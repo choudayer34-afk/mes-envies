@@ -229,12 +229,12 @@ function renderByPersonne(items, envie, checklist) {
 
     groupesPersonnes.forEach(groupePersonne => {
 
-const complete = estGroupeComplet(groupePersonne.items);
-        const coches = groupePersonne.items.filter(i => i.checked).length;
+const complete = estGroupeCompletPourPersonne(groupePersonne.items, groupePersonne.id);
+        const coches = groupePersonne.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
         const total = groupePersonne.items.length;
         const estOuverte = personnesOuvertes.has(groupePersonne.id);
 
-        const itemsPersonneAffiches = masquerCoches ? groupePersonne.items.filter(i => !i.checked) : groupePersonne.items;
+        const itemsPersonneAffiches = masquerCoches ? groupePersonne.items.filter(i => !estCochePourGroupe(i, groupePersonne.id)) : groupePersonne.items;
 
         if (masquerCoches && itemsPersonneAffiches.length === 0)
             return;
@@ -274,9 +274,9 @@ const groupesCategories = groupByCategorie(itemsPersonneAffiches, categories);
         groupesCategories.forEach(group => {
 
             const cle = cleCategorie(group.categorie);
-            const completeCat = estGroupeComplet(group.items);
+const completeCat = estGroupeCompletPourPersonne(group.items, groupePersonne.id);
             const estOuverteCat = categorieOuvertePersonne[groupePersonne.id] === cle;
-            const cochesCat = group.items.filter(i => i.checked).length;
+            const cochesCat = group.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
 
             const subHeader = document.createElement("button");
             subHeader.type = "button";
