@@ -847,12 +847,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         </div>
 
-<div id="checklistEditChampsTodo" class="hidden">
+
+
+    <div id="checklistEditChampsTodo" class="hidden">
     <label class="fieldTitle" style="margin-top:12px;">Étape (optionnel)</label>
     <input type="text" id="checklistEditEtapeInput" placeholder="Ex: Passeport" class="numberInput">
 
     <label class="fieldTitle" style="margin-top:12px;">Date (optionnelle)</label>
     <input type="date" id="checklistEditDateInput" class="numberInput">
+
+    <label class="fieldTitle" style="margin-top:12px;">Lien (optionnel)</label>
+    <input type="text" id="checklistEditLienInput" placeholder="https://..." class="numberInput">
+
 </div>
         
         <div class="modal-actions">
@@ -2204,6 +2210,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <label class="fieldTitle" style="margin-top:12px;">Date (optionnelle)</label>
 <input type="date" id="todoDateInput" class="numberInput">
+
+        <label class="fieldTitle" style="margin-top:12px;">Lien (optionnel)</label>
+<input type="text" id="todoLienInput" placeholder="https://..." class="numberInput">
         
         <div class="modal-actions" style="margin-top:14px;">
             <button id="cancelTodoAdd">Annuler</button>
