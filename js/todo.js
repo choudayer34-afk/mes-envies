@@ -523,6 +523,8 @@ const bouton = document.getElementById("todoToutDeplierButton");
     
 document.getElementById("todoMasquerCochesToggle")?.addEventListener("click", () => {
 
+        console.log("[DEBUG] Clic sur Masquer reçu, ancienne valeur masquerCochesTodo =", masquerCochesTodo);
+
         masquerCochesTodo = !masquerCochesTodo;
 
 const bouton = document.getElementById("todoMasquerCochesToggle");
