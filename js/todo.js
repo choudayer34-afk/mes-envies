@@ -316,7 +316,7 @@ function creerLigneTodo(item, envie) {
     const assignLabel = formatAssignLabel(item.assignedTo);
 
     row.innerHTML = `
-        <span class="dragHandle" style="cursor:grab;padding-right:8px;">⠿</span>
+       <span class="dragHandle" style="cursor:grab;padding-right:8px;flex:0 0 auto;">⠿</span>
 <label class="checkLabel" style="width:auto;flex:1;min-width:0;">
             <input type="checkbox" ${item.checked ? "checked" : ""}>
             <span>
