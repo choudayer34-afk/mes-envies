@@ -5,14 +5,16 @@ import { showToast } from "./toast.js";
 let plancheEnCoursEditionId = null;
 let dragEnCoursPlan = null;
 let dernierTransformPlan = null;
- 
+let vuePlanActuelle = "dessus";
+
 function getBois(envie) {
 
     return {
         planches: envie.bois?.planches || [],
         stockLongueur: envie.bois?.stockLongueur || null,
         stockLargeur: envie.bois?.stockLargeur || null,
-        stocksBruts: envie.bois?.stocksBruts || []
+        stocksBruts: envie.bois?.stocksBruts || [],
+        planPositions: envie.bois?.planPositions || {}
     };
 
 }
@@ -643,8 +645,22 @@ function ajouterPlanchesAuxAchats() {
 
 }
 
-function getPositionsPlan(envie) {
-    return envie.bois?.planPositions || {};
+function getPositionsPlan(envie, vue) {
+    return envie.bois?.planPositions?.[vue] || {};
+}
+
+function getDimensionsPourVue(u, vue) {
+
+    if (vue === "face") {
+        return { d1: u.longueur, d2: u.epaisseur / 10 };
+    }
+
+    if (vue === "cote") {
+        return { d1: u.largeur, d2: u.epaisseur / 10 };
+    }
+
+    return { d1: u.longueur, d2: u.largeur };
+
 }
 
 function genererUnitesPieces(planches) {
@@ -657,7 +673,8 @@ function genererUnitesPieces(planches) {
                 uniqueId: `${p.id}_${i}`,
                 nom: p.nom || "Pièce",
                 longueur: p.longueur,
-                largeur: p.largeur
+                largeur: p.largeur,
+                epaisseur: p.epaisseur || 18
             });
         }
     });
@@ -666,10 +683,15 @@ function genererUnitesPieces(planches) {
 
 }
 
-function calculerDispositionAuto(unites) {
+function calculerDispositionAuto(unites, vue) {
 
     const colonnes = Math.max(1, Math.ceil(Math.sqrt(unites.length)));
-    const maxTaille = Math.max(...unites.map(u => Math.max(u.longueur, u.largeur)), 30);
+
+    const maxTaille = Math.max(...unites.map(u => {
+        const { d1, d2 } = getDimensionsPourVue(u, vue);
+        return Math.max(d1, d2);
+    }), 30);
+
     const pas = maxTaille * 1.3;
 
     const positions = {};
@@ -693,7 +715,7 @@ function calculerDispositionAuto(unites) {
 
 }
 
-function construireSVGPlan(envie, bois) {
+function construireSVGPlan(envie, bois, vue) {
 
     const unites = genererUnitesPieces(bois.planches);
 
@@ -702,7 +724,7 @@ function construireSVGPlan(envie, bois) {
         return `<div class="emptyState">Ajoute des pièces à découper ci-dessus pour construire le plan.</div>`;
     }
 
-    let positions = getPositionsPlan(envie);
+    let positions = getPositionsPlan(envie, vue);
 
     const idsConnus = Object.keys(positions);
     const idsAttendus = unites.map(u => u.uniqueId);
@@ -712,17 +734,25 @@ function construireSVGPlan(envie, bois) {
 
     if (manqueDesPositions) {
 
-        const disposition = calculerDispositionAuto(unites);
+        const disposition = calculerDispositionAuto(unites, vue);
         positions = disposition.positions;
         largeurTotale = disposition.largeurTotale;
         hauteurTotale = disposition.hauteurTotale;
 
-        updateEnvieBois(envie.id, { ...bois, planPositions: positions });
+        const positionsCompletes = { ...(bois.planPositions || {}), [vue]: positions };
+        updateEnvieBois(envie.id, { ...bois, planPositions: positionsCompletes });
 
     } else {
 
-        largeurTotale = Math.max(...unites.map(u => (positions[u.uniqueId]?.x || 0) + Math.max(u.longueur, u.largeur)), 100);
-        hauteurTotale = Math.max(...unites.map(u => (positions[u.uniqueId]?.y || 0) + Math.max(u.longueur, u.largeur)), 100);
+        largeurTotale = Math.max(...unites.map(u => {
+            const { d1, d2 } = getDimensionsPourVue(u, vue);
+            return (positions[u.uniqueId]?.x || 0) + Math.max(d1, d2);
+        }), 100);
+
+        hauteurTotale = Math.max(...unites.map(u => {
+            const { d1, d2 } = getDimensionsPourVue(u, vue);
+            return (positions[u.uniqueId]?.y || 0) + Math.max(d1, d2);
+        }), 100);
 
     }
 
@@ -730,7 +760,7 @@ function construireSVGPlan(envie, bois) {
     const marge = 20;
     const echelle = Math.min((taille - marge * 2) / largeurTotale, (taille - marge * 2) / hauteurTotale);
 
-    dernierTransformPlan = { echelle, marge, taille, positions, unites };
+    dernierTransformPlan = { echelle, marge, taille, positions, unites, vue };
 
     let svg = `<svg id="boisPlanSVG" viewBox="0 0 ${taille} ${taille}" style="width:100%;max-width:360px;height:auto;background:#F4F4F4;border-radius:8px;border:1px solid var(--color-border);display:block;margin:0 auto;touch-action:none;">`;
 
@@ -739,11 +769,12 @@ function construireSVGPlan(envie, bois) {
     unites.forEach((u, i) => {
 
         const pos = positions[u.uniqueId];
-        const w = u.longueur * echelle;
-        const h = u.largeur * echelle;
+        const { d1, d2 } = getDimensionsPourVue(u, vue);
+        const w = d1 * echelle;
+        const h = d2 * echelle;
         const cx = pos.x * echelle + marge;
         const cy = pos.y * echelle + marge;
-        const enTrainDeGlisser = dragEnCoursPlan?.uniqueId === u.uniqueId;
+        const enTrainDeGlisser = dragEnCoursPlan?.uniqueId === u.uniqueId && dragEnCoursPlan?.vue === vue;
 
         svg += `<g class="boisPlanElementGroup" data-unique-id="${u.uniqueId}" style="cursor:${enTrainDeGlisser ? "grabbing" : "grab"};" transform="rotate(${pos.rotation || 0} ${cx.toFixed(1)} ${cy.toFixed(1)})">`;
         svg += `<rect x="${(cx - w / 2).toFixed(1)}" y="${(cy - h / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" fill="${enTrainDeGlisser ? "#8A6D3A" : couleurs[i % couleurs.length]}" stroke="#6B4F2A" stroke-width="1.5"/>`;
@@ -776,6 +807,7 @@ function attacherInteractionsPlan() {
 
             dragEnCoursPlan = {
                 uniqueId,
+                vue: vuePlanActuelle,
                 startClientX: event.clientX,
                 startClientY: event.clientY,
                 startX: pos.x,
@@ -794,12 +826,12 @@ function attacherInteractionsPlan() {
             const uniqueId = groupe.dataset.uniqueId;
             const envieActuelle = getEnvieCourante();
             const bois = getBois(envieActuelle);
-            const positions = getPositionsPlan(envieActuelle);
+            const positions = getPositionsPlan(envieActuelle, vuePlanActuelle);
 
             const nouvelleRotation = ((positions[uniqueId]?.rotation || 0) + 90) % 360;
 
             const nouvellesPositions = { ...positions, [uniqueId]: { ...positions[uniqueId], rotation: nouvelleRotation } };
-            const nouveauBois = { ...bois, planPositions: nouvellesPositions };
+            const nouveauBois = { ...bois, planPositions: { ...(bois.planPositions || {}), [vuePlanActuelle]: nouvellesPositions } };
 
             updateEnvieBois(envieActuelle.id, nouveauBois);
             renderPlanApercu({ ...envieActuelle, bois: nouveauBois });
@@ -813,13 +845,16 @@ function attacherInteractionsPlan() {
 function reafficherPendantDragPlan(envie) {
 
     const bois = getBois(envie);
+    const positionsActuelles = getPositionsPlan(envie, dragEnCoursPlan.vue);
 
     const positionsAffichees = {
-        ...getPositionsPlan(envie),
-        [dragEnCoursPlan.uniqueId]: { ...getPositionsPlan(envie)[dragEnCoursPlan.uniqueId], x: dragEnCoursPlan.xActuel, y: dragEnCoursPlan.yActuel }
+        ...positionsActuelles,
+        [dragEnCoursPlan.uniqueId]: { ...positionsActuelles[dragEnCoursPlan.uniqueId], x: dragEnCoursPlan.xActuel, y: dragEnCoursPlan.yActuel }
     };
 
-    document.getElementById("boisPlanApercu").innerHTML = construireSVGPlan(envie, { ...bois, planPositions: positionsAffichees });
+    const boisAffiche = { ...bois, planPositions: { ...(bois.planPositions || {}), [dragEnCoursPlan.vue]: positionsAffichees } };
+
+    document.getElementById("boisPlanApercu").innerHTML = construireSVGPlan(envie, boisAffiche, dragEnCoursPlan.vue);
     attacherInteractionsPlan();
 
 }
@@ -856,14 +891,14 @@ function initDragPlan() {
 
         const envie = getEnvieCourante();
         const bois = getBois(envie);
-        const positions = getPositionsPlan(envie);
+        const positions = getPositionsPlan(envie, dragEnCoursPlan.vue);
 
         const nouvellesPositions = {
             ...positions,
             [dragEnCoursPlan.uniqueId]: { ...positions[dragEnCoursPlan.uniqueId], x: dragEnCoursPlan.xActuel, y: dragEnCoursPlan.yActuel }
         };
 
-        const nouveauBois = { ...bois, planPositions: nouvellesPositions };
+        const nouveauBois = { ...bois, planPositions: { ...(bois.planPositions || {}), [dragEnCoursPlan.vue]: nouvellesPositions } };
 
         updateEnvieBois(envie.id, nouveauBois);
 
@@ -884,7 +919,7 @@ function renderPlanApercu(envie) {
 
     const bois = getBois(envie);
 
-    container.innerHTML = construireSVGPlan(envie, bois);
+    container.innerHTML = construireSVGPlan(envie, bois, vuePlanActuelle);
     attacherInteractionsPlan();
 
 }
@@ -964,7 +999,7 @@ document.getElementById("ajouterBoisAchatsButton")?.addEventListener("click", aj
 
     initDragPlan();
 
-    document.getElementById("reinitialiserPlanButton")?.addEventListener("click", () => {
+document.getElementById("reinitialiserPlanButton")?.addEventListener("click", () => {
 
         const envie = getEnvieCourante();
         const bois = getBois(envie);
@@ -975,11 +1010,26 @@ document.getElementById("ajouterBoisAchatsButton")?.addEventListener("click", aj
             return;
         }
 
-        const disposition = calculerDispositionAuto(unites);
-        const nouveauBois = { ...bois, planPositions: disposition.positions };
+        const disposition = calculerDispositionAuto(unites, vuePlanActuelle);
+        const nouveauBois = { ...bois, planPositions: { ...(bois.planPositions || {}), [vuePlanActuelle]: disposition.positions } };
 
         updateEnvieBois(envie.id, nouveauBois);
         renderPlanApercu({ ...envie, bois: nouveauBois });
+
+    });
+
+    document.querySelectorAll("#boisVuePlanToggle .itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            document.querySelectorAll("#boisVuePlanToggle .itemTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            vuePlanActuelle = chip.dataset.vue;
+
+            renderPlanApercu(getEnvieCourante());
+
+        });
 
     });
     
