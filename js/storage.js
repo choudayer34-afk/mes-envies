@@ -3,7 +3,7 @@ import { getFoyerId } from "./auth.js";
 import {
     collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
+ 
 let enviesCache = [];
 let onChangeCallback = null;
 let magasinsCache = [];
