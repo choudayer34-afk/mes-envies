@@ -27,6 +27,7 @@ let categorieOuverteId = null;
 let personnesOuvertes = new Set();
 let categorieOuvertePersonne = {};
 let masquerCoches = false;
+let tousDeplierChecklist = false;
 
 const PALETTE_CATEGORIES = ["#D97C7C", "#E7A94C", "#8FBF7F", "#6FAFC4", "#8A6FBF", "#4FB0A5", "#D98CB3"];
 
@@ -139,9 +140,9 @@ function renderByCategorie(items, envie, checklist) {
 
 groupes.forEach(group => {
 
-        const cle = cleCategorie(group.categorie);
+const cle = cleCategorie(group.categorie);
         const complete = estGroupeComplet(group.items);
-        const estOuverte = categorieOuverteId === cle;
+        const estOuverte = tousDeplierChecklist || categorieOuverteId === cle;
         const coches = group.items.filter(i => i.checked).length;
 
         const itemsAffiches = masquerCoches ? group.items.filter(i => !i.checked) : group.items;
@@ -158,9 +159,14 @@ header.innerHTML = `
             <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${group.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
 
-        header.addEventListener("click", () => {
+       header.addEventListener("click", () => {
 
-            categorieOuverteId = estOuverte ? null : cle;
+            if (tousDeplierChecklist) {
+                tousDeplierChecklist = false;
+                categorieOuverteId = cle;
+            } else {
+                categorieOuverteId = categorieOuverteId === cle ? null : cle;
+            }
 
             preserverScroll(() => renderChecklist(envie));
 
@@ -232,7 +238,7 @@ function renderByPersonne(items, envie, checklist) {
 const complete = estGroupeCompletPourPersonne(groupePersonne.items, groupePersonne.id);
         const coches = groupePersonne.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
         const total = groupePersonne.items.length;
-        const estOuverte = personnesOuvertes.has(groupePersonne.id);
+        const estOuverte = tousDeplierChecklist || personnesOuvertes.has(groupePersonne.id);
 
         const itemsPersonneAffiches = masquerCoches ? groupePersonne.items.filter(i => !estCochePourGroupe(i, groupePersonne.id)) : groupePersonne.items;
 
@@ -248,9 +254,14 @@ personneHeader.innerHTML = `
             <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${total} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
 
-        personneHeader.addEventListener("click", () => {
+       personneHeader.addEventListener("click", () => {
 
-            if (estOuverte) {
+            if (tousDeplierChecklist) {
+
+                tousDeplierChecklist = false;
+                personnesOuvertes = new Set([groupePersonne.id]);
+
+            } else if (personnesOuvertes.has(groupePersonne.id)) {
                 personnesOuvertes.delete(groupePersonne.id);
             } else {
                 personnesOuvertes.add(groupePersonne.id);
@@ -275,7 +286,7 @@ const groupesCategories = groupByCategorie(itemsPersonneAffiches, categories);
 
             const cle = cleCategorie(group.categorie);
 const completeCat = estGroupeCompletPourPersonne(group.items, groupePersonne.id);
-            const estOuverteCat = categorieOuvertePersonne[groupePersonne.id] === cle;
+            const estOuverteCat = tousDeplierChecklist || categorieOuvertePersonne[groupePersonne.id] === cle;
             const cochesCat = group.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
 
             const subHeader = document.createElement("button");
@@ -287,9 +298,19 @@ const completeCat = estGroupeCompletPourPersonne(group.items, groupePersonne.id)
                 <span class="checklistCategorieCompteur">${completeCat ? "✅ " : ""}${cochesCat}/${group.items.length} <span class="accordionIcon">${estOuverteCat ? "▾" : "▸"}</span></span>
             `;
 
-            subHeader.addEventListener("click", () => {
+subHeader.addEventListener("click", () => {
 
-                categorieOuvertePersonne[groupePersonne.id] = estOuverteCat ? null : cle;
+                if (tousDeplierChecklist) {
+
+                    tousDeplierChecklist = false;
+                    personnesOuvertes = new Set([groupePersonne.id]);
+                    categorieOuvertePersonne[groupePersonne.id] = cle;
+
+                } else {
+
+                    categorieOuvertePersonne[groupePersonne.id] = categorieOuvertePersonne[groupePersonne.id] === cle ? null : cle;
+
+                }
 
                 preserverScroll(() => renderChecklist(envie));
 
@@ -548,6 +569,22 @@ export function renderPersonneSelector(container, selected, onChange) {
 
 export function initChecklistModal() {
 
+
+    document.getElementById("checklistToutDeplierButton")?.addEventListener("click", () => {
+
+        tousDeplierChecklist = !tousDeplierChecklist;
+
+        const bouton = document.getElementById("checklistToutDeplierButton");
+        bouton.textContent = tousDeplierChecklist ? "📕 Tout replier" : "📖 Tout déplier";
+
+        const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+        if (envie) {
+            renderChecklist(envie);
+        }
+
+    });
+    
     document.getElementById("checklistMasquerCochesToggle")?.addEventListener("click", () => {
 
         masquerCoches = !masquerCoches;
