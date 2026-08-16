@@ -14,6 +14,11 @@ export function getChangelog() {
     return [...changelogCache].sort((a, b) => (b.date || 0) - (a.date || 0));
 }
 
+export function updateEnvieBillets(id, billets) {
+    patchEnvie(id, { billets });
+}
+
+
 export function updateEnvieStatutManuel(id, statutManuel) {
     patchEnvie(id, { statutManuel });
 }
