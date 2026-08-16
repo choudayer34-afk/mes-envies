@@ -89,7 +89,7 @@ const cle = cleCategorie(group.categorie);
         const coches = group.items.filter(i => i.checked).length;
 
         const itemsAffiches = masquerCochesTodo ? group.items.filter(i => !i.checked) : group.items;
-
+console.log(`[DEBUG] Catégorie "${cle}" — masquerCochesTodo=${masquerCochesTodo}, total=${group.items.length}, affichés=${itemsAffiches.length}, estOuverte=${estOuverte}, coches=${coches}`);
         if (masquerCochesTodo && itemsAffiches.length === 0)
             return;
 
