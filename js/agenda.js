@@ -1,4 +1,4 @@
-import { getEnvies, updateEnvieRealise, getModeActif } from "./storage.js";
+import { getEnvies, updateEnvieRealise, getModeActif, updateEnvieChecklistTodo } from "./storage.js";
 import { groupAndSort } from "./grouping.js";
 
 import { groupForAgenda } from "./grouping.js";
@@ -20,11 +20,14 @@ export function initAgenda() {
 
             const row = button.closest("[data-envie-id]");
             const envieId = row?.dataset.envieId;
+            const todoParentId = row?.dataset.todoParentId;
 
-            if (envieId) {
-                closeAgenda();
-                openEnvie(envie.id, null);
+            closeAgenda();
 
+            if (todoParentId) {
+                openEnvie(todoParentId, null);
+            } else if (envieId) {
+                openEnvie(envieId, null);
             }
 
             return;
@@ -39,6 +42,27 @@ export function initAgenda() {
             return;
 
         const row = event.target.closest("[data-envie-id]");
+        const todoParentId = row?.dataset.todoParentId;
+        const todoItemId = row?.dataset.todoItemId;
+
+        if (todoParentId && todoItemId) {
+
+            const envieParent = getEnvies().find(e => e.id === todoParentId);
+
+            if (!envieParent)
+                return;
+
+            const nouveauxItems = (envieParent.checklistTodo || []).map(i =>
+                i.id === todoItemId ? { ...i, checked: true } : i
+            );
+
+            updateEnvieChecklistTodo(todoParentId, nouveauxItems);
+            renderAgenda();
+
+            return;
+
+        }
+
         const envieId = row?.dataset.envieId;
 
         if (!envieId)
@@ -55,8 +79,7 @@ export function initAgenda() {
 
         if (nouvelEtat) {
             closeAgenda();
-            openEnvie(envie.id, null);
-
+            openEnvie(envieId, null);
             openEvaluationAccordion();
         } else {
             renderAgenda();
@@ -76,14 +99,46 @@ function closeAgenda() {
     document.getElementById("agendaModal").classList.add("hidden");
 }
 
+function construirePseudoEnviesTodo(envies) {
+
+    const pseudos = [];
+
+    envies.forEach(envie => {
+
+        (envie.checklistTodo || []).forEach(item => {
+
+            if (item.date && !item.checked) {
+
+                pseudos.push({
+                    id: `todo_${envie.id}_${item.id}`,
+                    titre: `${item.texte} (${envie.titre})`,
+                    categorie: null,
+                    date: { start: item.date, type: "single" },
+                    realise: false,
+                    ordre: 0,
+                    _todoParentId: envie.id,
+                    _todoItemId: item.id
+                });
+
+            }
+
+        });
+
+    });
+
+    return pseudos;
+
+}
+
 function renderAgenda() {
 
     const container = document.getElementById("agendaContent");
     container.innerHTML = "";
 
 const envies = getEnvies().filter(e => e.contexte === getModeActif());
+const pseudosTodo = construirePseudoEnviesTodo(envies);
 
-    const { datedGroups, adhocGroups, todo } = groupForAgenda(envies);
+    const { datedGroups, adhocGroups, todo } = groupForAgenda([...envies, ...pseudosTodo]);
 
     if (datedGroups.length === 0 && adhocGroups.length === 0 && todo.length === 0) {
         container.innerHTML = `<div class="emptyState">Rien à planifier pour l'instant.</div>`;
@@ -154,10 +209,15 @@ function createAgendaRow(envie) {
     row.className = "checklistRow";
     row.dataset.envieId = envie.id;
 
+    if (envie._todoParentId) {
+        row.dataset.todoParentId = envie._todoParentId;
+        row.dataset.todoItemId = envie._todoItemId;
+    }
+
     row.innerHTML = `
         <label class="checkLabel">
             <input type="checkbox" ${envie.realise ? "checked" : ""}>
-            <span>${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
+            <span>${envie._todoParentId ? "🗒️" : (getCategorieById(envie.categorie)?.emoji || "💡")} ${envie.titre}</span>
         </label>
         <button class="editAgendaButton" data-action="edit" title="Modifier">✏️</button>
     `;
