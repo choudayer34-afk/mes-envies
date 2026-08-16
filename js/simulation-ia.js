@@ -315,9 +315,9 @@ produitsSelectionnes.forEach(p => {
 
     const encode = encodeURIComponent(prompt);
 
-    document.getElementById("simIALiensRapides").innerHTML = `
+document.getElementById("simIALiensRapides").innerHTML = `
         <a href="https://chatgpt.com/?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">💬 ChatGPT</a>
-        <a href="https://gemini.google.com/app?q=${encode}" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">✨ Gemini</a>
+        <a href="https://gemini.google.com/app" target="_blank" class="secondaryButton" style="flex:1;text-align:center;text-decoration:none;">✨ Ouvrir Gemini</a>
     `;
 
     if (!navigator.share) {
