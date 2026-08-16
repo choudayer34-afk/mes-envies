@@ -104,6 +104,23 @@ function estGroupeComplet(items) {
     return items.length > 0 && items.every(i => i.checked);
 }
 
+function estCochePourGroupe(item, groupePersonneId) {
+
+    if (groupePersonneId === "tous")
+        return item.checked;
+
+    if (item.assignedTo?.length > 1) {
+        return !!item.checkedBy?.[groupePersonneId];
+    }
+
+    return item.checked;
+
+}
+
+function estGroupeCompletPourPersonne(items, groupePersonneId) {
+    return items.length > 0 && items.every(i => estCochePourGroupe(i, groupePersonneId));
+}
+
 function trierGroupesCategories(groupes) {
 
     const incomplets = groupes.filter(g => !estGroupeComplet(g.items));
@@ -205,8 +222,8 @@ function renderByPersonne(items, envie, checklist) {
 
     groupesPersonnes.forEach(groupePersonne => {
 
-        const complete = estGroupeComplet(groupePersonne.items);
-        const coches = groupePersonne.items.filter(i => i.checked).length;
+const complete = estGroupeCompletPourPersonne(groupePersonne.items, groupePersonne.id);
+        const coches = groupePersonne.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
         const total = groupePersonne.items.length;
         const estOuverte = personnesOuvertes.has(groupePersonne.id);
 
@@ -245,9 +262,9 @@ personneHeader.innerHTML = `
         groupesCategories.forEach(group => {
 
             const cle = cleCategorie(group.categorie);
-            const completeCat = estGroupeComplet(group.items);
+const completeCat = estGroupeCompletPourPersonne(group.items, groupePersonne.id);
             const estOuverteCat = categorieOuvertePersonne[groupePersonne.id] === cle;
-            const cochesCat = group.items.filter(i => i.checked).length;
+            const cochesCat = group.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
 
             const subHeader = document.createElement("button");
             subHeader.type = "button";
