@@ -11,6 +11,9 @@ let viewModeTodo = "categorie";
 let personnesOuvertesTodo = new Set();
 let categorieOuvertePersonneTodo = {};
 let currentAssignedToTodo = [];
+let currentEtapeTodo = null;
+let currentDateTodo = null;
+let etapeOuverteTodoId = null;
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
@@ -31,13 +34,15 @@ export function renderTodoSection(envie) {
     if (!accordion)
         return;
 
+
     if (envie.id !== derniereEnvieIdTodo) {
         derniereEnvieIdTodo = envie.id;
         categorieOuverteTodoId = null;
         personnesOuvertesTodo = new Set();
         categorieOuvertePersonneTodo = {};
+        etapeOuverteTodoId = null;
     }
-
+    
     renderTodoListe(envie);
 
 }
@@ -58,8 +63,10 @@ function renderTodoListe(envie) {
         return;
     }
 
-    if (viewModeTodo === "personne") {
+if (viewModeTodo === "personne") {
         renderTodoParPersonne(items, envie, container);
+    } else if (viewModeTodo === "etape") {
+        renderTodoParEtape(items, envie, container);
     } else {
         renderTodoParCategorie(items, envie, container);
     }
@@ -104,6 +111,67 @@ function renderTodoParCategorie(items, envie, container) {
     });
 
 }
+
+function renderTodoParEtape(items, envie, container) {
+
+    const itemsAvecEtape = items.filter(i => i.etape);
+    const itemsSansEtape = items.filter(i => !i.etape);
+
+    const etapesUniques = [...new Set(itemsAvecEtape.map(i => i.etape))];
+
+    const groupes = etapesUniques.map(nom => ({
+        cle: nom,
+        nom,
+        items: itemsAvecEtape.filter(i => i.etape === nom)
+    }));
+
+    if (itemsSansEtape.length > 0) {
+        groupes.push({ cle: "sans-etape", nom: "Sans étape", items: itemsSansEtape });
+    }
+
+    if (groupes.length === 0) {
+        container.innerHTML = `<div class="emptyState">Aucune tâche pour l'instant.</div>`;
+        return;
+    }
+
+    groupes.forEach(groupe => {
+
+        const complete = estGroupeComplet(groupe.items);
+        const estOuverte = etapeOuverteTodoId === groupe.cle;
+        const coches = groupe.items.filter(i => i.checked).length;
+
+        const header = document.createElement("button");
+        header.type = "button";
+        header.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
+
+        header.innerHTML = `
+            <span>📋 ${groupe.nom}</span>
+            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${groupe.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
+        `;
+
+        header.addEventListener("click", () => {
+            etapeOuverteTodoId = estOuverte ? null : groupe.cle;
+            renderTodoListe(envie);
+        });
+
+        container.appendChild(header);
+
+        if (!estOuverte)
+            return;
+
+        groupe.items.forEach(item => {
+            container.appendChild(creerLigneTodo(item, envie));
+        });
+
+    });
+
+}
+
+function formatDateAffichageTodo(dateIso) {
+    const [an, mois, jour] = dateIso.split("-");
+    return `${jour}/${mois}/${an}`;
+}
+
 
 function renderTodoParPersonne(items, envie, container) {
 
@@ -220,10 +288,11 @@ function creerLigneTodo(item, envie) {
 
     row.innerHTML = `
         <span class="dragHandle" style="cursor:grab;padding-right:8px;">⠿</span>
-        <label class="checkLabel" style="width:auto;flex:1;min-width:0;">
+<label class="checkLabel" style="width:auto;flex:1;min-width:0;">
             <input type="checkbox" ${item.checked ? "checked" : ""}>
             <span>
                 <span style="${item.checked ? "text-decoration:line-through;color:var(--color-text-light);" : ""}">${item.texte}</span>
+                ${item.date ? `<small class="assignBadge">📅 ${formatDateAffichageTodo(item.date)}</small>` : ""}
                 <small class="assignBadge">${assignLabel}</small>
             </span>
         </label>
@@ -261,12 +330,12 @@ function creerLigneTodo(item, envie) {
 
     });
 
-    row.querySelector(".editTodoButton").addEventListener("click", (event) => {
+row.querySelector(".editTodoButton").addEventListener("click", (event) => {
 
         event.stopPropagation();
 
-        ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte) => {
-            sauvegarderItem({ texte: nouveauTexte });
+        ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte, nouvelleDate) => {
+            sauvegarderItem({ texte: nouveauTexte, date: nouvelleDate });
         });
 
     });
@@ -374,11 +443,13 @@ export function initTodo() {
 
     });
 
-   document.getElementById("addTodoButton")?.addEventListener("click", () => {
+document.getElementById("addTodoButton")?.addEventListener("click", () => {
 
         currentBulkCategorieTodoId = null;
         currentAssignedToTodo = [];
         document.getElementById("todoInput").value = "";
+        document.getElementById("todoEtapeInput").value = "";
+        document.getElementById("todoDateInput").value = "";
 
         renderTodoCategorieSelector();
         renderTodoAssignSelector();
@@ -400,12 +471,17 @@ export function initTodo() {
 
         const envie = getEnvieCourante();
 
-const nouveauxItems = lignes.map(texte => ({
+const etape = document.getElementById("todoEtapeInput").value.trim() || null;
+        const date = document.getElementById("todoDateInput").value || null;
+
+        const nouveauxItems = lignes.map(texte => ({
             id: crypto.randomUUID(),
             texte,
             categorieId: currentBulkCategorieTodoId,
             checked: false,
-            assignedTo: [...currentAssignedToTodo]
+            assignedTo: [...currentAssignedToTodo],
+            etape,
+            date
         }));
 
         const tousLesItems = [...(envie.checklistTodo || []), ...nouveauxItems];
