@@ -8,6 +8,7 @@ import { renderPhotosGrid } from "./photos.js";
 import { renderPeintureCalculateur } from "./peinture.js";
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
+import { renderBilletsSection } from "./billets.js";
 import { renderPeriode } from "./periode.js";
 import { renderBoisCalculateur } from "./bois.js";
 import { renderVoyageSection } from "./voyage.js";
@@ -84,6 +85,7 @@ document.getElementById("ficheModeIcone").textContent = envie.contexte === "mais
     renderDevis(envie);
     renderSimulationIA(envie);
     renderCroquisSection(envie);
+    renderBilletsSection(envie);
     renderTodoSection(envie);
     renderUrls(envie);
 
@@ -417,7 +419,8 @@ const RUBRIQUES_GEREES = [
     { id: "devis", sectionId: "devisSection", emoji: "🧾", label: "Devis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.devis?.entries || []).length > 0 },
     { id: "croquis", sectionId: "croquisSection", emoji: "📐", label: "Croquis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.croquis || []).length > 0 },
    { id: "simulationIA", sectionId: "simulationIASection", emoji: "🪄", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false },
-    { id: "todo", sectionId: "todoSection", emoji: "🗒️", label: "À faire", aDuContenu: e => (e.checklistTodo || []).length > 0 }
+    { id: "todo", sectionId: "todoSection", emoji: "🗒️", label: "À faire", aDuContenu: e => (e.checklistTodo || []).length > 0 },
+    { id: "billets", sectionId: "billetsSection", emoji: "🎫", label: "Billets", estPertinent: e => e.contexte !== "maison" && isContainer(e.categorie), aDuContenu: e => (e.billets || []).length > 0 }
 ];
 
 function estRubriqueVisible(rubrique, envie) {
