@@ -1154,10 +1154,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 id="checklistSection"
                 class="accordionContent hidden">
 
-                <div class="itemTypeToggle" id="checklistViewToggle">
-                    <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
-                    <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
-                </div>
+<div class="itemTypeToggle" id="checklistViewToggle">
+    <button type="button" class="itemTypeChip active" data-view="categorie">🏷️ Par catégorie</button>
+    <button type="button" class="itemTypeChip" data-view="personne">👤 Par personne</button>
+</div>
+
+<div style="display:flex;gap:10px;margin:12px 0 16px;justify-content:flex-end;padding:8px;background:var(--color-card);border-radius:12px;">
+    <button type="button" id="checklistMasquerCochesToggle" class="iconSmallButton" title="Masquer les éléments cochés" style="font-size:24px;padding:6px 10px;">🙈</button>
+    <button type="button" id="checklistToutDeplierButton" class="iconSmallButton" title="Tout déplier" style="font-size:24px;padding:6px 10px;">📖</button>
+</div>
 
                 <div class="checklistButtonsRow">
 
