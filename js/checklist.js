@@ -26,6 +26,8 @@ let derniereEnvieIdChecklist = null;
 let categorieOuverteId = null;
 let personnesOuvertes = new Set();
 let categorieOuvertePersonne = {};
+let masquerCoches = false;
+
 const PALETTE_CATEGORIES = ["#D97C7C", "#E7A94C", "#8FBF7F", "#6FAFC4", "#8A6FBF", "#4FB0A5", "#D98CB3"];
 
 function couleurCategorie(categorieId) {
@@ -135,12 +137,17 @@ function renderByCategorie(items, envie, checklist) {
     const categories = getChecklistCategories();
     const groupes = trierGroupesCategories(groupByCategorie(items, categories));
 
-    groupes.forEach(group => {
+groupes.forEach(group => {
 
         const cle = cleCategorie(group.categorie);
         const complete = estGroupeComplet(group.items);
         const estOuverte = categorieOuverteId === cle;
         const coches = group.items.filter(i => i.checked).length;
+
+        const itemsAffiches = masquerCoches ? group.items.filter(i => !i.checked) : group.items;
+
+        if (masquerCoches && itemsAffiches.length === 0)
+            return;
 
         const header = document.createElement("button");
         header.type = "button";
@@ -168,10 +175,10 @@ header.innerHTML = `
         
        
 
-        if (!estOuverte)
+if (!estOuverte)
             return;
 
-        const itemsTries = trierItemsChecklist(group.items);
+        const itemsTries = trierItemsChecklist(itemsAffiches);
 
         itemsTries.forEach(item => {
             checklist.appendChild(createChecklistRow(item, envie));
@@ -222,10 +229,15 @@ function renderByPersonne(items, envie, checklist) {
 
     groupesPersonnes.forEach(groupePersonne => {
 
-const complete = estGroupeCompletPourPersonne(groupePersonne.items, groupePersonne.id);
-        const coches = groupePersonne.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
+const complete = estGroupeComplet(groupePersonne.items);
+        const coches = groupePersonne.items.filter(i => i.checked).length;
         const total = groupePersonne.items.length;
         const estOuverte = personnesOuvertes.has(groupePersonne.id);
+
+        const itemsPersonneAffiches = masquerCoches ? groupePersonne.items.filter(i => !i.checked) : groupePersonne.items;
+
+        if (masquerCoches && itemsPersonneAffiches.length === 0)
+            return;
 
         const personneHeader = document.createElement("button");
         personneHeader.type = "button";
@@ -257,14 +269,14 @@ personneHeader.innerHTML = `
         sousContainer.className = "checklistPersonneSousListe";
         checklist.appendChild(sousContainer);
 
-        const groupesCategories = trierGroupesCategories(groupByCategorie(groupePersonne.items, categories));
+const groupesCategories = groupByCategorie(itemsPersonneAffiches, categories);
 
         groupesCategories.forEach(group => {
 
             const cle = cleCategorie(group.categorie);
-const completeCat = estGroupeCompletPourPersonne(group.items, groupePersonne.id);
+            const completeCat = estGroupeComplet(group.items);
             const estOuverteCat = categorieOuvertePersonne[groupePersonne.id] === cle;
-            const cochesCat = group.items.filter(i => estCochePourGroupe(i, groupePersonne.id)).length;
+            const cochesCat = group.items.filter(i => i.checked).length;
 
             const subHeader = document.createElement("button");
             subHeader.type = "button";
@@ -535,7 +547,18 @@ export function renderPersonneSelector(container, selected, onChange) {
 /* ---------- Modale ajout élément (création) ---------- */
 
 export function initChecklistModal() {
+document.getElementById("checklistMasquerCochesToggle")?.addEventListener("change", (event) => {
 
+        masquerCoches = event.target.checked;
+
+        const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
+
+        if (envie) {
+            renderChecklist(envie);
+        }
+
+    });
+    
 document.getElementById("addChecklistButton").addEventListener("click", () => {
 
         currentChecklistEnvieId = getCurrentEnvieId();
