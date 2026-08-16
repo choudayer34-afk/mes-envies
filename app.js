@@ -12,6 +12,7 @@
 import { initAgenda } from "./js/agenda.js";
 import { initPullToRefresh } from "./js/pulltorefresh.js";
 import { initChangelogSync } from "./js/storage.js";
+import { initBillets } from "./js/billets.js";
 import { renderNouveautes } from "./js/plus.js";
 import { initEnvieCategoriesSync } from "./js/storage.js";
 import { initTodo } from "./js/todo.js";
@@ -129,6 +130,7 @@ function init() {
 afficherVersionCache();
      initSimulationIA();
 initCroquis();
+ initBillets();
  initFicheFab();
  initTodo();
     initEnvironnementsSync(() => {});
