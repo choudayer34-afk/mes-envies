@@ -26,7 +26,7 @@ import { openVoyageImport } from "./voyage-import.js";
 import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
 import { getFoyerId } from "./auth.js";
 import { updateEnvieVisibilite } from "./storage.js";
-import { auth } from "./firebase-auth.js";
+import { auth } from "./firebase.js";
 
 const groupesOuverts = new Set();
 const voyagesForcesEnEdition = new Set();
