@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v103';
+const CACHE_NAME = 'envie-cache-v104';
 
 
  
@@ -12,6 +12,7 @@ const APP_SHELL = [
  './js/billets.js',
     './js/croquis.js',
     './js/storage.js',
+ './js/tricount.js',
     './js/ui.js',
     './js/modal.js',
     './js/modal-utils.js',
