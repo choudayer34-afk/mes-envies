@@ -670,9 +670,7 @@ function renderPersonnesList() {
         });
 
 
-        row.querySelector(".papiersPersonneButton").addEventListener("click", () => {
-            ouvrirPapiersPersonne(personne);
-        });
+
 
         row.querySelector(".personneDateNaissanceInput").addEventListener("change", (event) => {
             updatePersonneDateNaissance(personne.id, event.target.value || null);
@@ -693,6 +691,10 @@ function renderPersonnesList() {
 
         row.querySelector(".deleteButton").addEventListener("click", () => {
 
+        row.querySelector(".personneParDefautCheckbox").addEventListener("change", (event) => {
+            updatePersonneParDefautVoyage(personne.id, event.target.checked);
+        });
+
             if (!window.confirm(`Supprimer "${personne.nom}" ?`))
                 return;
 
@@ -701,13 +703,7 @@ function renderPersonnesList() {
 
         });
 
-        document.querySelectorAll(".personneParDefautCheckbox").forEach(checkbox => {
-
-    checkbox.addEventListener("change", (event) => {
-        updatePersonneParDefautVoyage(checkbox.dataset.id, event.target.checked);
-    });
-
-});
+ 
         
         container.appendChild(row);
 
