@@ -633,7 +633,7 @@ function renderPersonnesList() {
     personnes.forEach(personne => {
 
 
-      const age = calculerAgeDepuisNaissance(personne.dateNaissance);
+      
 
         const row = document.createElement("div");
         row.className = "actionGroupCard";
