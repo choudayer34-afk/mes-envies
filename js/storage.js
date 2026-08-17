@@ -61,6 +61,18 @@ export function initSocietesSync(onChange) {
 
 }
 
+export function updateEnvieVisibilite(id, visibilite, proprietaireId = null) {
+
+    const champs = { visibilite };
+
+    if (visibilite === "prive") {
+        champs.proprietaireId = proprietaireId;
+    }
+
+    patchEnvie(id, champs);
+
+}
+
 export function rememberSociete({ societe, contact, telephone, email }) {
 
     const nomPropre = societe.trim();
