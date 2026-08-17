@@ -734,16 +734,18 @@ main{
     cursor: pointer;
 }
 
-.checklistRow input[type="checkbox"] {
+.checkLabel input[type="checkbox"] {
     width: 20px;
     height: 20px;
     flex-shrink: 0;
     cursor: pointer;
 }
 
-.checklistRow span {
+.checkLabel span {
     flex: 1;
 }
+
+
 
 .checkLabel{
     display:flex;
