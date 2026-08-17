@@ -22,6 +22,65 @@ export function updateEnvieTricount(id, tricount) {
     patchEnvie(id, { tricount });
 }
 
+export function updatePersonneDocument(id, type, champs) {
+    updateDoc(doc(db, "foyers", getFoyerId(), "personnes", id), {
+        [`documentsIdentite.${type}`]: champs
+    }).catch(console.error);
+}
+
+export function updateEnvieDocumentRequis(id, documentRequis) {
+    patchEnvie(id, { documentRequis });
+}
+
+export function voyageADocumentExpire(envie) {
+
+    if (!envie.documentRequis || !envie.date?.start)
+        return false;
+
+    const personnes = getPersonnes().filter(p => (envie.personnesIds || []).includes(p.id));
+
+    return personnes.some(p => {
+        const doc = p.documentsIdentite?.[envie.documentRequis];
+        return doc?.dateExpiration && doc.dateExpiration < envie.date.start;
+    });
+
+}
+
+export function getAlertesDocumentsExpiration() {
+
+    const dansSixMois = new Date();
+    dansSixMois.setMonth(dansSixMois.getMonth() + 6);
+    const seuil = dansSixMois.toISOString().split("T")[0];
+    const aujourdhui = new Date().toISOString().split("T")[0];
+
+    const alertes = [];
+
+    getPersonnes().forEach(personne => {
+
+        ["cni", "passeport"].forEach(type => {
+
+            const doc = personne.documentsIdentite?.[type];
+
+            if (doc?.dateExpiration && doc.dateExpiration <= seuil) {
+
+                alertes.push({
+                    personneId: personne.id,
+                    personneNom: personne.nom,
+                    type,
+                    dateExpiration: doc.dateExpiration,
+                    expire: doc.dateExpiration < aujourdhui
+                });
+
+            }
+
+        });
+
+    });
+
+    return alertes;
+
+}
+
 
 export function updatePersonneParDefautVoyage(id, parDefautVoyage) {
     updateDoc(doc(db, "foyers", getFoyerId(), "personnes", id), { parDefautVoyage }).catch(console.error);
