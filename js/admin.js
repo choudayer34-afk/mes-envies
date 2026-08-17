@@ -632,8 +632,6 @@ function renderPersonnesList() {
 
     personnes.forEach(personne => {
 
-        const row = document.createElement("div");
-        row.className = "templateRow";
 
       const age = calculerAgeDepuisNaissance(personne.dateNaissance);
 
