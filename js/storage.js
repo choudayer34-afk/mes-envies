@@ -18,6 +18,13 @@ export function updateEnvieBillets(id, billets) {
     patchEnvie(id, { billets });
 }
 
+export function updateEnvieTricount(id, tricount) {
+    patchEnvie(id, { tricount });
+}
+
+export function updatePersonneParDefautVoyage(id, parDefautVoyage) {
+    updateDoc(doc(db, "foyers", getFoyerId(), "personnes", id), { parDefautVoyage }).catch(console.error);
+}
 
 export function updateEnvieStatutManuel(id, statutManuel) {
     patchEnvie(id, { statutManuel });
