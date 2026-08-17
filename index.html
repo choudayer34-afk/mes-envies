@@ -1053,7 +1053,38 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
 
         </div>
+<div class="accordion">
 
+    <button class="accordionHeader" data-target="tricountSection">
+        <span>💶 Tricount</span>
+        <span class="accordionIcon">▾</span>
+    </button>
+
+    <div id="tricountSection" class="accordionContent hidden">
+
+        <label class="fieldTitle">Participants</label>
+        <div id="tricountParticipantsListe"></div>
+        <button id="addParticipantButton" class="secondaryButton" style="width:100%;margin:8px 0 20px;">➕ Ajouter un participant</button>
+
+        <label class="fieldTitle">Dépenses</label>
+        <div id="tricountDepensesListe"></div>
+        <button id="addDepenseButton" class="secondaryButton" style="width:100%;margin:8px 0 20px;">➕ Ajouter une dépense</button>
+
+        <label class="fieldTitle">Remboursements / transferts</label>
+        <div id="tricountMouvementsListe"></div>
+        <button id="addMouvementButton" class="secondaryButton" style="width:100%;margin:8px 0 20px;">➕ Ajouter un remboursement</button>
+
+        <label class="fieldTitle">💰 Résultat</label>
+        <div id="tricountResultat" style="margin-bottom:12px;"></div>
+
+        <div class="modal-actions">
+            <button id="copierResultatTricountButton">📋 Copier le texte</button>
+            <button id="exporterPdfTricountButton" class="primaryButton">📄 PDF</button>
+        </div>
+
+    </div>
+
+</div>
         <div class="accordion">
 
             <button
@@ -1748,8 +1779,59 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
-
-
+<div id="tricountParticipantModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2>➕ Ajouter un participant</h2>
+        <label class="fieldTitle">Depuis le foyer</label>
+        <div id="tricountParticipantFoyerListe" style="margin-bottom:14px;"></div>
+        <label class="fieldTitle">Ou un nom libre (ami, famille...)</label>
+        <input type="text" id="tricountParticipantNomLibre" placeholder="Ex: Julien" class="numberInput">
+        <div class="modal-actions" style="margin-top:16px;">
+            <button id="cancelTricountParticipant">Annuler</button>
+            <button id="saveTricountParticipant" class="primaryButton">Ajouter</button>
+        </div>
+    </div>
+</div>
+<div id="tricountDepenseModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2 id="tricountDepenseTitre">➕ Ajouter une dépense</h2>
+        <input type="text" id="tricountDepenseNom" placeholder="Ex: Restaurant" class="numberInput">
+        <input type="number" id="tricountDepenseMontant" placeholder="Montant (€)" step="0.01" min="0" class="numberInput" style="margin-top:8px;">
+        <label class="fieldTitle" style="margin-top:12px;">Payé par</label>
+        <select id="tricountDepensePayePar" class="categorieSelect"></select>
+        <label class="fieldTitle" style="margin-top:12px;">Date</label>
+        <input type="date" id="tricountDepenseDate" class="numberInput">
+        <label class="fieldTitle" style="margin-top:12px;">Pour qui</label>
+        <div id="tricountDepensePourQui"></div>
+        <div class="itemTypeToggle" id="tricountRepartitionToggle" style="margin:10px 0;">
+            <button type="button" class="itemTypeChip active" data-repartition="egale">⚖️ Égale</button>
+            <button type="button" class="itemTypeChip" data-repartition="custom">✏️ Personnalisée</button>
+        </div>
+        <div id="tricountMontantsCustom" class="hidden"></div>
+        <div class="modal-actions" style="margin-top:16px;">
+            <button id="cancelTricountDepense">Annuler</button>
+            <button id="saveTricountDepense" class="primaryButton">Enregistrer</button>
+        </div>
+    </div>
+</div>
+    <div id="tricountMouvementModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2>➕ Remboursement / transfert</h2>
+        <input type="text" id="tricountMouvementNom" placeholder="Ex: Remboursement essence (optionnel)" class="numberInput">
+        <input type="number" id="tricountMouvementMontant" placeholder="Montant (€)" step="0.01" min="0" class="numberInput" style="margin-top:8px;">
+        <label class="fieldTitle" style="margin-top:12px;">De</label>
+        <select id="tricountMouvementDe" class="categorieSelect"></select>
+        <label class="fieldTitle" style="margin-top:12px;">Vers</label>
+        <select id="tricountMouvementVers" class="categorieSelect"></select>
+        <label class="fieldTitle" style="margin-top:12px;">Date</label>
+        <input type="date" id="tricountMouvementDate" class="numberInput">
+        <div class="modal-actions" style="margin-top:16px;">
+            <button id="cancelTricountMouvement">Annuler</button>
+            <button id="saveTricountMouvement" class="primaryButton">Enregistrer</button>
+        </div>
+    </div>
+</div>
+    
 <div id="adminModal" class="modal-overlay hidden">
 
     <div class="modal">
