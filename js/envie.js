@@ -22,6 +22,7 @@ import { renderCroquisSection } from "./croquis.js";
 import { updateEnvieRubriquesEtat } from "./storage.js";
 import { afficherConfirmationAjoutRubrique } from "./onboarding.js";
 import { renderTodoSection } from "./todo.js";
+import { renderTricountSection } from "./tricount.js";
 
 let currentEnvieId = null;
 
@@ -88,7 +89,7 @@ document.getElementById("ficheModeIcone").textContent = envie.contexte === "mais
     renderBilletsSection(envie);
     renderTodoSection(envie);
     renderUrls(envie);
-
+renderTricountSection(envie);
        
     renderPhotosGrid(envie);
 
@@ -420,7 +421,8 @@ const RUBRIQUES_GEREES = [
     { id: "croquis", sectionId: "croquisSection", emoji: "📐", label: "Croquis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.croquis || []).length > 0 },
    { id: "simulationIA", sectionId: "simulationIASection", emoji: "🪄", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false },
     { id: "todo", sectionId: "todoSection", emoji: "🗒️", label: "À faire", aDuContenu: e => (e.checklistTodo || []).length > 0 },
-    { id: "billets", sectionId: "billetsSection", emoji: "🎫", label: "Billets", estPertinent: e => e.contexte !== "maison" && isContainer(e.categorie), aDuContenu: e => (e.billets || []).length > 0 }
+    { id: "billets", sectionId: "billetsSection", emoji: "🎫", label: "Billets", estPertinent: e => e.contexte !== "maison" && isContainer(e.categorie), aDuContenu: e => (e.billets || []).length > 0 },
+    { id: "tricount", sectionId: "tricountSection", emoji: "💶", label: "Tricount", estPertinent: e => e.contexte !== "maison" && isContainer(e.categorie), aDuContenu: e => (e.tricount?.participants || []).length > 0 }
 ];
 
 function estRubriqueVisible(rubrique, envie) {
