@@ -161,7 +161,11 @@ const RUBRIQUE_ONBOARDING = {
         aQuoiCaSert: "Calcule automatiquement la quantité de peinture nécessaire à partir des dimensions de tes murs.",
         commentCaSutilise: "Ajoute chaque mur (largeur × hauteur), déduis les ouvertures (portes, fenêtres) si besoin, choisis le nombre de couches — le nombre de litres à acheter s'affiche directement."
     },
-
+tricount: {
+    titre: "💶 Tricount",
+    aQuoiCaSert: "Suit qui a payé quoi pendant le voyage, et calcule automatiquement qui doit combien à qui à la fin, en minimisant le nombre de remboursements.",
+    commentCaSutilise: "Ajoute les participants (depuis le foyer ou un nom libre), note chaque dépense avec qui l'a payée et pour qui, et les remboursements déjà faits. Le résultat se met à jour tout seul, exportable en PDF ou en texte à copier."
+},
     billets: {
         titre: "🎫 Billets & titres de transport",
         aQuoiCaSert: "Garde tes billets d'avion/train sous la main, même sans connexion — utile à l'aéroport ou dans le train si le réseau est mauvais.",
