@@ -3,7 +3,7 @@ import {
     deleteEnvieCategoryDef, moveEnvieCategory
 } from "./storage.js";
 import { fusionnerActiviteTypesParDefaut, fusionnerCriteresVoyageParDefaut } from "./storage.js";
-import { updatePersonneDateNaissance, calculerAgeDepuisNaissance } from "./storage.js";
+import { updatePersonneDateNaissance, calculerAgeDepuisNaissance, updatePersonneParDefautVoyage } from "./storage.js";
 import { renderCreationCategorieSelector } from "./modal.js";
 import { addMultipleTemplateItems } from "./storage.js";
 import { computeContainerStatus } from "./progress.js";
@@ -15,6 +15,7 @@ import {
 } from "./storage.js";
 import { renderNouveautes } from "./plus.js";
 import { groupByCategorie } from "./checklist.js";
+
 import {
     getChecklistTemplates, getTemplate, createTemplate, renameTemplate, deleteTemplate,
     addTemplateItem, deleteTemplateItem, getChecklistCategories, createChecklistCategory,
