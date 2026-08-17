@@ -597,6 +597,10 @@ function renderPersonnesList() {
                 ${age !== null ? `<div style="font-size:11px;color:var(--color-text-light);">🎂 ${age} an${age > 1 ? "s" : ""}</div>` : ""}
             </div>
             <input type="date" class="personneDateNaissanceInput" value="${personne.dateNaissance || ""}" title="Date de naissance" style="margin-right:8px;">
+            <label class="checkLabel" style="margin-top:4px;">
+    <input type="checkbox" class="personneParDefautCheckbox" data-id="${personne.id}" ${personne.parDefautVoyage ? "checked" : ""}>
+    <span style="font-size:13px;">Participe aux voyages par défaut</span>
+</label>
             <div class="templateRowActions">
                 <button class="actionButton editButton">Modifier</button>
                 <button class="actionButton deleteButton">Supprimer</button>
@@ -630,6 +634,14 @@ function renderPersonnesList() {
 
         });
 
+        document.querySelectorAll(".personneParDefautCheckbox").forEach(checkbox => {
+
+    checkbox.addEventListener("change", (event) => {
+        updatePersonneParDefautVoyage(checkbox.dataset.id, event.target.checked);
+    });
+
+});
+        
         container.appendChild(row);
 
     });
