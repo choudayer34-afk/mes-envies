@@ -25,6 +25,8 @@ import { buildPromptVoyage } from "./promptgen.js";
 import { openVoyageImport } from "./voyage-import.js";
 import { activerPartagePublic, desactiverPartagePublic } from "./storage.js";
 import { getFoyerId } from "./auth.js";
+import { updateEnvieVisibilite } from "./storage.js";
+import { auth } from "./firebase-auth.js";
 
 const groupesOuverts = new Set();
 const voyagesForcesEnEdition = new Set();
@@ -180,6 +182,34 @@ couvertureRow.innerHTML = envie.photoCouverture ? `
 
     container.appendChild(statutManuelRow);
     
+    
+        const visibiliteRow = document.createElement("div");
+    visibiliteRow.className = "itemTypeToggle";
+    visibiliteRow.style.marginTop = "10px";
+
+    const estPrive = envie.visibilite === "prive";
+
+    visibiliteRow.innerHTML = `
+        <button type="button" class="itemTypeChip visibiliteChip ${!estPrive ? "active" : ""}" data-visibilite="foyer">👪 Partagé avec le foyer</button>
+        <button type="button" class="itemTypeChip visibiliteChip ${estPrive ? "active" : ""}" data-visibilite="prive">🔒 Privé (seulement moi)</button>
+    `;
+
+    visibiliteRow.querySelectorAll(".visibiliteChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            const nouvelleVisibilite = chip.dataset.visibilite;
+            const uid = auth.currentUser?.uid;
+
+            updateEnvieVisibilite(envie.id, nouvelleVisibilite, uid);
+            renderVoyageSection({ ...envie, visibilite: nouvelleVisibilite, proprietaireId: nouvelleVisibilite === "prive" ? uid : envie.proprietaireId });
+
+        });
+
+    });
+
+    container.appendChild(visibiliteRow);
+
         const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today && !(estMaison && e.realise));
 
