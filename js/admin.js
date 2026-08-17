@@ -62,6 +62,9 @@ export function initAdmin() {
         renderActiviteTypesList();
 
     });
+
+    initPersonnePapiersModal();
+    
     document.getElementById("fusionnerActiviteTypesButton")?.addEventListener("click", async () => {
 
         const nb = await fusionnerActiviteTypesParDefaut();
