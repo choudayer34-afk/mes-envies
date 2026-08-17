@@ -1,6 +1,6 @@
 import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
-import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour } from "./storage.js";
+import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour, updateEnvieDocumentRequis } from "./storage.js";
 import { ouvrirTableauSaisie } from "./tableau-saisie.js";
 
 import { updateEnvieOrdre } from "./storage.js";
@@ -210,6 +210,27 @@ couvertureRow.innerHTML = envie.photoCouverture ? `
 
     container.appendChild(visibiliteRow);
 
+    const documentRow = document.createElement("div");
+    documentRow.className = "itemTypeToggle";
+    documentRow.style.marginTop = "10px";
+
+    documentRow.innerHTML = `
+        <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "cni" ? "active" : ""}" data-document="cni">🪪 CNI suffit</button>
+        <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "passeport" ? "active" : ""}" data-document="passeport">📔 Passeport nécessaire</button>
+    `;
+
+    documentRow.querySelectorAll(".documentChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            updateEnvieDocumentRequis(envie.id, chip.dataset.document);
+            renderVoyageSection({ ...envie, documentRequis: chip.dataset.document });
+
+        });
+
+    });
+
+    container.appendChild(documentRow);
         const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today && !(estMaison && e.realise));
 
