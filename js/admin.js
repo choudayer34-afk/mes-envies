@@ -637,22 +637,40 @@ function renderPersonnesList() {
 
       const age = calculerAgeDepuisNaissance(personne.dateNaissance);
 
-row.innerHTML = `
-            <div class="templateRowNom">
-                👤 ${personne.nom}
-                ${age !== null ? `<div style="font-size:11px;color:var(--color-text-light);">🎂 ${age} an${age > 1 ? "s" : ""}</div>` : ""}
+        const row = document.createElement("div");
+        row.className = "actionGroupCard";
+
+        const age = calculerAgeDepuisNaissance(personne.dateNaissance);
+
+        row.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <div style="font-weight:700;font-size:16px;">
+                    👤 ${personne.nom}
+                    ${age !== null ? `<span style="font-weight:400;font-size:12px;color:var(--color-text-light);margin-left:8px;">🎂 ${age} an${age > 1 ? "s" : ""}</span>` : ""}
+                </div>
+                <div style="display:flex;gap:6px;flex-shrink:0;">
+                    <button class="iconSmallButton editButton" title="Modifier le nom">✏️</button>
+                    <button class="iconSmallButton deleteButton" title="Supprimer">🗑️</button>
+                </div>
             </div>
-            <input type="date" class="personneDateNaissanceInput" value="${personne.dateNaissance || ""}" title="Date de naissance" style="margin-right:8px;">
-            <label class="checkLabel" style="margin-top:4px;">
-    <input type="checkbox" class="personneParDefautCheckbox" data-id="${personne.id}" ${personne.parDefautVoyage ? "checked" : ""}>
-    <span style="font-size:13px;">Participe aux voyages par défaut</span>
-</label>
-            <div class="templateRowActions">
-                <button class="actionButton editButton papiersPersonneButton" data-id="${personne.id}" title="Papiers d'identité">🪪</button>
-                <button class="actionButton editButton">Modifier</button>
-                <button class="actionButton deleteButton">Supprimer</button>
-            </div>
+
+            <label class="fieldTitle" style="margin-top:0;">Date de naissance</label>
+            <input type="date" class="personneDateNaissanceInput numberInput" value="${personne.dateNaissance || ""}" style="margin-bottom:12px;">
+
+            <label class="checkLabel" style="margin-bottom:12px;">
+                <input type="checkbox" class="personneParDefautCheckbox" data-id="${personne.id}" ${personne.parDefautVoyage ? "checked" : ""}>
+                <span style="font-size:13px;">Participe aux voyages par défaut</span>
+            </label>
+
+            <button type="button" class="secondaryButton papiersPersonneButton" data-id="${personne.id}" style="width:100%;">
+                🪪 Papiers d'identité
+            </button>
         `;
+
+        row.querySelector(".papiersPersonneButton").addEventListener("click", () => {
+            ouvrirPapiersPersonne(personne);
+        });
+
 
         row.querySelector(".papiersPersonneButton").addEventListener("click", () => {
             ouvrirPapiersPersonne(personne);
