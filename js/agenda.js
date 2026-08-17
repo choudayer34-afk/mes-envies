@@ -1,5 +1,6 @@
 import { getEnvies, updateEnvieRealise, getModeActif, updateEnvieChecklistTodo } from "./storage.js";
 import { groupAndSort } from "./grouping.js";
+import { getBilletsAujourdhui } from "./billets.js";
 
 import { groupForAgenda } from "./grouping.js";
 import { getCategorieById, openEvaluationAccordion, openEnvie } from "./envie.js";
@@ -16,15 +17,18 @@ export function initAgenda() {
 
         const button = event.target.closest('[data-action="edit"]');
 
-        if (button) {
+         if (button) {
 
             const row = button.closest("[data-envie-id]");
             const envieId = row?.dataset.envieId;
             const todoParentId = row?.dataset.todoParentId;
+            const billetVoyageId = row?.dataset.billetVoyageId;
 
             closeAgenda();
 
-            if (todoParentId) {
+            if (billetVoyageId) {
+                openEnvie(billetVoyageId, null);
+            } else if (todoParentId) {
                 openEnvie(todoParentId, null);
             } else if (envieId) {
                 openEnvie(envieId, null);
@@ -33,6 +37,7 @@ export function initAgenda() {
             return;
 
         }
+
 
     });
 
@@ -130,6 +135,38 @@ function construirePseudoEnviesTodo(envies) {
 
 }
 
+function construirePseudoEnviesBillets(envies) {
+
+    const emojiParType = { avion: "✈️", train: "🚆", autre: "🎫" };
+    const pseudos = [];
+
+    envies.forEach(envie => {
+
+        (envie.billets || []).forEach(billet => {
+
+            if (billet.dateDepart) {
+
+                pseudos.push({
+                    id: `billetAgenda_${envie.id}_${billet.id}`,
+                    titre: `${emojiParType[billet.type] || "🎫"} ${[billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || "Billet"} (${envie.titre})`,
+                    categorie: null,
+                    date: { start: billet.dateDepart, type: "single" },
+                    realise: false,
+                    ordre: 0,
+                    _billetVoyageId: envie.id
+                });
+
+            }
+
+        });
+
+    });
+
+    return pseudos;
+
+}
+
+
 function renderAgenda() {
 
     const container = document.getElementById("agendaContent");
@@ -137,8 +174,9 @@ function renderAgenda() {
 
 const envies = getEnvies().filter(e => e.contexte === getModeActif());
 const pseudosTodo = construirePseudoEnviesTodo(envies);
+const pseudosBillets = construirePseudoEnviesBillets(envies);
 
-    const { datedGroups, adhocGroups, todo } = groupForAgenda([...envies, ...pseudosTodo]);
+    const { datedGroups, adhocGroups, todo } = groupForAgenda([...envies, ...pseudosTodo, ...pseudosBillets]);
 
     if (datedGroups.length === 0 && adhocGroups.length === 0 && todo.length === 0) {
         container.innerHTML = `<div class="emptyState">Rien à planifier pour l'instant.</div>`;
@@ -209,9 +247,22 @@ function createAgendaRow(envie) {
     row.className = "checklistRow";
     row.dataset.envieId = envie.id;
 
-    if (envie._todoParentId) {
+      if (envie._todoParentId) {
         row.dataset.todoParentId = envie._todoParentId;
         row.dataset.todoItemId = envie._todoItemId;
+    }
+
+    if (envie._billetVoyageId) {
+
+        row.dataset.billetVoyageId = envie._billetVoyageId;
+
+        row.innerHTML = `
+            <span style="flex:1;">${envie.titre}</span>
+            <button class="editAgendaButton" data-action="edit" title="Voir le billet">🎫</button>
+        `;
+
+        return row;
+
     }
 
     row.innerHTML = `
@@ -221,6 +272,7 @@ function createAgendaRow(envie) {
         </label>
         <button class="editAgendaButton" data-action="edit" title="Modifier">✏️</button>
     `;
+
 
     return row;
 
