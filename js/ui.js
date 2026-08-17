@@ -1,6 +1,7 @@
 
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
+import { getBilletsAujourdhui } from "./billets.js";
 
 import { getModeActif, basculerMode } from "./storage.js";
 
@@ -100,9 +101,11 @@ function renderHomeSections() {
 
     const today = new Date().toISOString().slice(0, 10);
 
-    const ajourdhuiItems = envies.filter(e =>
-        !isContainer(e.categorie) && e.date?.start === today
-    );
+   const ajourdhuiItems = [
+        ...envies.filter(e => !isContainer(e.categorie) && e.date?.start === today),
+        ...getBilletsAujourdhui(envies)
+    ];
+
 
     const enCoursItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
@@ -217,6 +220,21 @@ function createCompactRow(envie) {
     const row = document.createElement("div");
     row.className = "checklistRow";
 
+    if (envie._billetVoyageId) {
+
+        row.innerHTML = `
+            <span style="flex:1;">${envie.titre}</span>
+            <button class="editAgendaButton" title="Voir le billet">🎫</button>
+        `;
+
+        row.querySelector(".editAgendaButton").addEventListener("click", () => {
+            openEnvie(envie._billetVoyageId, null);
+        });
+
+        return row;
+
+    }
+
     row.innerHTML = `
         <label class="checkLabel">
             <input type="checkbox" ${envie.realise ? "checked" : ""}>
@@ -238,6 +256,7 @@ function createCompactRow(envie) {
         }
 
     });
+
 
     row.querySelector(".editAgendaButton").addEventListener("click", (event) => {
 
