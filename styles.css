@@ -220,7 +220,7 @@ main{
     box-sizing:border-box;
     index:2000;
 }
-
+#personnePapiersModal,
 #deleteModal,
 #ficheOverlay,
 #modalOverlay,
