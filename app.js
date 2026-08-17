@@ -44,6 +44,7 @@ import { initCarteVoyages } from "./js/carte-voyages.js";
 import { initAlbum } from "./js/album.js";
 import { initPoiRoute } from "./js/etape-finder.js";
 import { initTableauSaisie } from "./js/tableau-saisie.js";
+import { initTricount } from "./js/tricount.js";
 import {
     initEnvironnementsSync, initAmbiancesSync, initActivitesVoyageAssistantSync,
     initContraintesVoyageSync, initHebergementTypesSync, initHebergementEquipementsSync,
@@ -133,6 +134,7 @@ initCroquis();
  initBillets();
  initFicheFab();
  initTodo();
+ initTricount();
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
     initActivitesVoyageAssistantSync(() => {});
