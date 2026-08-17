@@ -220,7 +220,7 @@ main{
     box-sizing:border-box;
     index:2000;
 }
-#personnePapiersModal,
+
 #deleteModal,
 #ficheOverlay,
 #modalOverlay,
@@ -264,7 +264,8 @@ main{
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
 #adminPartagesModal, #platformerModal, #simulationIAModal,
 #croquisEditorModal, #mesurePhotoModal, #todoAddModal, #billetAddModal,
-#tricountParticipantModal, #tricountDepenseModal, #tricountMouvementModal, #personnePapiersModal
+#tricountParticipantModal, #tricountDepenseModal, #tricountMouvementModal, #personnePapiersModal,
+#personnePapiersModal
 {
     z-index:2100;
 }
