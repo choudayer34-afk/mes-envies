@@ -1141,7 +1141,7 @@ const badgeExpirationHtml = (estContainer && voyageADocumentExpire(envie))
 
 card.innerHTML = `
             <div class="envieReduiteLigne">
-                <span class="envieReduiteTitre">${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
+                <span class="envieReduiteTitre">${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.visibilite === "prive" ? "🔒 " : ""}${envie.titre}</span>
                 <span class="envieReduiteInfo">${infoCompacte}</span>
                 <button class="envieReduireButtonInline" title="Développer">▸</button>
             </div>
@@ -1219,8 +1219,9 @@ card.innerHTML = `
             <button class="favoriteButton" data-id="${envie.id}">
                 ${envie.favorite ? "⭐" : "☆"}
             </button>
-            <div class="envieTitle">
+<div class="envieTitle">
                 ${getCategorieById(envie.categorie)?.emoji || "💡"}
+                ${envie.visibilite === "prive" ? "🔒" : ""}
                 ${envie.titre}
             </div>
             ${boutonReduireHtml}
