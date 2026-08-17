@@ -22,6 +22,8 @@ import { renderCroquisSection } from "./croquis.js";
 import { updateEnvieRubriquesEtat } from "./storage.js";
 import { afficherConfirmationAjoutRubrique } from "./onboarding.js";
 import { renderTodoSection } from "./todo.js";
+import { updateEnvieVisibilite } from "./storage.js";
+import { auth } from "./firebase-auth.js";
 
 let currentEnvieId = null;
 
