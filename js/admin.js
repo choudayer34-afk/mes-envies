@@ -572,6 +572,48 @@ function renderCategoriesList() {
 
 }
 
+function ouvrirPapiersPersonne(personne) {
+
+    document.getElementById("personnePapiersTitre").textContent = `🪪 Papiers de ${personne.nom}`;
+
+    document.getElementById("papierCniNumero").value = personne.documentsIdentite?.cni?.numero || "";
+    document.getElementById("papierCniDate").value = personne.documentsIdentite?.cni?.dateExpiration || "";
+    document.getElementById("papierPasseportNumero").value = personne.documentsIdentite?.passeport?.numero || "";
+    document.getElementById("papierPasseportDate").value = personne.documentsIdentite?.passeport?.dateExpiration || "";
+
+    document.getElementById("personnePapiersModal").dataset.personneId = personne.id;
+    document.getElementById("personnePapiersModal").classList.remove("hidden");
+
+}
+
+function initPersonnePapiersModal() {
+
+    document.getElementById("cancelPersonnePapiers")?.addEventListener("click", () => {
+        document.getElementById("personnePapiersModal").classList.add("hidden");
+    });
+
+    document.getElementById("savePersonnePapiers")?.addEventListener("click", () => {
+
+        const personneId = document.getElementById("personnePapiersModal").dataset.personneId;
+
+        updatePersonneDocument(personneId, "cni", {
+            numero: document.getElementById("papierCniNumero").value.trim() || null,
+            dateExpiration: document.getElementById("papierCniDate").value || null
+        });
+
+        updatePersonneDocument(personneId, "passeport", {
+            numero: document.getElementById("papierPasseportNumero").value.trim() || null,
+            dateExpiration: document.getElementById("papierPasseportDate").value || null
+        });
+
+        document.getElementById("personnePapiersModal").classList.add("hidden");
+
+        showToast("✓ Papiers enregistrés");
+
+    });
+
+}
+
 function renderPersonnesList() {
 
     const container = document.getElementById("personnesList");
@@ -591,7 +633,7 @@ function renderPersonnesList() {
 
       const age = calculerAgeDepuisNaissance(personne.dateNaissance);
 
-        row.innerHTML = `
+row.innerHTML = `
             <div class="templateRowNom">
                 👤 ${personne.nom}
                 ${age !== null ? `<div style="font-size:11px;color:var(--color-text-light);">🎂 ${age} an${age > 1 ? "s" : ""}</div>` : ""}
@@ -602,10 +644,15 @@ function renderPersonnesList() {
     <span style="font-size:13px;">Participe aux voyages par défaut</span>
 </label>
             <div class="templateRowActions">
+                <button class="actionButton editButton papiersPersonneButton" data-id="${personne.id}" title="Papiers d'identité">🪪</button>
                 <button class="actionButton editButton">Modifier</button>
                 <button class="actionButton deleteButton">Supprimer</button>
             </div>
         `;
+
+        row.querySelector(".papiersPersonneButton").addEventListener("click", () => {
+            ouvrirPapiersPersonne(personne);
+        });
 
         row.querySelector(".personneDateNaissanceInput").addEventListener("change", (event) => {
             updatePersonneDateNaissance(personne.id, event.target.value || null);
