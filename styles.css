@@ -263,7 +263,8 @@ main{
 #agendaLocalModal,#rapportModal,
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
 #adminPartagesModal, #platformerModal, #simulationIAModal,
-#croquisEditorModal, #mesurePhotoModal, #todoAddModal, #billetAddModal
+#croquisEditorModal, #mesurePhotoModal, #todoAddModal, #billetAddModal,
+#tricountParticipantModal, #tricountDepenseModal, #tricountMouvementModal
 {
     z-index:2100;
 }
