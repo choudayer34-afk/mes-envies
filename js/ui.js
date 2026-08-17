@@ -11,6 +11,7 @@ import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggle
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion, openChecklistAccordion } from "./envie.js";
 import { normaliserTexte } from "./utils.js";
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
+import { voyageADocumentExpire, getAlertesDocumentsExpiration } from "./storage.js";
 
 let modeReduitGlobal = false;
 let tachesOuvert = true;
@@ -142,6 +143,8 @@ function renderHomeSections() {
 renderAchatsMaison();
     renderMesTachesSection();
     renderBilletsAujourdhui();
+    renderPapiersAlerteSection();
+    
  if (modeActif === "maison") {
         renderCollapsibleSection("actionSection", "actionContainer", "🔔 En attente d'action", calculerGroupesActionsMaison(), createActionGroupCard, true);
     } else {
@@ -1071,6 +1074,33 @@ export function renderBilletsAujourdhui() {
 
 }
 
+export function renderPapiersAlerteSection() {
+
+    const section = document.getElementById("papiersAlerteSection");
+
+    if (!section)
+        return;
+
+    const alertes = getAlertesDocumentsExpiration();
+
+    if (alertes.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    section.classList.remove("hidden");
+
+    const emojiParType = { cni: "🪪", passeport: "📔" };
+
+    section.innerHTML = alertes.map(a => `
+        <div class="billetAujourdhuiCard">
+            <div><strong>${a.expire ? "❌" : "⚠️"} ${emojiParType[a.type]} ${a.type === "cni" ? "CNI" : "Passeport"} de ${a.personneNom}</strong></div>
+            <div>${a.expire ? "Expiré depuis le" : "Expire le"} ${a.dateExpiration.split("-").reverse().join("/")}</div>
+        </div>
+    `).join("");
+
+}
+
 function createEnvieCard(envie) {
 
     const card = document.createElement("div");
@@ -1082,7 +1112,10 @@ function createEnvieCard(envie) {
 
     const estContainer = isContainer(envie.categorie);
     const estReduite = estContainer && (cartesEtatIndividuel.has(envie.id) ? cartesEtatIndividuel.get(envie.id) : modeReduitGlobal);
-
+const badgeExpirationHtml = (estContainer && voyageADocumentExpire(envie))
+        ? `<div class="badgeAlerteExpiration">⚠️ Papiers expirés</div>`
+        : "";
+    
     if (estReduite) {
 
         const { statut, pourcentage, realises, total } = computeContainerStatus(envie);
@@ -1106,12 +1139,13 @@ function createEnvieCard(envie) {
 
         card.classList.add("envie-card-reduite");
 
-        card.innerHTML = `
+card.innerHTML = `
             <div class="envieReduiteLigne">
                 <span class="envieReduiteTitre">${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
                 <span class="envieReduiteInfo">${infoCompacte}</span>
                 <button class="envieReduireButtonInline" title="Développer">▸</button>
             </div>
+            ${badgeExpirationHtml}
         `;
 
         card.querySelector(".envieReduireButtonInline").addEventListener("click", (event) => {
@@ -1194,7 +1228,8 @@ function createEnvieCard(envie) {
         <div class="envieCategory">
             ${getCategorieById(envie.categorie)?.label || "Général"}
         </div>
-        ${statutHtml}
+${statutHtml}
+        ${badgeExpirationHtml}
         ${calculerPucesMaison(envie)}
         ${calculerNomsTachesRestantes(envie)}
         <div class="envieActions">
