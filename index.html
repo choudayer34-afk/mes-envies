@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </section>
     <section id="tachesSection" class="inboxSection hidden"></section>
-    
+    <div id="papiersAlerteSection" class="hidden" style="margin-bottom:16px;"></div>
   <section id="actionSection" class="inboxSection hidden"></section>
     
     <button id="btnToggleReductionGlobale" class="secondaryButton" style="width:100%;margin-bottom:14px;">
@@ -805,7 +805,25 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+<div id="personnePapiersModal" class="modal-overlay hidden">
+    <div class="modal">
+        <h2 id="personnePapiersTitre">🪪 Papiers d'identité</h2>
 
+        <label class="fieldTitle">CNI</label>
+        <input type="text" id="papierCniNumero" placeholder="Numéro (optionnel)" class="numberInput">
+        <input type="date" id="papierCniDate" class="numberInput" style="margin-top:8px;">
+
+        <label class="fieldTitle" style="margin-top:16px;">Passeport</label>
+        <input type="text" id="papierPasseportNumero" placeholder="Numéro (optionnel)" class="numberInput">
+        <input type="date" id="papierPasseportDate" class="numberInput" style="margin-top:8px;">
+
+        <div class="modal-actions" style="margin-top:16px;">
+            <button id="cancelPersonnePapiers">Fermer</button>
+            <button id="savePersonnePapiers" class="primaryButton">Enregistrer</button>
+        </div>
+    </div>
+</div>
+    
 <div id="gameboyMenuModal" class="modal-overlay hidden">
 
     <div class="modal">
