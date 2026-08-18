@@ -23,7 +23,7 @@ import { updateEnvieRubriquesEtat } from "./storage.js";
 import { afficherConfirmationAjoutRubrique } from "./onboarding.js";
 import { renderTodoSection } from "./todo.js";
 import { renderTricountSection } from "./tricount.js";
-
+ 
 let currentEnvieId = null;
 
 export function getCurrentEnvieId() {
