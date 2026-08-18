@@ -4,7 +4,7 @@ import { removeEnvie } from "./modal.js";
 import { fetchMeteo3Jours, renderMeteoWidget } from "./meteo.js";
 import { buildPromptSortie } from "./promptgen.js";
 import { showToast } from "./toast.js";
-import { renderPhotosGrid } from "./photos.js";
+import { renderPhotosGrid,initPhotosRecuesModeration } from "./photos.js";
 import { renderPeintureCalculateur } from "./peinture.js";
 import { renderChecklist } from "./checklist.js";
 import { renderUrls } from "./urls.js";
