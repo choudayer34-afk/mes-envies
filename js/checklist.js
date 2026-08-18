@@ -4,6 +4,7 @@ import {
     getChecklistLibrary, getPersonnes, createPersonne,
     updateChecklistItemAssignment, getMagasins, rememberMagasin, updateChecklistItem
 } from "./storage.js";
+import { makeRowDraggable } from "./dragdrop.js";
 
 import { removePersonneFromChecklistItem } from "./storage.js";
 import { setChecklistItems } from "./storage.js";
@@ -397,6 +398,8 @@ function createChecklistRow(item, envie, personneContext = null) {
 
     const row = document.createElement("div");
     row.className = "checklistRow";
+    row.dataset.dragId = item.id;
+
 
         const usePersonneCheckbox = personneContext && item.assignedTo && item.assignedTo.length > 1;
     const isChecked = usePersonneCheckbox
@@ -410,7 +413,8 @@ function createChecklistRow(item, envie, personneContext = null) {
   
 
   row.innerHTML = `
-        <label class="checkLabel">
+        <span class="dragHandle" style="cursor:grab;padding-right:8px;flex:0 0 auto;">⠿</span>
+        <label class="checkLabel" style="width:auto;flex:1;min-width:0;">
             <input type="checkbox" ${isChecked ? "checked" : ""}>
             <span>
                 ${prefix}${item.texte}
@@ -424,6 +428,7 @@ function createChecklistRow(item, envie, personneContext = null) {
         <button class="assignItemButton" title="Attribuer">👤</button>
         <button class="deleteChecklistButton" title="${personneContext ? "Retirer pour cette personne" : "Supprimer"}">🗑️</button>
     `;
+
 
 
    row.querySelector("input").addEventListener("change", (event) => {
@@ -474,6 +479,16 @@ function createChecklistRow(item, envie, personneContext = null) {
             row.remove();
 
         }
+
+    });
+
+    makeRowDraggable(row, item.id, (targetId) => {
+
+        const envieActuelle = getEnvies().find(e => e.id === envie.id);
+        const nouveauxItems = reorderChecklistItem(envieActuelle, item.id, targetId);
+
+        setChecklistItems(envieActuelle.id, nouveauxItems);
+        preserverScroll(() => renderChecklist({ ...envieActuelle, checklist: nouveauxItems }));
 
     });
 
