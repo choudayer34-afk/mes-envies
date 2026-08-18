@@ -264,7 +264,7 @@ main{
 #adminTemplatesModal, #adminCategoriesModal, #adminPersonnesModal, #adminEnvieCategoriesModal, #adminExternalModal, #adminActiviteTypesModal, #adminCriteresVoyageModal, #adminCompteModal,
 #adminPartagesModal, #platformerModal, #simulationIAModal,
 #croquisEditorModal, #mesurePhotoModal, #todoAddModal, #billetAddModal,
-#tricountParticipantModal, #tricountDepenseModal, #tricountMouvementModal, #personnePapiersModal,
+#tricountParticipantModal, #tricountDepenseModal, #tricountMouvementModal,
 #personnePapiersModal
 {
     z-index:2100;
@@ -274,6 +274,9 @@ main{
     z-index:2200;
 }
 
+#personnePapiersModal{
+    z-index:2200;
+}
 
 .modal{
     width:min(92vw,520px);
