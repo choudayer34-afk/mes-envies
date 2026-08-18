@@ -22,6 +22,41 @@ export function updateEnvieTricount(id, tricount) {
     patchEnvie(id, { tricount });
 }
 
+export function activerCollectePhotos(id, activee) {
+    patchEnvie(id, { collecteActivee: activee });
+}
+
+export function initPhotosRecuesSync(foyerId, envieId, onChange) {
+    return onSnapshot(collection(db, "foyers", foyerId, "envies", envieId, "photosPartagees"), (snap) => {
+        const photos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        onChange(photos);
+    });
+}
+
+export function accepterPhotoRecue(foyerId, envieId, photoRecue) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const nouvellesPhotos = [...(envie.photos || []), {
+        id: crypto.randomUUID(),
+        url: photoRecue.url,
+        publicId: photoRecue.publicId,
+        description: photoRecue.nom ? `Envoyée par ${photoRecue.nom}` : ""
+    }];
+
+    patchEnvie(envieId, { photos: nouvellesPhotos });
+
+    deleteDoc(doc(db, "foyers", foyerId, "envies", envieId, "photosPartagees", photoRecue.id)).catch(console.error);
+
+}
+
+export function rejeterPhotoRecue(foyerId, envieId, photoId) {
+    deleteDoc(doc(db, "foyers", foyerId, "envies", envieId, "photosPartagees", photoId)).catch(console.error);
+}
+
 export function updatePersonneDocument(id, type, champs) {
     updateDoc(doc(db, "foyers", getFoyerId(), "personnes", id), {
         [`documentsIdentite.${type}`]: champs
