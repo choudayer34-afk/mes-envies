@@ -11,7 +11,8 @@ import { getEnvies } from "./storage.js";
 import { isContainer, getCategorieById, openEnvie } from "./envie.js";
 import {
     getActiviteTypes, createActiviteType, updateActiviteType, deleteActiviteType, moveActiviteType,
-    getCriteresVoyage, createCritereVoyage, updateCritereVoyage, deleteCritereVoyage, moveCritereVoyage
+    getCriteresVoyage, createCritereVoyage, updateCritereVoyage, deleteCritereVoyage, moveCritereVoyage,
+    updatePersonneDocument
 } from "./storage.js";
 import { renderNouveautes } from "./plus.js";
 import { groupByCategorie } from "./checklist.js";
