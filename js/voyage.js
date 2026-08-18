@@ -2,6 +2,7 @@ import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour, updateEnvieDocumentRequis } from "./storage.js";
 import { ouvrirTableauSaisie } from "./tableau-saisie.js";
+import { activerCollectePhotos } from "./storage.js";
 
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
@@ -997,8 +998,64 @@ function ouvrirPartageModal(envie) {
         });
 
     }
+    
+        let sectionCollecte = document.getElementById("collectePhotosSection");
+
+    if (!sectionCollecte) {
+        sectionCollecte = document.createElement("div");
+        sectionCollecte.id = "collectePhotosSection";
+        sectionCollecte.style.marginTop = "20px";
+        sectionCollecte.style.paddingTop = "16px";
+        sectionCollecte.style.borderTop = "1px solid var(--color-border)";
+        content.appendChild(sectionCollecte);
+    }
+
+    renderCollectePhotosSection(envie, sectionCollecte);
+
 
     modal.classList.remove("hidden");
+
+}
+
+function renderCollectePhotosSection(envie, container) {
+
+    const lienCollecte = `${window.location.origin}/photo-partage.html?foyer=${getFoyerId()}&id=${envie.id}`;
+
+    if (envie.collecteActivee) {
+
+        container.innerHTML = `
+            <p style="font-size:13px;font-weight:700;margin-bottom:8px;">📸 Collecte de photos</p>
+            <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">N'importe qui avec ce lien peut ajouter une photo, sans compte.</p>
+            <textarea readonly rows="2" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--color-border);font-size:13px;margin-bottom:14px;box-sizing:border-box;">${lienCollecte}</textarea>
+            <button id="copierLienCollecte" class="secondaryButton" style="width:100%;margin-bottom:10px;">📋 Copier le lien photo</button>
+            <button id="desactiverCollecte" class="secondaryButton" style="width:100%;background:#FEE2E2;color:#DC2626;">🔒 Désactiver la collecte</button>
+        `;
+
+        container.querySelector("#copierLienCollecte").addEventListener("click", async () => {
+            await navigator.clipboard.writeText(lienCollecte);
+            showToast("✓ Lien copié");
+        });
+
+        container.querySelector("#desactiverCollecte").addEventListener("click", () => {
+            activerCollectePhotos(envie.id, false);
+            renderCollectePhotosSection({ ...envie, collecteActivee: false }, container);
+            showToast("✓ Collecte désactivée");
+        });
+
+    } else {
+
+        container.innerHTML = `
+            <p style="font-size:13px;font-weight:700;margin-bottom:8px;">📸 Collecte de photos</p>
+            <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">Génère un lien séparé pour que d'autres personnes déposent leurs photos, sans voir le reste du voyage.</p>
+            <button id="activerCollecte" class="secondaryButton" style="width:100%;">➕ Activer la collecte de photos</button>
+        `;
+
+        container.querySelector("#activerCollecte").addEventListener("click", () => {
+            activerCollectePhotos(envie.id, true);
+            renderCollectePhotosSection({ ...envie, collecteActivee: true }, container);
+        });
+
+    }
 
 }
 
