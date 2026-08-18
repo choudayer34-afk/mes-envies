@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Envoyer une photo — EnVie</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body style="padding:24px;max-width:480px;margin:0 auto;">
+
+    <h1 id="titreVoyage">📸 Envoyer une photo</h1>
+    <p id="sousTitre" style="color:var(--color-text-light);margin-bottom:20px;"></p>
+
+    <div id="formulaireEnvoi">
+
+        <label class="fieldTitle">Ton nom (optionnel)</label>
+        <input type="text" id="nomEnvoyeur" placeholder="Ex: Julien" class="numberInput" style="margin-bottom:14px;">
+
+        <label class="fieldTitle">Photo</label>
+        <input type="file" id="fichierPhoto" accept="image/*" class="numberInput" style="margin-bottom:14px;">
+
+        <button id="envoyerPhotoButton" class="primaryButton" style="width:100%;">📤 Envoyer</button>
+
+    </div>
+
+    <div id="messageResultat" class="hidden" style="text-align:center;margin-top:24px;font-size:16px;"></div>
+
+    <script type="module" src="./js/photo-partage.js"></script>
+
+</body>
+</html>
