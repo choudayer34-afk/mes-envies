@@ -1,10 +1,12 @@
 import { db } from "./firebase.js";
-import { doc, getDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { uploadToCloudinary } from "./photos.js";
 
 const params = new URLSearchParams(window.location.search);
 const foyerId = params.get("foyer");
 const envieId = params.get("id");
+
+let ciblesDisponibles = [];
 
 async function init() {
 
@@ -26,8 +28,30 @@ async function init() {
 
         }
 
-        document.getElementById("titreVoyage").textContent = `📸 ${envieSnap.data().titre}`;
-        document.getElementById("sousTitre").textContent = "Envoie une photo directement, sans créer de compte.";
+        const envie = envieSnap.data();
+
+        document.getElementById("titreVoyage").textContent = `📸 ${envie.titre}`;
+        document.getElementById("sousTitre").textContent = "Envoie une ou plusieurs photos, sans créer de compte.";
+
+        ciblesDisponibles = [{ id: envieId, titre: envie.titre }];
+
+        const enfantsSnap = await getDocs(query(collection(db, "foyers", foyerId, "envies"), where("voyageId", "==", envieId)));
+
+        enfantsSnap.forEach(d => {
+            ciblesDisponibles.push({ id: d.id, titre: d.data().titre });
+        });
+
+        if (ciblesDisponibles.length > 1) {
+
+            const selecteur = document.getElementById("cibleSelecteur");
+
+            selecteur.innerHTML = ciblesDisponibles.map((c, i) =>
+                `<option value="${c.id}">${i === 0 ? "📌 " : "— "}${c.titre}</option>`
+            ).join("");
+
+            document.getElementById("cibleSelecteurLigne").classList.remove("hidden");
+
+        }
 
     } catch (err) {
 
@@ -48,6 +72,10 @@ document.getElementById("envoyerPhotoButton").addEventListener("click", async ()
         return;
     }
 
+    const cibleId = ciblesDisponibles.length > 1
+        ? document.getElementById("cibleSelecteur").value
+        : envieId;
+
     const bouton = document.getElementById("envoyerPhotoButton");
     bouton.disabled = true;
 
@@ -64,7 +92,7 @@ document.getElementById("envoyerPhotoButton").addEventListener("click", async ()
 
             const result = await uploadToCloudinary(fichiers[i]);
 
-            await addDoc(collection(db, "foyers", foyerId, "envies", envieId, "photosPartagees"), {
+            await addDoc(collection(db, "foyers", foyerId, "envies", cibleId, "photosPartagees"), {
                 url: result.secure_url,
                 publicId: result.public_id,
                 nom,
@@ -92,6 +120,5 @@ document.getElementById("envoyerPhotoButton").addEventListener("click", async ()
     }
 
 });
-
 
 init();
