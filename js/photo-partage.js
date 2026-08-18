@@ -41,42 +41,57 @@ async function init() {
 
 document.getElementById("envoyerPhotoButton").addEventListener("click", async () => {
 
-    const fichier = document.getElementById("fichierPhoto").files[0];
+    const fichiers = Array.from(document.getElementById("fichierPhoto").files);
 
-    if (!fichier) {
-        alert("Choisis une photo d'abord.");
+    if (fichiers.length === 0) {
+        alert("Choisis au moins une photo d'abord.");
         return;
     }
 
     const bouton = document.getElementById("envoyerPhotoButton");
     bouton.disabled = true;
-    bouton.textContent = "⏳ Envoi en cours...";
 
-    try {
+    const nom = document.getElementById("nomEnvoyeur").value.trim() || null;
 
-        const result = await uploadToCloudinary(fichier);
-        const nom = document.getElementById("nomEnvoyeur").value.trim() || null;
+    let reussies = 0;
+    let echouees = 0;
 
-        await addDoc(collection(db, "foyers", foyerId, "envies", envieId, "photosPartagees"), {
-            url: result.secure_url,
-            publicId: result.public_id,
-            nom,
-            createdAt: Date.now()
-        });
+    for (let i = 0; i < fichiers.length; i++) {
 
-        document.getElementById("formulaireEnvoi").classList.add("hidden");
-        document.getElementById("messageResultat").classList.remove("hidden");
-        document.getElementById("messageResultat").innerHTML = "✅ Photo envoyée, merci !";
+        bouton.textContent = `⏳ Envoi ${i + 1}/${fichiers.length}...`;
 
-    } catch (err) {
+        try {
 
-        console.error("Erreur envoi photo: " + err.message);
-        bouton.disabled = false;
-        bouton.textContent = "📤 Envoyer";
-        alert("Échec de l'envoi, réessaie.");
+            const result = await uploadToCloudinary(fichiers[i]);
+
+            await addDoc(collection(db, "foyers", foyerId, "envies", envieId, "photosPartagees"), {
+                url: result.secure_url,
+                publicId: result.public_id,
+                nom,
+                createdAt: Date.now()
+            });
+
+            reussies++;
+
+        } catch (err) {
+
+            console.error("Erreur envoi photo: " + err.message);
+            echouees++;
+
+        }
 
     }
 
+    document.getElementById("formulaireEnvoi").classList.add("hidden");
+    document.getElementById("messageResultat").classList.remove("hidden");
+
+    if (echouees === 0) {
+        document.getElementById("messageResultat").innerHTML = `✅ ${reussies} photo${reussies > 1 ? "s" : ""} envoyée${reussies > 1 ? "s" : ""}, merci !`;
+    } else {
+        document.getElementById("messageResultat").innerHTML = `⚠️ ${reussies} envoyée${reussies > 1 ? "s" : ""}, ${echouees} en échec. Réessaie si besoin.`;
+    }
+
 });
+
 
 init();
