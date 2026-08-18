@@ -2,6 +2,7 @@ import { updateEnviePhotos, updatePhotoDescription, getEnvies, updateEnviePhotoC
 import { getCurrentEnvieId, openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
 import { renderVoyageSection } from "./voyage.js";
+import { initPhotosRecuesSync, accepterPhotoRecue, rejeterPhotoRecue, getFoyerId } from "./storage.js";
 
 const CLOUD_NAME = "wz4fkcbs";
 const UPLOAD_PRESET = "Envies";
@@ -10,6 +11,70 @@ const COULEURS_MESURE = ["#D97C7C", "#3E7CB1", "#2C7A4B", "#E7A94C", "#8A6FBF", 
 let modeMesureActif = false;
 let pointsMesureEnCours = [];
 let couleurMesureChoisie = COULEURS_MESURE[0];
+
+
+let arreterSyncPhotosRecues = null;
+
+export function initPhotosRecuesModeration(envieId) {
+
+    if (arreterSyncPhotosRecues) {
+        arreterSyncPhotosRecues();
+        arreterSyncPhotosRecues = null;
+    }
+
+    arreterSyncPhotosRecues = initPhotosRecuesSync(getFoyerId(), envieId, (photosRecues) => {
+        renderPhotosRecues(envieId, photosRecues);
+    });
+
+}
+
+function renderPhotosRecues(envieId, photosRecues) {
+
+    const section = document.getElementById("photosRecuesSection");
+    const container = document.getElementById("photosRecuesListe");
+
+    if (!section || !container)
+        return;
+
+    if (photosRecues.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    section.classList.remove("hidden");
+
+    container.innerHTML = photosRecues.map(p => `
+        <div class="templateRow">
+            <img src="${p.url.replace('/upload/', '/upload/w_60,h_60,c_fill,q_auto/')}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;">
+            <div class="templateRowNom" style="flex:1;margin-left:10px;">${p.nom || "Anonyme"}</div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton accepterPhotoRecueButton" data-id="${p.id}" title="Ajouter à la galerie">✅</button>
+                <button class="actionButton deleteButton rejeterPhotoRecueButton" data-id="${p.id}" title="Rejeter">🗑️</button>
+            </div>
+        </div>
+    `).join("");
+
+    container.querySelectorAll(".accepterPhotoRecueButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+
+            const photo = photosRecues.find(p => p.id === btn.dataset.id);
+            accepterPhotoRecue(getFoyerId(), envieId, photo);
+            showToast("✓ Photo ajoutée à la galerie");
+
+        });
+
+    });
+
+    container.querySelectorAll(".rejeterPhotoRecueButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+            rejeterPhotoRecue(getFoyerId(), envieId, btn.dataset.id);
+        });
+
+    });
+
+}
 
 export function initPhotos() {
 
