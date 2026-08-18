@@ -5,7 +5,7 @@ import {
     updateChecklistItemAssignment, getMagasins, rememberMagasin, updateChecklistItem
 } from "./storage.js";
 import { makeRowDraggable } from "./dragdrop.js";
-
+ 
 import { removePersonneFromChecklistItem } from "./storage.js";
 import { setChecklistItems } from "./storage.js";
 
