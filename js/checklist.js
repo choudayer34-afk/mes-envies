@@ -100,6 +100,24 @@ function preserverScroll(fonction) {
 
 }
 
+function reorderChecklistItem(envie, itemId, targetId) {
+
+    const items = [...(envie.checklist || [])];
+    const currentIndex = items.findIndex(i => i.id === itemId);
+
+    if (currentIndex === -1)
+        return items;
+
+    const [item] = items.splice(currentIndex, 1);
+    const nouvelIndex = items.findIndex(i => i.id === targetId);
+
+    items.splice(nouvelIndex === -1 ? items.length : nouvelIndex, 0, item);
+
+    return items;
+
+}
+
+
 function cleCategorie(categorie) {
     return categorie ? categorie.id : "sans-categorie";
 }
