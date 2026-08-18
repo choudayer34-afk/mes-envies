@@ -2,7 +2,9 @@ import { updateEnviePhotos, updatePhotoDescription, getEnvies, updateEnviePhotoC
 import { getCurrentEnvieId, openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
 import { renderVoyageSection } from "./voyage.js";
-import { initPhotosRecuesSync, accepterPhotoRecue, rejeterPhotoRecue, getFoyerId } from "./storage.js";
+import { initPhotosRecuesSync, accepterPhotoRecue, rejeterPhotoRecue } from "./storage.js";
+import { getFoyerId } from "./auth.js";
+
 
 const CLOUD_NAME = "wz4fkcbs";
 const UPLOAD_PRESET = "Envies";
