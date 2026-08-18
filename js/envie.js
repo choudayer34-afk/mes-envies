@@ -92,6 +92,9 @@ document.getElementById("ficheModeIcone").textContent = envie.contexte === "mais
 renderTricountSection(envie);
        
     renderPhotosGrid(envie);
+    if (envie.contexte !== "maison") {
+        initPhotosRecuesModeration(envie.id);
+    }
 
 
     document.getElementById("ficheLieu").value = envie.lieu?.nom || "";
