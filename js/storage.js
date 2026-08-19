@@ -62,13 +62,14 @@ export function creerJourneeSilencieuse(voyage, lieu) {
 
     const aujourdhui = new Date().toISOString().split("T")[0];
     const numeroJour = calculerNumeroJour(voyage);
+    const categorieJournee = getEnvieCategories().find(c => c.label === "Journée");
 
     const id = crypto.randomUUID();
 
     const envieData = {
         titre: `📅 Jour ${numeroJour}`,
         contexte: "voyage",
-        categorie: null,
+        categorie: categorieJournee?.id || null,
         voyageId: voyage.id,
         date: { start: aujourdhui, type: "single" },
         lieu: lieu || null,
@@ -81,6 +82,7 @@ export function creerJourneeSilencieuse(voyage, lieu) {
     return { id, ...envieData };
 
 }
+
 
 export function accepterPhotoRecue(foyerId, envieId, photoRecue) {
 
