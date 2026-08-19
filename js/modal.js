@@ -230,6 +230,7 @@ function saveCurrentEnvie() {
         const input = document.getElementById("envieInput");
         const titre = input.value.trim();
         const erreur = document.getElementById("envieInputErreur");
+console.log("[DEBUG] creation envie");
 
         if (!titre) {
 
