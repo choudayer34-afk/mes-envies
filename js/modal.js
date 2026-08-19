@@ -251,7 +251,10 @@ function saveCurrentEnvie() {
 
                    } else {
 
-                   const nouvelId = createEnvie({
+                   console.log("[DEBUG] creationJourneeAuto au moment de sauvegarder:", JSON.stringify(creationJourneeAuto));
+
+const nouvelId = createEnvie({
+
                 titre,
                 categorie: currentCategorie,
                 lieu: creationJourneeAuto?.lieu ?? getSelectedLieu(),
