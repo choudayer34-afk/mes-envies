@@ -340,9 +340,17 @@ export function initAjoutPhotoRapide() {
 
         }
 
-        const envie = getEnvies().find(e => e.id === envieId);
+          const envie = getEnvies().find(e => e.id === envieId);
 
-        if (envie && nouvellesPhotos.length > 0) {
+        if (!envie) {
+
+            console.error("Ajout photo rapide : envie introuvable pour l'id " + envieId);
+            showToast("❌ Idée introuvable, la photo n'a pas pu être rattachée");
+            return;
+
+        }
+
+        if (nouvellesPhotos.length > 0) {
             updateEnviePhotos(envieId, [...(envie.photos || []), ...nouvellesPhotos]);
         }
 
@@ -351,6 +359,7 @@ export function initAjoutPhotoRapide() {
         } else {
             showToast(`⚠️ ${reussies} ajoutée${reussies > 1 ? "s" : ""}, ${echouees} en échec`);
         }
+
 
     });
 
