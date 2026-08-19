@@ -5,6 +5,7 @@ import { getBilletsAujourdhui } from "./billets.js";
 import { openModalJournee } from "./modal.js";
 import { obtenirPositionActuelle } from "./location.js";
 import { calculerNumeroJour } from "./storage.js";
+import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
 
 
 import { getModeActif, basculerMode } from "./storage.js";
@@ -19,6 +20,8 @@ import { voyageADocumentExpire, getAlertesDocumentsExpiration } from "./storage.
 
 let modeReduitGlobal = false;
 let tachesOuvert = true;
+let ajoutPhotoRapideEnvieId = null;
+
 const cartesEtatIndividuel = new Map();
 let vueAchats = "projet";
 function isUntriaged(envie) {
@@ -242,13 +245,24 @@ function createCompactRow(envie) {
 
     }
 
-    row.innerHTML = `
+       row.innerHTML = `
         <label class="checkLabel">
             <input type="checkbox" ${envie.realise ? "checked" : ""}>
             <span>${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}</span>
         </label>
+        <button class="ajoutPhotoRapideButton" data-id="${envie.id}" title="Ajouter une photo">📷</button>
         <button class="editAgendaButton" title="Modifier">✏️</button>
     `;
+
+    row.querySelector(".ajoutPhotoRapideButton")?.addEventListener("click", (event) => {
+
+        event.stopPropagation();
+
+        ajoutPhotoRapideEnvieId = envie.id;
+        document.getElementById("ajoutPhotoRapideInput")?.click();
+
+    });
+
 
     row.querySelector("input").addEventListener("change", () => {
 
@@ -280,6 +294,52 @@ function createCompactRow(envie) {
 
 
     return row;
+
+}
+
+export function initAjoutPhotoRapide() {
+
+    document.getElementById("ajoutPhotoRapideInput")?.addEventListener("change", async (event) => {
+
+        const fichier = event.target.files[0];
+        const envieId = ajoutPhotoRapideEnvieId;
+
+        event.target.value = "";
+        ajoutPhotoRapideEnvieId = null;
+
+        if (!fichier || !envieId)
+            return;
+
+        showToast("📤 Envoi de la photo...");
+
+        try {
+
+            const blobCompresse = await compresserImageAvantEnvoi(fichier);
+            const result = await uploadToCloudinary(blobCompresse);
+
+            const envie = getEnvies().find(e => e.id === envieId);
+
+            if (!envie)
+                return;
+
+            const nouvellesPhotos = [...(envie.photos || []), {
+                id: crypto.randomUUID(),
+                url: result.secure_url,
+                publicId: result.public_id
+            }];
+
+            updateEnviePhotos(envieId, nouvellesPhotos);
+
+            showToast("✓ Photo ajoutée");
+
+        } catch (err) {
+
+            console.error("Erreur ajout photo rapide: " + err.message);
+            showToast("❌ Échec de l'envoi");
+
+        }
+
+    });
 
 }
 
