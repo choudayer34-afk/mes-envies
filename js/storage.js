@@ -18,6 +18,19 @@ export function updateEnvieBillets(id, billets) {
     patchEnvie(id, { billets });
 }
 
+export function updateUrlNom(envieId, urlId, nom) {
+
+    const envie = enviesCache.find(e => e.id === envieId);
+
+    if (!envie)
+        return;
+
+    const urls = (envie.urls || []).map(u => u.id === urlId ? { ...u, nom } : u);
+
+    patchEnvie(envieId, { urls });
+
+}
+
 export function updateEnvieTricount(id, tricount) {
     patchEnvie(id, { tricount });
 }
