@@ -33,6 +33,42 @@ export function initPhotosRecuesSync(foyerId, envieId, onChange) {
     });
 }
 
+export function calculerNumeroJour(voyage) {
+
+    if (!voyage.date?.start)
+        return 1;
+
+    const debut = new Date(voyage.date.start);
+    const diffJours = Math.round((new Date() - debut) / (1000 * 60 * 60 * 24));
+
+    return Math.max(1, diffJours + 1);
+
+}
+
+export function creerJourneeSilencieuse(voyage, lieu) {
+
+    const aujourdhui = new Date().toISOString().split("T")[0];
+    const numeroJour = calculerNumeroJour(voyage);
+
+    const id = crypto.randomUUID();
+
+    const envieData = {
+        titre: `📅 Jour ${numeroJour}`,
+        contexte: "voyage",
+        categorie: null,
+        voyageId: voyage.id,
+        date: { start: aujourdhui, type: "single" },
+        lieu: lieu || null,
+        favorite: false,
+        realise: false
+    };
+
+    setDoc(doc(db, "foyers", getFoyerId(), "envies", id), envieData).catch(console.error);
+
+    return { id, ...envieData };
+
+}
+
 export function accepterPhotoRecue(foyerId, envieId, photoRecue) {
 
     const envie = enviesCache.find(e => e.id === envieId);
