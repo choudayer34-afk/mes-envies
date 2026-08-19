@@ -13,7 +13,7 @@ export function renderUrls(envie) {
     const urlList = document.getElementById("urlList");
     urlList.innerHTML = "";
 
-     (envie.urls || []).forEach(link => {
+         (envie.urls || []).forEach(link => {
 
         const div = document.createElement("div");
         div.className = "urlItem";
@@ -22,8 +22,27 @@ export function renderUrls(envie) {
 
         div.innerHTML = `
             <a href="${link.url}" target="_blank">${icone} ${link.nom || link.url}</a>
+            <button class="iconSmallButton renommerUrlButton">✏️</button>
             <button class="deleteUrlButton">🗑️</button>
         `;
+
+        div.querySelector(".renommerUrlButton").addEventListener("click", () => {
+
+            const nouveauNom = prompt("Nom / description :", link.nom || "");
+
+            if (nouveauNom === null)
+                return;
+
+            updateUrlNom(envie.id, link.id, nouveauNom.trim() || null);
+
+            const envieActuelle = getEnvies().find(e => e.id === envie.id);
+
+            if (envieActuelle) {
+                renderUrls(envieActuelle);
+            }
+
+        });
+
 
 
         div.querySelector(".deleteUrlButton").addEventListener("click", (event) => {
