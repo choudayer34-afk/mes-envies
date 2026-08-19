@@ -33,7 +33,20 @@ export function openModalJournee(voyageId, titre, date, lieu) {
     renderCreationCategorieSelector();
     openModal("📅 Nouveau jour", titre);
 
+    const info = document.getElementById("creationJourneeInfo");
+
+    if (info) {
+
+        const dateAffichee = date?.start ? date.start.split("-").reverse().join("/") : "non détectée";
+        const lieuAffiche = lieu?.nom || "non détecté (géolocalisation refusée ou indisponible)";
+
+        info.innerHTML = `📅 ${dateAffichee} · 📍 ${lieuAffiche}`;
+        info.classList.remove("hidden");
+
+    }
+
 }
+
 
 export function openModalConteneurSelonMode() {
 
@@ -196,7 +209,10 @@ export function renderCreationCategorieSelector(categorieIdPreselectionnee = nul
 
 export function openModal(title = "💡 Une envie", value = "", editId = null) {
 
+    document.getElementById("creationJourneeInfo")?.classList.add("hidden");
+
     currentEditId = editId;
+
 
     document.querySelector("#modalOverlay h2").textContent = title;
 
