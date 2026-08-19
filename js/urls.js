@@ -1,7 +1,7 @@
 
 import { openEnvie, getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
-import { addUrl as addUrlStorage, removeUrl as removeUrlStorage, getEnvies } from "./storage.js";
+import { addUrl as addUrlStorage, removeUrl as removeUrlStorage, getEnvies,updateUrlNom } from "./storage.js";
 import { uploadToCloudinary } from "./photos.js";
 
 let currentUrlEnvieId = null;
