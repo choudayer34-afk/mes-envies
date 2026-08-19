@@ -501,18 +501,19 @@ export function updateEnvieEvaluation(id, critere, valeur) {
 
 }
 
-export function addUrl(id, url, nom = null) {
+export function addUrl(id, url, nom = null, type = "lien", fichierType = null) {
 
     const envie = enviesCache.find(e => e.id === id);
 
     if (!envie)
         return;
 
-    const urls = [...(envie.urls || []), { id: crypto.randomUUID(), url, nom, createdAt: Date.now() }];
+    const urls = [...(envie.urls || []), { id: crypto.randomUUID(), url, nom, type, fichierType, createdAt: Date.now() }];
 
     patchEnvie(id, { urls });
 
 }
+
 
 export function removeUrl(envieId, urlId) {
 
