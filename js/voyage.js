@@ -3,6 +3,8 @@ import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour, updateEnvieDocumentRequis } from "./storage.js";
 import { ouvrirTableauSaisie } from "./tableau-saisie.js";
 import { activerCollectePhotos } from "./storage.js";
+import { creerJourneeSilencieuse, calculerNumeroJour } from "./storage.js";
+import { obtenirPositionActuelle } from "./location.js";
 
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
@@ -404,7 +406,32 @@ if (!estMaison) {
 
     container.appendChild(creerNouvelleButton);
 
-    
+        const creerJourneeButton = document.createElement("button");
+    creerJourneeButton.className = "secondaryButton";
+    creerJourneeButton.textContent = "📅 Créer une journée ici";
+    creerJourneeButton.style.marginTop = "10px";
+
+    creerJourneeButton.addEventListener("click", async () => {
+
+        creerJourneeButton.disabled = true;
+        creerJourneeButton.textContent = "📅 Localisation...";
+
+        const place = await obtenirPositionActuelle();
+
+        const nouvelleJournee = creerJourneeSilencieuse(envie, place);
+
+        creerJourneeButton.disabled = false;
+        creerJourneeButton.textContent = "📅 Créer une journée ici";
+
+        showToast(`✓ "${nouvelleJournee.titre}" créé`);
+
+        renderVoyageSection({ ...envie });
+
+    });
+
+    container.appendChild(creerJourneeButton);
+
+
   if (estMaison) {
 
         const partagerButton = document.createElement("button");
