@@ -90,6 +90,8 @@ import { closeFiche, initAccordions } from "./js/envie.js";
 import { initAdmin } from "./js/admin.js";
 import { initFicheDelete } from "./js/envie.js";
     import { afficherVersionCache } from "./js/ui.js";
+    import { initAjoutPhotoRapide } from "./js/ui.js";
+
 const APP = {
     name: "EnVie",
     version: "0.3.0",
@@ -134,6 +136,8 @@ initCroquis();
  initBillets();
  initFicheFab();
  initTodo();
+    initAjoutPhotoRapide();
+
  initTricount();
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
