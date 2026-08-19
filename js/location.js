@@ -24,6 +24,24 @@ export function resetSelectedLieu() {
     selectedLieu = { nom: "", adresse: "", latitude: null, longitude: null };
 }
 
+export function obtenirPositionActuelle() {
+
+    return new Promise((resolve) => {
+
+        let resolu = false;
+
+        const delaiMax = setTimeout(() => {
+            if (!resolu) { resolu = true; resolve(null); }
+        }, 6000);
+
+        useCurrentLocation(null, (place) => {
+            if (!resolu) { resolu = true; clearTimeout(delaiMax); resolve(place); }
+        });
+
+    });
+
+}
+
 export async function searchLocation(query) {
 
     if (query.length < 3)
