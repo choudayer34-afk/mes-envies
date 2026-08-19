@@ -299,47 +299,61 @@ function createCompactRow(envie) {
 
 export function initAjoutPhotoRapide() {
 
-    document.getElementById("ajoutPhotoRapideInput")?.addEventListener("change", async (event) => {
+       document.getElementById("ajoutPhotoRapideInput")?.addEventListener("change", async (event) => {
 
-        const fichier = event.target.files[0];
+        const fichiers = Array.from(event.target.files);
         const envieId = ajoutPhotoRapideEnvieId;
 
         event.target.value = "";
         ajoutPhotoRapideEnvieId = null;
 
-        if (!fichier || !envieId)
+        if (fichiers.length === 0 || !envieId)
             return;
 
-        showToast("📤 Envoi de la photo...");
+        showToast(`📤 Envoi de ${fichiers.length} photo${fichiers.length > 1 ? "s" : ""}...`);
 
-        try {
+        let reussies = 0;
+        let echouees = 0;
+        const nouvellesPhotos = [];
 
-            const blobCompresse = await compresserImageAvantEnvoi(fichier);
-            const result = await uploadToCloudinary(blobCompresse);
+        for (const fichier of fichiers) {
 
-            const envie = getEnvies().find(e => e.id === envieId);
+            try {
 
-            if (!envie)
-                return;
+                const blobCompresse = await compresserImageAvantEnvoi(fichier);
+                const result = await uploadToCloudinary(blobCompresse);
 
-            const nouvellesPhotos = [...(envie.photos || []), {
-                id: crypto.randomUUID(),
-                url: result.secure_url,
-                publicId: result.public_id
-            }];
+                nouvellesPhotos.push({
+                    id: crypto.randomUUID(),
+                    url: result.secure_url,
+                    publicId: result.public_id
+                });
 
-            updateEnviePhotos(envieId, nouvellesPhotos);
+                reussies++;
 
-            showToast("✓ Photo ajoutée");
+            } catch (err) {
 
-        } catch (err) {
+                console.error("Erreur ajout photo rapide: " + err.message);
+                echouees++;
 
-            console.error("Erreur ajout photo rapide: " + err.message);
-            showToast("❌ Échec de l'envoi");
+            }
 
         }
 
+        const envie = getEnvies().find(e => e.id === envieId);
+
+        if (envie && nouvellesPhotos.length > 0) {
+            updateEnviePhotos(envieId, [...(envie.photos || []), ...nouvellesPhotos]);
+        }
+
+        if (echouees === 0) {
+            showToast(`✓ ${reussies} photo${reussies > 1 ? "s" : ""} ajoutée${reussies > 1 ? "s" : ""}`);
+        } else {
+            showToast(`⚠️ ${reussies} ajoutée${reussies > 1 ? "s" : ""}, ${echouees} en échec`);
+        }
+
     });
+
 
 }
 
