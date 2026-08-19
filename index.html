@@ -1774,14 +1774,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <h2>Ajouter un lien</h2>
 
- <label class="fieldTitle">Nom (optionnel)</label>
+ <div class="itemTypeToggle" id="urlTypeToggle" style="margin-bottom:14px;">
+    <button type="button" class="itemTypeChip active" data-type="lien">🔗 Lien</button>
+    <button type="button" class="itemTypeChip" data-type="fichier">📎 PDF / Photo</button>
+</div>
+
+<label class="fieldTitle">Nom / description (optionnel)</label>
 <input type="text" id="urlNomInput" placeholder="Ex: Devis du plombier" class="numberInput" style="margin-bottom:10px;">
 
-<label class="fieldTitle">Lien</label>
-<input
-    id="urlInput"
+<div id="urlLienChamp">
+    <label class="fieldTitle">Lien</label>
+    <input
+        id="urlInput"
+
             type="url"
             placeholder="https://...">
+<\div>
+<div id="urlFichierChamp" class="hidden">
+    <label class="fieldTitle">Fichier</label>
+    <div id="urlFichierApercu" style="margin-bottom:8px;"></div>
+    <input type="file" id="urlFichierInput" accept="image/*,application/pdf" hidden>
+    <button type="button" id="urlFichierButton" class="secondaryButton" style="width:100%;">📎 Choisir un fichier</button>
+</div>
 
         <div class="modal-actions">
 
