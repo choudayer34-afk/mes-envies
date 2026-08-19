@@ -30,8 +30,13 @@ export function openModalJournee(voyageId, titre, date, lieu) {
     voyageContextId = voyageId;
     creationJourneeAuto = { date, lieu };
 
-    renderCreationCategorieSelector();
+    const categorieJournee = getEnvieCategories().find(c => c.label === "Journée");
+
+    renderCreationCategorieSelector(categorieJournee?.id || null);
+    currentCategorie = categorieJournee?.id || null;
+
     openModal("📅 Nouveau jour", titre);
+
 
     const info = document.getElementById("creationJourneeInfo");
 
