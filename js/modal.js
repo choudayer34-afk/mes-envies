@@ -15,12 +15,23 @@ let currentCategorie = "general";
 let currentDeleteId = null;
 let categorieGridOuverte = false;
 let voyageContextId = null;
+let creationJourneeAuto = null;
 
 export function openModalVoyageContext(voyageId) {
 
     voyageContextId = voyageId;
     renderCreationCategorieSelector();
     openModal();
+
+}
+
+export function openModalJournee(voyageId, titre, date, lieu) {
+
+    voyageContextId = voyageId;
+    creationJourneeAuto = { date, lieu };
+
+    renderCreationCategorieSelector();
+    openModal("📅 Nouveau jour", titre);
 
 }
 
@@ -80,6 +91,8 @@ export function initModal() {
             resetSelectedPeriode();
 
             voyageContextId = null;
+          
+
 
             closeModal();
 
@@ -238,14 +251,15 @@ function saveCurrentEnvie() {
 
                    } else {
 
-            const nouvelId = createEnvie({
+                   const nouvelId = createEnvie({
                 titre,
                 categorie: currentCategorie,
-                lieu: getSelectedLieu(),
-                date: getSelectedPeriode(),
+                lieu: creationJourneeAuto?.lieu ?? getSelectedLieu(),
+                date: creationJourneeAuto?.date ?? getSelectedPeriode(),
                 voyageId: voyageContextId || null,
                 contexte: getModeActif()
             });
+
 
             console.log("Créé avec categorie=" + currentCategorie + " contexte=" + getModeActif());
 
@@ -260,6 +274,8 @@ function saveCurrentEnvie() {
 
         currentEditId = null;
         voyageContextId = null;
+        creationJourneeAuto = null;
+
 
         closeModal();
         renderEnvies();
