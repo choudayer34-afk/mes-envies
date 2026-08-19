@@ -5,9 +5,7 @@ import { getBilletsAujourdhui } from "./billets.js";
 import { openModalJournee } from "./modal.js";
 import { obtenirPositionActuelle } from "./location.js";
 import { calculerNumeroJour } from "./storage.js";
-import { openModalJournee } from "./modal.js";
-import { obtenirPositionActuelle } from "./location.js";
-import { calculerNumeroJour } from "./storage.js";
+
 
 import { getModeActif, basculerMode } from "./storage.js";
 
