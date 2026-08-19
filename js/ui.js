@@ -5,6 +5,9 @@ import { getBilletsAujourdhui } from "./billets.js";
 import { openModalJournee } from "./modal.js";
 import { obtenirPositionActuelle } from "./location.js";
 import { calculerNumeroJour } from "./storage.js";
+import { openModalJournee } from "./modal.js";
+import { obtenirPositionActuelle } from "./location.js";
+import { calculerNumeroJour } from "./storage.js";
 
 import { getModeActif, basculerMode } from "./storage.js";
 
@@ -1236,10 +1239,12 @@ ${statutHtml}
         ${badgeExpirationHtml}
         ${calculerPucesMaison(envie)}
         ${calculerNomsTachesRestantes(envie)}
-        <div class="envieActions">
+                <div class="envieActions">
+            ${estContainer && envie.contexte !== "maison" ? `<button class="actionButton editButton creerJourneeCardButton" data-id="${envie.id}" title="Créer une journée">📅➕</button>` : ""}
             <button class="actionButton editButton" data-id="${envie.id}" title="Modifier">✏️</button>
             <button class="actionButton deleteButton" data-id="${envie.id}" title="Supprimer">🗑️</button>
         </div>`;
+
 
     card.querySelector(".envieReduireButton")?.addEventListener("click", (event) => {
 
@@ -1254,6 +1259,23 @@ ${statutHtml}
     card.querySelector(".editButton").addEventListener("click", (event) => {
         event.stopPropagation();
         openEnvie(envie.id, null);
+
+    });
+
+    card.querySelector(".creerJourneeCardButton")?.addEventListener("click", async (event) => {
+
+        event.stopPropagation();
+
+        const bouton = event.target;
+        bouton.disabled = true;
+
+        const place = await obtenirPositionActuelle();
+        const numeroJour = calculerNumeroJour(envie);
+        const aujourdhui = new Date().toISOString().split("T")[0];
+
+        openModalJournee(envie.id, `📅 Jour ${numeroJour}`, { start: aujourdhui, type: "single" }, place);
+
+        bouton.disabled = false;
 
     });
 
