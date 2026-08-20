@@ -24,6 +24,10 @@ function getCategorieById(id) {
     return categoriesCache.find(c => c.id === id);
 }
 
+function urlTelechargement(url) {
+    return url.replace("/upload/", "/upload/fl_attachment/");
+}
+
 async function init() {
 
     const container = document.getElementById("partageContent");
@@ -681,12 +685,14 @@ function createCartePartage(envie, photosDuJour = []) {
             const thumbUrl = photo.url.replace("/upload/", "/upload/w_400,h_400,c_fill,q_auto/");
             const indexGlobal = photosDuJour.findIndex(p => p.url === photo.url && p.activiteTitre === envie.titre);
 
-            photosHtml += `
-                <div class="carnetPhotoItem" data-index-global="${indexGlobal}" style="cursor:pointer;">
+                     photosHtml += `
+                <div class="carnetPhotoItem" data-index-global="${indexGlobal}" style="cursor:pointer;position:relative;">
                     <img src="${thumbUrl}" loading="lazy">
+                    <a href="${urlTelechargement(photo.url)}" download title="Télécharger" onclick="event.stopPropagation()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.55);color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:14px;">⬇️</a>
                     ${photo.description ? `<div class="carnetPhotoLegende">${photo.description}</div>` : ""}
                 </div>
             `;
+
 
         });
 
@@ -839,11 +845,14 @@ function openPhotoViewerPublic(toutesLesPhotosDuJour, indexDepart) {
 
         const photo = toutesLesPhotosDuJour[indexActuel];
 
-        modal.innerHTML = `
+         modal.innerHTML = `
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
                 <button id="fermerViewer" style="background:none;border:none;color:white;font-size:16px;">← Retour</button>
                 <span style="color:white;font-size:13px;">${indexActuel + 1} / ${toutesLesPhotosDuJour.length}</span>
+                <a href="${urlTelechargement(photo.url)}" download style="background:rgba(255,255,255,.15);color:white;border:none;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:13px;">⬇️ Télécharger</a>
             </div>
+
+
             <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;">
                 ${indexActuel > 0 ? `<button id="photoPrec" style="position:absolute;left:0;background:rgba(255,255,255,.15);border:none;color:white;font-size:24px;width:44px;height:44px;border-radius:50%;">‹</button>` : ""}
                 <img src="${photo.url}" style="max-width:100%;max-height:70vh;border-radius:16px;">
