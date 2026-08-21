@@ -6,6 +6,7 @@ import { openModalJournee } from "./modal.js";
 import { obtenirPositionActuelle } from "./location.js";
 import { calculerNumeroJour } from "./storage.js";
 import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
+import { ouvrirGoogleMaps } from "./location.js";
 
 
 import { getModeActif, basculerMode } from "./storage.js";
@@ -230,12 +231,20 @@ function createCompactRow(envie) {
     const row = document.createElement("div");
     row.className = "checklistRow";
 
-    if (envie._billetVoyageId) {
+          if (envie._billetVoyageId) {
 
         row.innerHTML = `
-            <span style="flex:1;">${envie.titre}</span>
+            <span style="flex:1;">
+                ${envie.titre}
+                ${envie._billetLieu ? `<span class="lieuBilletCliquable" style="display:block;font-size:12px;color:#3E7CB1;text-decoration:underline;">📍 ${envie._billetLieu}</span>` : ""}
+            </span>
             <button class="editAgendaButton" title="Voir le billet">🎫</button>
         `;
+
+        row.querySelector(".lieuBilletCliquable")?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            ouvrirGoogleMaps(envie._billetLieu);
+        });
 
         row.querySelector(".editAgendaButton").addEventListener("click", () => {
             openEnvie(envie._billetVoyageId, null);
@@ -244,6 +253,7 @@ function createCompactRow(envie) {
         return row;
 
     }
+
 
        row.innerHTML = `
         <label class="checkLabel">
