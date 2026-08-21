@@ -13,6 +13,9 @@ let changelogCache = [];
 export function getChangelog() {
     return [...changelogCache].sort((a, b) => (b.date || 0) - (a.date || 0));
 }
+export function estimerTailleDocument(envie) {
+    return new Blob([JSON.stringify(envie)]).size;
+}
 
 export function updateEnvieBillets(id, billets) {
     patchEnvie(id, { billets });
