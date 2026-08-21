@@ -17,6 +17,30 @@ export function estimerTailleDocument(envie) {
     return new Blob([JSON.stringify(envie)]).size;
 }
 
+export function creerBilletSilencieux(voyage) {
+
+    const categorieBillet = getEnvieCategories().find(c => c.label === "Billet");
+
+    const id = crypto.randomUUID();
+
+    const envieData = {
+        titre: "🎫 Nouveau billet",
+        contexte: "voyage",
+        categorie: categorieBillet?.id || null,
+        voyageId: voyage.id,
+        date: null,
+        rubriquesEtatManuel: { billets: "visible" },
+        favorite: false,
+        realise: false
+    };
+
+    setDoc(doc(db, "foyers", getFoyerId(), "envies", id), envieData).catch(console.error);
+
+    return { id, ...envieData };
+
+}
+
+
 export function updateEnvieBillets(id, billets) {
     patchEnvie(id, { billets });
 }
