@@ -37,6 +37,7 @@ import { getCurrentEnvieId } from "./js/envie.js";
 import { renderChecklist } from "./js/checklist.js";
 import { renderVoyageSection } from "./js/voyage.js";
 import { initMapPicker } from "./js/location.js";
+import { showToast } from "./toast.js";
 import { initEtapeFinder } from "./js/etape-finder.js";
 import { initPromptEtapeSync } from "./js/storage.js";
 import { initActiviteTypesSync, initCriteresVoyageSync } from "./js/storage.js";
@@ -284,6 +285,11 @@ initDevis();
     document.getElementById("closeInbox").addEventListener("click", () => {
         document.getElementById("inboxModal").classList.add("hidden");
     });
+    
+    window.addEventListener("erreurEnregistrement", (event) => {
+    showToast(`❌ Échec de l'enregistrement : ${event.detail.includes("longer than") || event.detail.includes("exceeds") ? "fiche trop volumineuse, retire un fichier" : "réessaie"}`);
+});
+
 
     initOnboarding();
     initIndicesContextuels();
