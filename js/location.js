@@ -417,7 +417,8 @@ async function reverseGeocode(latitude, longitude) {
 
 }
 
-function ouvrirGoogleMaps(texte) {
+export function ouvrirGoogleMaps(texte) {
+
 
     const requeteEncodee = encodeURIComponent(texte);
     const urlWeb = `https://www.google.com/maps/search/?api=1&query=${requeteEncodee}`;
