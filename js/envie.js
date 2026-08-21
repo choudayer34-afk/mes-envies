@@ -424,7 +424,7 @@ const RUBRIQUES_GEREES = [
     { id: "croquis", sectionId: "croquisSection", emoji: "📐", label: "Croquis", estPertinent: e => e.contexte === "maison", aDuContenu: e => (e.croquis || []).length > 0 },
    { id: "simulationIA", sectionId: "simulationIASection", emoji: "🪄", label: "Simulation IA", estPertinent: e => e.contexte === "maison", aDuContenu: () => false },
     { id: "todo", sectionId: "todoSection", emoji: "🗒️", label: "À faire", aDuContenu: e => (e.checklistTodo || []).length > 0 },
-    { id: "billets", sectionId: "billetsSection", emoji: "🎫", label: "Billets", estPertinent: e => e.contexte !== "maison" && isContainer(e.categorie), aDuContenu: e => (e.billets || []).length > 0 },
+    { id: "billets", sectionId: "billetsSection", emoji: "🎫", label: "Billets", estPertinent: e => e.contexte !== "maison", aDuContenu: e => (e.billets || []).length > 0 }, 
     { id: "tricount", sectionId: "tricountSection", emoji: "💶", label: "Tricount", estPertinent: e => e.contexte !== "maison" && isContainer(e.categorie), aDuContenu: e => (e.tricount?.participants || []).length > 0 }
 ];
 
