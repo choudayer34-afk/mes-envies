@@ -19,7 +19,7 @@ export function estimerTailleDocument(envie) {
 
 export function creerBilletSilencieux(voyage) {
 
-    const categorieBillet = getEnvieCategories().find(c => c.label === "Billet");
+    const categorieBillet = getEnvieCategories().find(c => c.label === "Billets");
 
     const id = crypto.randomUUID();
 
