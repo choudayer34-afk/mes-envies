@@ -230,7 +230,7 @@ function renderBilletsListe(envie) {
             const nouveauxBillets = (envieActuelle.billets || []).filter(b => b.id !== billet.id);
 
             updateEnvieBillets(envieActuelle.id, nouveauxBillets);
-            renderJaugeTaille({ ...envie, billets: nouveauxBillets });
+            renderJaugeTaille({ ...envieActuelle, billets: nouveauxBillets });
             renderBilletsListe({ ...envieActuelle, billets: nouveauxBillets });
 
         });
