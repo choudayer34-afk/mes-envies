@@ -6,6 +6,8 @@ import { showToast } from "./toast.js";
 let currentTypeBillet = "avion";
 let currentFichiers = [];
 let editingBilletId = null;
+let visionneuseFichiers = [];
+let visionneuseIndex = 0;
 
 const EMOJI_PAR_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
 
@@ -76,22 +78,78 @@ export function renderBilletsSection(envie) {
 
 }
 
-function ouvrirFichier(fichier) {
+function ouvrirFichier(fichiers, indexDepart) {
 
-    if (fichier.type === "pdf") {
+    visionneuseFichiers = fichiers;
+    visionneuseIndex = indexDepart;
 
-        const fenetre = window.open();
-        fenetre.document.write(`<iframe src="${fichier.dataUrl}" style="width:100%;height:100vh;border:none;"></iframe>`);
+    const modal = document.createElement("div");
+    modal.id = "billetFichierViewerModal";
+    modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:3600;display:flex;flex-direction:column;padding:16px;";
 
-    } else {
+    document.body.appendChild(modal);
 
-        const img = document.getElementById("imageAgrandieSrc");
-        img.src = fichier.dataUrl;
-        document.getElementById("imageAgrandieModal")?.classList.remove("hidden");
+    let touchStartX = 0;
+
+    function render() {
+
+        const fichier = visionneuseFichiers[visionneuseIndex];
+        const plusieurs = visionneuseFichiers.length > 1;
+
+        if (fichier.type === "pdf") {
+
+            modal.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <button id="fermerFichierViewer" style="background:none;border:none;color:white;font-size:16px;">← Retour</button>
+                    ${plusieurs ? `<span style="color:white;font-size:13px;">${visionneuseIndex + 1} / ${visionneuseFichiers.length}</span>` : ""}
+                </div>
+                <iframe src="${fichier.dataUrl}" style="flex:1;border:none;border-radius:12px;background:white;"></iframe>
+            `;
+
+        } else {
+
+            modal.innerHTML = `
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <button id="fermerFichierViewer" style="background:none;border:none;color:white;font-size:16px;">← Retour</button>
+                    ${plusieurs ? `<span style="color:white;font-size:13px;">${visionneuseIndex + 1} / ${visionneuseFichiers.length}</span>` : ""}
+                </div>
+                <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                    <img src="${fichier.dataUrl}" style="max-width:100%;max-height:100%;border-radius:12px;">
+                </div>
+                ${plusieurs ? `<p style="color:rgba(255,255,255,.5);font-size:12px;text-align:center;margin-top:10px;">← Balaye pour changer de photo →</p>` : ""}
+            `;
+
+        }
+
+        modal.querySelector("#fermerFichierViewer").addEventListener("click", () => modal.remove());
 
     }
 
+    modal.addEventListener("touchstart", (event) => {
+        touchStartX = event.touches[0].clientX;
+    });
+
+    modal.addEventListener("touchend", (event) => {
+
+        const deltaX = event.changedTouches[0].clientX - touchStartX;
+
+        if (Math.abs(deltaX) < 50)
+            return;
+
+        if (deltaX < 0 && visionneuseIndex < visionneuseFichiers.length - 1) {
+            visionneuseIndex++;
+            render();
+        } else if (deltaX > 0 && visionneuseIndex > 0) {
+            visionneuseIndex--;
+            render();
+        }
+
+    });
+
+    render();
+
 }
+
 
 function renderBilletsListe(envie) {
 
@@ -167,7 +225,7 @@ function renderBilletsListe(envie) {
                 vignette.style.cssText = "padding:6px 10px;font-size:13px;";
                 vignette.textContent = fichier.type === "pdf" ? `📄 Fichier ${index + 1}` : `🖼️ Fichier ${index + 1}`;
 
-                vignette.addEventListener("click", () => ouvrirFichier(fichier));
+                vignette.addEventListener("click", () => ouvrirFichier(billet.fichiers, index));
 
                 fichiersRow.appendChild(vignette);
 
@@ -298,14 +356,26 @@ export function initBillets() {
                     type = "image";
                 }
 
-                const taille = estimerTailleOctets(dataUrl);
+                         const taille = estimerTailleOctets(dataUrl);
 
-                if (taille > 700000) {
-                    showToast(`❌ "${file.name}" trop volumineux (${Math.round(taille / 1024)} Ko, max ~700 Ko)`);
-                    continue;
-                }
+            if (taille > 700000) {
+                showToast(`❌ "${file.name}" trop volumineux (${Math.round(taille / 1024)} Ko, max ~700 Ko)`);
+                continue;
+            }
 
-                currentFichiers.push({ dataUrl, nom: file.name, type });
+            const envie = getEnvieCourante();
+            const tailleExistante = (envie.billets || [])
+                .filter(b => b.id !== editingBilletId)
+                .reduce((total, b) => total + (b.fichiers || []).reduce((s, f) => s + estimerTailleOctets(f.dataUrl), 0), 0);
+
+            const tailleEnCours = currentFichiers.reduce((s, f) => s + estimerTailleOctets(f.dataUrl), 0);
+
+            if (tailleExistante + tailleEnCours + taille > 800000) {
+                showToast(`❌ Trop de fichiers déjà stockés sur ce voyage (limite globale ~800 Ko). Supprime un ancien billet ou une photo pour en ajouter un nouveau.`);
+                continue;
+            }
+
+            currentFichiers.push({ dataUrl, nom: file.name, type });
 
             } catch (err) {
 
