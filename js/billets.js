@@ -3,13 +3,16 @@ import { getCurrentEnvieId } from "./envie.js";
 import { compresserImageAvantEnvoi } from "./photos.js";
 import { showToast } from "./toast.js";
 import { estimerTailleDocument } from "./storage.js";
-import { ouvrirGoogleMaps } from "./location.js";
+
+import { setupAutocomplete, ouvrirGoogleMaps } from "./location.js";
+import { updateEnvieDate } from "./storage.js";
 
 let currentTypeBillet = "avion";
 let currentFichiers = [];
 let editingBilletId = null;
 let visionneuseFichiers = [];
 let visionneuseIndex = 0;
+let currentBilletDestination = null;
 
 const EMOJI_PAR_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
 
@@ -281,8 +284,12 @@ function reinitialiserFormulaireBillet() {
     document.getElementById("billetHeure").value = "";
     document.getElementById("billetLien").value = "";
     document.getElementById("billetFichierApercu").innerHTML = "";
-
     document.getElementById("saveBilletAdd").textContent = "Ajouter";
+    
+        currentBilletDestination = null;
+    document.getElementById("billetHeureArrivee").value = "";
+    document.getElementById("billetDestinationInput").value = "";
+
 
 }
 
@@ -335,6 +342,10 @@ function ouvrirEditionBillet(billet) {
 
     document.getElementById("billetAddModal")?.classList.remove("hidden");
 
+    currentBilletDestination = billet.destination || null;
+    document.getElementById("billetHeureArrivee").value = billet.heureArrivee || "";
+    document.getElementById("billetDestinationInput").value = billet.destination?.nom || "";
+
 }
 
 export function initBillets() {
@@ -345,6 +356,7 @@ export function initBillets() {
         document.getElementById("billetAddModal")?.classList.remove("hidden");
 
     });
+
 
     document.querySelectorAll("#billetTypeToggle .itemTypeChip").forEach(chip => {
 
@@ -424,6 +436,13 @@ export function initBillets() {
         document.getElementById("billetAddModal")?.classList.add("hidden");
     });
 
+    setupAutocomplete(
+        document.getElementById("billetDestinationInput"),
+        document.getElementById("billetDestinationSuggestions"),
+        (place) => { currentBilletDestination = place; }
+    );
+
+
     document.getElementById("saveBilletAdd")?.addEventListener("click", () => {
 
         const envie = getEnvieCourante();
@@ -431,15 +450,20 @@ export function initBillets() {
         if (!envie)
             return;
 
+              const dateDepart = document.getElementById("billetDate").value || null;
+
         const donneesBillet = {
             type: currentTypeBillet,
             compagnie: document.getElementById("billetCompagnie").value.trim() || null,
             numeroVol: document.getElementById("billetNumero").value.trim() || null,
-            dateDepart: document.getElementById("billetDate").value || null,
+            dateDepart,
             heureDepart: document.getElementById("billetHeure").value || null,
+            heureArrivee: document.getElementById("billetHeureArrivee").value || null,
+            destination: currentBilletDestination,
             lienApp: document.getElementById("billetLien").value.trim() || null,
             fichiers: currentFichiers
         };
+
 
         let nouveauxBillets;
 
@@ -456,6 +480,9 @@ export function initBillets() {
         }
 
         updateEnvieBillets(envie.id, nouveauxBillets);
+        if (dateDepart && (!envie.date?.start || envie.date.start !== dateDepart)) {
+            updateEnvieDate(envie.id, { start: dateDepart, type: "single" });
+        }
 
         document.getElementById("billetAddModal")?.classList.add("hidden");
 renderJaugeTaille({ ...envie, billets: nouveauxBillets });
