@@ -1964,10 +1964,20 @@ document.addEventListener("DOMContentLoaded", () => {
         <label class="fieldTitle" style="margin-top:12px;">Numéro de vol/train (optionnel)</label>
         <input type="text" id="billetNumero" placeholder="Ex: AF1234" class="numberInput">
 
-        <div class="peintureAddRow" style="margin-top:12px;">
-            <input type="date" id="billetDate" class="numberInput">
-            <input type="time" id="billetHeure" class="numberInput">
-        </div>
+  <div class="peintureAddRow" style="margin-top:12px;">
+    <input type="date" id="billetDate" class="numberInput">
+    <input type="time" id="billetHeure" placeholder="Départ" class="numberInput">
+</div>
+
+<label class="fieldTitle" style="margin-top:12px;">Heure d'arrivée (optionnel)</label>
+<input type="time" id="billetHeureArrivee" class="numberInput">
+
+<label class="fieldTitle" style="margin-top:12px;">Destination (optionnel)</label>
+<div style="position:relative;">
+    <input type="text" id="billetDestinationInput" placeholder="Ex: Paris CDG" class="numberInput" autocomplete="off">
+    <div id="billetDestinationSuggestions" class="autocompleteSuggestions hidden"></div>
+</div>
+
 
         <label class="fieldTitle" style="margin-top:12px;">Lien vers l'appli/site (optionnel)</label>
         <input type="text" id="billetLien" placeholder="https://..." class="numberInput">
