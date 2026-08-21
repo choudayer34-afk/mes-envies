@@ -418,9 +418,15 @@ export function getEnvies() {
 
 function patchEnvie(id, fields) {
 
-    updateDoc(envieRef(id), { ...fields, updatedAt: Date.now() }).catch(console.error);
+    updateDoc(envieRef(id), { ...fields, updatedAt: Date.now() }).catch((err) => {
+
+        console.error("Erreur d'enregistrement: " + err.message);
+        window.dispatchEvent(new CustomEvent("erreurEnregistrement", { detail: err.message }));
+
+    });
 
 }
+
 
 export function toggleFavorite(id) {
 
