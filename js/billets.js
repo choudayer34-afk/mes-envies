@@ -3,6 +3,7 @@ import { getCurrentEnvieId } from "./envie.js";
 import { compresserImageAvantEnvoi } from "./photos.js";
 import { showToast } from "./toast.js";
 import { estimerTailleDocument } from "./storage.js";
+import { ouvrirGoogleMaps } from "./location.js";
 
 let currentTypeBillet = "avion";
 let currentFichiers = [];
@@ -55,7 +56,8 @@ export function getBilletsAujourdhui(envies) {
                     titre: `${EMOJI_PAR_TYPE[billet.type] || "🎫"} ${[billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || "Billet"}${billet.heureDepart ? ` — ${billet.heureDepart}` : ""} (${envie.titre})`,
                     categorie: null,
                     realise: false,
-                    _billetVoyageId: envie.id
+                    _billetVoyageId: envie.id,
+                    _billetLieu: envie.lieu?.nom || null
                 });
 
             }
@@ -67,6 +69,7 @@ export function getBilletsAujourdhui(envies) {
     return items;
 
 }
+
 
 export function renderBilletsSection(envie) {
 
