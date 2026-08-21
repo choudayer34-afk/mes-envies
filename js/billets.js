@@ -2,6 +2,7 @@ import { getEnvies, updateEnvieBillets } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { compresserImageAvantEnvoi } from "./photos.js";
 import { showToast } from "./toast.js";
+import { estimerTailleDocument } from "./storage.js";
 
 let currentTypeBillet = "avion";
 let currentFichiers = [];
@@ -74,9 +75,11 @@ export function renderBilletsSection(envie) {
     if (!accordion)
         return;
 
+    renderJaugeTaille(envie);
     renderBilletsListe(envie);
 
 }
+
 
 function ouvrirFichier(fichiers, indexDepart) {
 
@@ -150,6 +153,27 @@ function ouvrirFichier(fichiers, indexDepart) {
 
 }
 
+function renderJaugeTaille(envie) {
+
+    const container = document.getElementById("jaugeTailleFicheContainer");
+
+    if (!container)
+        return;
+
+    const tailleOctets = estimerTailleDocument(envie);
+    const maxOctets = 1048576;
+    const pourcentage = Math.min(100, (tailleOctets / maxOctets) * 100);
+
+    const couleur = pourcentage > 90 ? "#D9534F" : pourcentage > 70 ? "#E7A94C" : "#5CB85C";
+
+    container.innerHTML = `
+        <div class="jaugeTailleFicheBarreFond">
+            <div class="jaugeTailleFicheBarre" style="width:${pourcentage.toFixed(1)}%;background:${couleur};"></div>
+        </div>
+        <div style="font-size:12px;color:var(--color-text-light);">${Math.round(tailleOctets / 1024)} Ko / 1024 Ko utilisés sur cette fiche</div>
+    `;
+
+}
 
 function renderBilletsListe(envie) {
 
@@ -206,6 +230,7 @@ function renderBilletsListe(envie) {
             const nouveauxBillets = (envieActuelle.billets || []).filter(b => b.id !== billet.id);
 
             updateEnvieBillets(envieActuelle.id, nouveauxBillets);
+            renderJaugeTaille({ ...envie, billets: nouveauxBillets });
             renderBilletsListe({ ...envieActuelle, billets: nouveauxBillets });
 
         });
@@ -430,7 +455,7 @@ export function initBillets() {
         updateEnvieBillets(envie.id, nouveauxBillets);
 
         document.getElementById("billetAddModal")?.classList.add("hidden");
-
+renderJaugeTaille({ ...envie, billets: nouveauxBillets });
         renderBilletsListe({ ...envie, billets: nouveauxBillets });
 
         showToast(editingBilletId ? "✓ Billet modifié" : "✓ Billet ajouté");
