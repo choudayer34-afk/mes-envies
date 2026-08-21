@@ -15,7 +15,7 @@ import { updateEnvieStatutManuel } from "./storage.js";
 import { openModalVoyageContext } from "./modal.js";
 
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp, calculerDistancesEtapes } from "./itineraire.js";
-
+import { creerBilletSilencieux } from "./storage.js";
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
@@ -406,6 +406,7 @@ if (!estMaison) {
 
     container.appendChild(creerNouvelleButton);
 
+
         const creerJourneeButton = document.createElement("button");
     creerJourneeButton.className = "secondaryButton";
     creerJourneeButton.textContent = "📅 Créer une journée ici";
@@ -431,6 +432,24 @@ if (!estMaison) {
 
     container.appendChild(creerJourneeButton);
 
+    const creerBilletButton = document.createElement("button");
+    creerBilletButton.className = "secondaryButton";
+    creerBilletButton.textContent = "🎫 Créer un billet ici";
+    creerBilletButton.style.marginTop = "10px";
+
+    creerBilletButton.addEventListener("click", () => {
+
+        const nouveauBillet = creerBilletSilencieux(envie);
+
+        openEnvie(nouveauBillet.id, null);
+
+        setTimeout(() => {
+            document.getElementById("addBilletButton")?.click();
+        }, 300);
+
+    });
+
+    container.appendChild(creerBilletButton);
 
   if (estMaison) {
 
