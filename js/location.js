@@ -229,7 +229,8 @@ function initClearButton(button, input, suggestionsBox, onClear) {
 
 }
 
-function setupAutocomplete(input, suggestionsBox, onSelect) {
+export function setupAutocomplete(input, suggestionsBox, onSelect) {
+
 
     if (!input || !suggestionsBox)
         return;
