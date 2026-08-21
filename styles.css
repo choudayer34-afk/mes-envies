@@ -2756,3 +2756,18 @@ button {
     margin-top:6px;
     display:inline-block;
 }
+
+.jaugeTailleFicheBarreFond{
+    background:#EEF4F6;
+    border-radius:8px;
+    height:10px;
+    overflow:hidden;
+    margin-bottom:6px;
+}
+
+.jaugeTailleFicheBarre{
+    height:100%;
+    border-radius:8px;
+    transition:width .3s ease;
+}
+
