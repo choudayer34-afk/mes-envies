@@ -37,7 +37,7 @@ import { getCurrentEnvieId } from "./js/envie.js";
 import { renderChecklist } from "./js/checklist.js";
 import { renderVoyageSection } from "./js/voyage.js";
 import { initMapPicker } from "./js/location.js";
-import { showToast } from "./toast.js";
+import { showToast } from "./js/toast.js";
 import { initEtapeFinder } from "./js/etape-finder.js";
 import { initPromptEtapeSync } from "./js/storage.js";
 import { initActiviteTypesSync, initCriteresVoyageSync } from "./js/storage.js";
