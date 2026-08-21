@@ -104,6 +104,10 @@ document.addEventListener("DOMContentLoaded", () => {
     initAuth(init);
 });
 
+    window.addEventListener("erreurEnregistrement", (event) => {
+    showToast(`❌ Échec de l'enregistrement : ${event.detail.includes("longer than") || event.detail.includes("exceeds") ? "fiche trop volumineuse, retire un fichier" : "réessaie"}`);
+});
+
 let enviesPretes = false;
 let categoriesPretes = false;
 let modePret = false;
@@ -286,9 +290,7 @@ initDevis();
         document.getElementById("inboxModal").classList.add("hidden");
     });
     
-    window.addEventListener("erreurEnregistrement", (event) => {
-    showToast(`❌ Échec de l'enregistrement : ${event.detail.includes("longer than") || event.detail.includes("exceeds") ? "fiche trop volumineuse, retire un fichier" : "réessaie"}`);
-});
+
 
 
     initOnboarding();
