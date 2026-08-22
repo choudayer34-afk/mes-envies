@@ -29,7 +29,7 @@ Génère des fiches au format JSON strict suivant, sans aucun texte avant ou apr
 }
 
 Identifiants de categorieId valides :
-priorites, abri, eau, feu, protection, orientation, nourriture, outils, signaler, meteo, mental, secours, deplacement, danger, preparation, materiel
+priorites, abri, eau, feu, protection, orientation, nourriture, outils, signaler, meteo, mental, secours, deplacement, danger, preparation, materiel, communication
 
 Règles de contenu impératives :
 - Chaque section doit contenir des points numérotés sous forme d'étapes concrètes ("1. faire ceci", "2. faire cela"), jamais de généralités vagues.
