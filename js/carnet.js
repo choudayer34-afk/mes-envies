@@ -47,6 +47,19 @@ export function renderCarnetVoyage(envie, container) {
 
     container.appendChild(albumButton);
 
+    const zipButton = document.createElement("button");
+    zipButton.className = "secondaryButton";
+    zipButton.textContent = "📦 Télécharger l'album complet (ZIP)";
+    zipButton.style.width = "100%";
+    zipButton.style.marginBottom = "16px";
+
+    zipButton.addEventListener("click", () => {
+        telechargerAlbumZip(envie);
+    });
+
+    container.appendChild(zipButton);
+
+
     const tousLesEnfants = getEnvies().filter(e => e.voyageId === envie.id);
     const nonRealisees = tousLesEnfants.filter(e => !e.realise && !isLogementCategory(e.categorie));
 
