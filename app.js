@@ -54,6 +54,7 @@ import {
 import { initModeSync } from "./js/storage.js";
 import { initSimulationIA } from "./js/simulation-ia.js";
 import { initOnboarding, initIndicesContextuels } from "./js/onboarding.js";
+import { initZoomImageViewer } from "./js/modal-utils.js";
 
 import { initMagasinsSync } from "./js/storage.js";
 import { initSocietesSync } from "./js/storage.js";
@@ -142,6 +143,7 @@ initCroquis();
  initFicheFab();
  initTodo();
     initAjoutPhotoRapide();
+    initZoomImageViewer();
 
  initTricount();
     initEnvironnementsSync(() => {});
