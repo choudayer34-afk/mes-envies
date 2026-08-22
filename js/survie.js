@@ -1256,6 +1256,10 @@ function openFicheEditor(fiche) {
 
     document.getElementById("ficheEditorModal").classList.remove("hidden");
 
+    const selectCategorie = document.getElementById("ficheEditorCategorie");
+    selectCategorie.innerHTML = CATEGORIES_SURVIE.map(c => `<option value="${c.id}">${c.emoji} ${c.label}</option>`).join("");
+    selectCategorie.value = fiche?.categorieId || CATEGORIES_SURVIE[0].id;
+
 }
 
 function renderSectionsEditor() {
@@ -1298,6 +1302,7 @@ function collectSectionsFromEditor() {
     const titres = container.querySelectorAll(".sectionTitreInput");
     const pointsInputs = container.querySelectorAll(".sectionPointsInput");
     const illustrations = container.querySelectorAll(".sectionIllustrationInput");
+categorieId: document.getElementById("ficheEditorCategorie").value,
 
     return Array.from(titres).map((input, i) => ({
         titre: input.value.trim(),
