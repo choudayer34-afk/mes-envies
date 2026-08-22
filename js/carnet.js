@@ -8,7 +8,11 @@ import { showToast } from "./toast.js";
 import { isContainer } from "./envie.js";
 import { ouvrirPreparationAlbum } from "./album.js";
 
+let toutesLesPhotosCarnet = [];
+
 export function renderCarnetVoyage(envie, container) {
+
+    toutesLesPhotosCarnet = [];
 
     const estMaison = envie.contexte === "maison";
 
@@ -156,9 +160,12 @@ function createCarnetActiviteCard(envie) {
         envie.photos.forEach(photo => {
 
             const thumbUrl = photo.url.replace("/upload/", "/upload/w_300,h_300,c_fill,q_auto/");
+            const indexGlobal = toutesLesPhotosCarnet.length;
+
+            toutesLesPhotosCarnet.push({ url: photo.url, description: photo.description, activiteTitre: envie.titre });
 
             photosHtml += `
-                <div class="carnetPhotoItem">
+                <div class="carnetPhotoItem" data-index-global="${indexGlobal}" style="cursor:pointer;">
                     <img src="${thumbUrl}" loading="lazy">
                     ${photo.description ? `<div class="carnetPhotoLegende">${photo.description}</div>` : ""}
                 </div>
@@ -170,15 +177,6 @@ function createCarnetActiviteCard(envie) {
 
     }
 
-    card.innerHTML = `
-        <div class="carnetActiviteTitre">${emoji} ${envie.titre} ${etoiles}</div>
-        ${envie.description ? `<p class="carnetActiviteDescription">${envie.description}</p>` : ""}
-        ${photosHtml}
-    `;
-
-    return card;
-
-}
 
 function createCarnetJourBlock(label, items, voyageEnvie, groupKey) {
 
@@ -250,6 +248,79 @@ function ouvrirSelecteurVoyageCible(idee, voyageActuelId) {
     });
 
     document.getElementById("dupliquerPickerModal").classList.remove("hidden");
+
+}
+
+function urlTelechargementCarnet(url) {
+    return url.replace("/upload/", "/upload/fl_attachment/");
+}
+
+function ouvrirPhotoViewerCarnet(indexDepart) {
+
+    let indexActuel = indexDepart;
+
+    const modal = document.createElement("div");
+    modal.style = "position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;flex-direction:column;padding:16px;";
+
+    function render() {
+
+        const photo = toutesLesPhotosCarnet[indexActuel];
+
+        modal.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <button id="fermerViewerCarnet" style="background:none;border:none;color:white;font-size:16px;">← Retour</button>
+                <span style="color:white;font-size:13px;">${indexActuel + 1} / ${toutesLesPhotosCarnet.length}</span>
+                <a href="${urlTelechargementCarnet(photo.url)}" download style="background:rgba(255,255,255,.15);color:white;border:none;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:13px;">⬇️</a>
+            </div>
+            <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;">
+                ${indexActuel > 0 ? `<button id="photoPrecCarnet" style="position:absolute;left:0;background:rgba(255,255,255,.15);border:none;color:white;font-size:24px;width:44px;height:44px;border-radius:50%;">‹</button>` : ""}
+                <img src="${photo.url}" style="max-width:100%;max-height:70vh;border-radius:16px;">
+                ${indexActuel < toutesLesPhotosCarnet.length - 1 ? `<button id="photoSuivCarnet" style="position:absolute;right:0;background:rgba(255,255,255,.15);border:none;color:white;font-size:24px;width:44px;height:44px;border-radius:50%;">›</button>` : ""}
+            </div>
+            ${photo.description ? `<p style="color:white;font-size:14px;text-align:center;margin-top:16px;">${photo.description}</p>` : ""}
+            <p style="color:rgba(255,255,255,.6);font-size:12px;text-align:center;margin-top:6px;">${photo.activiteTitre}</p>
+        `;
+
+        modal.querySelector("#fermerViewerCarnet").addEventListener("click", () => modal.remove());
+
+        modal.querySelector("#photoPrecCarnet")?.addEventListener("click", () => {
+            indexActuel--;
+            render();
+        });
+
+        modal.querySelector("#photoSuivCarnet")?.addEventListener("click", () => {
+            indexActuel++;
+            render();
+        });
+
+    }
+
+    render();
+
+    let touchStartX = 0;
+
+    modal.addEventListener("touchstart", (e) => {
+        touchStartX = e.touches[0].clientX;
+    });
+
+    modal.addEventListener("touchend", (e) => {
+
+        const diff = touchStartX - e.changedTouches[0].clientX;
+
+        if (Math.abs(diff) < 50)
+            return;
+
+        if (diff > 0 && indexActuel < toutesLesPhotosCarnet.length - 1) {
+            indexActuel++;
+            render();
+        } else if (diff < 0 && indexActuel > 0) {
+            indexActuel--;
+            render();
+        }
+
+    });
+
+    document.body.appendChild(modal);
 
 }
 
