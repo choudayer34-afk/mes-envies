@@ -3,7 +3,8 @@ import {
     updateFicheSurvieCustom, deleteFicheSurvieCustom
 } from "./storage.js";
 
- 
+ import { ouvrirImageAgrandie } from "./modal-utils.js";
+
 
 const CATEGORIES_SURVIE = [
     { id: "priorites", emoji: "🚨", label: "Priorités immédiates" },
@@ -1192,17 +1193,22 @@ function renderSurvie() {
 
         const images = fiche.illustrations || (fiche.illustration ? [fiche.illustration] : []);
 
-        images.forEach(src => {
+            images.forEach(src => {
+
+            const urlComplete = src.startsWith("http") ? src : `illustrations/survie/${src}`;
 
             const img = document.createElement("img");
-            img.src = src.startsWith("http") ? src : `illustrations/survie/${src}`;
+            img.src = urlComplete;
             img.className = "survieIllustration";
             img.style.marginBottom = "12px";
+            img.style.cursor = "zoom-in";
             img.onerror = () => { img.style.display = "none"; };
+            img.addEventListener("click", () => ouvrirImageAgrandie(urlComplete));
 
             container.appendChild(img);
 
         });
+
 
         fiche.sections.forEach(section => {
 
@@ -1211,15 +1217,21 @@ function renderSurvie() {
             h3.textContent = section.titre;
             container.appendChild(h3);
 
-            if (section.illustration) {
+                   if (section.illustration) {
+
+                const urlSection = section.illustration.startsWith("http") ? section.illustration : `illustrations/survie/${section.illustration}`;
 
                 const imgSection = document.createElement("img");
-                imgSection.src = section.illustration.startsWith("http") ? section.illustration : `illustrations/survie/${section.illustration}`;
+                imgSection.src = urlSection;
                 imgSection.className = "survieIllustration";
+                imgSection.style.cursor = "zoom-in";
                 imgSection.onerror = () => { imgSection.style.display = "none"; };
+                imgSection.addEventListener("click", () => ouvrirImageAgrandie(urlSection));
+
                 container.appendChild(imgSection);
 
             }
+
 
             const ul = document.createElement("ul");
             ul.className = "survieListe";
