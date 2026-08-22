@@ -324,3 +324,94 @@ function ouvrirPhotoViewerCarnet(indexDepart) {
 
 }
 
+function nettoyerNomFichier(nom) {
+
+    let propre = (nom || "sans-nom")
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/[. ]+$/, "");
+
+    const reserves = ["CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"];
+
+    if (reserves.includes(propre.toUpperCase())) {
+        propre = `_${propre}`;
+    }
+
+    return propre.substring(0, 100) || "sans-nom";
+
+}
+
+async function telechargerAlbumZip(voyage) {
+
+    const enfants = getEnvies().filter(e => e.voyageId === voyage.id);
+    const tousLesElements = [voyage, ...enfants];
+
+    const totalPhotos = tousLesElements.reduce((total, e) => total + (e.photos || []).length, 0);
+
+    if (totalPhotos === 0) {
+        showToast("Aucune photo dans cet album");
+        return;
+    }
+
+    showToast(`📦 Préparation de ${totalPhotos} photo${totalPhotos > 1 ? "s" : ""}...`);
+
+    const zip = new JSZip();
+
+    const prefixeDate = voyage.date?.start ? voyage.date.start.replace(/-/g, "").substring(0, 6) : "000000";
+    const nomRacine = `${prefixeDate}-${nettoyerNomFichier(voyage.titre)}`;
+    const dossierRacine = zip.folder(nomRacine);
+
+    let photosTraitees = 0;
+    let echecs = 0;
+
+    for (const element of tousLesElements) {
+
+        const photos = element.photos || [];
+
+        if (photos.length === 0)
+            continue;
+
+        const dateLabel = element.date?.start || "Sans-date";
+        const dossierDate = dossierRacine.folder(dateLabel);
+        const dossierIdee = dossierDate.folder(nettoyerNomFichier(element.titre));
+
+        for (let i = 0; i < photos.length; i++) {
+
+            try {
+
+                const response = await fetch(photos[i].url);
+                const blob = await response.blob();
+
+                const nomFichier = `${dateLabel}_${nettoyerNomFichier(element.titre)}_${String(i + 1).padStart(2, "0")}.jpg`;
+
+                dossierIdee.file(nomFichier, blob);
+
+                photosTraitees++;
+
+            } catch (err) {
+
+                console.error("Erreur récupération photo pour ZIP: " + err.message);
+                echecs++;
+
+            }
+
+        }
+
+    }
+
+    showToast(`📦 Compression en cours...`);
+
+    const contenuZip = await zip.generateAsync({ type: "blob" });
+
+    const url = URL.createObjectURL(contenuZip);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${nomRacine}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+
+    showToast(echecs === 0 ? `✓ Album téléchargé (${photosTraitees} photos)` : `⚠️ ${photosTraitees} téléchargées, ${echecs} en échec`);
+
+}
+
