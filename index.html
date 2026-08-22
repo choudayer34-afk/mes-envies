@@ -2329,8 +2329,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </div>
 <div id="imageAgrandieModal" class="modal-overlay hidden">
-    <img id="imageAgrandieSrc" src="" style="max-width:92vw;max-height:92vh;border-radius:12px;margin:auto;">
-    <button id="closeImageAgrandie" style="position:fixed;top:20px;right:20px;font-size:28px;background:none;border:none;color:white;">✕</button>
+    <img id="imageAgrandieSrc" src="" style="max-width:92vw;max-height:92vh;border-radius:12px;margin:auto;touch-action:none;transition:transform .05s linear;">
+
+        <button id="closeImageAgrandie" style="position:fixed;top:20px;right:20px;font-size:28px;background:none;border:none;color:white;">✕</button>
 </div>
     <div id="todoAddModal" class="modal-overlay hidden">
 
