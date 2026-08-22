@@ -21,8 +21,8 @@ const CATEGORIES_SURVIE = [
         { id: "deplacement", emoji: "🧗", label: "Déplacement & obstacles" },
     { id: "danger", emoji: "🐍", label: "Animaux & dangers" },
     { id: "preparation", emoji: "🎒", label: "Préparation" },
-        { id: "materiel", emoji: "🔋", label: "Matériel & astuces" }
-
+        { id: "materiel", emoji: "🔋", label: "Matériel & astuces" },
+            { id: "communication", emoji: "📡", label: "Communication" }
 ];
 
 const FICHES_SURVIE = [
