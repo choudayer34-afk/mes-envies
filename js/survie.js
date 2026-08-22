@@ -3,7 +3,7 @@ import {
     updateFicheSurvieCustom, deleteFicheSurvieCustom
 } from "./storage.js";
 
-
+ 
 
 const CATEGORIES_SURVIE = [
     { id: "priorites", emoji: "🚨", label: "Priorités immédiates" },
