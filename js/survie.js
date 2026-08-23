@@ -4,7 +4,9 @@ import {
 } from "./storage.js";
 
  import { ouvrirImageAgrandie } from "./modal-utils.js";
+import { uploadToCloudinary } from "./photos.js";
 
+let illustrationsEnEdition = [];
 
 const CATEGORIES_SURVIE = [
     { id: "priorites", emoji: "🚨", label: "Priorités immédiates" },
@@ -1262,7 +1264,8 @@ function openFicheEditor(fiche) {
     document.getElementById("ficheEditorTitre").value = fiche ? fiche.titre.replace(/^\S+\s/, "") : "";
     document.getElementById("ficheEditorEmoji").value = fiche ? fiche.emoji : "🩹";
     document.getElementById("ficheEditorResume").value = fiche?.resume ? fiche.resume.join("\n") : "";
-    document.getElementById("ficheEditorIllustration").value = fiche?.illustrations?.join(", ") || fiche?.illustration || "";
+     illustrationsEnEdition = fiche?.illustrations || (fiche?.illustration ? [fiche.illustration] : []);
+    renderIllustrationsFicheApercu();
 
     renderSectionsEditor();
 
@@ -1271,6 +1274,31 @@ function openFicheEditor(fiche) {
     const selectCategorie = document.getElementById("ficheEditorCategorie");
     selectCategorie.innerHTML = CATEGORIES_SURVIE.map(c => `<option value="${c.id}">${c.emoji} ${c.label}</option>`).join("");
     selectCategorie.value = fiche?.categorieId || CATEGORIES_SURVIE[0].id;
+
+}
+
+function renderIllustrationsFicheApercu() {
+
+    const container = document.getElementById("ficheEditorIllustrationsApercu");
+
+    if (!container)
+        return;
+
+    container.innerHTML = illustrationsEnEdition.map((url, i) => `
+        <div style="position:relative;display:inline-block;">
+            <img src="${url.startsWith("http") ? url : "illustrations/survie/" + url}" style="width:70px;height:70px;object-fit:cover;border-radius:8px;">
+            <button type="button" class="retirerIllustrationFicheButton" data-idx="${i}" style="position:absolute;top:-6px;right:-6px;background:#D9534F;color:white;border:none;border-radius:50%;width:20px;height:20px;cursor:pointer;font-size:11px;">✕</button>
+        </div>
+    `).join("");
+
+    container.querySelectorAll(".retirerIllustrationFicheButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+            illustrationsEnEdition.splice(parseInt(btn.dataset.idx, 10), 1);
+            renderIllustrationsFicheApercu();
+        });
+
+    });
 
 }
 
@@ -1293,8 +1321,17 @@ function renderSectionsEditor() {
             <input type="text" class="sectionTitreInput" data-idx="${index}" value="${section.titre || ""}" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">
             <label class="fieldTitle">Contenu (une ligne par point)</label>
             <textarea class="sectionPointsInput" data-idx="${index}" rows="4" style="width:100%;padding:12px;border-radius:12px;border:1px solid var(--color-border);margin-bottom:10px;box-sizing:border-box;">${(section.points || []).join("\n")}</textarea>
-            <label class="fieldTitle">Illustration (nom de fichier ou URL, facultatif)</label>
-            <input type="text" class="sectionIllustrationInput" data-idx="${index}" value="${section.illustration || ""}" placeholder="ex : mon-image.png" style="width:100%;height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--color-border);box-sizing:border-box;">
+            <label class="fieldTitle">Illustration (optionnel)</label>
+            <div class="sectionIllustrationApercu" data-idx="${index}" style="margin-bottom:8px;">
+                ${section.illustration ? `
+                    <div style="position:relative;display:inline-block;">
+                        <img src="${section.illustration.startsWith("http") ? section.illustration : "illustrations/survie/" + section.illustration}" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">
+                        <button type="button" class="retirerIllustrationSectionButton" data-idx="${index}" style="position:absolute;top:-6px;right:-6px;background:#D9534F;color:white;border:none;border-radius:50%;width:22px;height:22px;cursor:pointer;">✕</button>
+                    </div>
+                ` : `<div class="emptyState">Aucune image</div>`}
+            </div>
+            <input type="file" class="sectionIllustrationInputFile" data-idx="${index}" accept="image/*" hidden>
+            <button type="button" class="choisirIllustrationSectionButton" data-idx="${index}" style="width:100%;">📎 ${section.illustration ? "Changer l'image" : "Choisir une image"}</button>
         `;
 
         card.querySelector("[data-remove]").addEventListener("click", () => {
@@ -1304,6 +1341,42 @@ function renderSectionsEditor() {
 
         container.appendChild(card);
 
+                card.querySelector(".choisirIllustrationSectionButton").addEventListener("click", () => {
+            card.querySelector(".sectionIllustrationInputFile").click();
+        });
+
+        card.querySelector(".sectionIllustrationInputFile").addEventListener("change", async (event) => {
+
+            const fichier = event.target.files[0];
+
+            if (!fichier)
+                return;
+
+            const bouton = card.querySelector(".choisirIllustrationSectionButton");
+            bouton.disabled = true;
+            bouton.textContent = "⏳ Envoi...";
+
+            try {
+
+                const result = await uploadToCloudinary(fichier);
+
+                sectionsEnEdition[index].illustration = result.secure_url;
+                renderSectionsEditor();
+
+            } catch (err) {
+
+                console.error("Erreur upload illustration section: " + err.message);
+                bouton.disabled = false;
+                bouton.textContent = "📎 Choisir une image";
+
+            }
+
+        });
+
+        card.querySelector(".retirerIllustrationSectionButton")?.addEventListener("click", () => {
+            sectionsEnEdition[index].illustration = "";
+            renderSectionsEditor();
+        });
     });
 
 }
@@ -1313,12 +1386,11 @@ function collectSectionsFromEditor() {
     const container = document.getElementById("ficheEditorSections");
     const titres = container.querySelectorAll(".sectionTitreInput");
     const pointsInputs = container.querySelectorAll(".sectionPointsInput");
-    const illustrations = container.querySelectorAll(".sectionIllustrationInput");
 
     return Array.from(titres).map((input, i) => ({
         titre: input.value.trim(),
         points: pointsInputs[i].value.split("\n").map(l => l.trim()).filter(Boolean),
-        illustration: illustrations[i].value.trim()
+        illustration: sectionsEnEdition[i]?.illustration || ""
     })).filter(s => s.titre || s.points.length > 0);
 
 }
@@ -1326,6 +1398,46 @@ function collectSectionsFromEditor() {
 
 export function initSurvieEditor() {
 
+
+        document.getElementById("ajouterIllustrationsFicheButton")?.addEventListener("click", () => {
+        document.getElementById("ficheEditorIllustrationsInput")?.click();
+    });
+
+    document.getElementById("ficheEditorIllustrationsInput")?.addEventListener("change", async (event) => {
+
+        const fichiers = Array.from(event.target.files);
+
+        if (fichiers.length === 0)
+            return;
+
+        const bouton = document.getElementById("ajouterIllustrationsFicheButton");
+        bouton.disabled = true;
+        bouton.textContent = `⏳ Envoi de ${fichiers.length} image${fichiers.length > 1 ? "s" : ""}...`;
+
+        for (const fichier of fichiers) {
+
+            try {
+
+                const result = await uploadToCloudinary(fichier);
+                illustrationsEnEdition.push(result.secure_url);
+
+            } catch (err) {
+
+                console.error("Erreur upload illustration fiche: " + err.message);
+
+            }
+
+        }
+
+        bouton.disabled = false;
+        bouton.textContent = "📎 Ajouter des images";
+
+        event.target.value = "";
+
+        renderIllustrationsFicheApercu();
+
+    });
+    
     document.getElementById("addFicheSectionButton").addEventListener("click", () => {
         sectionsEnEdition.push({ titre: "", points: [], illustration: "" });
         renderSectionsEditor();
@@ -1340,7 +1452,7 @@ export function initSurvieEditor() {
         const titreInput = document.getElementById("ficheEditorTitre").value.trim();
         const emoji = document.getElementById("ficheEditorEmoji").value.trim() || "🩹";
         const resumeRaw = document.getElementById("ficheEditorResume").value.trim();
-        const illustrationsRaw = document.getElementById("ficheEditorIllustration").value.trim();
+
         const sections = collectSectionsFromEditor();
 
         if (!titreInput || sections.length === 0) {
