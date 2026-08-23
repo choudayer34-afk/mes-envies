@@ -190,6 +190,23 @@ function createCarnetActiviteCard(envie) {
 
     }
 
+    card.innerHTML = `
+        <div class="carnetActiviteTitre">${emoji} ${envie.titre} ${etoiles}</div>
+        ${envie.description ? `<p class="carnetActiviteDescription">${envie.description}</p>` : ""}
+        ${photosHtml}
+    `;
+
+    card.querySelectorAll(".carnetPhotoItem").forEach(item => {
+
+        item.addEventListener("click", () => {
+            ouvrirPhotoViewerCarnet(parseInt(item.dataset.indexGlobal, 10));
+        });
+
+    });
+
+    return card;
+
+}
 
 function createCarnetJourBlock(label, items, voyageEnvie, groupKey) {
 
