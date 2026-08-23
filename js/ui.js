@@ -1278,7 +1278,6 @@ card.innerHTML = `
             ${badgeExpirationHtml}
             ${badgeArretHtml}
         `;
-        `;
 
             const badgeArretHtml = (estContainer && estProjetAlArret(envie))
         ? `<div class="badgeAlerteArret">⏸️ En pause depuis ${formaterDureeArret(envie)}</div>`
