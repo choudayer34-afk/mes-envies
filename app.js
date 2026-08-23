@@ -13,6 +13,7 @@ import { initAgenda } from "./js/agenda.js";
 import { initChangelogSync } from "./js/storage.js";
 import { initBillets } from "./js/billets.js";
 import { renderNouveautes } from "./js/plus.js";
+import { initCorbeille } from "./js/corbeille.js";
 import { initEnvieCategoriesSync } from "./js/storage.js";
 import { initTodo } from "./js/todo.js";
 import { initHomeMeteo } from "./js/ui.js";
@@ -143,7 +144,7 @@ initCroquis();
  initTodo();
     initAjoutPhotoRapide();
     initZoomImageViewer();
-
+    initCorbeille();
  initTricount();
     initEnvironnementsSync(() => {});
     initAmbiancesSync(() => {});
