@@ -2679,6 +2679,10 @@ document.addEventListener("DOMContentLoaded", () => {
     👋 Revoir la présentation
 </button>
 
+        <button id="plusBtnCorbeille" class="secondaryButton" style="width:100%;margin-bottom:10px;">
+    🗑️ Corbeille
+</button>
+
     </div>
 
 </div>
@@ -2897,7 +2901,25 @@ document.addEventListener("DOMContentLoaded", () => {
     </div>
 
 </div>
+    
+<div id="corbeilleModal" class="modal-overlay hidden">
 
+    <div class="modal">
+
+        <button class="backButton" id="closeCorbeille">← Retour</button>
+
+        <h2>🗑️ Corbeille</h2>
+
+        <p style="font-size:13px;color:var(--color-text-light);margin-bottom:16px;">
+            Les éléments supprimés restent ici, restaurables à tout moment.
+        </p>
+
+        <div id="corbeilleListe"></div>
+
+    </div>
+
+</div>
+    
 <div id="voyagePourImportModal" class="modal-overlay hidden">
 
     <div class="modal">
