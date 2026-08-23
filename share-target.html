@@ -20,8 +20,7 @@
         <p id="shareConnexionErreur" class="hidden" style="color:#D9534F;font-size:13px;margin-top:8px;"></p>
     </div>
 
-    <div id="etapeContexte" class="hidden">
-
+        <div id="etapeContexte" class="hidden">
         <label class="fieldTitle">C'est pour :</label>
         <div class="itemTypeToggle">
             <button type="button" class="itemTypeChip" data-contexte="voyage">🧳 Voyage</button>
@@ -29,7 +28,19 @@
         </div>
     </div>
 
+    <div id="etapeConteneur" class="hidden" style="margin-top:16px;">
+        <label class="fieldTitle">Rattacher à :</label>
+        <div id="conteneurListe" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div id="etapeDestination" class="hidden" style="margin-top:16px;">
+        <label class="fieldTitle" id="destinationTitre"></label>
+        <div id="destinationListe" style="display:flex;flex-direction:column;gap:8px;"></div>
+        <button type="button" id="destinationRetourButton" class="secondaryButton" style="width:100%;margin-top:10px;">← Choisir un autre voyage/projet</button>
+    </div>
+
     <div id="etapeValidation" class="hidden" style="margin-top:20px;">
+
 
         <label class="fieldTitle">Titre</label>
         <input type="text" id="shareTitre" class="numberInput" style="margin-bottom:14px;">
