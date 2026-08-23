@@ -438,9 +438,17 @@ export function assurerListeLibreCourses() {
 
 
 export function getEnvies() {
-    return enviesCache.map(e => ({ ...e, contexte: e.contexte || "voyage" }));
+    return enviesCache
+        .filter(e => !e.supprime)
+        .map(e => ({ ...e, contexte: e.contexte || "voyage" }));
 }
 
+export function getEnviesCorbeille() {
+    return enviesCache
+        .filter(e => e.supprime)
+        .map(e => ({ ...e, contexte: e.contexte || "voyage" }))
+        .sort((a, b) => (b.supprimeLe || 0) - (a.supprimeLe || 0));
+}
 
 
 function patchEnvie(id, fields) {
@@ -519,7 +527,15 @@ export function reorderEnvieNear(sourceId, targetId) {
 }
 
 export function deleteEnvie(id) {
-    deleteDoc(envieRef(id)).catch(console.error);
+    patchEnvie(id, { supprime: true, supprimeLe: Date.now() });
+}
+
+export function restaurerEnvie(id) {
+    patchEnvie(id, { supprime: false, supprimeLe: null });
+}
+
+export function supprimerDefinitivement(id) {
+    return deleteDoc(envieRef(id));
 }
 
 export function updateEnvieDescription(id, description) {
@@ -1768,6 +1784,19 @@ export async function fusionnerCriteresVoyageParDefaut() {
 }
 
 export async function supprimerVoyageEtContenu(voyageId) {
+
+    const enfants = enviesCache.filter(e => e.voyageId === voyageId);
+    const maintenant = Date.now();
+
+    for (const enfant of enfants) {
+        await updateDoc(envieRef(enfant.id), { supprime: true, supprimeLe: maintenant });
+    }
+
+    await updateDoc(envieRef(voyageId), { supprime: true, supprimeLe: maintenant });
+
+}
+
+export async function supprimerDefinitivementAvecEnfants(voyageId) {
 
     const enfants = enviesCache.filter(e => e.voyageId === voyageId);
 
