@@ -282,13 +282,11 @@ function renderVoyageContenu(envie, container) {
         personnesLabel.textContent = estMaison ? "Personnes concernées" : "Personnes du voyage";
         parametresWrapper.appendChild(personnesLabel);
 
-        const personnesContainer = document.createElement("div");
+         const personnesContainer = document.createElement("div");
         personnesContainer.id = "voyageParamsPersonnesSelector";
         personnesContainer.className = "categorieSelector fiche";
         personnesContainer.style.marginBottom = "10px";
         parametresWrapper.appendChild(personnesContainer);
-
-        renderPersonnesSelector(envie, "voyageParamsPersonnesSelector");
 
         const partageButton = document.createElement("button");
         partageButton.className = "secondaryButton";
@@ -307,6 +305,10 @@ function renderVoyageContenu(envie, container) {
     }
 
     container.appendChild(parametresWrapper);
+
+    if (parametresOuvert) {
+        renderPersonnesSelector(envie, "voyageParamsPersonnesSelector");
+    }
 
     /* ---------- Carte (déplacée au-dessus des logements) ---------- */
 
