@@ -7,7 +7,7 @@ import { obtenirPositionActuelle } from "./location.js";
 import { calculerNumeroJour } from "./storage.js";
 import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
 import { ouvrirGoogleMaps } from "./location.js";
-
+import { showToast } from "./toast.js";
 
 import { getModeActif, basculerMode } from "./storage.js";
 
