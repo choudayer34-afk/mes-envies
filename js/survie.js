@@ -1314,7 +1314,6 @@ function collectSectionsFromEditor() {
     const titres = container.querySelectorAll(".sectionTitreInput");
     const pointsInputs = container.querySelectorAll(".sectionPointsInput");
     const illustrations = container.querySelectorAll(".sectionIllustrationInput");
-categorieId: document.getElementById("ficheEditorCategorie").value,
 
     return Array.from(titres).map((input, i) => ({
         titre: input.value.trim(),
@@ -1323,6 +1322,7 @@ categorieId: document.getElementById("ficheEditorCategorie").value,
     })).filter(s => s.titre || s.points.length > 0);
 
 }
+
 
 export function initSurvieEditor() {
 
@@ -1348,14 +1348,15 @@ export function initSurvieEditor() {
             return;
         }
 
-        const fiche = {
+            const fiche = {
             titre: titreInput,
             emoji,
-            categorieId: categorieActuelle,
+            categorieId: document.getElementById("ficheEditorCategorie").value,
             resume: resumeRaw ? resumeRaw.split("\n").map(l => l.trim()).filter(Boolean) : [],
             illustrations: illustrationsRaw ? illustrationsRaw.split(",").map(s => s.trim()).filter(Boolean) : [],
             sections
         };
+
 
         if (ficheEnEdition) {
             updateFicheSurvieCustom(ficheEnEdition.id, fiche);
