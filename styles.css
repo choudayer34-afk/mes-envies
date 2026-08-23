@@ -2771,3 +2771,90 @@ button {
     transition:width .3s ease;
 }
 
+.survieFicheAccordion{
+    background:var(--color-card);
+    border-radius:var(--radius-medium);
+    border:1px solid var(--color-border);
+    margin-bottom:10px;
+    overflow:hidden;
+}
+
+.survieFicheHeader{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px;
+    cursor:pointer;
+    background:none;
+    border:none;
+    width:100%;
+    text-align:left;
+    font-size:15px;
+    font-weight:600;
+    color:var(--color-text);
+}
+
+.survieResumeBox{
+    border:2px solid #E7A94C;
+    background:#FFF8EC;
+    border-radius:12px;
+    padding:14px;
+    margin:0 14px 14px;
+}
+
+.survieResumeLabel{
+    font-weight:700;
+    color:#B5763F;
+    margin-bottom:8px;
+}
+
+.survieSectionTitreV2{
+    color:#C97B4A;
+    font-weight:700;
+    font-size:15px;
+    margin:16px 14px 8px;
+    scroll-margin-top:20px;
+}
+
+.survieSectionMiseEnEvidence{
+    background:#E8F5E9;
+    border:2px solid #2C7A4B;
+    border-radius:12px;
+    padding:14px;
+    margin:8px 14px 14px;
+}
+
+.survieSommaire{
+    background:#F4F4F4;
+    border-radius:12px;
+    padding:10px 14px;
+    margin:0 14px 14px;
+}
+
+.survieSommaireItem{
+    display:block;
+    color:#3E7CB1;
+    text-decoration:underline;
+    font-size:13px;
+    padding:4px 0;
+    cursor:pointer;
+    background:none;
+    border:none;
+    text-align:left;
+    width:100%;
+}
+
+.survieDetailsToggle{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 14px;
+    background:#F4F4F4;
+    border:none;
+    width:calc(100% - 28px);
+    margin:0 14px 14px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+    color:var(--color-text);
+}
