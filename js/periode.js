@@ -11,12 +11,19 @@ let context = "creation"; // "creation" | "fiche"
 let periodeLibreCallback = null;
 let periodeLibreValeur = null;
 
-export function ouvrirSelecteurPeriodeLibre(onChoisi, valeurActuelle = null) {
+export function ouvrirSelecteurPeriodeLibre(onChoisi, valeurActuelle = null, autoriserPlage = false) {
 
     periodeLibreCallback = onChoisi;
     periodeLibreValeur = valeurActuelle;
 
     context = "libre";
+    currentType = "single";
+
+    document.querySelectorAll(".periodeTypeChip").forEach(c => {
+        c.classList.toggle("active", c.dataset.type === "single");
+    });
+
+    document.querySelector(".periodeTypeToggle").classList.toggle("hidden", !autoriserPlage);
 
     openDateModal();
 
