@@ -392,8 +392,10 @@ async function telechargerAlbumZip(voyage) {
     const nomRacine = `${prefixeDate}-${nettoyerNomFichier(voyage.titre)}`;
     const dossierRacine = zip.folder(nomRacine);
 
-    let photosTraitees = 0;
+       let photosTraitees = 0;
     let echecs = 0;
+    const echecsDetails = [];
+
 
     for (const element of tousLesElements) {
 
@@ -406,27 +408,44 @@ async function telechargerAlbumZip(voyage) {
         const dossierDate = dossierRacine.folder(dateLabel);
         const dossierIdee = dossierDate.folder(nettoyerNomFichier(element.titre));
 
-        for (let i = 0; i < photos.length; i++) {
+             for (let i = 0; i < photos.length; i++) {
 
-            try {
+            const nomFichier = `${dateLabel}_${nettoyerNomFichier(element.titre)}_${String(i + 1).padStart(2, "0")}.jpg`;
 
-                const response = await fetch(photos[i].url);
-                const blob = await response.blob();
+            let reussi = false;
 
-                const nomFichier = `${dateLabel}_${nettoyerNomFichier(element.titre)}_${String(i + 1).padStart(2, "0")}.jpg`;
+            for (let tentative = 0; tentative < 2 && !reussi; tentative++) {
 
-                dossierIdee.file(nomFichier, blob);
+                try {
 
-                photosTraitees++;
+                    const response = await fetch(photos[i].url);
 
-            } catch (err) {
+                    if (!response.ok)
+                        throw new Error(`HTTP ${response.status}`);
 
-                console.error("Erreur récupération photo pour ZIP: " + err.message);
-                echecs++;
+                    const blob = await response.blob();
+
+                    dossierIdee.file(nomFichier, blob);
+
+                    photosTraitees++;
+                    reussi = true;
+
+                } catch (err) {
+
+                    if (tentative === 1) {
+
+                        console.error(`Échec définitif ZIP pour "${nomFichier}": ${err.message}`);
+                        echecsDetails.push(nomFichier);
+                        echecs++;
+
+                    }
+
+                }
 
             }
 
         }
+
 
     }
 
@@ -441,7 +460,12 @@ async function telechargerAlbumZip(voyage) {
     a.click();
     URL.revokeObjectURL(url);
 
-    showToast(echecs === 0 ? `✓ Album téléchargé (${photosTraitees} photos)` : `⚠️ ${photosTraitees} téléchargées, ${echecs} en échec`);
+        if (echecs === 0) {
+        showToast(`✓ Album téléchargé (${photosTraitees} photos)`);
+    } else {
+        showToast(`⚠️ ${photosTraitees} téléchargées, ${echecs} en échec : ${echecsDetails.join(", ")}`);
+        console.warn("Photos manquantes dans le ZIP:", echecsDetails);
+    }
 
 }
 
