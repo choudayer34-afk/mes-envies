@@ -3,9 +3,11 @@ import { getCurrentEnvieId } from "./envie.js";
 import { compresserImageAvantEnvoi } from "./photos.js";
 import { showToast } from "./toast.js";
 import { estimerTailleDocument } from "./storage.js";
-
 import { setupAutocomplete, ouvrirGoogleMaps } from "./location.js";
-import { updateEnvieDate } from "./storage.js";
+import { updateEnvieDate, updateEnvieLieu } from "./storage.js";
+
+
+
 
 let currentTypeBillet = "avion";
 let currentFichiers = [];
@@ -13,6 +15,8 @@ let editingBilletId = null;
 let visionneuseFichiers = [];
 let visionneuseIndex = 0;
 let currentBilletDestination = null;
+let currentBilletLieuDepart = null;
+
 
 const EMOJI_PAR_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
 
@@ -60,7 +64,7 @@ export function getBilletsAujourdhui(envies) {
                     categorie: null,
                     realise: false,
                     _billetVoyageId: envie.id,
-                    _billetLieu: envie.lieu?.nom || null
+                    _billetLieu: billet.lieuDepart?.nom || envie.lieu?.nom || null 
                 });
 
             }
@@ -290,6 +294,8 @@ function reinitialiserFormulaireBillet() {
     document.getElementById("billetHeureArrivee").value = "";
     document.getElementById("billetDestinationInput").value = "";
 
+    currentBilletLieuDepart = null;
+    document.getElementById("billetLieuDepartInput").value = "";
 
 }
 
@@ -336,6 +342,9 @@ function ouvrirEditionBillet(billet) {
     document.getElementById("billetHeure").value = billet.heureDepart || "";
     document.getElementById("billetLien").value = billet.lienApp || "";
 
+    currentBilletLieuDepart = billet.lieuDepart || null;
+    document.getElementById("billetLieuDepartInput").value = billet.lieuDepart?.nom || "";
+
     renderApercuFichiers();
 
     document.getElementById("saveBilletAdd").textContent = "Enregistrer";
@@ -350,12 +359,27 @@ function ouvrirEditionBillet(billet) {
 
 export function initBillets() {
 
-    document.getElementById("addBilletButton")?.addEventListener("click", () => {
+       document.getElementById("addBilletButton")?.addEventListener("click", () => {
 
         reinitialiserFormulaireBillet();
+
+        const envie = getEnvieCourante();
+
+        if (envie?.lieu?.nom) {
+            currentBilletLieuDepart = envie.lieu;
+            document.getElementById("billetLieuDepartInput").value = envie.lieu.nom;
+        }
+
         document.getElementById("billetAddModal")?.classList.remove("hidden");
 
     });
+
+
+    setupAutocomplete(
+        document.getElementById("billetLieuDepartInput"),
+        document.getElementById("billetLieuDepartSuggestions"),
+        (place) => { currentBilletLieuDepart = place; }
+    );
 
 
     document.querySelectorAll("#billetTypeToggle .itemTypeChip").forEach(chip => {
@@ -452,17 +476,19 @@ export function initBillets() {
 
               const dateDepart = document.getElementById("billetDate").value || null;
 
-        const donneesBillet = {
+           const donneesBillet = {
             type: currentTypeBillet,
             compagnie: document.getElementById("billetCompagnie").value.trim() || null,
             numeroVol: document.getElementById("billetNumero").value.trim() || null,
             dateDepart,
             heureDepart: document.getElementById("billetHeure").value || null,
             heureArrivee: document.getElementById("billetHeureArrivee").value || null,
+            lieuDepart: currentBilletLieuDepart,
             destination: currentBilletDestination,
             lienApp: document.getElementById("billetLien").value.trim() || null,
             fichiers: currentFichiers
         };
+
 
 
         let nouveauxBillets;
@@ -483,6 +509,11 @@ export function initBillets() {
         if (dateDepart && (!envie.date?.start || envie.date.start !== dateDepart)) {
             updateEnvieDate(envie.id, { start: dateDepart, type: "single" });
         }
+        
+                if (currentBilletLieuDepart && currentBilletLieuDepart.nom !== envie.lieu?.nom) {
+            updateEnvieLieu(envie.id, currentBilletLieuDepart);
+        }
+
 
         document.getElementById("billetAddModal")?.classList.add("hidden");
 renderJaugeTaille({ ...envie, billets: nouveauxBillets });
