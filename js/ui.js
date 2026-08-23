@@ -38,6 +38,39 @@ function isUntriaged(envie) {
 }
 
 
+function estProjetAlArret(container) {
+
+    if (computeContainerStatus(container).statut === "termine")
+        return false;
+
+    const enfants = getEnvies().filter(e => e.voyageId === container.id);
+    const dates = [container.updatedAt || 0, ...enfants.map(e => e.updatedAt || 0)];
+    const derniereActivite = Math.max(...dates);
+
+    const trenteJours = 30 * 24 * 60 * 60 * 1000;
+
+    return derniereActivite > 0 && (Date.now() - derniereActivite) > trenteJours;
+
+}
+
+function formaterDureeArret(container) {
+
+    const enfants = getEnvies().filter(e => e.voyageId === container.id);
+    const dates = [container.updatedAt || 0, ...enfants.map(e => e.updatedAt || 0)];
+    const derniereActivite = Math.max(...dates);
+
+    const jours = Math.floor((Date.now() - derniereActivite) / (1000 * 60 * 60 * 24));
+
+    if (jours >= 60) {
+        return `${Math.floor(jours / 30)} mois`;
+    }
+
+    const semaines = Math.floor(jours / 7);
+
+    return semaines > 0 ? `${semaines} semaine${semaines > 1 ? "s" : ""}` : `${jours} jour${jours > 1 ? "s" : ""}`;
+
+}
+
 export function renderEnvies() {
 
     const auMoinsUneEnvie = getEnvies().length > 0;
@@ -1243,8 +1276,14 @@ card.innerHTML = `
                 <button class="envieReduireButtonInline" title="Développer">▸</button>
             </div>
             ${badgeExpirationHtml}
+            ${badgeArretHtml}
+        `;
         `;
 
+            const badgeArretHtml = (estContainer && estProjetAlArret(envie))
+        ? `<div class="badgeAlerteArret">⏸️ En pause depuis ${formaterDureeArret(envie)}</div>`
+        : "";
+        
         card.querySelector(".envieReduireButtonInline").addEventListener("click", (event) => {
 
             event.stopPropagation();
@@ -1328,7 +1367,9 @@ card.innerHTML = `
         </div>
 ${statutHtml}
         ${badgeExpirationHtml}
+        ${badgeArretHtml}
         ${calculerPucesMaison(envie)}
+        
         ${calculerNomsTachesRestantes(envie)}
                 <div class="envieActions">
             ${estContainer && envie.contexte !== "maison" ? `<button class="actionButton editButton creerJourneeCardButton" data-id="${envie.id}" title="Créer une journée">📅➕</button>` : ""}
