@@ -422,6 +422,145 @@ function renderVoyageContenu(envie, container) {
 
 }
 
+export function renderOutilsVoyage(envie) {
+
+    const container = document.getElementById("outilsVoyageContainer");
+
+    if (!container)
+        return;
+
+    container.innerHTML = "";
+
+    if (!isContainer(envie.categorie))
+        return;
+
+    const estMaison = estContexteMaison(envie);
+
+    const ajouterLabel = document.createElement("label");
+    ajouterLabel.className = "fieldTitle";
+    ajouterLabel.textContent = "Ajouter";
+    container.appendChild(ajouterLabel);
+
+    const ajouterRow = document.createElement("div");
+    ajouterRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;";
+
+    const addButton = document.createElement("button");
+    addButton.className = "secondaryButton";
+    addButton.style.flex = "1 1 45%";
+    addButton.textContent = estMaison ? "➕ Tâche existante" : "➕ Idée existante";
+    addButton.addEventListener("click", () => openEnviePicker(envie.id));
+    ajouterRow.appendChild(addButton);
+
+    const creerNouvelleButton = document.createElement("button");
+    creerNouvelleButton.className = "secondaryButton";
+    creerNouvelleButton.style.flex = "1 1 45%";
+    creerNouvelleButton.textContent = estMaison ? "🔧 Nouvelle tâche" : "💡 Nouvelle idée";
+    creerNouvelleButton.addEventListener("click", () => openModalVoyageContext(envie.id));
+    ajouterRow.appendChild(creerNouvelleButton);
+
+    if (!estMaison) {
+
+        const creerJourneeButton = document.createElement("button");
+        creerJourneeButton.className = "secondaryButton";
+        creerJourneeButton.style.flex = "1 1 45%";
+        creerJourneeButton.textContent = "📅 Journée";
+
+        creerJourneeButton.addEventListener("click", async () => {
+
+            creerJourneeButton.disabled = true;
+            creerJourneeButton.textContent = "📅 Localisation...";
+
+            const place = await obtenirPositionActuelle();
+            const nouvelleJournee = creerJourneeSilencieuse(envie, place);
+
+            showToast(`✓ "${nouvelleJournee.titre}" créé`);
+            renderVoyageSection({ ...envie });
+
+        });
+
+        ajouterRow.appendChild(creerJourneeButton);
+
+        const creerBilletButton = document.createElement("button");
+        creerBilletButton.className = "secondaryButton";
+        creerBilletButton.style.flex = "1 1 45%";
+        creerBilletButton.textContent = "🎫 Billet";
+
+        creerBilletButton.addEventListener("click", () => {
+
+            const nouveauBillet = creerBilletSilencieux(envie);
+
+            openEnvie(nouveauBillet.id, null);
+
+            setTimeout(() => {
+                document.getElementById("addBilletButton")?.click();
+            }, 300);
+
+        });
+
+        ajouterRow.appendChild(creerBilletButton);
+
+    }
+
+    container.appendChild(ajouterRow);
+
+    if (!estMaison) {
+
+        const outilsLabel = document.createElement("label");
+        outilsLabel.className = "fieldTitle";
+        outilsLabel.textContent = "Outils";
+        container.appendChild(outilsLabel);
+
+        const outilsRow = document.createElement("div");
+        outilsRow.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;";
+
+        const promptButton = document.createElement("button");
+        promptButton.className = "secondaryButton";
+        promptButton.style.flex = "1 1 100%";
+        promptButton.textContent = "🔎 Quoi faire autour (1h15)";
+
+        promptButton.addEventListener("click", () => {
+            document.getElementById("promptModalContent").value = buildPromptVoyage(envie);
+            document.getElementById("promptModal").classList.remove("hidden");
+        });
+
+        outilsRow.appendChild(promptButton);
+
+        const importButton = document.createElement("button");
+        importButton.className = "secondaryButton";
+        importButton.style.flex = "1 1 45%";
+        importButton.textContent = "📥 Importer via IA";
+        importButton.addEventListener("click", () => openVoyageImport(envie.id));
+        outilsRow.appendChild(importButton);
+
+        const tableauButton = document.createElement("button");
+        tableauButton.className = "secondaryButton";
+        tableauButton.style.flex = "1 1 45%";
+        tableauButton.textContent = "📊 Tableau de saisie";
+        tableauButton.addEventListener("click", () => ouvrirTableauSaisie(envie.id));
+        outilsRow.appendChild(tableauButton);
+
+        if (envie.lieu?.latitude && envie.lieu?.longitude) {
+
+            const carteTouristiqueButton = document.createElement("button");
+            carteTouristiqueButton.className = "secondaryButton";
+            carteTouristiqueButton.style.flex = "1 1 100%";
+            carteTouristiqueButton.textContent = "🗺️ Carte touristique autour";
+
+            carteTouristiqueButton.addEventListener("click", () => {
+                const lien = `https://www.google.com/maps/search/choses+à+faire+tourisme/@${envie.lieu.latitude},${envie.lieu.longitude},12z`;
+                window.open(lien, "_blank");
+            });
+
+            outilsRow.appendChild(carteTouristiqueButton);
+
+        }
+
+        container.appendChild(outilsRow);
+
+    }
+
+}
+
 function calculerResumeParametres(envie, estMaison) {
 
     const parties = [];
