@@ -17,7 +17,7 @@ import { initCorbeille } from "./js/corbeille.js";
 import { initEnvieCategoriesSync } from "./js/storage.js";
 import { initTodo } from "./js/todo.js";
 import { initHomeMeteo } from "./js/ui.js";
-import { initPromptModal } from "./js/envie.js";
+import { initPromptModal,openEnvie } from "./js/envie.js";
 import { initPhotos } from "./js/photos.js";
 import { initRechercheAccueil } from "./js/ui.js";
 import { initJeux } from "./js/jeux.js";
