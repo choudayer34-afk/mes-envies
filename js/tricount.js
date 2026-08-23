@@ -1,10 +1,13 @@
 import { getEnvies, updateEnvieTricount, getPersonnes } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { showToast } from "./toast.js";
+import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
 
 let currentRepartition = "egale";
 let participantsFoyerSelectionnes = [];
 let editingDepenseId = null;
+let currentDepenseDate = null;
+let currentMouvementDate = null;
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
@@ -291,7 +294,8 @@ function ouvrirAjoutDepense() {
     document.getElementById("tricountDepenseTitre").textContent = "➕ Ajouter une dépense";
     document.getElementById("tricountDepenseNom").value = "";
     document.getElementById("tricountDepenseMontant").value = "";
-    document.getElementById("tricountDepenseDate").value = new Date().toISOString().split("T")[0];
+      currentDepenseDate = new Date().toISOString().split("T")[0];
+    document.getElementById("tricountDepenseDateButton").textContent = `📅 ${formatPeriode({ start: currentDepenseDate, type: "single" })}`;
 
     document.getElementById("tricountDepensePayePar").innerHTML = tricount.participants.map(p => `<option value="${p.id}">${p.nom}</option>`).join("");
 
@@ -315,7 +319,8 @@ function ouvrirEditionDepense(depense) {
     document.getElementById("tricountDepenseTitre").textContent = "✏️ Modifier la dépense";
     document.getElementById("tricountDepenseNom").value = depense.nom;
     document.getElementById("tricountDepenseMontant").value = depense.montant;
-    document.getElementById("tricountDepenseDate").value = depense.date || "";
+       currentDepenseDate = depense.date || null;
+    document.getElementById("tricountDepenseDateButton").textContent = currentDepenseDate ? `📅 ${formatPeriode({ start: currentDepenseDate, type: "single" })}` : "📅 Choisir une date";
 
     document.getElementById("tricountDepensePayePar").innerHTML = tricount.participants.map(p => `<option value="${p.id}" ${p.id === depense.payePar ? "selected" : ""}>${p.nom}</option>`).join("");
 
@@ -467,6 +472,27 @@ export function initTricount() {
         document.getElementById("tricountParticipantModal")?.classList.add("hidden");
     });
 
+        document.getElementById("tricountDepenseDateButton")?.addEventListener("click", () => {
+
+        ouvrirSelecteurPeriodeLibre((periode) => {
+
+            currentDepenseDate = periode.start;
+            document.getElementById("tricountDepenseDateButton").textContent = `📅 ${formatPeriode(periode)}`;
+
+        }, currentDepenseDate ? { start: currentDepenseDate, type: "single" } : null);
+
+    });
+
+    document.getElementById("tricountMouvementDateButton")?.addEventListener("click", () => {
+
+        ouvrirSelecteurPeriodeLibre((periode) => {
+
+            currentMouvementDate = periode.start;
+            document.getElementById("tricountMouvementDateButton").textContent = `📅 ${formatPeriode(periode)}`;
+
+        }, currentMouvementDate ? { start: currentMouvementDate, type: "single" } : null);
+
+    });
     document.getElementById("saveTricountParticipant")?.addEventListener("click", () => {
 
         const envie = getEnvieCourante();
@@ -566,7 +592,7 @@ export function initTricount() {
             nom,
             montant,
             payePar: document.getElementById("tricountDepensePayePar").value,
-            date: document.getElementById("tricountDepenseDate").value || null,
+                        date: currentDepenseDate,
             pourQui,
             repartition: currentRepartition,
             montantsCustom
@@ -602,7 +628,8 @@ export function initTricount() {
 
         document.getElementById("tricountMouvementNom").value = "";
         document.getElementById("tricountMouvementMontant").value = "";
-        document.getElementById("tricountMouvementDate").value = new Date().toISOString().split("T")[0];
+               currentMouvementDate = new Date().toISOString().split("T")[0];
+        document.getElementById("tricountMouvementDateButton").textContent = `📅 ${formatPeriode({ start: currentMouvementDate, type: "single" })}`;
 
         const options = tricount.participants.map(p => `<option value="${p.id}">${p.nom}</option>`).join("");
         document.getElementById("tricountMouvementDe").innerHTML = options;
@@ -641,7 +668,7 @@ export function initTricount() {
             montant,
             de,
             vers,
-            date: document.getElementById("tricountMouvementDate").value || null
+                       date: currentMouvementDate
         };
 
         const nouveauTricount = { ...tricount, mouvements: [...tricount.mouvements, nouveauMouvement] };
