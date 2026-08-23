@@ -1465,7 +1465,7 @@ export function initSurvieEditor() {
             emoji,
             categorieId: document.getElementById("ficheEditorCategorie").value,
             resume: resumeRaw ? resumeRaw.split("\n").map(l => l.trim()).filter(Boolean) : [],
-            illustrations: illustrationsRaw ? illustrationsRaw.split(",").map(s => s.trim()).filter(Boolean) : [],
+                        illustrations: illustrationsEnEdition,
             sections
         };
 
