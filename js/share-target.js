@@ -42,9 +42,12 @@ async function init() {
 
     const params = new URLSearchParams(window.location.search);
 
+       const urlBrute = params.get("url") || "";
+
     contenuPartage.titre = params.get("title") || "";
-    contenuPartage.texte = params.get("text") || "";
-    contenuPartage.url = params.get("url") || "";
+    contenuPartage.url = urlBrute.startsWith("http") ? urlBrute : "";
+    contenuPartage.texte = params.get("text") || (!contenuPartage.url ? urlBrute : "");
+
 
     renderApercu();
 
