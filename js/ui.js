@@ -13,7 +13,7 @@ import { getModeActif, basculerMode } from "./storage.js";
 
 import { makeRowDraggable } from "./dragdrop.js";
 
-import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem, assurerListeLibreCourses, updateEnvieChecklistTodo } from "./storage.js";
+import { getEnvies, toggleFavorite, updateEnvieRealise, updateEnvieOrdre, toggleChecklistItem, assurerListeLibreCourses, updateEnvieChecklistTodo, updateEnviePhotos } from "./storage.js";
 import { getCategorieById, isContainer, openEnvie, openEvaluationAccordion, openChecklistAccordion } from "./envie.js";
 import { normaliserTexte } from "./utils.js";
 import { fetchMeteo3Jours, renderMeteoWidget, reverseGeocodeLieu } from "./meteo.js";
