@@ -57,10 +57,9 @@ export function renderCarnetVoyage(envie, container) {
 
         zipButton.disabled = true;
         const texteOriginal = zipButton.textContent;
-        zipButton.textContent = "⏳ Préparation en cours...";
 
         try {
-            await telechargerAlbumZip(envie);
+            await telechargerAlbumZip(envie, zipButton);
         } finally {
             zipButton.disabled = false;
             zipButton.textContent = texteOriginal;
@@ -383,7 +382,7 @@ function nettoyerNomFichier(nom) {
 
 }
 
-async function telechargerAlbumZip(voyage) {
+async function telechargerAlbumZip(voyage, boutonProgression) {
 
     const enfants = getEnvies().filter(e => e.voyageId === voyage.id);
     const tousLesElements = [voyage, ...enfants];
@@ -396,7 +395,7 @@ async function telechargerAlbumZip(voyage) {
     }
 
        showToast(`📦 Préparation de ${totalPhotos} photo${totalPhotos > 1 ? "s" : ""}...`);
-    document.getElementById("telechargerAlbumZipButton").textContent = `⏳ Récupération des photos (0/${totalPhotos})...`;
+        boutonProgression.textContent = `⏳ Récupération des photos (0/${totalPhotos})...`;
 
     const zip = new JSZip();
 
@@ -442,7 +441,7 @@ async function telechargerAlbumZip(voyage) {
                     photosTraitees++;
                     reussi = true;
 
-                    document.getElementById("telechargerAlbumZipButton").textContent = `⏳ Récupération des photos (${photosTraitees}/${totalPhotos})...`;
+                                      boutonProgression.textContent = `⏳ Récupération des photos (${photosTraitees}/${totalPhotos})...`;
 
                 } catch (err) {
 
@@ -464,7 +463,7 @@ async function telechargerAlbumZip(voyage) {
     }
 
     showToast(`📦 Compression en cours...`);
-    document.getElementById("telechargerAlbumZipButton").textContent = "⏳ Compression du fichier ZIP...";
+       boutonProgression.textContent = "⏳ Compression du fichier ZIP...";
 
     const contenuZip = await zip.generateAsync({ type: "blob" });
 
