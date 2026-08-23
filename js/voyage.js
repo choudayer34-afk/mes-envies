@@ -5,7 +5,7 @@ import { ouvrirTableauSaisie } from "./tableau-saisie.js";
 import { activerCollectePhotos } from "./storage.js";
 import { creerJourneeSilencieuse, calculerNumeroJour } from "./storage.js";
 import { obtenirPositionActuelle } from "./location.js";
-
+import { renderPersonnesSelector } from "./periode.js";
 import { updateEnvieOrdre } from "./storage.js";
 import { searchLocation } from "./location.js";
 import { supprimerVoyageEtContenu } from "./storage.js";
