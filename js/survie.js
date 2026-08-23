@@ -1013,7 +1013,7 @@ function closeSurvie() {
     document.getElementById("survieModal").classList.add("hidden");
 }
 
-function renderSurvie() {
+export function renderSurvie() {
 
     const container = document.getElementById("survieContent");
     const backButton = document.getElementById("survieBackButton");
