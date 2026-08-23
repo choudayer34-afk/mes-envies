@@ -5,6 +5,7 @@ const CACHE_NAME = 'envie-cache-v144';
 const APP_SHELL = [
     './index.html',
     './styles.css',
+ './js/corbeille.js',
     './app.js',
     './manifest.json',
     './js/firebase.js',
