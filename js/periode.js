@@ -3,7 +3,7 @@ import { getCurrentEnvieId } from "./envie.js";
 import { updateEnvieDate, propagateDateToGroup } from "./storage.js";
 
 import { updateEnviePersonnesIds, getPersonnes } from "./storage.js";
-
+import { isContainer } from "./envie.js";
 
 let selectedPeriode = null;
 let currentType = "single";
@@ -245,13 +245,21 @@ export function getDureeJours(periode) {
 export function renderPeriode(envie) {
 
     updateLabel(document.getElementById("fichePeriodeLabel"), envie.date);
-    renderPersonnesSelector(envie);
+
+    const wrapper = document.getElementById("fichePersonnesWrapper");
+
+    if (isContainer(envie.categorie)) {
+        wrapper?.classList.add("hidden");
+    } else {
+        wrapper?.classList.remove("hidden");
+        renderPersonnesSelector(envie);
+    }
 
 }
 
-function renderPersonnesSelector(envie) {
+export function renderPersonnesSelector(envie, containerId = "fichePersonnesSelector") {
 
-    const container = document.getElementById("fichePersonnesSelector");
+      const container = document.getElementById(containerId);
 
     if (!container)
         return;
@@ -274,7 +282,7 @@ function renderPersonnesSelector(envie) {
                 : [...selected, personne.id];
 
             updateEnviePersonnesIds(envie.id, next);
-            renderPersonnesSelector({ ...envie, personnesIds: next });
+                      renderPersonnesSelector({ ...envie, personnesIds: next }, containerId);
 
         });
 
