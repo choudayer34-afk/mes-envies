@@ -53,8 +53,19 @@ export function renderCarnetVoyage(envie, container) {
     zipButton.style.width = "100%";
     zipButton.style.marginBottom = "16px";
 
-    zipButton.addEventListener("click", () => {
-        telechargerAlbumZip(envie);
+    zipButton.addEventListener("click", async () => {
+
+        zipButton.disabled = true;
+        const texteOriginal = zipButton.textContent;
+        zipButton.textContent = "⏳ Préparation en cours...";
+
+        try {
+            await telechargerAlbumZip(envie);
+        } finally {
+            zipButton.disabled = false;
+            zipButton.textContent = texteOriginal;
+        }
+
     });
 
     container.appendChild(zipButton);
@@ -384,7 +395,8 @@ async function telechargerAlbumZip(voyage) {
         return;
     }
 
-    showToast(`📦 Préparation de ${totalPhotos} photo${totalPhotos > 1 ? "s" : ""}...`);
+       showToast(`📦 Préparation de ${totalPhotos} photo${totalPhotos > 1 ? "s" : ""}...`);
+    document.getElementById("telechargerAlbumZipButton").textContent = `⏳ Récupération des photos (0/${totalPhotos})...`;
 
     const zip = new JSZip();
 
@@ -430,6 +442,8 @@ async function telechargerAlbumZip(voyage) {
                     photosTraitees++;
                     reussi = true;
 
+                    document.getElementById("telechargerAlbumZipButton").textContent = `⏳ Récupération des photos (${photosTraitees}/${totalPhotos})...`;
+
                 } catch (err) {
 
                     if (tentative === 1) {
@@ -450,6 +464,7 @@ async function telechargerAlbumZip(voyage) {
     }
 
     showToast(`📦 Compression en cours...`);
+    document.getElementById("telechargerAlbumZipButton").textContent = "⏳ Compression du fichier ZIP...";
 
     const contenuZip = await zip.generateAsync({ type: "blob" });
 
