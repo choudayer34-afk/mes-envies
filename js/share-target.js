@@ -1,7 +1,7 @@
 import { auth, db, authReady } from "./firebase.js";
 import { doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
+ 
 let contenuPartage = { titre: "", texte: "", url: "" };
 let contexteChoisi = null;
 let foyerIdActuel = null;
