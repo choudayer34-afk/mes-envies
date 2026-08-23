@@ -33,7 +33,7 @@ import { auth } from "./firebase.js";
 
 const groupesOuverts = new Set();
 const voyagesForcesEnEdition = new Set();
-
+const parametresOuvertsSet = new Set();
 
 function estContexteMaison(envie) {
     return envie.contexte === "maison";
@@ -67,6 +67,7 @@ if (statut === "termine" && !forceEdition) {
         } else {
 
             renderVoyageContenu(envie, container);
+    renderOutilsVoyage(envie);
 
             if (envie.contexte === "maison") {
 
@@ -104,6 +105,11 @@ function renderVoyageContenu(envie, container) {
 
     const estMaison = estContexteMaison(envie);
 
+    const headerTitre = document.querySelector('.accordionHeader[data-target="voyageSection"] span');
+
+    if (headerTitre) {
+        headerTitre.textContent = estMaison ? "🔧 Suivi du projet" : "📋 Suivi du voyage";
+    }
 
     const { statut: statutActuel } = computeContainerStatus(envie);
 
@@ -126,14 +132,13 @@ function renderVoyageContenu(envie, container) {
 
     const couvertureRow = document.createElement("div");
     couvertureRow.className = "voyageCouvertureRow";
+    couvertureRow.style.position = "relative";
 
     if (envie.photoCouverture) {
         couvertureRow.style.backgroundImage = `url(${envie.photoCouverture})`;
     }
 
-couvertureRow.style.position = "relative";
-
-couvertureRow.innerHTML = envie.photoCouverture ? `
+    couvertureRow.innerHTML = envie.photoCouverture ? `
         <button id="addPhotoCouvertureButton" class="couverturePetitBouton" style="top:10px;right:10px;" title="Changer la photo">✏️</button>
         <button id="repositionnerCouvertureButton" class="couverturePetitBouton" style="top:10px;right:56px;" title="Repositionner">🎯</button>
         <input type="file" id="photoCouvertureInput" accept="image/*" hidden>
@@ -147,7 +152,6 @@ couvertureRow.innerHTML = envie.photoCouverture ? `
     container.appendChild(couvertureRow);
 
     const enfants = getEnvies().filter(e => e.voyageId === envie.id);
-
     const { statut, pourcentage } = computeContainerStatus(envie);
 
     const statutBox = document.createElement("div");
@@ -161,90 +165,178 @@ couvertureRow.innerHTML = envie.photoCouverture ? `
     `;
     container.appendChild(statutBox);
 
-    const statutManuelRow = document.createElement("div");
-    statutManuelRow.className = "itemTypeToggle";
-    statutManuelRow.style.marginTop = "10px";
+    /* ---------- Paramètres (repliable) ---------- */
 
-    statutManuelRow.innerHTML = `
-        <button type="button" class="itemTypeChip statutManuelChip ${!envie.statutManuel ? "active" : ""}" data-statut="">🤖 Auto</button>
-        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "planifie" ? "active" : ""}" data-statut="planifie">📋 À faire</button>
-        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "en_cours" ? "active" : ""}" data-statut="en_cours">🔄 En cours</button>
-        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "termine" ? "active" : ""}" data-statut="termine">✅ Terminé</button>
+    const parametresOuvert = parametresOuvertsSet.has(envie.id);
+
+    const parametresWrapper = document.createElement("div");
+    parametresWrapper.style.marginTop = "10px";
+
+    const parametresHeader = document.createElement("button");
+    parametresHeader.type = "button";
+    parametresHeader.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
+    parametresHeader.innerHTML = `
+        <span>⚙️ Paramètres</span>
+        <span class="accordionIcon">${parametresOuvert ? "▾" : "▸"}</span>
     `;
 
-    statutManuelRow.querySelectorAll(".statutManuelChip").forEach(chip => {
+    parametresHeader.addEventListener("click", () => {
 
-        chip.addEventListener("click", () => {
+        if (parametresOuvertsSet.has(envie.id)) {
+            parametresOuvertsSet.delete(envie.id);
+        } else {
+            parametresOuvertsSet.add(envie.id);
+        }
 
-            updateEnvieStatutManuel(envie.id, chip.dataset.statut || null);
-            renderVoyageSection({ ...envie, statutManuel: chip.dataset.statut || null });
-
-        });
+        renderVoyageSection(envie);
 
     });
 
-    container.appendChild(statutManuelRow);
-    
-    
+    parametresWrapper.appendChild(parametresHeader);
+
+    if (!parametresOuvert) {
+
+        const resume = document.createElement("p");
+        resume.style.cssText = "font-style:italic;font-size:12px;color:var(--color-text-light);margin:4px 0 0;";
+        resume.textContent = calculerResumeParametres(envie, estMaison);
+        parametresWrapper.appendChild(resume);
+
+    } else {
+
+        const statutManuelRow = document.createElement("div");
+        statutManuelRow.className = "itemTypeToggle";
+        statutManuelRow.style.marginTop = "10px";
+
+        statutManuelRow.innerHTML = `
+            <button type="button" class="itemTypeChip statutManuelChip ${!envie.statutManuel ? "active" : ""}" data-statut="">🤖 Auto</button>
+            <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "planifie" ? "active" : ""}" data-statut="planifie">📋 À faire</button>
+            <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "en_cours" ? "active" : ""}" data-statut="en_cours">🔄 En cours</button>
+            <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "termine" ? "active" : ""}" data-statut="termine">✅ Terminé</button>
+        `;
+
+        statutManuelRow.querySelectorAll(".statutManuelChip").forEach(chip => {
+
+            chip.addEventListener("click", () => {
+                updateEnvieStatutManuel(envie.id, chip.dataset.statut || null);
+                renderVoyageSection({ ...envie, statutManuel: chip.dataset.statut || null });
+            });
+
+        });
+
+        parametresWrapper.appendChild(statutManuelRow);
+
         const visibiliteRow = document.createElement("div");
-    visibiliteRow.className = "itemTypeToggle";
-    visibiliteRow.style.marginTop = "10px";
+        visibiliteRow.className = "itemTypeToggle";
+        visibiliteRow.style.marginTop = "10px";
 
-    const estPrive = envie.visibilite === "prive";
+        const estPrive = envie.visibilite === "prive";
 
-    visibiliteRow.innerHTML = `
-        <button type="button" class="itemTypeChip visibiliteChip ${!estPrive ? "active" : ""}" data-visibilite="foyer">👪 Partagé avec le foyer</button>
-        <button type="button" class="itemTypeChip visibiliteChip ${estPrive ? "active" : ""}" data-visibilite="prive">🔒 Privé (seulement moi)</button>
-    `;
+        visibiliteRow.innerHTML = `
+            <button type="button" class="itemTypeChip visibiliteChip ${!estPrive ? "active" : ""}" data-visibilite="foyer">👪 Partagé avec le foyer</button>
+            <button type="button" class="itemTypeChip visibiliteChip ${estPrive ? "active" : ""}" data-visibilite="prive">🔒 Privé (seulement moi)</button>
+        `;
 
-    visibiliteRow.querySelectorAll(".visibiliteChip").forEach(chip => {
+        visibiliteRow.querySelectorAll(".visibiliteChip").forEach(chip => {
 
-        chip.addEventListener("click", () => {
+            chip.addEventListener("click", () => {
 
-            const nouvelleVisibilite = chip.dataset.visibilite;
-            const uid = auth.currentUser?.uid;
+                const nouvelleVisibilite = chip.dataset.visibilite;
+                const uid = auth.currentUser?.uid;
 
-            updateEnvieVisibilite(envie.id, nouvelleVisibilite, uid);
-            renderVoyageSection({ ...envie, visibilite: nouvelleVisibilite, proprietaireId: nouvelleVisibilite === "prive" ? uid : envie.proprietaireId });
+                updateEnvieVisibilite(envie.id, nouvelleVisibilite, uid);
+                renderVoyageSection({ ...envie, visibilite: nouvelleVisibilite, proprietaireId: nouvelleVisibilite === "prive" ? uid : envie.proprietaireId });
 
-        });
-
-    });
-
-    container.appendChild(visibiliteRow);
-
-    const documentRow = document.createElement("div");
-    documentRow.className = "itemTypeToggle";
-    documentRow.style.marginTop = "10px";
-
-    documentRow.innerHTML = `
-        <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "cni" ? "active" : ""}" data-document="cni">🪪 CNI suffit</button>
-        <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "passeport" ? "active" : ""}" data-document="passeport">📔 Passeport nécessaire</button>
-    `;
-
-    documentRow.querySelectorAll(".documentChip").forEach(chip => {
-
-        chip.addEventListener("click", () => {
-
-            updateEnvieDocumentRequis(envie.id, chip.dataset.document);
-            renderVoyageSection({ ...envie, documentRequis: chip.dataset.document });
+            });
 
         });
 
-    });
+        parametresWrapper.appendChild(visibiliteRow);
 
-    container.appendChild(documentRow);
-        const today = new Date().toISOString().slice(0, 10);
+        if (!estMaison) {
+
+            const documentRow = document.createElement("div");
+            documentRow.className = "itemTypeToggle";
+            documentRow.style.marginTop = "10px";
+
+            documentRow.innerHTML = `
+                <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "cni" ? "active" : ""}" data-document="cni">🪪 CNI suffit</button>
+                <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "passeport" ? "active" : ""}" data-document="passeport">📔 Passeport nécessaire</button>
+            `;
+
+            documentRow.querySelectorAll(".documentChip").forEach(chip => {
+
+                chip.addEventListener("click", () => {
+                    updateEnvieDocumentRequis(envie.id, chip.dataset.document);
+                    renderVoyageSection({ ...envie, documentRequis: chip.dataset.document });
+                });
+
+            });
+
+            parametresWrapper.appendChild(documentRow);
+
+        }
+
+        const personnesLabel = document.createElement("label");
+        personnesLabel.className = "fieldTitle";
+        personnesLabel.style.marginTop = "10px";
+        personnesLabel.textContent = estMaison ? "Personnes concernées" : "Personnes du voyage";
+        parametresWrapper.appendChild(personnesLabel);
+
+        const personnesContainer = document.createElement("div");
+        personnesContainer.id = "voyageParamsPersonnesSelector";
+        personnesContainer.style.marginBottom = "10px";
+        parametresWrapper.appendChild(personnesContainer);
+
+        renderPersonnesSelector(envie, "voyageParamsPersonnesSelector");
+
+        const partageButton = document.createElement("button");
+        partageButton.className = "secondaryButton";
+        partageButton.style.width = "100%";
+        partageButton.style.marginTop = "10px";
+        partageButton.textContent = envie.partagePublic
+            ? "🔗 Gérer le partage"
+            : (estMaison ? "🔗 Partager ce projet" : "🔗 Partager ce voyage");
+
+        partageButton.addEventListener("click", () => {
+            ouvrirPartageModal(envie);
+        });
+
+        parametresWrapper.appendChild(partageButton);
+
+    }
+
+    container.appendChild(parametresWrapper);
+
+    /* ---------- Carte (déplacée au-dessus des logements) ---------- */
+
+    if (!estMaison) {
+
+        const mapButton = document.createElement("button");
+        mapButton.className = "secondaryButton";
+        mapButton.textContent = "🗺️ Voir sur la carte";
+        mapButton.style.marginTop = "16px";
+        mapButton.style.width = "100%";
+
+        mapButton.addEventListener("click", () => {
+            openMap(envie.id);
+        });
+
+        container.appendChild(mapButton);
+
+    }
+
+    /* ---------- Contenu : Aujourd'hui, logements, groupes ---------- */
+
+    const today = new Date().toISOString().slice(0, 10);
     const ajourdhuiItems = enfants.filter(e => e.date?.start === today && !(estMaison && e.realise));
 
     if (ajourdhuiItems.length > 0) {
         appendCollapsibleGroup(container, "🔆 Aujourd'hui", ajourdhuiItems, envie, `d_${today}`, true);
     }
 
-     const logements = estMaison ? [] : enfants.filter(e => isLogementCategoryLocal(e.categorie));
+    const logements = estMaison ? [] : enfants.filter(e => isLogementCategoryLocal(e.categorie));
 
     if (logements.length > 0) {
-
 
         const header = document.createElement("div");
         header.className = "checklistCategorieHeader";
@@ -257,9 +349,7 @@ couvertureRow.innerHTML = envie.photoCouverture ? `
 
     }
 
-    
-
-      if (estMaison) {
+    if (estMaison) {
 
         const enfantsRestants = enfants.filter(e =>
             e.date?.start !== today && !isLogementCategoryLocal(e.categorie) && !e.realise
@@ -301,175 +391,13 @@ couvertureRow.innerHTML = envie.photoCouverture ? `
 
     }
 
-
-if (!estMaison) {
-    const promptButton = document.createElement("button");
-    promptButton.className = "secondaryButton";
-    promptButton.textContent = "🔎 Quoi faire autour (1h15)";
-    promptButton.style.marginTop = "14px";
-
-    promptButton.addEventListener("click", () => {
-        document.getElementById("promptModalContent").value = buildPromptVoyage(envie);
-        document.getElementById("promptModal").classList.remove("hidden");
-    });
-
-    container.appendChild(promptButton);
-
-    const importButton = document.createElement("button");
-    importButton.className = "secondaryButton";
-    importButton.textContent = "📥 Importer des idées via IA";
-    importButton.style.marginTop = "14px";
-
-    importButton.addEventListener("click", () => {
-        openVoyageImport(envie.id);
-    });
-
-    container.appendChild(importButton);
-    
-    const tableauButton = document.createElement("button");
-    tableauButton.className = "secondaryButton";
-    tableauButton.textContent = "📊 Tableau de saisie (PC)";
-    tableauButton.style.marginTop = "10px";
-
-    tableauButton.addEventListener("click", () => {
-        ouvrirTableauSaisie(envie.id);
-    });
-
-    container.appendChild(tableauButton);
-
-
-    const partageButton = document.createElement("button");
-    partageButton.className = "secondaryButton";
-    partageButton.textContent = envie.partagePublic ? "🔗 Gérer le partage" : "🔗 Partager ce voyage";
-    partageButton.style.marginTop = "14px";
-
-    partageButton.addEventListener("click", () => {
-        ouvrirPartageModal(envie);
-    });
-
-    container.appendChild(partageButton);
-
-    const mapButton = document.createElement("button");
-    mapButton.className = "secondaryButton";
-    mapButton.textContent = "🗺️ Voir sur la carte";
-    mapButton.style.marginTop = "14px";
-
-    mapButton.addEventListener("click", () => {
-        openMap(envie.id);
-    });
-
-    container.appendChild(mapButton);
-
-}
-    if (envie.lieu?.latitude && envie.lieu?.longitude) {
-
-        const carteTouristiqueButton = document.createElement("button");
-        carteTouristiqueButton.className = "secondaryButton";
-        carteTouristiqueButton.textContent = "🗺️ Carte touristique autour";
-        carteTouristiqueButton.style.marginTop = "10px";
-
-        carteTouristiqueButton.addEventListener("click", () => {
-
-            const lien = `https://www.google.com/maps/search/choses+à+faire+tourisme/@${envie.lieu.latitude},${envie.lieu.longitude},12z`;
-            window.open(lien, "_blank");
-
-        });
-
-        container.appendChild(carteTouristiqueButton);
-
-    }
-
-
-        
-
-    const addButton = document.createElement("button");
-    addButton.className = "secondaryButton";
-    addButton.textContent = estMaison ? "➕ Ajouter une tâche existante" : "➕ Ajouter une envie existante";
-
-    addButton.style.marginTop = "10px";
-
-    addButton.addEventListener("click", () => {
-        openEnviePicker(envie.id);
-    });
-
-    container.appendChild(addButton);
-
-        const creerNouvelleButton = document.createElement("button");
-    creerNouvelleButton.className = "primaryButton";
-    creerNouvelleButton.textContent = estMaison ? "🔧 Créer une nouvelle tâche ici" : "💡 Créer une nouvelle idée ici";
-
-    creerNouvelleButton.style.marginTop = "10px";
-
-    creerNouvelleButton.addEventListener("click", () => {
-        openModalVoyageContext(envie.id);
-    });
-
-    container.appendChild(creerNouvelleButton);
-
-
-        const creerJourneeButton = document.createElement("button");
-    creerJourneeButton.className = "secondaryButton";
-    creerJourneeButton.textContent = "📅 Créer une journée ici";
-    creerJourneeButton.style.marginTop = "10px";
-
-    creerJourneeButton.addEventListener("click", async () => {
-
-        creerJourneeButton.disabled = true;
-        creerJourneeButton.textContent = "📅 Localisation...";
-
-        const place = await obtenirPositionActuelle();
-
-        const nouvelleJournee = creerJourneeSilencieuse(envie, place);
-
-        creerJourneeButton.disabled = false;
-        creerJourneeButton.textContent = "📅 Créer une journée ici";
-
-        showToast(`✓ "${nouvelleJournee.titre}" créé`);
-
-        renderVoyageSection({ ...envie });
-
-    });
-
-    container.appendChild(creerJourneeButton);
-
-    const creerBilletButton = document.createElement("button");
-    creerBilletButton.className = "secondaryButton";
-    creerBilletButton.textContent = "🎫 Créer un billet ici";
-    creerBilletButton.style.marginTop = "10px";
-
-    creerBilletButton.addEventListener("click", () => {
-
-        const nouveauBillet = creerBilletSilencieux(envie);
-
-        openEnvie(nouveauBillet.id, null);
-
-        setTimeout(() => {
-            document.getElementById("addBilletButton")?.click();
-        }, 300);
-
-    });
-
-    container.appendChild(creerBilletButton);
-
-  if (estMaison) {
-
-        const partagerButton = document.createElement("button");
-        partagerButton.className = "secondaryButton";
-        partagerButton.textContent = envie.partagePublic ? "🔗 Gérer le partage" : "🔗 Partager ce projet";
-        partagerButton.style.marginTop = "10px";
-
-        partagerButton.addEventListener("click", () => {
-            ouvrirPartageModal(envie);
-        });
-
-        container.appendChild(partagerButton);
-
-    }
+    /* ---------- Suppression (isolée, tout en bas) ---------- */
 
     const supprimerVoyageButton = document.createElement("button");
     supprimerVoyageButton.className = "secondaryButton";
-supprimerVoyageButton.textContent = estMaison ? "🗑️ Supprimer ce projet et tout son contenu" : "🗑️ Supprimer ce voyage et tout son contenu";
-    supprimerVoyageButton.style.marginTop = "20px";
+    supprimerVoyageButton.textContent = estMaison ? "🗑️ Supprimer ce projet et tout son contenu" : "🗑️ Supprimer ce voyage et tout son contenu";
+    supprimerVoyageButton.style.marginTop = "24px";
+    supprimerVoyageButton.style.width = "100%";
     supprimerVoyageButton.style.background = "#FEE2E2";
     supprimerVoyageButton.style.color = "#DC2626";
 
@@ -490,8 +418,32 @@ supprimerVoyageButton.textContent = estMaison ? "🗑️ Supprimer ce projet et 
 
     container.appendChild(supprimerVoyageButton);
 
-
     initPhotoCouverture();
+
+}
+
+function calculerResumeParametres(envie, estMaison) {
+
+    const parties = [];
+
+    const statutLabel = envie.statutManuel === "planifie" ? "À faire"
+        : envie.statutManuel === "en_cours" ? "En cours"
+        : envie.statutManuel === "termine" ? "Terminé"
+        : null;
+
+    if (statutLabel) parties.push(statutLabel);
+
+    parties.push(envie.visibilite === "prive" ? "Privé" : "Partagé avec le foyer");
+
+    if (!estMaison && envie.documentRequis) {
+        parties.push(envie.documentRequis === "cni" ? "CNI suffit" : "Passeport nécessaire");
+    }
+
+    if (envie.partagePublic) {
+        parties.push("Lien de partage actif");
+    }
+
+    return parties.join(" · ");
 
 }
 
