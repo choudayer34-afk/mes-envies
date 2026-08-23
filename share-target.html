@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Partager vers EnVie</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body style="padding:24px;max-width:480px;margin:0 auto;">
+
+    <h1>📥 Partager vers EnVie</h1>
+
+    <div id="apercuPartage" style="margin-bottom:20px;padding:14px;background:var(--color-card);border-radius:12px;"></div>
+
+    <div id="etapeContexte">
+        <label class="fieldTitle">C'est pour :</label>
+        <div class="itemTypeToggle">
+            <button type="button" class="itemTypeChip" data-contexte="voyage">🧳 Voyage</button>
+            <button type="button" class="itemTypeChip" data-contexte="maison">🏠 Maison</button>
+        </div>
+    </div>
+
+    <div id="etapeValidation" class="hidden" style="margin-top:20px;">
+
+        <label class="fieldTitle">Titre</label>
+        <input type="text" id="shareTitre" class="numberInput" style="margin-bottom:14px;">
+
+        <label class="fieldTitle">Description (optionnel)</label>
+        <textarea id="shareDescription" class="numberInput" style="min-height:80px;margin-bottom:14px;width:100%;box-sizing:border-box;"></textarea>
+
+        <div class="modal-actions">
+            <button id="shareEnregistrer" class="secondaryButton">✓ Enregistrer</button>
+            <button id="shareEnregistrerVoir" class="primaryButton">✓ Voir la fiche</button>
+        </div>
+
+    </div>
+
+    <div id="shareMessage" class="hidden" style="text-align:center;margin-top:24px;font-size:16px;"></div>
+
+    <script type="module" src="./js/share-target.js"></script>
+
+</body>
+</html>
