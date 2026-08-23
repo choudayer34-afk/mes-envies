@@ -1,10 +1,12 @@
-const CACHE_NAME = 'envie-cache-v148';
+const CACHE_NAME = 'envie-cache-v149';
 
  
  
 const APP_SHELL = [
     './index.html',
     './styles.css',
+    './share-target.html',
+    './js/share-target.js',
  './js/corbeille.js',
     './app.js',
     './manifest.json',
