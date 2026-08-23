@@ -1748,26 +1748,16 @@ document.addEventListener("DOMContentLoaded", () => {
             <button class="dateChoice" data-value="custom">📆 Choisir une date…</button>
         </div>
 
-        <div id="customPeriodePanel" class="customPeriodePanel hidden">
+               <div id="customPeriodePanel" class="customPeriodePanel hidden">
 
             <div class="periodeTypeToggle">
                 <button type="button" class="periodeTypeChip active" data-type="single">Date unique</button>
                 <button type="button" class="periodeTypeChip" data-type="range">Plage (du/au)</button>
             </div>
 
-            <div class="field">
-                <label class="fieldTitle">Date</label>
-                <input id="periodeStart" type="date">
-            </div>
+            <div id="calendrierPeriodeContainer" style="margin:14px 0;"></div>
 
-            <div class="field hidden" id="periodeEndField">
-                <label class="fieldTitle">Au</label>
-                <input id="periodeEnd" type="date">
-            </div>
-
-            <button id="validateCustomPeriode" class="primaryButton">
-                Valider
-            </button>
+            <div id="calendrierPeriodeResume" style="text-align:center;font-size:13px;color:var(--color-text-light);margin-bottom:10px;min-height:18px;"></div>
 
         </div>
 
