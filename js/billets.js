@@ -5,7 +5,7 @@ import { showToast } from "./toast.js";
 import { estimerTailleDocument } from "./storage.js";
 import { setupAutocomplete, ouvrirGoogleMaps } from "./location.js";
 import { updateEnvieDate, updateEnvieLieu } from "./storage.js";
-
+import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
 
 
 
@@ -16,7 +16,7 @@ let visionneuseFichiers = [];
 let visionneuseIndex = 0;
 let currentBilletDestination = null;
 let currentBilletLieuDepart = null;
-
+let currentBilletDate = null;
 
 const EMOJI_PAR_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
 
@@ -284,7 +284,8 @@ function reinitialiserFormulaireBillet() {
 
     document.getElementById("billetCompagnie").value = "";
     document.getElementById("billetNumero").value = "";
-    document.getElementById("billetDate").value = "";
+       currentBilletDate = null;
+    document.getElementById("billetDateButton").textContent = "📅 Choisir la date de départ";
     document.getElementById("billetHeure").value = "";
     document.getElementById("billetLien").value = "";
     document.getElementById("billetFichierApercu").innerHTML = "";
@@ -338,7 +339,8 @@ function ouvrirEditionBillet(billet) {
 
     document.getElementById("billetCompagnie").value = billet.compagnie || "";
     document.getElementById("billetNumero").value = billet.numeroVol || "";
-    document.getElementById("billetDate").value = billet.dateDepart || "";
+      currentBilletDate = billet.dateDepart || null;
+    document.getElementById("billetDateButton").textContent = currentBilletDate ? `📅 ${formatPeriode({ start: currentBilletDate, type: "single" })}` : "📅 Choisir la date de départ";
     document.getElementById("billetHeure").value = billet.heureDepart || "";
     document.getElementById("billetLien").value = billet.lienApp || "";
 
@@ -374,7 +376,17 @@ export function initBillets() {
 
     });
 
+    document.getElementById("billetDateButton")?.addEventListener("click", () => {
 
+        ouvrirSelecteurPeriodeLibre((periode) => {
+
+            currentBilletDate = periode.start;
+            document.getElementById("billetDateButton").textContent = `📅 ${formatPeriode(periode)}`;
+
+        }, currentBilletDate ? { start: currentBilletDate, type: "single" } : null);
+
+    });
+    
     setupAutocomplete(
         document.getElementById("billetLieuDepartInput"),
         document.getElementById("billetLieuDepartSuggestions"),
@@ -474,7 +486,7 @@ export function initBillets() {
         if (!envie)
             return;
 
-              const dateDepart = document.getElementById("billetDate").value || null;
+             const dateDepart = currentBilletDate;
 
            const donneesBillet = {
             type: currentTypeBillet,
