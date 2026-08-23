@@ -284,6 +284,7 @@ function renderVoyageContenu(envie, container) {
 
         const personnesContainer = document.createElement("div");
         personnesContainer.id = "voyageParamsPersonnesSelector";
+        personnesContainer.className = "categorieSelector fiche";
         personnesContainer.style.marginBottom = "10px";
         parametresWrapper.appendChild(personnesContainer);
 
