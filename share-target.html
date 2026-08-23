@@ -12,7 +12,16 @@
 
     <div id="apercuPartage" style="margin-bottom:20px;padding:14px;background:var(--color-card);border-radius:12px;"></div>
 
-    <div id="etapeContexte">
+        <div id="etapeConnexion" class="hidden">
+        <label class="fieldTitle">Reconnecte-toi</label>
+        <input type="email" id="shareEmail" placeholder="Email" class="numberInput" style="margin-bottom:10px;">
+        <input type="password" id="sharePassword" placeholder="Mot de passe" class="numberInput" style="margin-bottom:10px;">
+        <button id="shareConnexionButton" class="primaryButton" style="width:100%;">Se connecter</button>
+        <p id="shareConnexionErreur" class="hidden" style="color:#D9534F;font-size:13px;margin-top:8px;"></p>
+    </div>
+
+    <div id="etapeContexte" class="hidden">
+
         <label class="fieldTitle">C'est pour :</label>
         <div class="itemTypeToggle">
             <button type="button" class="itemTypeChip" data-contexte="voyage">🧳 Voyage</button>
