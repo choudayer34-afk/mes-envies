@@ -1,4 +1,4 @@
-import { getEnviesCorbeille, restaurerEnvie } from "./storage.js";
+
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
 import { getEnviesCorbeille, restaurerEnvie, supprimerDefinitivement, supprimerDefinitivementAvecEnfants, getEnvies } from "./storage.js";
