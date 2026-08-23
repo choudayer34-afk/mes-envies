@@ -1,10 +1,23 @@
 import { auth, db, authReady } from "./firebase.js";
-import { getFoyerId } from "./auth.js";
-import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 let contenuPartage = { titre: "", texte: "", url: "" };
 let contexteChoisi = null;
+let foyerIdActuel = null;
+
+async function obtenirFoyerId(uid) {
+
+    const userDoc = await getDoc(doc(db, "users", uid));
+
+    if (userDoc.exists() && userDoc.data().foyerId) {
+        return userDoc.data().foyerId;
+    }
+
+    return null;
+
+}
+
 
 function extraireDomaine(url) {
 
@@ -66,12 +79,15 @@ async function init() {
 
             try {
 
-                await signInWithEmailAndPassword(auth, email, password);
+                               const result = await signInWithEmailAndPassword(auth, email, password);
+
+                foyerIdActuel = await obtenirFoyerId(result.user.uid);
 
                 document.getElementById("etapeConnexion").classList.add("hidden");
                 document.getElementById("etapeContexte").classList.remove("hidden");
 
                 initEtapeContexte();
+
 
             } catch (err) {
 
@@ -86,10 +102,18 @@ async function init() {
 
     }
 
+     foyerIdActuel = await obtenirFoyerId(auth.currentUser.uid);
+
+    if (!foyerIdActuel) {
+        document.getElementById("apercuPartage").innerHTML += `<p style="color:#D9534F;margin-top:10px;">Impossible de retrouver ton foyer. Réessaie depuis l'application principale.</p>`;
+        return;
+    }
+
     document.getElementById("etapeContexte").classList.remove("hidden");
     initEtapeContexte();
 
 }
+
 
 function initEtapeContexte() {
 
@@ -121,8 +145,15 @@ async function enregistrer(ouvrirFiche) {
     const titre = document.getElementById("shareTitre").value.trim() || "Sans titre";
     const description = document.getElementById("shareDescription").value.trim();
 
-    const foyerId = getFoyerId();
+       const foyerId = foyerIdActuel;
     const id = crypto.randomUUID();
+
+    if (!foyerId) {
+        document.getElementById("shareMessage").classList.remove("hidden");
+        document.getElementById("shareMessage").textContent = "❌ Foyer introuvable, réessaie.";
+        return;
+    }
+
 
     const envieData = {
         titre,
@@ -136,8 +167,15 @@ async function enregistrer(ouvrirFiche) {
         realise: false
     };
 
-    await setDoc(doc(db, "foyers", foyerId, "envies", id), envieData);
-
+        try {
+        await setDoc(doc(db, "foyers", foyerId, "envies", id), envieData);
+    } catch (err) {
+        document.getElementById("shareMessage").classList.remove("hidden");
+        document.getElementById("shareMessage").textContent = "❌ Échec de l'enregistrement, réessaie.";
+        console.error("Erreur enregistrement partage: " + err.message);
+        return;
+    }
+ 
     document.getElementById("etapeContexte").classList.add("hidden");
     document.getElementById("etapeValidation").classList.add("hidden");
 
