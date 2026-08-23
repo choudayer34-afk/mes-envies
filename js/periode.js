@@ -1,10 +1,10 @@
-
+import { getEnvies } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { updateEnvieDate, propagateDateToGroup } from "./storage.js";
 
 import { updateEnviePersonnesIds, getPersonnes } from "./storage.js";
 import { isContainer } from "./envie.js";
-
+import { initCalendrierWidget, setModeCalendrier } from "./calendrier.js";
 let selectedPeriode = null;
 let currentType = "single";
 let context = "creation"; // "creation" | "fiche"
@@ -135,7 +135,7 @@ export function initDateModal() {
 
     });
 
-    document.querySelectorAll(".periodeTypeChip").forEach(chip => {
+        document.querySelectorAll(".periodeTypeChip").forEach(chip => {
 
         chip.addEventListener("click", () => {
 
@@ -146,31 +146,10 @@ export function initDateModal() {
 
             chip.classList.add("active");
 
-            document.getElementById("periodeEndField")
-                .classList.toggle("hidden", currentType !== "range");
+            setModeCalendrier(currentType);
+            document.getElementById("calendrierPeriodeResume").textContent = "";
 
         });
-
-    });
-
-    document.getElementById("validateCustomPeriode").addEventListener("click", () => {
-
-        const start = document.getElementById("periodeStart").value;
-        const end = document.getElementById("periodeEnd").value;
-
-        if (!start)
-            return;
-
-        if (currentType === "range" && !end)
-            return;
-
-        applyPeriode({
-            type: currentType,
-            start,
-            end: currentType === "range" ? end : null
-        });
-
-        closeDateModal();
 
     });
     
@@ -190,8 +169,33 @@ function closeDateModal() {
 }
 
 function showCustomPanel() {
+
     document.getElementById("dateChoicesList").classList.add("hidden");
     document.getElementById("customPeriodePanel").classList.remove("hidden");
+
+    let valeurInitiale = null;
+
+    if (context === "fiche") {
+        const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
+        valeurInitiale = envie?.date || null;
+    } else if (context === "creation") {
+        valeurInitiale = selectedPeriode;
+    } else if (context === "libre") {
+        valeurInitiale = periodeLibreValeur;
+    }
+
+    document.getElementById("calendrierPeriodeResume").textContent = "";
+
+    initCalendrierWidget("calendrierPeriodeContainer", currentType, valeurInitiale, (resultat) => {
+
+        applyPeriode(resultat);
+
+        document.getElementById("calendrierPeriodeResume").textContent = `✓ ${formatPeriode(resultat)}`;
+
+        setTimeout(closeDateModal, 500);
+
+    });
+
 }
 
 function applyPeriode(periode) {
