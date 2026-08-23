@@ -1269,6 +1269,10 @@ const badgeExpirationHtml = (estContainer && voyageADocumentExpire(envie))
 
         card.classList.add("envie-card-reduite");
 
+           const badgeArretHtml = (estContainer && estProjetAlArret(envie))
+        ? `<div class="badgeAlerteArret">⏸️ En pause depuis ${formaterDureeArret(envie)}</div>`
+        : "";
+        
 card.innerHTML = `
             <div class="envieReduiteLigne">
                 <span class="envieReduiteTitre">${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.visibilite === "prive" ? "🔒 " : ""}${envie.titre}</span>
@@ -1279,9 +1283,7 @@ card.innerHTML = `
             ${badgeArretHtml}
         `;
 
-            const badgeArretHtml = (estContainer && estProjetAlArret(envie))
-        ? `<div class="badgeAlerteArret">⏸️ En pause depuis ${formaterDureeArret(envie)}</div>`
-        : "";
+ 
         
         card.querySelector(".envieReduireButtonInline").addEventListener("click", (event) => {
 
