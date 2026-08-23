@@ -196,6 +196,12 @@ initEnvieCategoriesSync(() => {
 
 });
 
+const paramsUrl = new URLSearchParams(window.location.search);
+const idAOuvrir = paramsUrl.get("ouvrir");
+
+if (idAOuvrir) {
+    setTimeout(() => openEnvie(idAOuvrir, null), 500);
+}
 
 
         initSurvie();
