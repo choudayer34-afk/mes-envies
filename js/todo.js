@@ -93,14 +93,16 @@ console.log(`[DEBUG] Catégorie "${cle}" — masquerCochesTodo=${masquerCochesTo
         if (masquerCochesTodo && itemsAffiches.length === 0)
             return;
 
-        const header = document.createElement("button");
+                 const header = document.createElement("button");
         header.type = "button";
         header.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
+        header.dataset.dragId = `etape_${encodeURIComponent(groupe.cle)}`;
 
         header.innerHTML = `
-            <span>${group.categorie ? `${group.categorie.emoji} ${group.categorie.nom}` : "Sans catégorie"}</span>
-            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${group.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
+            <span>📋 ${groupe.nom}</span>
+            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${groupe.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
+
 
 header.addEventListener("click", () => {
 
@@ -430,15 +432,35 @@ ouvrirEditionChecklistItem(envie.id, item, (nouveauTexte, nouvelleDate, nouvelle
 
     });
 
-    makeRowDraggable(row, item.id, (targetId) => {
+     makeRowDraggable(row, item.id, (targetId) => {
 
         const envieActuelle = getEnvieCourante();
+
+        if (targetId.startsWith("etape_")) {
+
+            const etapeCible = decodeURIComponent(targetId.replace("etape_", ""));
+            const nouvelleEtape = etapeCible === "sans-etape" ? null : etapeCible;
+
+            const nouveauxItems = (envieActuelle.checklistTodo || []).map(i =>
+                i.id === item.id ? { ...i, etape: nouvelleEtape } : i
+            );
+
+            updateEnvieChecklistTodo(envieActuelle.id, nouveauxItems);
+            renderTodoListe({ ...envieActuelle, checklistTodo: nouveauxItems });
+
+            showToast(nouvelleEtape ? `✓ Déplacé vers "${nouvelleEtape}"` : "✓ Retiré de son étape");
+
+            return;
+
+        }
+
         const nouveauxItems = reorderTodoItem(envieActuelle, item.id, targetId);
 
         updateEnvieChecklistTodo(envieActuelle.id, nouveauxItems);
         renderTodoListe({ ...envieActuelle, checklistTodo: nouveauxItems });
 
     });
+
 
     return row;
 
