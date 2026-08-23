@@ -230,7 +230,6 @@ main{
 #comparateurProduitModal,
 #assignModal,
 #urlModal,
-#dateModal,
 #templatePickerModal,
 #catalogueModal,
 #mapModal,
@@ -268,6 +267,10 @@ main{
 #personnePapiersModal
 {
     z-index:2100;
+}
+
+#dateModal{
+    z-index:2200;
 }
 
 #checklistEditItemModal{
