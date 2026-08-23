@@ -1246,6 +1246,10 @@ const badgeExpirationHtml = (estContainer && voyageADocumentExpire(envie))
         ? `<div class="badgeAlerteExpiration">⚠️ Papiers expirés</div>`
         : "";
     
+        const badgeArretHtml = (estContainer && estProjetAlArret(envie))
+        ? `<div class="badgeAlerteArret">⏸️ En pause depuis ${formaterDureeArret(envie)}</div>`
+        : "";
+
     if (estReduite) {
 
         const { statut, pourcentage, realises, total } = computeContainerStatus(envie);
@@ -1269,9 +1273,6 @@ const badgeExpirationHtml = (estContainer && voyageADocumentExpire(envie))
 
         card.classList.add("envie-card-reduite");
 
-           const badgeArretHtml = (estContainer && estProjetAlArret(envie))
-        ? `<div class="badgeAlerteArret">⏸️ En pause depuis ${formaterDureeArret(envie)}</div>`
-        : "";
         
 card.innerHTML = `
             <div class="envieReduiteLigne">
