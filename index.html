@@ -1973,6 +1973,12 @@ document.addEventListener("DOMContentLoaded", () => {
 <label class="fieldTitle" style="margin-top:12px;">Heure d'arrivée (optionnel)</label>
 <input type="time" id="billetHeureArrivee" class="numberInput">
 
+<label class="fieldTitle" style="margin-top:12px;">Lieu de départ (optionnel)</label>
+<div style="position:relative;">
+    <input type="text" id="billetLieuDepartInput" placeholder="Ex: Gare de Bordeaux" class="numberInput" autocomplete="off">
+    <div id="billetLieuDepartSuggestions" class="autocompleteSuggestions hidden"></div>
+</div>
+
 <label class="fieldTitle" style="margin-top:12px;">Destination (optionnel)</label>
 <div style="position:relative;">
     <input type="text" id="billetDestinationInput" placeholder="Ex: Paris CDG" class="numberInput" autocomplete="off">
