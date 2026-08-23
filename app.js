@@ -22,7 +22,7 @@ import { initPhotos } from "./js/photos.js";
 import { initRechercheAccueil } from "./js/ui.js";
 import { initJeux } from "./js/jeux.js";
 import { initFichesSurvieCustomSync } from "./js/storage.js";
-import { initSurvieEditor } from "./js/survie.js";
+import { initSurvieEditor, renderSurvie } from "./js/survie.js";
 import { initSurvieImport } from "./js/survie-import.js";
 import { initPhotoDescription } from "./js/photos.js";
 import { initPhotoViewer } from "./js/photos.js";
