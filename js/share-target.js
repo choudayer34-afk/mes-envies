@@ -1,6 +1,7 @@
 import { auth, db, authReady } from "./firebase.js";
 import { getFoyerId } from "./auth.js";
 import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 let contenuPartage = { titre: "", texte: "", url: "" };
 let contexteChoisi = null;
@@ -51,16 +52,49 @@ async function init() {
 
     renderApercu();
 
-    await authReady;
+        await authReady;
 
     if (!auth.currentUser) {
 
-        document.getElementById("etapeContexte").innerHTML = `<p style="text-align:center;color:var(--color-text-light);">Connecte-toi d'abord dans l'application EnVie, puis réessaie de partager.</p>`;
+        document.getElementById("etapeConnexion").classList.remove("hidden");
+
+        document.getElementById("shareConnexionButton").addEventListener("click", async () => {
+
+            const email = document.getElementById("shareEmail").value.trim();
+            const password = document.getElementById("sharePassword").value;
+            const erreurEl = document.getElementById("shareConnexionErreur");
+
+            try {
+
+                await signInWithEmailAndPassword(auth, email, password);
+
+                document.getElementById("etapeConnexion").classList.add("hidden");
+                document.getElementById("etapeContexte").classList.remove("hidden");
+
+                initEtapeContexte();
+
+            } catch (err) {
+
+                erreurEl.textContent = "Identifiants incorrects, réessaie.";
+                erreurEl.classList.remove("hidden");
+
+            }
+
+        });
+
         return;
 
     }
 
+    document.getElementById("etapeContexte").classList.remove("hidden");
+    initEtapeContexte();
+
+}
+
+function initEtapeContexte() {
+
     document.querySelectorAll(".itemTypeChip").forEach(chip => {
+
 
         chip.addEventListener("click", () => {
 
@@ -128,3 +162,6 @@ document.getElementById("shareEnregistrer")?.addEventListener("click", () => enr
 document.getElementById("shareEnregistrerVoir")?.addEventListener("click", () => enregistrer(true));
 
 init();
+
+
+
