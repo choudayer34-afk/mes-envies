@@ -33,7 +33,7 @@ masquerRealisesCarte = !masquerRealisesCarte;
         const icon = document.getElementById("mapNonLocalisesHeader").querySelector(".accordionIcon");
         icon.textContent = liste.classList.contains("hidden") ? "▸" : "▾";
 
-    });
+
     
 
 }
