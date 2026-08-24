@@ -1,4 +1,4 @@
-const ALL_OVERLAY_IDS = [
+export const ALL_OVERLAY_IDS = [
     "modalOverlay", "deleteModal", "ficheOverlay", "dateModal", "urlModal",
     "adminModal", "templateEditModal", "checklistModal", "assignModal",
     "templatePickerModal", "enviePickerModal", "mapModal", "inboxModal", "agendaModal"
