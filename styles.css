@@ -989,6 +989,15 @@ button {
     padding:16px;
     display:flex;
     flex-direction:column;
+    overflow-y:auto;
+}
+
+#mapNonLocalisesSection{
+    flex-shrink:0;
+}
+
+#mapNonLocalisesHeader{
+    background:#FFF3E0;
 }
 
 .mapContainer{
