@@ -825,6 +825,37 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
     </div>
 </div>
+
+<div id="preparerVoyageModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closePreparerVoyage" class="backButton">← Retour</button>
+
+        <h2>🧭 Préparer le voyage</h2>
+
+        <label class="fieldTitle">🏨 Logement</label>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+            <a id="lienBooking" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Booking.com</a>
+            <a id="lienAirbnb" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Airbnb</a>
+            <a id="lienCozycozy" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Cozycozy</a>
+        </div>
+
+        <label class="fieldTitle">🚄 Billet</label>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
+            <a id="lienSNCF" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">SNCF Connect</a>
+            <a id="lienGoogleFlights" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Google Flights</a>
+        </div>
+
+        <label class="fieldTitle">🏞️ Activités</label>
+        <button id="preparerActivitesButton" class="secondaryButton" style="width:100%;margin-bottom:20px;">🤖 Générer le prompt IA</button>
+
+        <label class="fieldTitle">📋 Checklist</label>
+        <button id="preparerChecklistButton" class="secondaryButton" style="width:100%;">Copier depuis un voyage précédent</button>
+
+    </div>
+
+</div>
     
 <div id="gameboyMenuModal" class="modal-overlay hidden">
 
