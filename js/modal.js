@@ -1,5 +1,5 @@
 import { deleteEnvie, updateEnvie, updateEnvieVoyage, createEnvie, getEnvies } from "./storage.js";
-import { closeAllOverlaysExcept } from "./modal-utils.js";
+import { closeAllOverlaysExcept, ALL_OVERLAY_IDS } from "./modal-utils.js";
 
 import { renderEnvies } from "./ui.js";
 import { showToast } from "./toast.js";
@@ -321,30 +321,51 @@ const nouvelId = createEnvie({
 export function initDeleteModal() {
 
     document.getElementById("cancelDelete").addEventListener("click", () => {
+
         document.getElementById("deleteModal").classList.add("hidden");
+        restaurerOverlaysApresSuppression();
+
     });
 
     document.getElementById("confirmDelete").addEventListener("click", () => {
 
         deleteEnvie(currentDeleteId);
         renderEnvies();
-        showToast("✓ Envie supprimée");
+        showToast("✓ Envie supprimée (dans la corbeille)");
 
         document.getElementById("deleteModal").classList.add("hidden");
+        restaurerOverlaysApresSuppression();
 
     });
 
 }
 
+let overlaysAvantSuppression = [];
+
 export function removeEnvie(id) {
 
     currentDeleteId = id;
+
+    overlaysAvantSuppression = ALL_OVERLAY_IDS.filter(overlayId => {
+        const el = document.getElementById(overlayId);
+        return el && !el.classList.contains("hidden");
+    });
 
     document.getElementById("deleteText").textContent =
         "Cette envie sera supprimée définitivement.";
     closeAllOverlaysExcept("deleteModal");
 
     document.getElementById("deleteModal").classList.remove("hidden");
+
+}
+
+function restaurerOverlaysApresSuppression() {
+
+    overlaysAvantSuppression.forEach(overlayId => {
+        document.getElementById(overlayId)?.classList.remove("hidden");
+    });
+
+    overlaysAvantSuppression = [];
 
 }
 
