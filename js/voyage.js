@@ -31,6 +31,8 @@ import { getFoyerId } from "./auth.js";
 import { updateEnvieVisibilite } from "./storage.js";
 import { auth } from "./firebase.js";
 
+let vueSansDate = "libre";
+
 const groupesOuverts = new Set();
 const voyagesForcesEnEdition = new Set();
 const parametresOuvertsSet = new Set();
@@ -389,9 +391,8 @@ function renderVoyageContenu(envie, container) {
         });
 
         if (todo.length > 0) {
-            appendCollapsibleGroup(container, "Sans date", todo, envie, "todo");
+            appendGroupeSansDate(container, todo, envie);
         }
-
     }
 
     /* ---------- Suppression (isolée, tout en bas) ---------- */
@@ -692,6 +693,110 @@ function appendCollapsibleGroup(container, label, items, voyageEnvie, groupKey, 
     }
 
 
+
+}
+
+function appendGroupeSansDate(container, items, voyageEnvie) {
+
+    const estOuvert = groupesOuverts.has("todo");
+
+    const header = document.createElement("button");
+    header.type = "button";
+    header.className = "accordionHeader groupCollapseHeader";
+    header.innerHTML = `
+        <span>Sans date <small class="groupProgress">(${items.filter(i => i.realise).length}/${items.length})</small></span>
+        <span class="accordionIcon">${estOuvert ? "▾" : "▸"}</span>
+    `;
+
+    const content = document.createElement("div");
+    content.className = "accordionContent" + (estOuvert ? "" : " hidden");
+
+    const toggleVue = document.createElement("div");
+    toggleVue.className = "itemTypeToggle";
+    toggleVue.style.marginBottom = "10px";
+    toggleVue.innerHTML = `
+        <button type="button" class="itemTypeChip ${vueSansDate === "categorie" ? "active" : ""}" data-vue="categorie">🏷️ Catégorie</button>
+        <button type="button" class="itemTypeChip ${vueSansDate === "creation" ? "active" : ""}" data-vue="creation">🕐 Création</button>
+        <button type="button" class="itemTypeChip ${vueSansDate === "libre" ? "active" : ""}" data-vue="libre">📌 Libre</button>
+    `;
+
+    toggleVue.querySelectorAll(".itemTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            vueSansDate = chip.dataset.vue;
+            renderVoyageSection(voyageEnvie);
+
+        });
+
+    });
+
+    content.appendChild(toggleVue);
+
+    if (vueSansDate === "categorie") {
+
+        const groupes = new Map();
+
+        items.forEach(item => {
+
+            const cle = item.categorie || "sans-categorie";
+
+            if (!groupes.has(cle)) {
+                groupes.set(cle, []);
+            }
+
+            groupes.get(cle).push(item);
+
+        });
+
+        groupes.forEach((itemsCategorie, categorieId) => {
+
+            const emoji = getCategorieById(categorieId)?.emoji || "💡";
+            const label = getCategorieById(categorieId)?.label || "Sans catégorie";
+
+            const sousHeader = document.createElement("div");
+            sousHeader.className = "checklistCategorieHeader";
+            sousHeader.textContent = `${emoji} ${label} (${itemsCategorie.length})`;
+            content.appendChild(sousHeader);
+
+            itemsCategorie.forEach(item => {
+                content.appendChild(createVoyageItemRow(item, voyageEnvie));
+            });
+
+        });
+
+    } else if (vueSansDate === "creation") {
+
+        [...items].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)).forEach(item => {
+            content.appendChild(createVoyageItemRow(item, voyageEnvie));
+        });
+
+    } else {
+
+        [...items].sort((a, b) => (a.ordre || 0) - (b.ordre || 0)).forEach(item => {
+            content.appendChild(createVoyageItemRow(item, voyageEnvie));
+        });
+
+    }
+
+    header.addEventListener("click", () => {
+
+        content.classList.toggle("hidden");
+
+        if (content.classList.contains("hidden")) {
+            groupesOuverts.delete("todo");
+        } else {
+            groupesOuverts.add("todo");
+        }
+
+        header.querySelector(".accordionIcon").textContent = content.classList.contains("hidden") ? "▸" : "▾";
+
+    });
+
+    container.appendChild(header);
+    container.appendChild(content);
 
 }
 
