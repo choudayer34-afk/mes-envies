@@ -10,6 +10,7 @@
 
 "use strict";
 import { initAgenda } from "./js/agenda.js";
+import { openVoyageImport, genererPromptArticleADecortiquer } from "./js/voyage-import.js";
 import { initChangelogSync } from "./js/storage.js";
 import { initBillets } from "./js/billets.js";
 import { renderNouveautes } from "./js/plus.js";
@@ -198,9 +199,43 @@ initEnvieCategoriesSync(() => {
 
 const paramsUrl = new URLSearchParams(window.location.search);
 const idAOuvrir = paramsUrl.get("ouvrir");
+const importVoyageId = paramsUrl.get("importVoyage");
+const urlArticle = paramsUrl.get("urlArticle");
 
 if (idAOuvrir) {
+
     setTimeout(() => openEnvie(idAOuvrir, null), 500);
+
+} else if (importVoyageId) {
+
+    setTimeout(() => {
+
+        openEnvie(importVoyageId, null);
+
+        setTimeout(async () => {
+
+            openVoyageImport(importVoyageId);
+
+            if (urlArticle) {
+
+                const voyage = getEnvies().find(e => e.id === importVoyageId);
+                const prompt = genererPromptArticleADecortiquer(decodeURIComponent(urlArticle), voyage?.lieu?.nom);
+
+                try {
+                    await navigator.clipboard.writeText(prompt);
+                } catch {}
+
+                document.getElementById("voyageImportFormStep").classList.add("hidden");
+                document.getElementById("voyageImportJsonStep").classList.remove("hidden");
+
+                showToast("✓ Prompt (article) copié, colle-le dans ton IA");
+
+            }
+
+        }, 300);
+
+    }, 500);
+
 }
 
 
