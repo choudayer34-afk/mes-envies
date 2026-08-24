@@ -2929,3 +2929,31 @@ button {
     margin-top:6px;
     display:inline-block;
 }
+
+.agendaJourCase{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:2px;
+}
+
+.agendaPointEvenement{
+    font-size:8px;
+    line-height:1;
+    color:#6FAFC4;
+}
+
+.calendrierCaseDebut .agendaPointEvenement{
+    color:white;
+}
+
+.agendaJourAujourdhui{
+    border:2px solid #6FAFC4;
+}
+
+.agendaSectionTitle{
+    font-weight:700;
+    font-size:14px;
+    margin:16px 0 8px;
+}
