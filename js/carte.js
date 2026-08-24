@@ -13,28 +13,28 @@ const JOUR_COLORS = ["#6FAFC4", "#F5A623", "#E85D75", "#7ED6A5", "#9B7EDE", "#F2
 
 export function initCarte() {
 
-    
     document.getElementById("btnCarte").addEventListener("click", () => openMap());
     document.getElementById("closeCarte").addEventListener("click", closeMap);
 
-        document.getElementById("mapNonLocalisesHeader")?.addEventListener("click", () => {
+    document.getElementById("mapToggleRealisesButton")?.addEventListener("click", () => {
 
-masquerRealisesCarte = !masquerRealisesCarte;
+        masquerRealisesCarte = !masquerRealisesCarte;
 
         document.getElementById("mapToggleRealisesButton").textContent = masquerRealisesCarte ? "👁️ Afficher tout" : "🙈 Masquer réalisés";
 
         renderMarkers(voyageIdActuelCarte, enviesPreFiltreesActuelles);
 
     });
-    
+
+    document.getElementById("mapNonLocalisesHeader")?.addEventListener("click", () => {
+
         const liste = document.getElementById("mapNonLocalisesListe");
         liste.classList.toggle("hidden");
 
         const icon = document.getElementById("mapNonLocalisesHeader").querySelector(".accordionIcon");
         icon.textContent = liste.classList.contains("hidden") ? "▸" : "▾";
 
-
-    
+    });
 
 }
 
