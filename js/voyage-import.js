@@ -165,8 +165,9 @@ export function initVoyageImport() {
 
 export function genererPromptArticleADecortiquer(url, destination) {
 
+    return `RÉPONDS UNIQUEMENT EN JSON BRUT — même si tu effectues une recherche web, n'affiche jamais de citations, de sources, de liens formatés en Markdown, ni de texte explicatif. Uniquement le JSON demandé plus bas, rien d'autre.
 
-    return `Tu es un assistant qui extrait des idées de voyage concrètes à partir d'un article.
+Tu es un assistant qui extrait des idées de voyage concrètes à partir d'un article.
 
 Article à analyser : ${url}
 ${destination ? `Voyage concerné : ${destination}.` : ""}
@@ -178,16 +179,16 @@ Pour chaque idée trouvée (lieu à visiter, restaurant, activité, hébergement
 - description : un texte riche qui inclut, quand c'est pertinent selon le type d'activité : le niveau de difficulté, l'âge minimum conseillé, la durée approximative, le prix indicatif, la meilleure période, et tout autre critère utile mentionné dans l'article
 - liens : un tableau avec le lien de l'article lui-même, et tout autre lien officiel pertinent que tu identifies (site du lieu, réservation...) si tu peux faire une recherche complémentaire
 
-Si tu as la capacité de rechercher sur Internet, complète chaque idée avec des informations à jour plutôt que de te limiter au seul contenu de l'article.
+Si tu as la capacité de rechercher sur Internet, complète chaque idée avec des informations à jour plutôt que de te limiter au seul contenu de l'article — mais garde toujours le résultat au format JSON ci-dessous, sans jamais insérer de citations ou de liens de sources dans le texte.
 
 RÈGLES DE FORMAT ABSOLUES, à respecter scrupuleusement car le JSON sera analysé automatiquement par un programme :
-1. Réponds UNIQUEMENT avec le JSON demandé — aucun texte avant, aucun texte après, aucune balise \`\`\`, aucune explication.
+1. Réponds UNIQUEMENT avec le JSON demandé — aucun texte avant, aucun texte après, aucune balise \`\`\`, aucune explication, aucune citation de source.
 2. Utilise exclusivement des guillemets doubles droits ("), jamais de guillemets typographiques courbes (" " ni ' ').
 3. N'ajoute jamais de virgule après le dernier élément d'une liste ou d'un objet.
 4. Si un texte contient lui-même des guillemets, remplace-les par des apostrophes simples plutôt que d'essayer de les échapper.
 5. Vérifie que chaque accolade { et chaque crochet [ ouverts sont bien refermés avant la fin de ta réponse.
 
-Format exact attendu :
+Format exact attendu, et strictement rien d'autre dans ta réponse :
 {
   "idees": [
     {
@@ -198,7 +199,9 @@ Format exact attendu :
       "liens": ["${url}"]
     }
   ]
-}`;
+}
+
+RAPPEL FINAL : ta réponse doit commencer directement par { et se terminer directement par } — rien avant, rien après, aucune source citée.`;
 
 }
 
@@ -269,13 +272,29 @@ function analyserImportVoyage() {
 
     input = normaliserGuillemets(input);
 
-    let data;
+       let data;
 
     try {
         data = JSON.parse(input);
     } catch (err) {
-        reportEl.innerHTML = `<div class="emptyState">❌ JSON invalide : ${err.message}</div>`;
+
+        if (!input.trim().startsWith("{")) {
+
+            reportEl.innerHTML = `
+                <div class="emptyState">
+                    ❌ L'IA n'a pas répondu en JSON (probablement à cause d'une recherche web qui a pris le dessus sur la consigne de format).<br><br>
+                    Retourne dans ton IA et redemande simplement : <em>"Reformate ta réponse précédente en JSON strict, sans aucune citation ni texte autour, exactement selon le format demandé."</em>
+                </div>
+            `;
+
+        } else {
+
+            reportEl.innerHTML = `<div class="emptyState">❌ JSON invalide : ${err.message}</div>`;
+
+        }
+
         return;
+
     }
 
     const idees = data.idees || [];
