@@ -205,6 +205,27 @@ RAPPEL FINAL : ta réponse doit commencer directement par { et se terminer direc
 
 }
 
+export function genererPromptReformatage() {
+
+    return `Reformate ta réponse précédente en JSON strict, sans aucun texte autour, sans citations ni sources, sans balise markdown.
+
+Format exact attendu, et strictement rien d'autre dans ta réponse :
+{
+  "idees": [
+    {
+      "titre": "...",
+      "categorie": "...",
+      "lieu": "...",
+      "description": "...",
+      "liens": ["..."]
+    }
+  ]
+}
+
+Rappel : guillemets doubles droits uniquement ("), jamais de virgule après le dernier élément, réponds uniquement avec le JSON, en commençant directement par { et en terminant directement par }.`;
+
+}
+
 function closeVoyageImport() {
     document.getElementById("voyageImportModal").classList.add("hidden");
 }
