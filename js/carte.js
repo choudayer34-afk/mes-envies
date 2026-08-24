@@ -5,11 +5,21 @@ import { getGroupKey } from "./grouping.js";
 let map = null;
 let markersLayer = null;
 let retourVersCatalogue = false;
+let masquerRealisesCarte = false;
 
 const JOUR_COLORS = ["#6FAFC4", "#F5A623", "#E85D75", "#7ED6A5", "#9B7EDE", "#F2C94C", "#4F92A8"];
 
 export function initCarte() {
+    document.getElementById("mapToggleRealisesButton")?.addEventListener("click", () => {
 
+        masquerRealisesCarte = !masquerRealisesCarte;
+
+        document.getElementById("mapToggleRealisesButton").textContent = masquerRealisesCarte ? "👁️ Afficher tout" : "🙈 Masquer réalisés";
+
+        renderMarkers(voyageId);
+
+    });
+    
     document.getElementById("btnCarte").addEventListener("click", () => openMap());
     document.getElementById("closeCarte").addEventListener("click", closeMap);
 
@@ -128,21 +138,23 @@ function getJourColor(envie, jourColorMap) {
 
 }
 
-function createColoredIcon(color, emoji) {
+function createColoredIcon(color, emoji, realise = false) {
 
     return L.divIcon({
         className: "custom-map-pin",
         html: `
             <div style="
-                background:${color};
+                background:${realise ? "#B0B8BC" : color};
                 width:32px;height:32px;
                 border-radius:50% 50% 50% 0;
                 transform:rotate(-45deg);
                 display:flex;align-items:center;justify-content:center;
                 box-shadow:0 2px 6px rgba(0,0,0,.3);
                 border:2px solid white;
+                opacity:${realise ? "0.65" : "1"};
+                position:relative;
             ">
-                <span style="transform:rotate(45deg);font-size:15px;">${emoji}</span>
+                <span style="transform:rotate(45deg);font-size:15px;">${realise ? "✅" : emoji}</span>
             </div>
         `,
         iconSize: [32, 32],
@@ -160,7 +172,8 @@ function renderMarkers(voyageId, enviesPreFiltrees = null) {
 
     const envies = source.filter(e =>
         e.lieu?.latitude && e.lieu?.longitude &&
-        (!voyageId || e.voyageId === voyageId)
+        (!voyageId || e.voyageId === voyageId) &&
+        (!masquerRealisesCarte || !e.realise)
     );
 
     renderLegend(envies, voyageId);
@@ -181,7 +194,7 @@ function renderMarkers(voyageId, enviesPreFiltrees = null) {
 
         const marker = L.marker(
             [envie.lieu.latitude, envie.lieu.longitude],
-            { icon: createColoredIcon(color, emoji) }
+            { icon: createColoredIcon(color, emoji, envie.realise) }
         ).addTo(markersLayer);
 
         marker.bindPopup(`
