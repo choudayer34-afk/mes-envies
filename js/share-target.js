@@ -13,6 +13,7 @@ let lieuDetecte = null;
 let imagePartagee = null;
 let descriptionRecuperee = null;
 let categoriesDisponibles = [];
+let creerCommeComparateur = false;
 
 
 function extraireDomaine(url) {
@@ -379,8 +380,16 @@ async function afficherEtapeDestination(conteneur) {
     boutonNouvelle.textContent = "➕ Nouvelle idée ici";
 
     boutonNouvelle.addEventListener("click", () => {
+
         destinationEnvieId = null;
+
+        if (contenuPartage.url && !fichiersPartages.length && !lieuDetecte && contexteChoisi === "maison") {
+            afficherChoixNouvelleIdeeComparateur();
+            return;
+        }
+
         afficherFormulaireValidation();
+
     });
 
     liste.appendChild(boutonNouvelle);
@@ -526,6 +535,44 @@ function afficherChoixSpecialisation(envie) {
 
 }
 
+function afficherChoixNouvelleIdeeComparateur() {
+
+    document.getElementById("etapeDestination").classList.add("hidden");
+
+    const zone = document.getElementById("etapeConteneur");
+    zone.classList.remove("hidden");
+    zone.innerHTML = `<label class="fieldTitle">Ajouter comment ?</label><div id="specialisationListe" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div>`;
+
+    const liste = document.getElementById("specialisationListe");
+
+    const boutonComparateur = document.createElement("button");
+    boutonComparateur.type = "button";
+    boutonComparateur.className = "secondaryButton";
+    boutonComparateur.style.width = "100%";
+    boutonComparateur.textContent = "⚖️ Idée avec ce produit à comparer";
+
+    boutonComparateur.addEventListener("click", () => {
+        creerCommeComparateur = true;
+        afficherFormulaireValidation();
+    });
+
+    liste.appendChild(boutonComparateur);
+
+    const boutonSimple = document.createElement("button");
+    boutonSimple.type = "button";
+    boutonSimple.className = "secondaryButton";
+    boutonSimple.style.width = "100%";
+    boutonSimple.textContent = "🔗 Idée simple avec ce lien";
+
+    boutonSimple.addEventListener("click", () => {
+        creerCommeComparateur = false;
+        afficherFormulaireValidation();
+    });
+
+    liste.appendChild(boutonSimple);
+
+}
+
 async function sauvegarderEnrichissement(envie, champsSupplementaires) {
 
     try {
@@ -614,20 +661,38 @@ async function enregistrer(ouvrirFiche) {
 
     const photos = fichiersPartages.length > 0 ? await uploaderFichiersPartages() : [];
 
-    const categorieParDefaut = categoriesDisponibles.find(c => !c.conteneur)?.id || null;
-
     const envieData = {
         titre,
         contexte: contexteChoisi,
-        categorie: categorieParDefaut,
+        categorie: null,
         voyageId: conteneurChoisi ? conteneurChoisi.id : null,
         description: description || null,
         lieu: lieuDetecte || null,
-        urls: (contenuPartage.url && !lieuDetecte) ? [{ id: crypto.randomUUID(), type: "lien", url: contenuPartage.url, nom: null, createdAt: Date.now() }] : [],
+        urls: (contenuPartage.url && !lieuDetecte && !creerCommeComparateur) ? [{ id: crypto.randomUUID(), type: "lien", url: contenuPartage.url, nom: null, createdAt: Date.now() }] : [],
         photos,
         favorite: false,
         realise: false
     };
+
+    if (creerCommeComparateur) {
+
+        envieData.comparateur = {
+            produits: [{
+                id: crypto.randomUUID(),
+                nom: titre,
+                lien: contenuPartage.url,
+                magasin: deduireNomMagasin(contenuPartage.url),
+                prix: null,
+                longueur: null,
+                largeur: null,
+                hauteur: null,
+                photoUrl: imagePartagee,
+                avis: null,
+                retenu: false
+            }]
+        };
+
+    }
 
     try {
         await setDoc(doc(db, "foyers", foyerIdActuel, "envies", id), envieData);
