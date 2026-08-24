@@ -13,7 +13,9 @@ import { closeFiche } from "./envie.js";
 import { openModalConteneurSelonMode } from "./modal.js";
 import { updateEnvieStatutManuel } from "./storage.js";
 import { openModalVoyageContext } from "./modal.js";
-
+import { construireUrlBooking, construireUrlAirbnb, construireUrlGoogleFlights, construireUrlSNCF } from "./promptgen.js";
+import { formatVoyageursCozycozy } from "./voyageurs.js";
+import { getPersonnes, calculerAgeDepuisNaissance } from "./storage.js";
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp, calculerDistancesEtapes } from "./itineraire.js";
 import { creerBilletSilencieux } from "./storage.js";
 import { getCategorieById, isContainer, openEnvie } from "./envie.js";
@@ -542,6 +544,17 @@ export function renderOutilsVoyage(envie) {
 
         outilsRow.appendChild(promptButton);
 
+            const preparerButton = document.createElement("button");
+    preparerButton.className = "secondaryButton";
+    preparerButton.style.flex = "1 1 100%";
+    preparerButton.textContent = "🧭 Préparer le voyage (logement, billet...)";
+
+    preparerButton.addEventListener("click", () => {
+        ouvrirPreparerVoyage(envie);
+    });
+
+    outilsRow.appendChild(preparerButton);
+        
         const importButton = document.createElement("button");
         importButton.className = "secondaryButton";
         importButton.style.flex = "1 1 45%";
@@ -575,6 +588,65 @@ export function renderOutilsVoyage(envie) {
         container.appendChild(outilsRow);
 
     }
+
+}
+
+function ouvrirPreparerVoyage(envie) {
+
+    const destination = envie.lieu?.nom || envie.titre;
+    const dateDebut = envie.date?.start || new Date().toISOString().split("T")[0];
+    const dateFin = envie.date?.type === "range" ? envie.date.end : dateDebut;
+
+    const personnesDuVoyage = getPersonnes().filter(p => (envie.personnesIds || []).includes(p.id));
+
+    let adultes = 0;
+    const ages = [];
+
+    if (personnesDuVoyage.length > 0) {
+
+        personnesDuVoyage.forEach(p => {
+
+            const age = calculerAgeDepuisNaissance(p.dateNaissance);
+
+            if (age !== null && age < 18) {
+                ages.push(age);
+            } else {
+                adultes++;
+            }
+
+        });
+
+    } else {
+
+        adultes = 2;
+
+    }
+
+    const codeVoyageurs = formatVoyageursCozycozy({ adultes: adultes || 1, enfants: ages.length, ages, chambres: 1 });
+    const nbAdultesTotal = adultes + ages.length;
+
+    document.getElementById("lienBooking").href = construireUrlBooking(destination, dateDebut, dateFin, nbAdultesTotal);
+    document.getElementById("lienAirbnb").href = construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultesTotal);
+    document.getElementById("lienCozycozy").href = `https://www.cozycozy.com/fr/search/${encodeURIComponent(destination)}/${dateDebut}/${dateFin}/${codeVoyageurs}/progress`;
+    document.getElementById("lienSNCF").href = construireUrlSNCF();
+    document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(destination, dateDebut);
+
+    document.getElementById("preparerActivitesButton").onclick = () => {
+
+        document.getElementById("preparerVoyageModal").classList.add("hidden");
+        document.getElementById("promptModalContent").value = buildPromptVoyage(envie);
+        document.getElementById("promptModal").classList.remove("hidden");
+
+    };
+
+    document.getElementById("preparerChecklistButton").onclick = () => {
+
+        document.getElementById("preparerVoyageModal").classList.add("hidden");
+        ouvrirCopieChecklistDepuisVoyage(envie);
+
+    };
+
+    document.getElementById("preparerVoyageModal").classList.remove("hidden");
 
 }
 
@@ -1597,6 +1669,10 @@ export function initVoyage() {
         document.getElementById("closeOptimiser")?.addEventListener("click", () => {
         document.getElementById("optimiserModal").classList.add("hidden");
     });
+
+    document.getElementById("closePreparerVoyage")?.addEventListener("click", () => {
+    document.getElementById("preparerVoyageModal").classList.add("hidden");
+});
 
 
 }
