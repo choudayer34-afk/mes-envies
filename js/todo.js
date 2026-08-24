@@ -93,14 +93,13 @@ console.log(`[DEBUG] Catégorie "${cle}" — masquerCochesTodo=${masquerCochesTo
         if (masquerCochesTodo && itemsAffiches.length === 0)
             return;
 
-                 const header = document.createElement("button");
+        const header = document.createElement("button");
         header.type = "button";
         header.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
-        header.dataset.dragId = `etape_${encodeURIComponent(groupe.cle)}`;
 
         header.innerHTML = `
-            <span>📋 ${groupe.nom}</span>
-            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${groupe.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
+            <span>${categories.find(c => c.id === group.categorie)?.emoji || "🏷️"} ${categories.find(c => c.id === group.categorie)?.nom || "Sans catégorie"}</span>
+            <span class="checklistCategorieCompteur">${complete ? "✅ " : ""}${coches}/${group.items.length} <span class="accordionIcon">${estOuverte ? "▾" : "▸"}</span></span>
         `;
 
 
