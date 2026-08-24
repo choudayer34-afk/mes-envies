@@ -768,7 +768,7 @@ function afficherChoixSpecialisation(envie) {
                     {
                         id: crypto.randomUUID(),
                         nom: contenuPartage.titre || deduireNomMagasin(contenuPartage.url),
-                        lien: contenuPartage.url,
+                        url : contenuPartage.url,
                         magasin: deduireNomMagasin(contenuPartage.url),
                         prix: null,
                         longueur: null,
@@ -943,7 +943,7 @@ async function enregistrer(ouvrirFiche) {
             produits: [{
                 id: crypto.randomUUID(),
                 nom: titre,
-                lien: contenuPartage.url,
+                url : contenuPartage.url,
                 magasin: deduireNomMagasin(contenuPartage.url),
                 prix: null,
                 longueur: null,
