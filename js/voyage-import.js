@@ -1,6 +1,6 @@
 import { searchLocation } from "./location.js";
 import { showToast } from "./toast.js";
-import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies } from "./storage.js";
+import { creerEnvieDansVoyage, getEnvieCategories, getPromptImport, getEnvies, telechargerPhotoDepuisUrl } from "./storage.js";
 import { getDureeJours } from "./periode.js";
 import { getPersonnes, calculerAgeDepuisNaissance } from "./storage.js";
 
@@ -344,13 +344,18 @@ function analyserImportVoyage() {
     const idees = data.idees || [];
     const valides = idees.filter(i => i.titre);
 
-    ideesAImporter = valides.map(i => ({
-        ...i,
-        urls: urlArticleSource && !(i.liens || []).includes(urlArticleSource)
-            ? [...(i.liens || []), urlArticleSource]
-            : (i.liens || i.urls || []),
-        selectionne: true
-    }));
+    ideesAImporter = valides.map(i => {
+
+        const liens = (i.liens || i.urls || []).map(l => typeof l === "string" ? { nom: null, url: l } : l);
+        const dejaPresent = liens.some(l => l.url === urlArticleSource);
+
+        return {
+            ...i,
+            urls: (urlArticleSource && !dejaPresent) ? [...liens, { nom: "Article source", url: urlArticleSource }] : liens,
+            selectionne: true
+        };
+
+    });
 
     renderRapportImport();
 
@@ -648,13 +653,29 @@ async function confirmerImportVoyage() {
 
         }
 
-                creerEnvieDansVoyage(voyageIdActuel, {
+        let photos = [];
+
+        if (idee.photo) {
+
+            const photoTelechargee = await telechargerPhotoDepuisUrl(idee.photo);
+
+            if (photoTelechargee) {
+                photos = [photoTelechargee];
+            } else {
+                idee.urls = [...(idee.urls || []), { nom: "🖼️ Photo suggérée par l'IA", url: idee.photo }];
+            }
+
+        }
+
+        creerEnvieDansVoyage(voyageIdActuel, {
             titre: idee.titre,
             categorieId: trouverCategorieId(idee.categorie),
             description: idee.description || "",
             lieu,
+            photos,
             urls: idee.urls || [],
-            url: idee.url || ""
+            url: idee.url || "",
+            pdf: idee.pdf || ""
         });
 
 
