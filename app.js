@@ -10,7 +10,7 @@
 
 "use strict";
 import { initAgenda } from "./js/agenda.js";
-import { openVoyageImport, genererPromptArticleADecortiquer } from "./js/voyage-import.js";
+import { openVoyageImport, genererPromptArticleADecortiquer, definirUrlArticleSource } from "./js/voyage-import.js";
 import { initChangelogSync } from "./js/storage.js";
 import { initBillets } from "./js/billets.js";
 import { renderNouveautes } from "./js/plus.js";
@@ -266,8 +266,10 @@ if (idAOuvrir) {
                        if (urlArticle) {
 
                 const voyage = getEnvies().find(e => e.id === importVoyageId);
-                const prompt = genererPromptArticleADecortiquer(decodeURIComponent(urlArticle), voyage?.lieu?.nom);
+                const urlDecodee = decodeURIComponent(urlArticle);
+                const prompt = genererPromptArticleADecortiquer(urlDecodee, voyage?.lieu?.nom);
 
+                definirUrlArticleSource(urlDecodee);
                 afficherPromptArticleACopier(prompt);
 
             }
