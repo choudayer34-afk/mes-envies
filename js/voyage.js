@@ -32,7 +32,7 @@ import { updateEnvieVisibilite } from "./storage.js";
 import { auth } from "./firebase.js";
 
 let vueSansDate = "libre";
-
+const categoriesSansDateOuvertes = new Set();
 const groupesOuverts = new Set();
 const voyagesForcesEnEdition = new Set();
 const parametresOuvertsSet = new Set();
@@ -735,7 +735,7 @@ function appendGroupeSansDate(container, items, voyageEnvie) {
 
     content.appendChild(toggleVue);
 
-    if (vueSansDate === "categorie") {
+        if (vueSansDate === "categorie") {
 
         const groupes = new Map();
 
@@ -755,15 +755,39 @@ function appendGroupeSansDate(container, items, voyageEnvie) {
 
             const emoji = getCategorieById(categorieId)?.emoji || "💡";
             const label = getCategorieById(categorieId)?.label || "Sans catégorie";
+            const estOuverteCategorie = categoriesSansDateOuvertes.has(categorieId);
 
-            const sousHeader = document.createElement("div");
-            sousHeader.className = "checklistCategorieHeader";
-            sousHeader.textContent = `${emoji} ${label} (${itemsCategorie.length})`;
-            content.appendChild(sousHeader);
+            const sousHeader = document.createElement("button");
+            sousHeader.type = "button";
+            sousHeader.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
+            sousHeader.innerHTML = `
+                <span>${emoji} ${label} (${itemsCategorie.length})</span>
+                <span class="accordionIcon">${estOuverteCategorie ? "▾" : "▸"}</span>
+            `;
+
+            const sousContent = document.createElement("div");
+            sousContent.className = estOuverteCategorie ? "" : "hidden";
 
             itemsCategorie.forEach(item => {
-                content.appendChild(createVoyageItemRow(item, voyageEnvie));
+                sousContent.appendChild(createVoyageItemRow(item, voyageEnvie));
             });
+
+            sousHeader.addEventListener("click", () => {
+
+                sousContent.classList.toggle("hidden");
+
+                if (sousContent.classList.contains("hidden")) {
+                    categoriesSansDateOuvertes.delete(categorieId);
+                } else {
+                    categoriesSansDateOuvertes.add(categorieId);
+                }
+
+                sousHeader.querySelector(".accordionIcon").textContent = sousContent.classList.contains("hidden") ? "▸" : "▾";
+
+            });
+
+            content.appendChild(sousHeader);
+            content.appendChild(sousContent);
 
         });
 
