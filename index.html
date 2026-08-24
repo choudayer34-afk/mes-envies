@@ -2739,30 +2739,25 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         </div>
 
-        <div class="accordion">
+<div class="accordion">
     <button class="accordionHeader" data-target="guidePartage">
         <span>📥 Partager vers EnVie</span>
         <span class="accordionIcon">▸</span>
     </button>
-            
     <div id="guidePartage" class="accordionContent hidden">
         <ul style="padding-left:20px;line-height:1.7;">
 
             <li><strong>Sur Android</strong> : dès qu'EnVie est installée sur l'écran d'accueil, elle apparaît directement dans le menu "Partager" natif du téléphone (comme WhatsApp ou Notes) — depuis un lien, une photo, un article, il suffit de la choisir. Rien à configurer.</li>
 
-            <li><strong>Sur iPhone</strong> : Safari ne permet pas à un site web de s'ajouter au menu Partager natif (limite d'Apple, pas d'EnVie). Il faut créer une fois un petit Raccourci :
-                <ol style="padding-left:20px;line-height:1.7;">
-                    <li>Ouvre l'app <strong>Raccourcis</strong> → "+" → renomme-le "Envie"</li>
-                    <li>Active "Utiliser dans le menu Partager", coche URL / Texte / Pages Safari</li>
-                    <li>Ajoute l'action "Coder en URL", puis "Texte" avec : <code>https://mes-envies.pages.dev/share-target.html?url=[Résultat]&text=[Résultat]</code> (insère la variable "Résultat" deux fois)</li>
-                    <li>Ajoute l'action "Ouvrir les URL" en dernier</li>
-                </ol>
-                Le raccourci "Envie" apparaît ensuite dans le menu Partager de Safari/Photos, parfois sous "Autre".
+            <li><strong>Sur iPhone</strong> : Safari ne permet pas à un site web de s'ajouter au menu Partager natif (limite d'Apple, pas d'EnVie). Deux petits Raccourcis à ajouter une fois, en un tap chacun :
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+                    <a href="https://www.icloud.com/shortcuts/51ff3b388a554909821c72abaf62d689" target="_blank" class="secondaryButton" style="text-decoration:none;display:block;text-align:center;">🔗 Raccourci "Envie" (liens et texte)</a>
+                    <a href="https://www.icloud.com/shortcuts/96a84c93dfa441ca92ac893ad5faefa4" target="_blank" class="secondaryButton" style="text-decoration:none;display:block;text-align:center;">🖼️ Raccourci "Envie photo" (photos et PDF)</a>
+                </div>
+                <p style="font-size:12px;color:var(--color-text-light);margin-top:8px;">Ouvre ces liens directement depuis ton iPhone (pas depuis un ordinateur) — ils proposent d'ajouter le Raccourci en un tap. Les deux apparaissent ensuite séparément dans le menu Partager, selon que tu partages un lien/texte ou une photo/PDF.</p>
             </li>
 
             <li><strong>Limite connue sur iPhone</strong> : la page peut demander de se reconnecter à chaque partage (Safari isole le stockage selon la façon dont la page est ouverte) — l'email reste mémorisé pour aller plus vite, mais pas le mot de passe.</li>
-
-            <li><strong>Partager une photo</strong> : fonctionne aujourd'hui uniquement sur Android. Sur iPhone, utilise plutôt l'ajout rapide de photo depuis "🔆 Aujourd'hui" sur l'accueil, ou ajoute-la normalement dans la fiche.</li>
 
             <li><strong>Pas de partage possible ?</strong> Depuis n'importe quel voyage/projet, le bouton "📥 Ajouter depuis un lien" (dans sa Boîte à outils) ouvre le même écran directement dans l'app — colle-y un lien copié à la main.</li>
 
