@@ -107,6 +107,19 @@ self.addEventListener('activate', (event) => {
     );
 });
 
+self.addEventListener("fetch", (event) => {
+
+    const url = new URL(event.request.url);
+
+    if (event.request.method === "POST" && url.pathname.endsWith("/share-target.html")) {
+
+        event.respondWith(gererPartageAvecFichiers(event.request));
+        return;
+
+    }
+
+    // ⬇️ ici commence ton code fetch existant, inchangé
+ 
 self.addEventListener('fetch', (event) => {
 
     const request = event.request;
@@ -125,6 +138,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
+ 
     if (request.mode === 'navigate') {
         event.respondWith(reseauPuisCacheNavigation(request));
         return;
@@ -159,6 +173,27 @@ async function reseauPuisCacheNavigation(request) {
 
 }
 
+ async function gererPartageAvecFichiers(request) {
+
+    const formData = await request.formData();
+
+    const fichiers = formData.getAll("fichiers");
+    const title = formData.get("title") || "";
+    const text = formData.get("text") || "";
+    const url = formData.get("url") || "";
+
+    const cache = await caches.open("share-target-cache");
+
+    await cache.put("/share-payload", new Response(JSON.stringify({ title, text, url })));
+
+    for (let i = 0; i < fichiers.length; i++) {
+        await cache.put(`/share-file-${i}`, new Response(fichiers[i], { headers: { "X-File-Type": fichiers[i].type, "X-File-Name": fichiers[i].name } }));
+    }
+
+    return Response.redirect(`/share-target.html?fichiers=${fichiers.length}`, 303);
+
+}
+ 
 async function reseauPuisCache(request) {
 
     try {
