@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v185';
+const CACHE_NAME = 'envie-cache-v186';
 
  
  
@@ -15,6 +15,23 @@ const APP_SHELL = [
  './js/billets.js',
     './js/croquis.js',
     './js/storage.js',
+     './js/calendrier.js',
+    './js/itineraire.js',
+    './js/tableau-saisie.js',
+    './js/album.js',
+    './js/album-pdf.js',
+    './js/etape-finder.js',
+    './js/poi-route.js',
+    './js/multiselect.js',
+    './js/voyageurs.js',
+    './js/utils.js',
+    './js/verrouillage.js',
+    './js/db.js',
+    './js/geocoding.js',
+    './js/outils.js',
+    './js/agenda-local.js',
+    './js/carte-voyages.js',
+    './js/ideesmenu.js',
  './js/tricount.js',
     './js/ui.js',
     './js/modal.js',
