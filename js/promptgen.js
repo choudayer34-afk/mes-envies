@@ -132,8 +132,14 @@ export function construireUrlCozycozy(destination) {
 }
 
 export function construireUrlGoogleFlights(destination, date) {
-    return `https://www.google.com/travel/flights?q=${encodeURIComponent(`Vols vers ${destination} le ${date}`)}`;
+
+    const dateObj = new Date(date);
+    const dateLisible = dateObj.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+    return `https://www.google.com/travel/flights?q=${encodeURIComponent(`Vols vers ${destination} le ${dateLisible}`)}`;
+
 }
+
 
 export function construireUrlSNCF() {
     return `https://www.sncf-connect.com/`;
