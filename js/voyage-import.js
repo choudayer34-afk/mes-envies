@@ -108,6 +108,15 @@ function calculerDistanceKm(lat1, lon1, lat2, lon2) {
 
 export function initVoyageImport() {
 
+
+        document.getElementById("viderJsonImportButton")?.addEventListener("click", () => {
+
+        document.getElementById("voyageImportJsonInput").value = "";
+        document.getElementById("voyageImportJsonInput").focus();
+
+    });
+
+    
         document.getElementById("redemanderFormatButton")?.addEventListener("click", async () => {
 
         const prompt = genererPromptReformatage();
