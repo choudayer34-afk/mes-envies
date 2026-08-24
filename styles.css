@@ -273,6 +273,10 @@ main{
     z-index:2200;
 }
 
+#preparerVoyageModal{
+    z-index:2100;
+}
+
 #checklistEditItemModal{
     z-index:2200;
 }
