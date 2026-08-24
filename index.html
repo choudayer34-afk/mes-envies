@@ -2731,6 +2731,47 @@ document.addEventListener("DOMContentLoaded", () => {
         </div>
 
         <div class="accordion">
+    <button class="accordionHeader" data-target="guidePartage">
+        <span>📥 Partager vers EnVie</span>
+        <span class="accordionIcon">▸</span>
+    </button>
+    <div id="guidePartage" class="accordionContent hidden">
+        <ul style="padding-left:20px;line-height:1.7;">
+
+            <li><strong>Sur Android</strong> : dès qu'EnVie est installée sur l'écran d'accueil, elle apparaît directement dans le menu "Partager" natif du téléphone (comme WhatsApp ou Notes) — depuis un lien, une photo, un article, il suffit de la choisir. Rien à configurer.</li>
+
+            <li><strong>Sur iPhone</strong> : Safari ne permet pas à un site web de s'ajouter au menu Partager natif (limite d'Apple, pas d'EnVie). Il faut créer une fois un petit Raccourci :
+                <ol style="padding-left:20px;line-height:1.7;">
+                    <li>Ouvre l'app <strong>Raccourcis</strong> → "+" → renomme-le "Envie"</li>
+                    <li>Active "Utiliser dans le menu Partager", coche URL / Texte / Pages Safari</li>
+                    <li>Ajoute l'action "Coder en URL", puis "Texte" avec : <code>https://mes-envies.pages.dev/share-target.html?url=[Résultat]&text=[Résultat]</code> (insère la variable "Résultat" deux fois)</li>
+                    <li>Ajoute l'action "Ouvrir les URL" en dernier</li>
+                </ol>
+                Le raccourci "Envie" apparaît ensuite dans le menu Partager de Safari/Photos, parfois sous "Autre".
+            </li>
+
+            <li><strong>Limite connue sur iPhone</strong> : la page peut demander de se reconnecter à chaque partage (Safari isole le stockage selon la façon dont la page est ouverte) — l'email reste mémorisé pour aller plus vite, mais pas le mot de passe.</li>
+
+            <li><strong>Partager une photo</strong> : fonctionne aujourd'hui uniquement sur Android. Sur iPhone, utilise plutôt l'ajout rapide de photo depuis "🔆 Aujourd'hui" sur l'accueil, ou ajoute-la normalement dans la fiche.</li>
+
+            <li><strong>Pas de partage possible ?</strong> Depuis n'importe quel voyage/projet, le bouton "📥 Ajouter depuis un lien" (dans sa Boîte à outils) ouvre le même écran directement dans l'app — colle-y un lien copié à la main.</li>
+
+            <li><strong>Ce qui se passe une fois sur l'écran de partage :</strong>
+                <ul style="padding-left:20px;line-height:1.7;">
+                    <li>Choisis Voyage ou Maison, puis un voyage/projet existant (ou "Aucun" pour "À trier")</li>
+                    <li>Dans un voyage : crée une nouvelle idée, enrichis le voyage ou une idée précise à l'intérieur (un jour, un hôtel...)</li>
+                    <li>Un lien vers une carte (Google Maps/Waze) remplit directement le Lieu avec de vraies coordonnées</li>
+                    <li>Un lien produit vers une idée Maison propose de l'ajouter comme produit à comparer</li>
+                    <li>Une photo vers une idée Voyage propose de l'ajouter comme billet ou comme dépense Tricount (si des participants existent déjà)</li>
+                    <li>"🤖 C'est un article à décortiquer" génère un prompt à copier vers ton IA pour en extraire plusieurs idées d'un coup, avec lieux, liens nommés et photos suggérées</li>
+                </ul>
+            </li>
+
+        </ul>
+    </div>
+</div>
+        
+        <div class="accordion">
             <button class="accordionHeader" data-target="guideIdees">
                 <span>🔎 Trouver des idées</span>
                 <span class="accordionIcon">▸</span>
