@@ -11,6 +11,8 @@ let destinationEnvieId = null;
 let fichiersPartages = [];
 let lieuDetecte = null;
 let imagePartagee = null;
+let descriptionRecuperee = null;
+let categoriesDisponibles = [];
 
 
 function extraireDomaine(url) {
@@ -183,10 +185,13 @@ async function obtenirFoyerId(uid) {
 
 async function chargerConteneurs(contexte) {
 
-    const catsSnap = await getDocs(collection(db, "foyers", foyerIdActuel, "envieCategories"));
-    const categoriesConteneurs = new Set(catsSnap.docs.filter(d => d.data().conteneur).map(d => d.id));
+    const [catsSnap, enviesSnap] = await Promise.all([
+        getDocs(collection(db, "foyers", foyerIdActuel, "envieCategories")),
+        getDocs(query(collection(db, "foyers", foyerIdActuel, "envies"), where("contexte", "==", contexte)))
+    ]);
 
-    const enviesSnap = await getDocs(query(collection(db, "foyers", foyerIdActuel, "envies"), where("contexte", "==", contexte)));
+    const categoriesConteneurs = new Set(catsSnap.docs.filter(d => d.data().conteneur).map(d => d.id));
+    categoriesDisponibles = catsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
     return enviesSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
@@ -232,6 +237,7 @@ async function init() {
             }
 
             imagePartagee = apercu.image || null;
+            descriptionRecuperee = apercu.description || null;
 
             if (apercu.finalUrl && apercu.finalUrl !== contenuPartage.url) {
                 contenuPartage.url = apercu.finalUrl;
@@ -425,7 +431,7 @@ function afficherFormulaireValidation() {
         : (contenuPartage.titre || (contenuPartage.url ? extraireDomaine(contenuPartage.url) : contenuPartage.texte.slice(0, 60)));
 
     document.getElementById("shareTitre").value = contenuPartage.titre || titreDefaut || "";
-    document.getElementById("shareDescription").value = (!contenuPartage.url && contenuPartage.texte) ? "" : contenuPartage.texte;
+    document.getElementById("shareDescription").value = (!contenuPartage.url && contenuPartage.texte) ? "" : (contenuPartage.texte || descriptionRecuperee || "");
 
 }
 
@@ -608,10 +614,12 @@ async function enregistrer(ouvrirFiche) {
 
     const photos = fichiersPartages.length > 0 ? await uploaderFichiersPartages() : [];
 
+    const categorieParDefaut = categoriesDisponibles.find(c => !c.conteneur)?.id || null;
+
     const envieData = {
         titre,
         contexte: contexteChoisi,
-        categorie: null,
+        categorie: categorieParDefaut,
         voyageId: conteneurChoisi ? conteneurChoisi.id : null,
         description: description || null,
         lieu: lieuDetecte || null,
