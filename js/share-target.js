@@ -1,12 +1,14 @@
 import { auth, db, authReady } from "./firebase.js";
 import { doc, setDoc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
- 
+ import { uploadToCloudinary, compresserImageAvantEnvoi } from "./photos.js";
+
 let contenuPartage = { titre: "", texte: "", url: "" };
 let contexteChoisi = null;
 let foyerIdActuel = null;
 let conteneurChoisi = null;
 let destinationEnvieId = null;
+let fichiersPartages = [];
 
 function extraireDomaine(url) {
 
@@ -22,7 +24,20 @@ function renderApercu() {
 
     const container = document.getElementById("apercuPartage");
 
-    if (contenuPartage.url) {
+    if (fichiersPartages.length > 0) {
+
+        container.innerHTML = `<div>${fichiersPartages[0].type === "application/pdf" ? "📄" : "🖼️"} ${fichiersPartages.length} fichier${fichiersPartages.length > 1 ? "s" : ""} partagé${fichiersPartages.length > 1 ? "s" : ""}</div>`;
+
+        if (fichiersPartages[0].type !== "application/pdf") {
+
+            const img = document.createElement("img");
+            img.src = URL.createObjectURL(fichiersPartages[0]);
+            img.style.cssText = "max-width:120px;border-radius:8px;margin-top:8px;display:block;";
+            container.appendChild(img);
+
+        }
+
+    } else if (contenuPartage.url) {
 
         container.innerHTML = `
             <div>🔗 <strong>${contenuPartage.titre || extraireDomaine(contenuPartage.url)}</strong></div>
@@ -40,6 +55,35 @@ function renderApercu() {
     }
 
 }
+
+async function chargerFichiersPartages(nbFichiers) {
+
+    const cache = await caches.open("share-target-cache");
+    const fichiers = [];
+
+    for (let i = 0; i < nbFichiers; i++) {
+
+        const reponse = await cache.match(`/share-file-${i}`);
+
+        if (reponse) {
+
+            const blob = await reponse.blob();
+            const type = reponse.headers.get("X-File-Type") || blob.type;
+            const nom = reponse.headers.get("X-File-Name") || `fichier-${i}`;
+
+            fichiers.push(new File([blob], nom, { type }));
+            await cache.delete(`/share-file-${i}`);
+
+        }
+
+    }
+
+    await cache.delete("/share-payload");
+
+    return fichiers;
+
+}
+
 
 async function obtenirFoyerId(uid) {
 
@@ -80,6 +124,12 @@ async function chargerEnfants(voyageId) {
 async function init() {
 
     const params = new URLSearchParams(window.location.search);
+
+    const nbFichiers = parseInt(params.get("fichiers"), 10) || 0;
+
+    if (nbFichiers > 0) {
+        fichiersPartages = await chargerFichiersPartages(nbFichiers);
+    }
 
     const urlBrute = params.get("url") || "";
 
@@ -256,7 +306,9 @@ function afficherFormulaireValidation() {
     document.getElementById("etapeDestination").classList.add("hidden");
     document.getElementById("etapeValidation").classList.remove("hidden");
 
-    const titreDefaut = contenuPartage.titre || (contenuPartage.url ? extraireDomaine(contenuPartage.url) : contenuPartage.texte.slice(0, 60));
+       const titreDefaut = fichiersPartages.length > 0
+        ? `Photo du ${new Date().toLocaleDateString("fr-FR")}`
+        : (contenuPartage.titre || (contenuPartage.url ? extraireDomaine(contenuPartage.url) : contenuPartage.texte.slice(0, 60)));
 
     document.getElementById("shareTitre").value = contenuPartage.titre || titreDefaut || "";
     document.getElementById("shareDescription").value = (!contenuPartage.url && contenuPartage.texte) ? "" : contenuPartage.texte;
@@ -267,13 +319,25 @@ async function enrichirEnvieExistante(envie) {
 
     try {
 
-        const nouveauxUrls = [...(envie.urls || [])];
+        const champs = { updatedAt: Date.now() };
 
         if (contenuPartage.url) {
-            nouveauxUrls.push({ id: crypto.randomUUID(), type: "lien", url: contenuPartage.url, nom: contenuPartage.titre || null, createdAt: Date.now() });
+
+            champs.urls = [
+                ...(envie.urls || []),
+                { id: crypto.randomUUID(), type: "lien", url: contenuPartage.url, nom: contenuPartage.titre || null, createdAt: Date.now() }
+            ];
+
         }
 
-        await setDoc(doc(db, "foyers", foyerIdActuel, "envies", envie.id), { urls: nouveauxUrls, updatedAt: Date.now() }, { merge: true });
+        if (fichiersPartages.length > 0) {
+
+            const nouvellesPhotos = await uploaderFichiersPartages();
+            champs.photos = [...(envie.photos || []), ...nouvellesPhotos];
+
+        }
+
+        await setDoc(doc(db, "foyers", foyerIdActuel, "envies", envie.id), champs, { merge: true });
 
         afficherMessageFinal(`✅ Ajouté à "${envie.titre}" !`, envie.id);
 
@@ -303,12 +367,41 @@ function afficherMessageFinal(texte, idEnvieAOuvrir) {
 
 }
 
+async function uploaderFichiersPartages() {
+
+    const photos = [];
+
+    for (const fichier of fichiersPartages) {
+
+        if (fichier.type === "application/pdf") {
+            continue;
+        }
+
+        try {
+
+            const blobCompresse = await compresserImageAvantEnvoi(fichier);
+            const result = await uploadToCloudinary(blobCompresse);
+
+            photos.push({ id: crypto.randomUUID(), url: result.secure_url, publicId: result.public_id });
+
+        } catch (err) {
+            console.error("Erreur upload photo partagée: " + err.message);
+        }
+
+    }
+
+    return photos;
+
+}
+
 async function enregistrer(ouvrirFiche) {
 
     const titre = document.getElementById("shareTitre").value.trim() || "Sans titre";
     const description = document.getElementById("shareDescription").value.trim();
 
     const id = crypto.randomUUID();
+
+    const photos = fichiersPartages.length > 0 ? await uploaderFichiersPartages() : [];
 
     const envieData = {
         titre,
@@ -317,7 +410,7 @@ async function enregistrer(ouvrirFiche) {
         voyageId: conteneurChoisi ? conteneurChoisi.id : null,
         description: description || null,
         urls: contenuPartage.url ? [{ id: crypto.randomUUID(), type: "lien", url: contenuPartage.url, nom: null, createdAt: Date.now() }] : [],
-        photos: [],
+        photos,
         favorite: false,
         realise: false
     };
