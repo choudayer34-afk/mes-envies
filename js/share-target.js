@@ -427,7 +427,13 @@ async function obtenirFoyerId(uid) {
 
 }
 
+const conteneursCache = {};
+
 async function chargerConteneurs(contexte) {
+
+    if (conteneursCache[contexte]) {
+        return conteneursCache[contexte];
+    }
 
     const [catsSnap, enviesSnap] = await Promise.all([
         getDocs(collection(db, "foyers", foyerIdActuel, "envieCategories")),
@@ -437,10 +443,14 @@ async function chargerConteneurs(contexte) {
     const categoriesConteneurs = new Set(catsSnap.docs.filter(d => d.data().conteneur).map(d => d.id));
     categoriesDisponibles = catsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-    return enviesSnap.docs
+    const resultat = enviesSnap.docs
         .map(d => ({ id: d.id, ...d.data() }))
         .filter(e => !e.supprime && !e.realise && categoriesConteneurs.has(e.categorie))
         .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+
+    conteneursCache[contexte] = resultat;
+
+    return resultat;
 
 }
 
