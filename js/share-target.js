@@ -662,6 +662,22 @@ async function afficherEtapeDestination(conteneur) {
 
     liste.appendChild(boutonEnrichir);
 
+     if (contenuPartage.url && !fichiersPartages.length) {
+
+        const boutonArticle = document.createElement("button");
+        boutonArticle.type = "button";
+        boutonArticle.className = "secondaryButton";
+        boutonArticle.style.width = "100%";
+        boutonArticle.textContent = "🤖 C'est un article à décortiquer";
+
+        boutonArticle.addEventListener("click", () => {
+            window.location.href = `./index.html?importVoyage=${conteneur.id}&urlArticle=${encodeURIComponent(contenuPartage.url)}`;
+        });
+
+        liste.appendChild(boutonArticle);
+
+    }
+ 
     enfants.forEach(enfant => {
 
         const bouton = document.createElement("button");
