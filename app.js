@@ -114,6 +114,53 @@ let enviesPretes = false;
 let categoriesPretes = false;
 let modePret = false;
 
+function afficherPromptArticleACopier(prompt) {
+
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay";
+    overlay.style.zIndex = "3000";
+
+    overlay.innerHTML = `
+        <div class="modal">
+            <h2>🤖 Prompt pour ton IA</h2>
+            <p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">
+                Copie ce texte, colle-le dans ChatGPT/Gemini, puis reviens coller sa réponse dans la fenêtre d'import.
+            </p>
+            <textarea id="promptArticleTexte" readonly rows="8" style="width:100%;box-sizing:border-box;padding:12px;border-radius:12px;border:1px solid var(--color-border);font-size:13px;margin-bottom:14px;">${prompt}</textarea>
+            <button id="copierPromptArticleButton" class="primaryButton" style="width:100%;">📋 Copier</button>
+            <button id="fermerPromptArticleButton" class="secondaryButton" style="width:100%;margin-top:8px;">Fermer</button>
+        </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    overlay.querySelector("#copierPromptArticleButton").addEventListener("click", async () => {
+
+        try {
+
+            await navigator.clipboard.writeText(prompt);
+            showToast("✓ Copié !");
+
+        } catch {
+
+            overlay.querySelector("#promptArticleTexte").select();
+            showToast("Sélectionné — copie manuellement (Ctrl+C)");
+
+        }
+
+    });
+
+    overlay.querySelector("#fermerPromptArticleButton").addEventListener("click", () => {
+
+        overlay.remove();
+
+        document.getElementById("voyageImportFormStep").classList.add("hidden");
+        document.getElementById("voyageImportJsonStep").classList.remove("hidden");
+
+    });
+
+}
+
 function tryRenderEnvies() {
     if (enviesPretes && categoriesPretes && modePret) {
         renderEnvies();
@@ -216,21 +263,15 @@ if (idAOuvrir) {
 
             openVoyageImport(importVoyageId);
 
-            if (urlArticle) {
+                       if (urlArticle) {
 
                 const voyage = getEnvies().find(e => e.id === importVoyageId);
                 const prompt = genererPromptArticleADecortiquer(decodeURIComponent(urlArticle), voyage?.lieu?.nom);
 
-                try {
-                    await navigator.clipboard.writeText(prompt);
-                } catch {}
-
-                document.getElementById("voyageImportFormStep").classList.add("hidden");
-                document.getElementById("voyageImportJsonStep").classList.remove("hidden");
-
-                showToast("✓ Prompt (article) copié, colle-le dans ton IA");
+                afficherPromptArticleACopier(prompt);
 
             }
+
 
         }, 300);
 
