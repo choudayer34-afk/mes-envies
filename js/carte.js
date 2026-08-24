@@ -6,25 +6,27 @@ let map = null;
 let markersLayer = null;
 let retourVersCatalogue = false;
 let masquerRealisesCarte = false;
+let voyageIdActuelCarte = null;
+let enviesPreFiltreesActuelles = null;
 
 const JOUR_COLORS = ["#6FAFC4", "#F5A623", "#E85D75", "#7ED6A5", "#9B7EDE", "#F2C94C", "#4F92A8"];
 
 export function initCarte() {
-    document.getElementById("mapToggleRealisesButton")?.addEventListener("click", () => {
 
-        masquerRealisesCarte = !masquerRealisesCarte;
-
-        document.getElementById("mapToggleRealisesButton").textContent = masquerRealisesCarte ? "👁️ Afficher tout" : "🙈 Masquer réalisés";
-
-        renderMarkers(voyageId);
-
-    });
     
     document.getElementById("btnCarte").addEventListener("click", () => openMap());
     document.getElementById("closeCarte").addEventListener("click", closeMap);
 
         document.getElementById("mapNonLocalisesHeader")?.addEventListener("click", () => {
 
+masquerRealisesCarte = !masquerRealisesCarte;
+
+        document.getElementById("mapToggleRealisesButton").textContent = masquerRealisesCarte ? "👁️ Afficher tout" : "🙈 Masquer réalisés";
+
+        renderMarkers(voyageIdActuelCarte, enviesPreFiltreesActuelles);
+
+    });
+    
         const liste = document.getElementById("mapNonLocalisesListe");
         liste.classList.toggle("hidden");
 
@@ -75,6 +77,8 @@ export function openMapSingleLieu(lieu) {
 export function openMap(voyageId = null, enviesPreFiltrees = null) {
 
     retourVersCatalogue = !!enviesPreFiltrees;
+    voyageIdActuelCarte = voyageId;
+    enviesPreFiltreesActuelles = enviesPreFiltrees;
 
     document.getElementById("mapModal").classList.remove("hidden");
 
