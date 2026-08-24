@@ -161,6 +161,22 @@ export function initVoyageImport() {
 
 }
 
+export function genererPromptArticleADecortiquer(url, destination) {
+
+    return `Voici un article ou blog de voyage : ${url}
+
+Analyse son contenu et extrais-en les idées concrètes qu'il mentionne (lieux à visiter, restaurants, activités, hébergements, bons plans...).
+${destination ? `Le voyage concerné est : ${destination}.` : ""}
+
+Réponds uniquement avec ce format JSON, sans aucun texte autour :
+{
+  "idees": [
+    { "titre": "...", "categorie": "...", "description": "..." }
+  ]
+}`;
+
+}
+
 function closeVoyageImport() {
     document.getElementById("voyageImportModal").classList.add("hidden");
 }
