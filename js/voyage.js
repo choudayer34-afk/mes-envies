@@ -506,6 +506,19 @@ export function renderOutilsVoyage(envie) {
 
     container.appendChild(ajouterRow);
 
+        const boutonAjoutManuel = document.createElement("button");
+    boutonAjoutManuel.type = "button";
+    boutonAjoutManuel.className = "secondaryButton";
+    boutonAjoutManuel.style.width = "100%";
+    boutonAjoutManuel.style.marginBottom = "16px";
+    boutonAjoutManuel.textContent = "📥 Ajouter depuis un lien";
+
+    boutonAjoutManuel.addEventListener("click", () => {
+        window.location.href = `./share-target.html?contexte=${envie.contexte}&conteneurId=${envie.id}`;
+    });
+
+    container.appendChild(boutonAjoutManuel);
+    
     if (!estMaison) {
 
         const outilsLabel = document.createElement("label");
