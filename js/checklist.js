@@ -520,7 +520,7 @@ function createChecklistRow(item, envie, personneContext = null) {
 
 }
 
-function ouvrirFicheProduitDepuisChecklist(envie, produitId) {
+export function ouvrirFicheProduitDepuisChecklist(envie, produitId) {
 
     const produit = envie.comparateur?.produits?.find(p => p.id === produitId);
 
