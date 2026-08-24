@@ -159,25 +159,14 @@ card.querySelector(".comparateurRetenuButton").addEventListener("click", () => {
 
         const nouvelEtat = !produit.retenu;
 
-        const nouveauxProduits = comparateur.produits.map(p => ({
-            ...p,
-            retenu: p.id === produit.id ? nouvelEtat : false
-        }));
+        const nouveauxProduits = comparateur.produits.map(p =>
+            p.id === produit.id ? { ...p, retenu: nouvelEtat } : p
+        );
 
         const nouveauComparateur = { ...comparateur, produits: nouveauxProduits };
 
         updateEnvieComparateur(envie.id, nouveauComparateur);
-
-        comparateur.produits.forEach(p => {
-
-            const etaitRetenu = p.retenu;
-            const estRetenuMaintenant = p.id === produit.id ? nouvelEtat : false;
-
-            if (etaitRetenu !== estRetenuMaintenant) {
-                synchroniserChecklistDepuisProduit(envie.id, p, estRetenuMaintenant);
-            }
-
-        });
+        synchroniserChecklistDepuisProduit(envie.id, produit, nouvelEtat);
 
         renderComparateur({ ...envie, comparateur: nouveauComparateur });
 
