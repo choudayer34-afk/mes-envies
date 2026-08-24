@@ -182,6 +182,11 @@ export function initVoyageImport() {
 
 export function genererPromptArticleADecortiquer(url, destination) {
 
+    const categoriesListe = getEnvieCategories()
+        .filter(c => !c.conteneur)
+        .map(c => c.label)
+        .join(", ");
+
     return `RÉPONDS UNIQUEMENT EN JSON BRUT — même si tu effectues une recherche web, n'affiche jamais de citations, de sources, de liens formatés en Markdown, ni de texte explicatif. Uniquement le JSON demandé plus bas, rien d'autre.
 
 Tu es un assistant qui extrait des idées de voyage concrètes à partir d'un article.
@@ -191,7 +196,7 @@ ${destination ? `Voyage concerné : ${destination}.` : ""}
 
 Pour chaque idée trouvée (lieu à visiter, restaurant, activité, hébergement, bon plan), donne :
 - titre : court et clair
-- categorie : le type d'idée (ex: Restaurant, Activité, Logement, Visite)
+- categorie : choisis EXACTEMENT l'une de ces catégories, en respectant l'orthographe précise (aucune autre valeur n'est acceptée) : ${categoriesListe || "Idée"}
 - lieu : le nom du lieu tel qu'il apparaît, avec la ville si connue (permet de le localiser sur une carte ensuite) — laisse vide si non applicable
 - description : un texte riche qui inclut, quand c'est pertinent selon le type d'activité : le niveau de difficulté, l'âge minimum conseillé, la durée approximative, le prix indicatif, la meilleure période, et tout autre critère utile mentionné dans l'article
 - liens : un tableau d'objets {"nom": "...", "url": "..."} — le nom doit décrire ce que représente le lien ET le site de destination (ex: "Site officiel du JOST Hôtel", "Réservation sur TripAdvisor"), jamais juste "lien". Inclus le lien de l'article lui-même nommé "Article source", et tout autre lien officiel pertinent trouvé (site du lieu, réservation...)
@@ -228,7 +233,14 @@ RAPPEL FINAL : ta réponse doit commencer directement par { et se terminer direc
 
 export function genererPromptReformatage() {
 
+    const categoriesListe = getEnvieCategories()
+        .filter(c => !c.conteneur)
+        .map(c => c.label)
+        .join(", ");
+
     return `Reformate ta réponse précédente en JSON strict, sans aucun texte autour, sans citations ni sources, sans balise markdown.
+
+Pour le champ "categorie" de chaque idée, choisis EXACTEMENT l'une de ces valeurs (aucune autre acceptée) : ${categoriesListe || "Idée"}
 
 Format exact attendu, et strictement rien d'autre dans ta réponse :
 {
