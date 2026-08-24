@@ -6,6 +6,8 @@ import { getPersonnes, calculerAgeDepuisNaissance } from "./storage.js";
 
 
 let modeTriRapport = "pertinence";
+let urlArticleSource = null;
+
 const categoriesRepliees = new Set();
 
 
@@ -163,15 +165,38 @@ export function initVoyageImport() {
 
 export function genererPromptArticleADecortiquer(url, destination) {
 
-    return `Voici un article ou blog de voyage : ${url}
 
-Analyse son contenu et extrais-en les idées concrètes qu'il mentionne (lieux à visiter, restaurants, activités, hébergements, bons plans...).
-${destination ? `Le voyage concerné est : ${destination}.` : ""}
+    return `Tu es un assistant qui extrait des idées de voyage concrètes à partir d'un article.
 
-Réponds uniquement avec ce format JSON, sans aucun texte autour :
+Article à analyser : ${url}
+${destination ? `Voyage concerné : ${destination}.` : ""}
+
+Pour chaque idée trouvée (lieu à visiter, restaurant, activité, hébergement, bon plan), donne :
+- titre : court et clair
+- categorie : le type d'idée (ex: Restaurant, Activité, Logement, Visite)
+- lieu : le nom du lieu tel qu'il apparaît, avec la ville si connue (permet de le localiser sur une carte ensuite) — laisse vide si non applicable
+- description : un texte riche qui inclut, quand c'est pertinent selon le type d'activité : le niveau de difficulté, l'âge minimum conseillé, la durée approximative, le prix indicatif, la meilleure période, et tout autre critère utile mentionné dans l'article
+- liens : un tableau avec le lien de l'article lui-même, et tout autre lien officiel pertinent que tu identifies (site du lieu, réservation...) si tu peux faire une recherche complémentaire
+
+Si tu as la capacité de rechercher sur Internet, complète chaque idée avec des informations à jour plutôt que de te limiter au seul contenu de l'article.
+
+RÈGLES DE FORMAT ABSOLUES, à respecter scrupuleusement car le JSON sera analysé automatiquement par un programme :
+1. Réponds UNIQUEMENT avec le JSON demandé — aucun texte avant, aucun texte après, aucune balise \`\`\`, aucune explication.
+2. Utilise exclusivement des guillemets doubles droits ("), jamais de guillemets typographiques courbes (" " ni ' ').
+3. N'ajoute jamais de virgule après le dernier élément d'une liste ou d'un objet.
+4. Si un texte contient lui-même des guillemets, remplace-les par des apostrophes simples plutôt que d'essayer de les échapper.
+5. Vérifie que chaque accolade { et chaque crochet [ ouverts sont bien refermés avant la fin de ta réponse.
+
+Format exact attendu :
 {
   "idees": [
-    { "titre": "...", "categorie": "...", "description": "..." }
+    {
+      "titre": "...",
+      "categorie": "...",
+      "lieu": "...",
+      "description": "...",
+      "liens": ["${url}"]
+    }
   ]
 }`;
 
@@ -185,11 +210,32 @@ let ideesAImporter = [];
 
 function normaliserGuillemets(texte) {
 
-    return texte
+    let propre = texte
         .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
         .replace(/[\u2018\u2019\u201A\u201B]/g, "'");
 
+    // Retire d'éventuelles balises markdown ```json ... ``` autour du JSON
+    propre = propre.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "");
+
+    // Retire les virgules juste avant une accolade/crochet fermant (erreur fréquente des IA)
+    propre = propre.replace(/,(\s*[}\]])/g, "$1");
+
+    // Ne garde que la portion entre la première { et la dernière }, au cas où du texte traînerait autour
+    const debut = propre.indexOf("{");
+    const fin = propre.lastIndexOf("}");
+
+    if (debut !== -1 && fin !== -1 && fin > debut) {
+        propre = propre.substring(debut, fin + 1);
+    }
+
+    return propre.trim();
+
 }
+
+    export function definirUrlArticleSource(url) {
+    urlArticleSource = url;
+}
+
 
 function trouverCategorieId(labelSouhaite) {
 
@@ -235,7 +281,13 @@ function analyserImportVoyage() {
     const idees = data.idees || [];
     const valides = idees.filter(i => i.titre);
 
-    ideesAImporter = valides.map(i => ({ ...i, selectionne: true }));
+    ideesAImporter = valides.map(i => ({
+        ...i,
+        urls: urlArticleSource && !(i.liens || []).includes(urlArticleSource)
+            ? [...(i.liens || []), urlArticleSource]
+            : (i.liens || i.urls || []),
+        selectionne: true
+    }));
 
     renderRapportImport();
 
