@@ -3,6 +3,17 @@ const UPLOAD_PRESET = "Envies";
 
 export async function onRequestPost(context) {
 
+    const origine = context.request.headers.get("Origin") || context.request.headers.get("Referer") || "";
+
+if (!origine.includes("mes-envies.pages.dev")) {
+
+    return new Response(JSON.stringify({ error: "Origine non autorisée" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+    });
+
+}
+    
     try {
 
         const formData = await context.request.formData();
