@@ -236,6 +236,8 @@ function renderNonLocalises(voyageId, source) {
 
     section.classList.remove("hidden");
 
+    document.querySelector("#mapNonLocalisesHeader span").textContent = `📍 Non localisés sur la carte (${nonLocalises.length} élément${nonLocalises.length > 1 ? "s" : ""})`;
+
     container.innerHTML = nonLocalises.map(envie => `
         <div class="templateRow">
             <div class="templateRowNom">
