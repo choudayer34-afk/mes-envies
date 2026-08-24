@@ -103,3 +103,38 @@ export function buildPromptRegion(criteres) {
 
 }
 
+
+export function construireUrlBooking(destination, dateDebut, dateFin, nbAdultes) {
+
+    const params = new URLSearchParams({
+        ss: destination,
+        checkin: dateDebut,
+        checkout: dateFin || dateDebut,
+        group_adults: nbAdultes || 2,
+        no_rooms: 1,
+        group_children: 0
+    });
+
+    return `https://www.booking.com/searchresults.html?${params.toString()}`;
+
+}
+
+export function construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultes) {
+
+    const dest = encodeURIComponent(destination);
+
+    return `https://www.airbnb.fr/s/${dest}/homes?checkin=${dateDebut}&checkout=${dateFin || dateDebut}&adults=${nbAdultes || 2}`;
+
+}
+
+export function construireUrlCozycozy(destination) {
+    return `https://www.cozycozy.com/fr/search?q=${encodeURIComponent(destination)}`;
+}
+
+export function construireUrlGoogleFlights(destination, date) {
+    return `https://www.google.com/travel/flights?q=${encodeURIComponent(`Vols vers ${destination} le ${date}`)}`;
+}
+
+export function construireUrlSNCF() {
+    return `https://www.sncf-connect.com/`;
+}
