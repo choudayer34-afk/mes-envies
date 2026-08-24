@@ -437,7 +437,8 @@ function createChecklistRow(item, envie, personneContext = null) {
             <span>
                 ${prefix}${item.texte}
                                     <small class="assignBadge">${assignLabel}${item.parPersonne && !personneContext ? ` (${item.quantite}/pers)` : ""}${!personneContext ? formatProgressBadge(item) : ""}</small>
-                ${item.magasin ? `<small class="assignBadge">🏬 ${item.magasin}</small>` : ""}
+                          ${item.magasin ? `<small class="assignBadge">🏬 ${item.magasin}</small>` : ""}
+                ${item.remarque ? `<small class="assignBadge">📝 ${item.remarque}</small>` : ""}
 
             </span>
         </label>
