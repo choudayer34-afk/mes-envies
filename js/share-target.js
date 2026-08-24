@@ -519,6 +519,13 @@ async function init() {
 
         document.getElementById("etapeConnexion").classList.remove("hidden");
 
+        const emailMemorise = localStorage.getItem("envie_share_email");
+
+        if (emailMemorise) {
+            document.getElementById("shareEmail").value = emailMemorise;
+            document.getElementById("sharePassword").focus();
+        }
+
         document.getElementById("shareConnexionButton").addEventListener("click", async () => {
 
             const email = document.getElementById("shareEmail").value.trim();
@@ -528,6 +535,8 @@ async function init() {
             try {
 
                 const result = await signInWithEmailAndPassword(auth, email, password);
+
+                localStorage.setItem("envie_share_email", email);
 
                 foyerIdActuel = await obtenirFoyerId(result.user.uid);
 
