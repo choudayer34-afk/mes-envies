@@ -17,6 +17,7 @@ let creerCommeComparateur = false;
 let billetACreerAvecNouvelleIdee = null;
 let contexteForce = null;
 let conteneurIdForce = null;
+let photoDejaHebergee = null;
 
 function extraireDomaine(url) {
 
@@ -108,14 +109,14 @@ function deduireNomMagasin(url) {
 
 }
 
-async function tenterOcrPhoto(fichier) {
+async function tenterOcrPhoto(source) {
 
     try {
 
         const { createWorker } = await import("https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/+esm");
         const worker = await createWorker("fra");
 
-        const { data } = await worker.recognize(fichier);
+        const { data } = await worker.recognize(source);
 
         await worker.terminate();
 
@@ -153,13 +154,30 @@ function estimerTailleDataUrl(dataUrl) {
     return Math.ceil((dataUrl.length * 3) / 4);
 }
 
-async function construireBilletDepuisFichier(fichier, dateDepart) {
+async function construireBilletDepuisFichier(dateDepart) {
+
+    let blob, nom, type;
+
+    if (photoDejaHebergee) {
+
+        const reponse = await fetch(photoDejaHebergee.url);
+        blob = await reponse.blob();
+        nom = `partage.${photoDejaHebergee.type === "pdf" ? "pdf" : "jpg"}`;
+        type = photoDejaHebergee.type;
+
+    } else {
+
+        blob = fichiersPartages[0];
+        nom = blob.name;
+        type = blob.type === "application/pdf" ? "pdf" : "image";
+
+    }
 
     const dataUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result);
         reader.onerror = reject;
-        reader.readAsDataURL(fichier);
+        reader.readAsDataURL(blob);
     });
 
     if (estimerTailleDataUrl(dataUrl) > 700000) {
@@ -176,7 +194,7 @@ async function construireBilletDepuisFichier(fichier, dateDepart) {
         heureArrivee: null,
         destination: null,
         lienApp: null,
-        fichiers: [{ dataUrl, nom: fichier.name, type: fichier.type === "application/pdf" ? "pdf" : "image" }]
+        fichiers: [{ dataUrl, nom, type }]
     };
 
 }
@@ -236,11 +254,12 @@ async function afficherFormulaireBillet(envie) {
     const zone = document.getElementById("etapeConteneur");
     zone.innerHTML = `<div class="emptyState">🎫 Lecture du fichier...</div>`;
 
-    const fichier = fichiersPartages[0];
+    const sourceOcr = photoDejaHebergee?.url || fichiersPartages[0];
+    const typeSource = photoDejaHebergee?.type || (fichiersPartages[0].type === "application/pdf" ? "pdf" : "image");
     let dateDetectee = null;
 
-    if (fichier.type !== "application/pdf") {
-        const resultat = await tenterOcrPhoto(fichier);
+    if (typeSource !== "pdf") {
+        const resultat = await tenterOcrPhoto(sourceOcr);
         dateDetectee = resultat.date;
     }
 
@@ -265,7 +284,7 @@ async function afficherFormulaireBillet(envie) {
 
         try {
 
-            const nouveauBillet = await construireBilletDepuisFichier(fichier, dateDepart);
+                    const nouveauBillet = await construireBilletDepuisFichier(dateDepart);
 
             if (envie) {
                 await sauvegarderEnrichissement(envie, { billets: [...(envie.billets || []), nouveauBillet] });
@@ -290,8 +309,9 @@ async function afficherFormulaireDepense(envie) {
     const zone = document.getElementById("etapeConteneur");
     zone.innerHTML = `<div class="emptyState">💶 Lecture du ticket...</div>`;
 
-    const fichier = fichiersPartages[0];
-    const resultat = fichier.type !== "application/pdf" ? await tenterOcrPhoto(fichier) : { montant: null, date: null };
+    const sourceOcr = photoDejaHebergee?.url || fichiersPartages[0];
+    const typeSource = photoDejaHebergee?.type || (fichiersPartages[0].type === "application/pdf" ? "pdf" : "image");
+    const resultat = typeSource !== "pdf" ? await tenterOcrPhoto(sourceOcr) : { montant: null, date: null };
 
     const participants = envie.tricount.participants;
 
@@ -354,6 +374,18 @@ function renderApercu() {
 
     const container = document.getElementById("apercuPartage");
 
+    if (photoDejaHebergee) {
+
+        container.innerHTML = `<div>${photoDejaHebergee.type === "pdf" ? "📄" : "🖼️"} 1 fichier partagé</div>`;
+
+        if (photoDejaHebergee.type !== "pdf") {
+            container.innerHTML += `<img src="${photoDejaHebergee.url}" style="max-width:120px;border-radius:8px;margin-top:8px;display:block;">`;
+        }
+
+        return;
+
+    }
+
     if (fichiersPartages.length > 0) {
 
         container.innerHTML = `<div>${fichiersPartages[0].type === "application/pdf" ? "📄" : "🖼️"} ${fichiersPartages.length} fichier${fichiersPartages.length > 1 ? "s" : ""} partagé${fichiersPartages.length > 1 ? "s" : ""}</div>`;
@@ -385,6 +417,10 @@ function renderApercu() {
 
     }
 
+}
+
+function yAUnePhotoPartagee() {
+    return fichiersPartages.length > 0 || !!photoDejaHebergee;
 }
 
 async function chargerFichiersPartages(nbFichiers) {
@@ -481,6 +517,19 @@ async function init() {
     contenuPartage.url = urlBrute.startsWith("http") ? urlBrute : "";
     contenuPartage.texte = params.get("text") || (!contenuPartage.url ? urlBrute : "");
 
+
+     if (params.get("fichierPartage") === "true" && contenuPartage.url) {
+
+        photoDejaHebergee = {
+            url: contenuPartage.url,
+            type: contenuPartage.url.toLowerCase().includes(".pdf") ? "pdf" : "image"
+        };
+
+        contenuPartage.url = "";
+
+    }
+
+ 
     contexteForce = params.get("contexte") || null;
     conteneurIdForce = params.get("conteneurId") || null;
 
@@ -705,7 +754,7 @@ async function afficherEtapeDestination(conteneur) {
 
         destinationEnvieId = null;
 
-        if (fichiersPartages.length > 0 && contexteChoisi === "voyage") {
+        if (yAUnePhotoPartagee() && contexteChoisi === "voyage") {
             afficherChoixSpecialisationPhoto(null);
             return;
         }
@@ -789,7 +838,7 @@ function afficherFormulaireValidation() {
 
 async function enrichirEnvieExistante(envie) {
 
-    if (fichiersPartages.length > 0 && contexteChoisi === "voyage") {
+    if (yAUnePhotoPartagee() && contexteChoisi === "voyage") {
         await afficherChoixSpecialisationPhoto(envie);
         return;
     }
@@ -973,7 +1022,16 @@ function afficherMessageFinal(texte, idEnvieAOuvrir) {
 
 }
 
-async function uploaderFichiersPartages() {
+async function uploaderFichiersPartages() {async function uploaderFichiersPartages() {
+
+    if (photoDejaHebergee) {
+
+        if (photoDejaHebergee.type === "pdf")
+            return [];
+
+        return [{ id: crypto.randomUUID(), url: photoDejaHebergee.url, publicId: null }];
+
+    }
 
     const photos = [];
 
