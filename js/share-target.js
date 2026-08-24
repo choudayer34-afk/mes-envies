@@ -10,6 +10,7 @@ let conteneurChoisi = null;
 let destinationEnvieId = null;
 let fichiersPartages = [];
 let lieuDetecte = null;
+let imagePartagee = null;
 
 
 function extraireDomaine(url) {
@@ -18,6 +19,23 @@ function extraireDomaine(url) {
         return new URL(url).hostname.replace("www.", "");
     } catch {
         return "";
+    }
+
+}
+
+async function recupererApercu(url) {
+
+    try {
+
+        const reponse = await fetch(`/preview?url=${encodeURIComponent(url)}`);
+
+        if (!reponse.ok)
+            return null;
+
+        return await reponse.json();
+
+    } catch {
+        return null;
     }
 
 }
@@ -105,6 +123,7 @@ function renderApercu() {
     } else if (contenuPartage.url) {
 
         container.innerHTML = `
+            ${imagePartagee ? `<img src="${imagePartagee}" style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : ""}
             <div>🔗 <strong>${contenuPartage.titre || extraireDomaine(contenuPartage.url)}</strong></div>
             <div style="font-size:12px;color:var(--color-text-light);word-break:break-all;margin-top:4px;">${contenuPartage.url}</div>
         `;
@@ -201,6 +220,26 @@ async function init() {
     contenuPartage.titre = params.get("title") || "";
     contenuPartage.url = urlBrute.startsWith("http") ? urlBrute : "";
     contenuPartage.texte = params.get("text") || (!contenuPartage.url ? urlBrute : "");
+
+    if (contenuPartage.url) {
+
+        const apercu = await recupererApercu(contenuPartage.url);
+
+        if (apercu) {
+
+            if (!contenuPartage.titre && apercu.title) {
+                contenuPartage.titre = apercu.title;
+            }
+
+            imagePartagee = apercu.image || null;
+
+            if (apercu.finalUrl && apercu.finalUrl !== contenuPartage.url) {
+                contenuPartage.url = apercu.finalUrl;
+            }
+
+        }
+
+    }
 
     renderApercu();
 
@@ -457,7 +496,7 @@ function afficherChoixSpecialisation(envie) {
                         longueur: null,
                         largeur: null,
                         hauteur: null,
-                        photoUrl: null,
+                                               photoUrl: imagePartagee,
                         avis: null,
                         retenu: false
                     }
