@@ -3123,7 +3123,10 @@ document.addEventListener("DOMContentLoaded", () => {
     🔁 L'IA n'a pas répondu en JSON ? Redemander le format
 </button>
             
-            <textarea id="voyageImportJsonInput" rows="10" placeholder='{"idees": [...]}' style="width:100%;padding:14px;border-radius:16px;border:2px solid #D9E6EC;font-size:13px;font-family:monospace;box-sizing:border-box;"></textarea>
+               <div style="position:relative;">
+                <textarea id="voyageImportJsonInput" rows="10" placeholder='{"idees": [...]}' style="width:100%;padding:14px 40px 14px 14px;border-radius:16px;border:2px solid #D9E6EC;font-size:13px;font-family:monospace;box-sizing:border-box;"></textarea>
+                <button type="button" id="viderJsonImportButton" title="Vider" style="position:absolute;top:10px;right:10px;background:#EEF4F6;border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;font-size:13px;color:#6B7280;">✕</button>
+            </div>
 
             <button id="voyageImportAnalyserButton" class="primaryButton" style="width:100%;margin-top:10px;">
                 🔍 Analyser
