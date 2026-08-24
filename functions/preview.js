@@ -1,5 +1,16 @@
 export async function onRequestGet(context) {
 
+    const origine = context.request.headers.get("Origin") || context.request.headers.get("Referer") || "";
+
+if (!origine.includes("mes-envies.pages.dev")) {
+
+    return new Response(JSON.stringify({ error: "Origine non autorisée" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json" }
+    });
+
+}
+    
     const url = new URL(context.request.url);
     const cible = url.searchParams.get("url");
 
