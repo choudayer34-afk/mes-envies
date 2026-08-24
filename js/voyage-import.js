@@ -622,6 +622,33 @@ function renderRapportImport() {
 }
 
 
+async function geocoderAvecReplis(texteLieu) {
+
+    const segments = texteLieu.split(",").map(s => s.trim()).filter(Boolean);
+
+    for (let i = 0; i < segments.length; i++) {
+
+        const requete = segments.slice(i).join(", ");
+
+        try {
+
+            const resultats = await searchLocation(requete);
+
+            if (resultats.length > 0) {
+                return resultats[0];
+            }
+
+        } catch {}
+
+        if (i < segments.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 1100));
+        }
+
+    }
+
+    return null;
+
+}
 
 async function confirmerImportVoyage() {
 
@@ -657,28 +684,11 @@ async function confirmerImportVoyage() {
 
         } else if (idee.lieu) {
 
-            try {
+                        const resultat = await geocoderAvecReplis(idee.lieu);
 
-                const resultats = await searchLocation(idee.lieu);
-
-                if (resultats.length > 0) {
-
-                    lieu = {
-                        nom: resultats[0].display_name,
-                        adresse: resultats[0].display_name,
-                        latitude: parseFloat(resultats[0].lat),
-                        longitude: parseFloat(resultats[0].lon)
-                    };
-
-                } else {
-
-                    lieu = { nom: idee.lieu, adresse: idee.lieu, latitude: null, longitude: null };
-
-                }
-
-            } catch (err) {
-                lieu = { nom: idee.lieu, adresse: idee.lieu, latitude: null, longitude: null };
-            }
+            lieu = resultat
+                ? { nom: resultat.display_name, adresse: resultat.display_name, latitude: parseFloat(resultat.lat), longitude: parseFloat(resultat.lon) }
+                : { nom: idee.lieu, adresse: idee.lieu, latitude: null, longitude: null };
 
         }
 
