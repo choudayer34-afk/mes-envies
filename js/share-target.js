@@ -985,11 +985,9 @@ async function sauvegarderEnrichissement(envie, champsSupplementaires) {
 
         }
 
-        if (fichiersPartages.length > 0 && !champsSupplementaires.billets) {
-
+        if (yAUnePhotoPartagee() && !champsSupplementaires.billets) {
             const nouvellesPhotos = await uploaderFichiersPartages();
             champs.photos = [...(envie.photos || []), ...nouvellesPhotos];
-
         }
 
         await setDoc(doc(db, "foyers", foyerIdActuel, "envies", envie.id), champs, { merge: true });
@@ -1064,7 +1062,7 @@ async function enregistrer(ouvrirFiche) {
 
     const id = crypto.randomUUID();
 
-       const photos = (fichiersPartages.length > 0 && !billetACreerAvecNouvelleIdee) ? await uploaderFichiersPartages() : [];
+        const photos = (yAUnePhotoPartagee() && !billetACreerAvecNouvelleIdee) ? await uploaderFichiersPartages() : [];
 
     const envieData = {
         titre,
