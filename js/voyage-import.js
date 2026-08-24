@@ -194,7 +194,9 @@ Pour chaque idée trouvée (lieu à visiter, restaurant, activité, hébergement
 - categorie : le type d'idée (ex: Restaurant, Activité, Logement, Visite)
 - lieu : le nom du lieu tel qu'il apparaît, avec la ville si connue (permet de le localiser sur une carte ensuite) — laisse vide si non applicable
 - description : un texte riche qui inclut, quand c'est pertinent selon le type d'activité : le niveau de difficulté, l'âge minimum conseillé, la durée approximative, le prix indicatif, la meilleure période, et tout autre critère utile mentionné dans l'article
-- liens : un tableau avec le lien de l'article lui-même, et tout autre lien officiel pertinent que tu identifies (site du lieu, réservation...) si tu peux faire une recherche complémentaire
+- liens : un tableau d'objets {"nom": "...", "url": "..."} — le nom doit décrire ce que représente le lien ET le site de destination (ex: "Site officiel du JOST Hôtel", "Réservation sur TripAdvisor"), jamais juste "lien". Inclus le lien de l'article lui-même nommé "Article source", et tout autre lien officiel pertinent trouvé (site du lieu, réservation...)
+- photo : l'URL d'une image représentative si tu en trouves une (photo du lieu, illustration), sinon laisse vide
+- pdf : l'URL d'un PDF utile si tu en identifies un (carte, brochure, horaires), sinon laisse vide
 
 Si tu as la capacité de rechercher sur Internet, complète chaque idée avec des informations à jour plutôt que de te limiter au seul contenu de l'article — mais garde toujours le résultat au format JSON ci-dessous, sans jamais insérer de citations ou de liens de sources dans le texte.
 
@@ -213,7 +215,9 @@ Format exact attendu, et strictement rien d'autre dans ta réponse :
       "categorie": "...",
       "lieu": "...",
       "description": "...",
-      "liens": ["${url}"]
+      "liens": [{"nom": "Article source", "url": "${url}"}],
+      "photo": "",
+      "pdf": ""
     }
   ]
 }
@@ -234,7 +238,9 @@ Format exact attendu, et strictement rien d'autre dans ta réponse :
       "categorie": "...",
       "lieu": "...",
       "description": "...",
-      "liens": ["..."]
+      "liens": [{"nom": "Article source", "url": "${url}"}],
+      "photo": "",
+      "pdf": ""
     }
   ]
 }
