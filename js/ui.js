@@ -767,11 +767,13 @@ function calculerAchatsMaison() {
 
                 if (!item.checked) {
 
-                    items.push({
+                                     items.push({
                         envieId: tache.id,
                         itemId: item.id,
                         texte: item.texte,
                         magasin: item.magasin || null,
+                        remarque: item.remarque || null,
+                        produitOrigineId: item.produitOrigineId || null,
                         projetTitre: conteneur.titre,
                         projetEmoji: getCategorieById(conteneur.categorie)?.emoji || "🛠️"
                     });
@@ -824,10 +826,14 @@ function creerGroupeAchat(envieId, titreGroupe, items, infoComplementaireType, e
     bloc.innerHTML = `
         ${titreHtml}
         ${items.length === 0 ? `<div class="emptyState" style="padding:8px 0;">Aucun article pour l'instant.</div>` : ""}
-        ${items.map(item => `
+               ${items.map(item => `
             <label class="checkLabel achatCheckLabel" data-envie-id="${item.envieId}" data-item-id="${item.itemId}" style="display:flex;align-items:center;gap:8px;padding:6px 0;">
                 <input type="checkbox">
-                <span>${item.texte} <small class="assignBadge">${infoComplementaireType === "magasin" ? (item.magasin || "Sans magasin précisé") : item.projetTitre}</small></span>
+                <span>
+                    ${item.texte} <small class="assignBadge">${infoComplementaireType === "magasin" ? (item.magasin || "Sans magasin précisé") : item.projetTitre}</small>
+                    ${item.remarque ? `<small class="assignBadge">📝 ${item.remarque}</small>` : ""}
+                </span>
+                ${item.produitOrigineId ? `<button type="button" class="iconSmallButton voirFicheProduitAccueilButton" data-envie-id="${item.envieId}" data-produit-id="${item.produitOrigineId}" title="Voir la fiche comparateur">🔍</button>` : ""}
             </label>
         `).join("")}
     `;
@@ -860,6 +866,22 @@ function creerGroupeAchat(envieId, titreGroupe, items, infoComplementaireType, e
 
     });
 
+        bloc.querySelectorAll(".voirFicheProduitAccueilButton").forEach(bouton => {
+
+        bouton.addEventListener("click", (event) => {
+
+            event.stopPropagation();
+
+            const envie = getEnvies().find(e => e.id === bouton.dataset.envieId);
+
+            if (envie) {
+                ouvrirFicheProduitDepuisChecklist(envie, bouton.dataset.produitId);
+            }
+
+        });
+
+    });
+    
     return bloc;
 
 }
