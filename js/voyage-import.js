@@ -467,7 +467,15 @@ function renderRapportImport() {
                         <small style="color:var(--color-text-light);">${idee.categorie || ""}${idee.description ? ` · ${idee.description}` : ""}${distanceLabel}</small>
                                                ${(idee.urls?.length > 0 || idee.url) ? `
                             <div style="margin-top:4px;display:flex;flex-direction:column;gap:2px;">
-                                ${(idee.urls || []).map(u => `<a href="${u}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;">🔗 ${u.toLowerCase().includes(".pdf") ? "Document PDF" : "Lien suggéré par l'IA"}</a>`).join("")}
+                                ${(idee.urls || idee.liens || []).map(lien => {
+
+                                    const url = typeof lien === "string" ? lien : lien.url;
+                                    const nom = typeof lien === "string" ? null : lien.nom;
+                                    const label = nom || (url.toLowerCase().includes(".pdf") ? "📄 Document PDF" : "🔗 Lien suggéré");
+
+                                    return `<a href="${url}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;display:block;">${label}</a>`;
+
+                                }).join("")}
                                 ${idee.url ? `<a href="${idee.url}" target="_blank" style="font-size:12px;color:var(--color-primary);text-decoration:underline;">🔗 Lien suggéré par l'IA</a>` : ""}
                             </div>
                         ` : ""}
