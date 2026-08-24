@@ -47,7 +47,7 @@ function ouvrirSelecteurVoyagePourImport() {
 
     const voyages = getEnvies().filter(e => {
 
-        if (!isContainer(e.categorie))
+        if (!isContainer(e.categorie) || e.contexte === "maison")
             return false;
 
         const { statut } = computeContainerStatus(e);
