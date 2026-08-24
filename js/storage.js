@@ -1426,7 +1426,7 @@ Génère une liste de 30 a 50 idées concrètes au format JSON strict suivant, s
       "lieu": "Nom du lieu et ville, le plus précis possible (ex: 'Cascade de Sillans, Sillans-la-Cascade')",
       "latitude": "Coordonnée GPS latitude le plus precis de ce lieu si tu la connais avec certitude ou le centre, sinon laisser vide",
       "longitude": "Coordonnée GPS longitude le plus precis de ce lieu si tu la connais avec certitude ou le centre, sinon laisser vide",
-      "description": "1 à 2 phrases décrivant l'intérêt de cette idée",
+      "description": "1 à 2 phrases décrivant l'intérêt de cette idée et un texte riche qui inclut, quand c'est pertinent selon le type d'activité : le niveau de difficulté, l'âge minimum conseillé, la durée approximative, le prix indicatif, la meilleure période, et tout autre critère utile mentionné dans l'article",
                  "urls": ["Liste de liens pertinents et réellement existants : site officiel, page d'information, PDF de programme ou brochure si disponible. Laisser un tableau vide [] si aucun lien fiable n'est connu — ne jamais inventer une URL."],
 
 
