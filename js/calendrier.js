@@ -1,5 +1,5 @@
-const JOURS_SEMAINE = ["L", "M", "M", "J", "V", "S", "D"];
-const MOIS_NOMS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+export const JOURS_SEMAINE = ["L", "M", "M", "J", "V", "S", "D"];
+export const MOIS_NOMS = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
 let moisAffiche = new Date();
 let selectionDebut = null;
