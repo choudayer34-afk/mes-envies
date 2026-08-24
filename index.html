@@ -2524,9 +2524,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         <div id="mapContainer" class="mapContainer"></div>
 
+        <div id="mapNonLocalisesSection" class="hidden" style="margin-top:12px;">
+            <button type="button" id="mapNonLocalisesHeader" class="checklistCategorieHeader checklistCategorieHeaderCliquable">
+                <span>📍 Non localisés sur la carte</span>
+                <span class="accordionIcon">▸</span>
+            </button>
+            <div id="mapNonLocalisesListe" class="hidden"></div>
+        </div>
+
     </div>
 
 </div>
+    
 <div id="carteVoyagesModal" class="modal-overlay hidden">
 
     <div class="modal mapModal">
