@@ -13,6 +13,17 @@ export function initCarte() {
     document.getElementById("btnCarte").addEventListener("click", () => openMap());
     document.getElementById("closeCarte").addEventListener("click", closeMap);
 
+        document.getElementById("mapNonLocalisesHeader")?.addEventListener("click", () => {
+
+        const liste = document.getElementById("mapNonLocalisesListe");
+        liste.classList.toggle("hidden");
+
+        const icon = document.getElementById("mapNonLocalisesHeader").querySelector(".accordionIcon");
+        icon.textContent = liste.classList.contains("hidden") ? "▸" : "▾";
+
+    });
+    
+
 }
 
 export function setRetourCarteVersCatalogue(value) {
@@ -153,6 +164,7 @@ function renderMarkers(voyageId, enviesPreFiltrees = null) {
     );
 
     renderLegend(envies, voyageId);
+    renderNonLocalises(voyageId, source);
 
     if (envies.length === 0) {
         map.setView([46.6, 2.3], 5);
@@ -195,6 +207,55 @@ function renderMarkers(voyageId, enviesPreFiltrees = null) {
     });
 
     map.fitBounds(bounds, { padding: [40, 40] });
+
+}
+
+function renderNonLocalises(voyageId, source) {
+
+    const section = document.getElementById("mapNonLocalisesSection");
+    const container = document.getElementById("mapNonLocalisesListe");
+
+    if (!section || !container)
+        return;
+
+    if (!voyageId) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    const nonLocalises = source.filter(e =>
+        e.voyageId === voyageId &&
+        e.lieu?.nom &&
+        !(e.lieu?.latitude && e.lieu?.longitude)
+    );
+
+    if (nonLocalises.length === 0) {
+        section.classList.add("hidden");
+        return;
+    }
+
+    section.classList.remove("hidden");
+
+    container.innerHTML = nonLocalises.map(envie => `
+        <div class="templateRow">
+            <div class="templateRowNom">
+                ${getCategorieById(envie.categorie)?.emoji || "💡"} ${envie.titre}
+                <small>📍 ${envie.lieu.nom}</small>
+            </div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton ouvrirFicheNonLocaliseeButton" data-id="${envie.id}">Ouvrir</button>
+            </div>
+        </div>
+    `).join("");
+
+    container.querySelectorAll(".ouvrirFicheNonLocaliseeButton").forEach(btn => {
+
+        btn.addEventListener("click", () => {
+            closeMap();
+            openEnvie(btn.dataset.id, null);
+        });
+
+    });
 
 }
 
