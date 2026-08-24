@@ -5,7 +5,7 @@ import {
     updateChecklistItemAssignment, getMagasins, rememberMagasin, updateChecklistItem
 } from "./storage.js";
 import { makeRowDraggable } from "./dragdrop.js";
- 
+ import { ouvrirImageAgrandie } from "./modal-utils.js";
 import { removePersonneFromChecklistItem } from "./storage.js";
 import { setChecklistItems } from "./storage.js";
 
@@ -442,6 +442,7 @@ function createChecklistRow(item, envie, personneContext = null) {
             </span>
         </label>
             ${item.url ? `<a href="${item.url}" target="_blank" class="iconSmallButton" onclick="event.stopPropagation()">🔗</a>` : ""}
+              ${item.produitOrigineId ? `<button class="iconSmallButton voirFicheProduitButton" title="Voir la fiche comparateur">🔍</button>` : ""}
         <button class="iconSmallButton editChecklistItemButton" title="Modifier">✏️</button>
         <button class="assignItemButton" title="Attribuer">👤</button>
         <button class="deleteChecklistButton" title="${personneContext ? "Retirer pour cette personne" : "Supprimer"}">🗑️</button>
@@ -500,6 +501,10 @@ function createChecklistRow(item, envie, personneContext = null) {
 
     });
 
+        row.querySelector(".voirFicheProduitButton")?.addEventListener("click", () => {
+        ouvrirFicheProduitDepuisChecklist(envie, item.produitOrigineId);
+    });
+    
     makeRowDraggable(row, item.id, (targetId) => {
 
         const envieActuelle = getEnvies().find(e => e.id === envie.id);
@@ -514,7 +519,45 @@ function createChecklistRow(item, envie, personneContext = null) {
 
 }
 
+function ouvrirFicheProduitDepuisChecklist(envie, produitId) {
 
+    const produit = envie.comparateur?.produits?.find(p => p.id === produitId);
+
+    if (!produit) {
+        showToast("Fiche produit introuvable (peut-être supprimée)");
+        return;
+    }
+
+    const modal = document.createElement("div");
+    modal.className = "modal-overlay";
+    modal.style.zIndex = "2300";
+
+    const dimensions = [
+        produit.longueur ? `L:${produit.longueur}` : null,
+        produit.largeur ? `l:${produit.largeur}` : null,
+        produit.hauteur ? `H:${produit.hauteur}` : null
+    ].filter(Boolean).join(" ");
+
+    modal.innerHTML = `
+        <div class="modal">
+            <h2>${produit.nom}</h2>
+            ${produit.photoUrl ? `<img id="fichProduitPhoto" src="${produit.photoUrl}" style="width:100%;border-radius:12px;margin-bottom:12px;cursor:zoom-in;">` : ""}
+            ${produit.prix != null ? `<p><strong>Prix :</strong> ${produit.prix} €</p>` : ""}
+            ${produit.magasin ? `<p><strong>Magasin :</strong> ${produit.magasin}</p>` : ""}
+            ${dimensions ? `<p><strong>Dimensions :</strong> ${dimensions} cm</p>` : ""}
+            ${produit.avis ? `<p><strong>Avis :</strong> ${produit.avis}</p>` : ""}
+            ${produit.lien ? `<a href="${produit.lien}" target="_blank" class="secondaryButton" style="display:block;text-align:center;margin-top:10px;text-decoration:none;">🔗 Voir le lien</a>` : ""}
+            <button class="secondaryButton" style="width:100%;margin-top:14px;" id="fermerFicheProduitButton">Fermer</button>
+        </div>
+    `;
+
+    modal.querySelector("#fermerFicheProduitButton").addEventListener("click", () => modal.remove());
+    modal.addEventListener("click", (event) => { if (event.target === modal) modal.remove(); });
+    modal.querySelector("#fichProduitPhoto")?.addEventListener("click", () => ouvrirImageAgrandie(produit.photoUrl));
+
+    document.body.appendChild(modal);
+
+}
 
 export function formatAssignLabel(assignedTo) {
 
