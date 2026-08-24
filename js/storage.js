@@ -1,5 +1,6 @@
 import { db } from "./firebase.js";
 import { getFoyerId } from "./auth.js";
+import { uploadToCloudinary } from "./photos.js";
 import {
     collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -1376,7 +1377,7 @@ export function creerEnvieDansVoyage(voyageId, data) {
         favorite: false,
         realise: false,
         description: data.description || "",
-        photos: [],
+        photos: data.photos || [],
         checklist: [],
         urls: construireUrlsInitiales(data),
         tags: [],
@@ -1937,16 +1938,35 @@ export const getFamilleImportant = familleImportantStore.get;
 export const initFamilleImportantSync = familleImportantStore.init;
 
 
+function deduireNomDepuisUrl(url) {
+
+    try {
+
+        const domaine = new URL(url).hostname.replace("www.", "").split(".")[0];
+        return domaine.charAt(0).toUpperCase() + domaine.slice(1);
+
+    } catch {
+        return url;
+    }
+
+}
+
 function construireUrlsInitiales(data) {
 
     const liens = [];
 
     if (Array.isArray(data.urls)) {
 
-        data.urls.forEach(url => {
+        data.urls.forEach(entree => {
 
-            if (url && typeof url === "string" && url.trim()) {
-                liens.push({ id: crypto.randomUUID(), url: url.trim(), createdAt: Date.now() });
+            if (typeof entree === "string" && entree.trim()) {
+
+                liens.push({ id: crypto.randomUUID(), type: "lien", url: entree.trim(), nom: deduireNomDepuisUrl(entree.trim()), createdAt: Date.now() });
+
+            } else if (entree?.url) {
+
+                liens.push({ id: crypto.randomUUID(), type: "lien", url: entree.url.trim(), nom: entree.nom || deduireNomDepuisUrl(entree.url), createdAt: Date.now() });
+
             }
 
         });
@@ -1954,10 +1974,37 @@ function construireUrlsInitiales(data) {
     }
 
     if (data.url && typeof data.url === "string" && data.url.trim()) {
-        liens.push({ id: crypto.randomUUID(), url: data.url.trim(), createdAt: Date.now() });
+        liens.push({ id: crypto.randomUUID(), type: "lien", url: data.url.trim(), nom: deduireNomDepuisUrl(data.url), createdAt: Date.now() });
+    }
+
+    if (data.pdf && typeof data.pdf === "string" && data.pdf.trim()) {
+        liens.push({ id: crypto.randomUUID(), type: "lien", url: data.pdf.trim(), nom: `📄 PDF — ${deduireNomDepuisUrl(data.pdf)}`, createdAt: Date.now() });
     }
 
     return liens;
+
+}
+
+export async function telechargerPhotoDepuisUrl(url) {
+
+    try {
+
+        const reponse = await fetch(url);
+
+        if (!reponse.ok)
+            return null;
+
+        const blob = await reponse.blob();
+        const result = await uploadToCloudinary(blob);
+
+        return { id: crypto.randomUUID(), url: result.secure_url, publicId: result.public_id };
+
+    } catch (err) {
+
+        console.warn("Photo IA non récupérable (probablement bloquée par le site) : " + err.message);
+        return null;
+
+    }
 
 }
 
