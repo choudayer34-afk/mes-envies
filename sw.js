@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v153';
+const CACHE_NAME = 'envie-cache-v154';
 
  
  
@@ -112,16 +112,12 @@ self.addEventListener("fetch", (event) => {
     const url = new URL(event.request.url);
 
     if (event.request.method === "POST" && url.pathname.endsWith("/share-target.html")) {
-
         event.respondWith(gererPartageAvecFichiers(event.request));
-        return;
-
     }
 
-    // ⬇️ ici commence ton code fetch existant, inchangé
- 
-self.addEventListener('fetch', (event) => {
+});
 
+self.addEventListener('fetch', (event) => {
     const request = event.request;
 
     if (request.method !== 'GET') return;
