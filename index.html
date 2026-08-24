@@ -2744,6 +2744,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <span>📥 Partager vers EnVie</span>
         <span class="accordionIcon">▸</span>
     </button>
+            
     <div id="guidePartage" class="accordionContent hidden">
         <ul style="padding-left:20px;line-height:1.7;">
 
@@ -2775,6 +2776,38 @@ document.addEventListener("DOMContentLoaded", () => {
                     <li>"🤖 C'est un article à décortiquer" génère un prompt à copier vers ton IA pour en extraire plusieurs idées d'un coup, avec lieux, liens nommés et photos suggérées</li>
                 </ul>
             </li>
+
+        </ul>
+    </div>
+</div>
+
+        <div class="accordion">
+    <button class="accordionHeader" data-target="guideStockage">
+        <span>📊 Suivre mon stockage</span>
+        <span class="accordionIcon">▸</span>
+    </button>
+    <div id="guideStockage" class="accordionContent hidden">
+        <ul style="padding-left:20px;line-height:1.7;">
+
+            <li><strong>Firestore (tes données : envies, personnes, checklists...)</strong> :
+                <ol style="padding-left:20px;line-height:1.7;">
+                    <li>Ouvre la <a href="https://console.firebase.google.com/" target="_blank">Console Firebase</a></li>
+                    <li>Sélectionne ton projet</li>
+                    <li>Menu de gauche → <strong>"Utilisation et facturation"</strong> (ou l'onglet "Utilisation" dans Firestore Database)</li>
+                    <li>Tu y vois la taille totale de la base et les lectures/écritures du jour, comparées au forfait gratuit</li>
+                </ol>
+            </li>
+
+            <li><strong>Cloudinary (tes photos)</strong> :
+                <ol style="padding-left:20px;line-height:1.7;">
+                    <li>Ouvre le <a href="https://cloudinary.com/console" target="_blank">Dashboard Cloudinary</a></li>
+                    <li>Connecte-toi avec ton compte</li>
+                    <li>La page d'accueil affiche directement une jauge : stockage utilisé, bande passante du mois, transformations</li>
+                    <li>Pour le détail complet : menu <strong>"Settings" → "Usage"</strong></li>
+                </ol>
+            </li>
+
+            <li style="margin-top:8px;color:var(--color-text-light);font-size:13px;">Aucun des deux n'est suivi automatiquement depuis EnVie (à part la jauge par billet, qui ne concerne que cette rubrique précise) — ces liens t'amènent directement à la bonne page pour vérifier toi-même.</li>
 
         </ul>
     </div>
