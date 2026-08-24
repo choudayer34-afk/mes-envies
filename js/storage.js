@@ -1159,7 +1159,7 @@ const dimensionsTexte = [];
         const suffixeDimensions = dimensionsTexte.length > 0 ? ` (${dimensionsTexte.join(" ")} cm)` : "";
         const suffixePrix = produit.prix != null ? ` — ${produit.prix} €` : "";
 
-        const nouvelItem = {
+            const nouvelItem = {
             id: crypto.randomUUID(),
             texte: `${produit.nom}${suffixeDimensions}${suffixePrix}`,
             quantite: 1,
@@ -1170,6 +1170,7 @@ const dimensionsTexte = [];
             checkedBy: {},
             magasin: produit.magasin || null,
             url: produit.url || null,
+            remarque: produit.remarque || null,
             produitOrigineId: produit.id
         };
 
