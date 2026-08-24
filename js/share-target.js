@@ -1058,11 +1058,14 @@ async function uploaderFichiersPartages() {
 async function enregistrer(ouvrirFiche) {
 
     const titre = document.getElementById("shareTitre").value.trim() || "Sans titre";
-    const description = document.getElementById("shareDescription").value.trim();
+
 
     const id = crypto.randomUUID();
 
-        const photos = (yAUnePhotoPartagee() && !billetACreerAvecNouvelleIdee) ? await uploaderFichiersPartages() : [];
+            const description = document.getElementById("shareDescription").value.trim();
+
+    const photosBrutes = (yAUnePhotoPartagee() && !billetACreerAvecNouvelleIdee) ? await uploaderFichiersPartages() : [];
+    const photos = photosBrutes.map(p => ({ ...p, description: description || null }));
 
     const envieData = {
         titre,
