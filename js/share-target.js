@@ -14,6 +14,7 @@ let imagePartagee = null;
 let descriptionRecuperee = null;
 let categoriesDisponibles = [];
 let creerCommeComparateur = false;
+let billetACreerAvecNouvelleIdee = null;
 
 
 function extraireDomaine(url) {
@@ -105,6 +106,248 @@ function deduireNomMagasin(url) {
     return partie.charAt(0).toUpperCase() + partie.slice(1);
 
 }
+
+async function tenterOcrPhoto(fichier) {
+
+    try {
+
+        const { createWorker } = await import("https://cdn.jsdelivr.net/npm/tesseract.js@5.1.0/+esm");
+        const worker = await createWorker("fra");
+
+        const { data } = await worker.recognize(fichier);
+
+        await worker.terminate();
+
+        const texte = data.text;
+
+        const matchMontant = texte.match(/(\d+[.,]\d{2})\s*€|€\s*(\d+[.,]\d{2})|(\d+[.,]\d{2})\s*EUR/i);
+        const montant = matchMontant ? parseFloat((matchMontant[1] || matchMontant[2] || matchMontant[3]).replace(",", ".")) : null;
+
+        const matchDate = texte.match(/(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})/);
+
+        let date = null;
+
+        if (matchDate) {
+
+            let [, jour, mois, annee] = matchDate;
+
+            if (annee.length === 2) annee = "20" + annee;
+
+            date = `${annee}-${mois.padStart(2, "0")}-${jour.padStart(2, "0")}`;
+
+        }
+
+        return { montant, date };
+
+    } catch (err) {
+
+        console.error("Erreur OCR partage: " + err.message);
+        return { montant: null, date: null };
+
+    }
+
+}
+
+function estimerTailleDataUrl(dataUrl) {
+    return Math.ceil((dataUrl.length * 3) / 4);
+}
+
+async function construireBilletDepuisFichier(fichier, dateDepart) {
+
+    const dataUrl = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(fichier);
+    });
+
+    if (estimerTailleDataUrl(dataUrl) > 700000) {
+        throw new Error("Fichier trop volumineux pour un billet (max ~700 Ko)");
+    }
+
+    return {
+        id: crypto.randomUUID(),
+        type: "avion",
+        compagnie: null,
+        numeroVol: null,
+        dateDepart,
+        heureDepart: null,
+        heureArrivee: null,
+        destination: null,
+        lienApp: null,
+        fichiers: [{ dataUrl, nom: fichier.name, type: fichier.type === "application/pdf" ? "pdf" : "image" }]
+    };
+
+}
+
+async function afficherChoixSpecialisationPhoto(envie) {
+
+    document.getElementById("etapeDestination").classList.add("hidden");
+
+    const zone = document.getElementById("etapeConteneur");
+    zone.classList.remove("hidden");
+    zone.innerHTML = `<label class="fieldTitle">Ajouter comment${envie ? ` à "${envie.titre}"` : ""} ?</label><div id="specialisationListe" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div>`;
+
+    const liste = document.getElementById("specialisationListe");
+
+    const boutonBillet = document.createElement("button");
+    boutonBillet.type = "button";
+    boutonBillet.className = "secondaryButton";
+    boutonBillet.style.width = "100%";
+    boutonBillet.textContent = "🎫 Comme billet";
+    boutonBillet.addEventListener("click", () => afficherFormulaireBillet(envie));
+    liste.appendChild(boutonBillet);
+
+    if (envie && envie.tricount?.participants?.length > 0) {
+
+        const boutonDepense = document.createElement("button");
+        boutonDepense.type = "button";
+        boutonDepense.className = "secondaryButton";
+        boutonDepense.style.width = "100%";
+        boutonDepense.textContent = "💶 Comme dépense";
+        boutonDepense.addEventListener("click", () => afficherFormulaireDepense(envie));
+        liste.appendChild(boutonDepense);
+
+    }
+
+    const boutonSimple = document.createElement("button");
+    boutonSimple.type = "button";
+    boutonSimple.className = "secondaryButton";
+    boutonSimple.style.width = "100%";
+    boutonSimple.textContent = "📷 Photo simple";
+
+    boutonSimple.addEventListener("click", () => {
+
+        if (envie) {
+            sauvegarderEnrichissement(envie, {});
+        } else {
+            afficherFormulaireValidation();
+        }
+
+    });
+
+    liste.appendChild(boutonSimple);
+
+}
+
+async function afficherFormulaireBillet(envie) {
+
+    const zone = document.getElementById("etapeConteneur");
+    zone.innerHTML = `<div class="emptyState">🎫 Lecture du fichier...</div>`;
+
+    const fichier = fichiersPartages[0];
+    let dateDetectee = null;
+
+    if (fichier.type !== "application/pdf") {
+        const resultat = await tenterOcrPhoto(fichier);
+        dateDetectee = resultat.date;
+    }
+
+    zone.innerHTML = `
+        <label class="fieldTitle">🎫 Nouveau billet${envie ? ` sur "${envie.titre}"` : ""}</label>
+
+        <label class="fieldTitle" style="margin-top:12px;">Date de départ</label>
+        <input type="date" id="shareBilletDate" class="numberInput" value="${dateDetectee || ""}">
+
+        <p style="font-size:12px;color:var(--color-text-light);margin-top:10px;">
+            Compagnie, numéro de vol et heures se complètent ensuite directement dans la fiche.
+        </p>
+
+        <div class="modal-actions" style="margin-top:16px;">
+            <button id="shareBilletValider" class="primaryButton" style="width:100%;">✓ Enregistrer comme billet</button>
+        </div>
+    `;
+
+    document.getElementById("shareBilletValider").addEventListener("click", async () => {
+
+        const dateDepart = document.getElementById("shareBilletDate").value || null;
+
+        try {
+
+            const nouveauBillet = await construireBilletDepuisFichier(fichier, dateDepart);
+
+            if (envie) {
+                await sauvegarderEnrichissement(envie, { billets: [...(envie.billets || []), nouveauBillet] });
+            } else {
+                billetACreerAvecNouvelleIdee = nouveauBillet;
+                zone.classList.add("hidden");
+                afficherFormulaireValidation();
+            }
+
+        } catch (err) {
+
+            alert(err.message);
+
+        }
+
+    });
+
+}
+
+async function afficherFormulaireDepense(envie) {
+
+    const zone = document.getElementById("etapeConteneur");
+    zone.innerHTML = `<div class="emptyState">💶 Lecture du ticket...</div>`;
+
+    const fichier = fichiersPartages[0];
+    const resultat = fichier.type !== "application/pdf" ? await tenterOcrPhoto(fichier) : { montant: null, date: null };
+
+    const participants = envie.tricount.participants;
+
+    zone.innerHTML = `
+        <label class="fieldTitle">💶 Nouvelle dépense sur "${envie.titre}"</label>
+
+        <label class="fieldTitle" style="margin-top:12px;">Nom</label>
+        <input type="text" id="shareDepenseNom" class="numberInput" placeholder="Ex: Restaurant" value="${contenuPartage.titre || ""}">
+
+        <label class="fieldTitle" style="margin-top:12px;">Montant (€)</label>
+        <input type="number" id="shareDepenseMontant" class="numberInput" step="0.01" value="${resultat.montant || ""}">
+
+        <label class="fieldTitle" style="margin-top:12px;">Date</label>
+        <input type="date" id="shareDepenseDate" class="numberInput" value="${resultat.date || new Date().toISOString().split("T")[0]}">
+
+        <label class="fieldTitle" style="margin-top:12px;">Payé par</label>
+        <select id="shareDepensePayePar" class="categorieSelect">
+            ${participants.map(p => `<option value="${p.id}">${p.nom}</option>`).join("")}
+        </select>
+
+        <p style="font-size:12px;color:var(--color-text-light);margin-top:10px;">
+            Répartie également entre tous les participants pour l'instant — ajustable ensuite dans le Tricount.
+        </p>
+
+        <div class="modal-actions" style="margin-top:16px;">
+            <button id="shareDepenseValider" class="primaryButton" style="width:100%;">✓ Enregistrer la dépense</button>
+        </div>
+    `;
+
+    document.getElementById("shareDepenseValider").addEventListener("click", async () => {
+
+        const montant = parseFloat(document.getElementById("shareDepenseMontant").value);
+
+        if (!montant || montant <= 0) {
+            alert("Renseigne un montant valide.");
+            return;
+        }
+
+        const nouvelleDepense = {
+            id: crypto.randomUUID(),
+            nom: document.getElementById("shareDepenseNom").value.trim() || "Dépense",
+            montant,
+            payePar: document.getElementById("shareDepensePayePar").value,
+            date: document.getElementById("shareDepenseDate").value || null,
+            pourQui: participants.map(p => p.id),
+            repartition: "egale",
+            montantsCustom: null
+        };
+
+        const nouveauTricount = { ...envie.tricount, depenses: [...(envie.tricount.depenses || []), nouvelleDepense] };
+
+        await sauvegarderEnrichissement(envie, { tricount: nouveauTricount });
+
+    });
+
+}
+
 
 function renderApercu() {
 
@@ -383,6 +626,11 @@ async function afficherEtapeDestination(conteneur) {
 
         destinationEnvieId = null;
 
+        if (fichiersPartages.length > 0 && contexteChoisi === "voyage") {
+            afficherChoixSpecialisationPhoto(null);
+            return;
+        }
+
         if (contenuPartage.url && !fichiersPartages.length && !lieuDetecte && contexteChoisi === "maison") {
             afficherChoixNouvelleIdeeComparateur();
             return;
@@ -445,6 +693,11 @@ function afficherFormulaireValidation() {
 }
 
 async function enrichirEnvieExistante(envie) {
+
+    if (fichiersPartages.length > 0 && contexteChoisi === "voyage") {
+        await afficherChoixSpecialisationPhoto(envie);
+        return;
+    }
 
     if (lieuDetecte) {
         await enregistrerLieuSurEnvie(envie);
@@ -588,7 +841,7 @@ async function sauvegarderEnrichissement(envie, champsSupplementaires) {
 
         }
 
-        if (fichiersPartages.length > 0) {
+        if (fichiersPartages.length > 0 && !champsSupplementaires.billets) {
 
             const nouvellesPhotos = await uploaderFichiersPartages();
             champs.photos = [...(envie.photos || []), ...nouvellesPhotos];
@@ -659,7 +912,7 @@ async function enregistrer(ouvrirFiche) {
 
     const id = crypto.randomUUID();
 
-    const photos = fichiersPartages.length > 0 ? await uploaderFichiersPartages() : [];
+       const photos = (fichiersPartages.length > 0 && !billetACreerAvecNouvelleIdee) ? await uploaderFichiersPartages() : [];
 
     const envieData = {
         titre,
@@ -694,6 +947,10 @@ async function enregistrer(ouvrirFiche) {
 
     }
 
+     if (billetACreerAvecNouvelleIdee) {
+        envieData.billets = [billetACreerAvecNouvelleIdee];
+    }
+ 
     try {
         await setDoc(doc(db, "foyers", foyerIdActuel, "envies", id), envieData);
     } catch (err) {
