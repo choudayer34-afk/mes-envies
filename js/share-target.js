@@ -9,6 +9,8 @@ let foyerIdActuel = null;
 let conteneurChoisi = null;
 let destinationEnvieId = null;
 let fichiersPartages = [];
+let lieuDetecte = null;
+
 
 function extraireDomaine(url) {
 
@@ -17,6 +19,69 @@ function extraireDomaine(url) {
     } catch {
         return "";
     }
+
+}
+
+function estLienMaps(url) {
+    return /google\.[a-z.]+\/maps|goo\.gl\/maps|maps\.app\.goo\.gl|waze\.com/i.test(url);
+}
+
+function extraireCoordonneesUrl(url) {
+
+    let match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+    if (!match) {
+        match = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    }
+
+    if (!match) {
+        match = url.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    }
+
+    if (!match)
+        return null;
+
+    return { latitude: parseFloat(match[1]), longitude: parseFloat(match[2]) };
+
+}
+
+async function reverseGeocodeSimple(latitude, longitude) {
+
+    try {
+
+        const reponse = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+        const data = await reponse.json();
+
+        return data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+
+    } catch {
+        return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    }
+
+}
+
+async function detecterLieuPartage() {
+
+    if (!contenuPartage.url || !estLienMaps(contenuPartage.url))
+        return null;
+
+    const coords = extraireCoordonneesUrl(contenuPartage.url);
+
+    if (!coords)
+        return null;
+
+    const nom = await reverseGeocodeSimple(coords.latitude, coords.longitude);
+
+    return { nom, adresse: nom, latitude: coords.latitude, longitude: coords.longitude };
+
+}
+
+function deduireNomMagasin(url) {
+
+    const domaine = extraireDomaine(url);
+    const partie = domaine.split(".")[0];
+
+    return partie.charAt(0).toUpperCase() + partie.slice(1);
 
 }
 
@@ -139,6 +204,12 @@ async function init() {
 
     renderApercu();
 
+     lieuDetecte = await detecterLieuPartage();
+
+    if (lieuDetecte) {
+        document.getElementById("apercuPartage").innerHTML += `<div style="margin-top:8px;font-size:13px;">📍 Lieu détecté : ${lieuDetecte.nom}</div>`;
+    }
+ 
     await authReady;
 
     if (!auth.currentUser) {
@@ -306,6 +377,10 @@ function afficherFormulaireValidation() {
     document.getElementById("etapeDestination").classList.add("hidden");
     document.getElementById("etapeValidation").classList.remove("hidden");
 
+    if (lieuDetecte) {
+        document.getElementById("etapeValidation").insertAdjacentHTML("afterbegin", `<p style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;">📍 ${lieuDetecte.nom}</p>`);
+    }
+ 
        const titreDefaut = fichiersPartages.length > 0
         ? `Photo du ${new Date().toLocaleDateString("fr-FR")}`
         : (contenuPartage.titre || (contenuPartage.url ? extraireDomaine(contenuPartage.url) : contenuPartage.texte.slice(0, 60)));
@@ -317,11 +392,102 @@ function afficherFormulaireValidation() {
 
 async function enrichirEnvieExistante(envie) {
 
+    if (lieuDetecte) {
+        await enregistrerLieuSurEnvie(envie);
+        return;
+    }
+
+    if (contenuPartage.url && !fichiersPartages.length && envie.contexte === "maison") {
+        afficherChoixSpecialisation(envie);
+        return;
+    }
+
+    await sauvegarderEnrichissement(envie, {});
+
+}
+
+async function enregistrerLieuSurEnvie(envie) {
+
     try {
 
-        const champs = { updatedAt: Date.now() };
+        await setDoc(doc(db, "foyers", foyerIdActuel, "envies", envie.id), {
+            lieu: lieuDetecte,
+            updatedAt: Date.now()
+        }, { merge: true });
 
-        if (contenuPartage.url) {
+        afficherMessageFinal(`✅ Lieu ajouté à "${envie.titre}" !`, envie.id);
+
+    } catch (err) {
+
+        console.error("Erreur enregistrement lieu: " + err.message);
+        afficherMessageFinal("❌ Échec de l'enregistrement, réessaie.", null);
+
+    }
+
+}
+
+function afficherChoixSpecialisation(envie) {
+
+    document.getElementById("etapeDestination").classList.add("hidden");
+
+    const zone = document.getElementById("etapeConteneur");
+    zone.classList.remove("hidden");
+    zone.innerHTML = `<label class="fieldTitle">Ajouter comment à "${envie.titre}" ?</label><div id="specialisationListe" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"></div>`;
+
+    const liste = document.getElementById("specialisationListe");
+
+    const boutonComparateur = document.createElement("button");
+    boutonComparateur.type = "button";
+    boutonComparateur.className = "secondaryButton";
+    boutonComparateur.style.width = "100%";
+    boutonComparateur.textContent = "⚖️ Comme produit à comparer";
+
+    boutonComparateur.addEventListener("click", () => {
+
+        sauvegarderEnrichissement(envie, {
+            comparateur: {
+                produits: [
+                    ...(envie.comparateur?.produits || []),
+                    {
+                        id: crypto.randomUUID(),
+                        nom: contenuPartage.titre || deduireNomMagasin(contenuPartage.url),
+                        lien: contenuPartage.url,
+                        magasin: deduireNomMagasin(contenuPartage.url),
+                        prix: null,
+                        longueur: null,
+                        largeur: null,
+                        hauteur: null,
+                        photoUrl: null,
+                        avis: null,
+                        retenu: false
+                    }
+                ]
+            }
+        }, false);
+
+    });
+
+    liste.appendChild(boutonComparateur);
+
+    const boutonLien = document.createElement("button");
+    boutonLien.type = "button";
+    boutonLien.className = "secondaryButton";
+    boutonLien.style.width = "100%";
+    boutonLien.textContent = "🔗 Simplement en lien";
+
+    boutonLien.addEventListener("click", () => sauvegarderEnrichissement(envie, {}));
+
+    liste.appendChild(boutonLien);
+
+}
+
+async function sauvegarderEnrichissement(envie, champsSupplementaires) {
+
+    try {
+
+        const champs = { updatedAt: Date.now(), ...champsSupplementaires };
+
+        if (contenuPartage.url && !champsSupplementaires.comparateur) {
 
             champs.urls = [
                 ...(envie.urls || []),
@@ -409,7 +575,8 @@ async function enregistrer(ouvrirFiche) {
         categorie: null,
         voyageId: conteneurChoisi ? conteneurChoisi.id : null,
         description: description || null,
-        urls: contenuPartage.url ? [{ id: crypto.randomUUID(), type: "lien", url: contenuPartage.url, nom: null, createdAt: Date.now() }] : [],
+        lieu: lieuDetecte || null,
+        urls: (contenuPartage.url && !lieuDetecte) ? [{ id: crypto.randomUUID(), type: "lien", url: contenuPartage.url, nom: null, createdAt: Date.now() }] : [],
         photos,
         favorite: false,
         realise: false
