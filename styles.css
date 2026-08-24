@@ -1008,14 +1008,16 @@ button {
 }
 
 .mapPopupButton{
-    margin-top:6px;
+    margin-top:8px;
     border:none;
-    background:var(--color-primary);
-    color:white;
-    padding:6px 12px;
+    padding:6px 14px;
     border-radius:10px;
+    background:#6FAFC4;
+    color:white;
     font-size:13px;
+    font-weight:600;
     cursor:pointer;
+    display:inline-block;
 }
 
 .lieuActionsRow{
