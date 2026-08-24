@@ -15,7 +15,8 @@ let descriptionRecuperee = null;
 let categoriesDisponibles = [];
 let creerCommeComparateur = false;
 let billetACreerAvecNouvelleIdee = null;
-
+let contexteForce = null;
+let conteneurIdForce = null;
 
 function extraireDomaine(url) {
 
@@ -480,6 +481,9 @@ async function init() {
     contenuPartage.url = urlBrute.startsWith("http") ? urlBrute : "";
     contenuPartage.texte = params.get("text") || (!contenuPartage.url ? urlBrute : "");
 
+    contexteForce = params.get("contexte") || null;
+    conteneurIdForce = params.get("conteneurId") || null;
+
     if (contenuPartage.url) {
 
         const apercu = await recupererApercu(contenuPartage.url);
@@ -528,9 +532,7 @@ async function init() {
                 foyerIdActuel = await obtenirFoyerId(result.user.uid);
 
                 document.getElementById("etapeConnexion").classList.add("hidden");
-                document.getElementById("etapeContexte").classList.remove("hidden");
-
-                initEtapeContexte();
+                demarrerApresConnexion();
 
             } catch (err) {
 
@@ -552,62 +554,120 @@ async function init() {
         return;
     }
 
-    document.getElementById("etapeContexte").classList.remove("hidden");
-    initEtapeContexte();
+    demarrerApresConnexion();
+
+}
+
+function demarrerApresConnexion() {
+
+    if (!contenuPartage.url && !contenuPartage.texte && fichiersPartages.length === 0) {
+
+        document.getElementById("etapeSaisieManuelle").classList.remove("hidden");
+
+        document.getElementById("saisieManuelleValider").addEventListener("click", () => {
+
+            const valeur = document.getElementById("saisieManuelleInput").value.trim();
+
+            if (!valeur)
+                return;
+
+            if (valeur.startsWith("http")) {
+                contenuPartage.url = valeur;
+            } else {
+                contenuPartage.texte = valeur;
+            }
+
+            renderApercu();
+
+            document.getElementById("etapeSaisieManuelle").classList.add("hidden");
+
+            demarrerFluxApresContenu();
+
+        });
+
+        return;
+
+    }
+
+    demarrerFluxApresContenu();
+
+}
+
+async function afficherListeConteneurs(contexte) {
+
+    contexteChoisi = contexte;
+
+    document.querySelectorAll(".itemTypeChip").forEach(c => c.classList.toggle("active", c.dataset.contexte === contexte));
+
+    document.getElementById("etapeConteneur").classList.remove("hidden");
+
+    const liste = document.getElementById("conteneurListe");
+    liste.innerHTML = `<div class="emptyState">Chargement...</div>`;
+
+    const conteneurs = await chargerConteneurs(contexteChoisi);
+
+    liste.innerHTML = "";
+
+    const boutonAucun = document.createElement("button");
+    boutonAucun.type = "button";
+    boutonAucun.className = "secondaryButton";
+    boutonAucun.style.width = "100%";
+    boutonAucun.textContent = "📥 Aucun (À trier)";
+
+    boutonAucun.addEventListener("click", () => {
+        conteneurChoisi = null;
+        destinationEnvieId = null;
+        afficherFormulaireValidation();
+    });
+
+    liste.appendChild(boutonAucun);
+
+    conteneurs.forEach(conteneur => {
+
+        const bouton = document.createElement("button");
+        bouton.type = "button";
+        bouton.className = "secondaryButton";
+        bouton.style.width = "100%";
+        bouton.textContent = `${contexteChoisi === "voyage" ? "🧳" : "🏠"} ${conteneur.titre}`;
+
+        bouton.addEventListener("click", () => afficherEtapeDestination(conteneur));
+
+        liste.appendChild(bouton);
+
+    });
+
+    return conteneurs;
 
 }
 
 function initEtapeContexte() {
 
     document.querySelectorAll(".itemTypeChip").forEach(chip => {
-
-        chip.addEventListener("click", async () => {
-
-            document.querySelectorAll(".itemTypeChip").forEach(c => c.classList.remove("active"));
-            chip.classList.add("active");
-
-            contexteChoisi = chip.dataset.contexte;
-
-            document.getElementById("etapeConteneur").classList.remove("hidden");
-
-            const liste = document.getElementById("conteneurListe");
-            liste.innerHTML = `<div class="emptyState">Chargement...</div>`;
-
-            const conteneurs = await chargerConteneurs(contexteChoisi);
-
-            liste.innerHTML = "";
-
-            const boutonAucun = document.createElement("button");
-            boutonAucun.type = "button";
-            boutonAucun.className = "secondaryButton";
-            boutonAucun.style.width = "100%";
-            boutonAucun.textContent = "📥 Aucun (À trier)";
-
-            boutonAucun.addEventListener("click", () => {
-                conteneurChoisi = null;
-                destinationEnvieId = null;
-                afficherFormulaireValidation();
-            });
-
-            liste.appendChild(boutonAucun);
-
-            conteneurs.forEach(conteneur => {
-
-                const bouton = document.createElement("button");
-                bouton.type = "button";
-                bouton.className = "secondaryButton";
-                bouton.style.width = "100%";
-                bouton.textContent = `${contexteChoisi === "voyage" ? "🧳" : "🏠"} ${conteneur.titre}`;
-
-                bouton.addEventListener("click", () => afficherEtapeDestination(conteneur));
-
-                liste.appendChild(bouton);
-
-            });
-
-        });
-
+        chip.addEventListener("click", () => afficherListeConteneurs(chip.dataset.contexte));
     });
+
+}
+
+async function demarrerFluxApresContenu() {
+
+    document.getElementById("etapeContexte").classList.remove("hidden");
+    initEtapeContexte();
+
+    if (contexteForce) {
+
+        const conteneurs = await afficherListeConteneurs(contexteForce);
+
+        if (conteneurIdForce) {
+
+            const conteneur = conteneurs.find(c => c.id === conteneurIdForce);
+
+            if (conteneur) {
+                afficherEtapeDestination(conteneur);
+            }
+
+        }
+
+    }
 
 }
 
