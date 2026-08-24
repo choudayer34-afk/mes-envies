@@ -1022,8 +1022,7 @@ function afficherMessageFinal(texte, idEnvieAOuvrir) {
 
 }
 
-async function uploaderFichiersPartages() {async function uploaderFichiersPartages() {
-
+async function uploaderFichiersPartages() {
     if (photoDejaHebergee) {
 
         if (photoDejaHebergee.type === "pdf")
