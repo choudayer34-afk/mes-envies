@@ -72,43 +72,33 @@ export async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     const query = `[out:json][timeout:20];(${filtreTags});out center 20;`;
 
-    const miroirs = [
-        "https://overpass.kumi.systems/api/interpreter",
-        "https://overpass.private.coffee/api/interpreter",
-        "https://overpass-api.de/api/interpreter"
-    ];
+    try {
 
-    for (const miroir of miroirs) {
+        const response = await fetchAvecTimeout("/overpass-proxy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ query })
+        }, 20000);
 
-        try {
-
-            const response = await fetchAvecTimeout(miroir, {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: "data=" + encodeURIComponent(query)
-            }, 15000);
-
-            if (!response.ok) {
-                console.error(`Miroir ${miroir} status: ${response.status}`);
-                continue;
-            }
-
-            const data = await response.json();
-
-            return (data.elements || []).map(el => ({
-                nom: el.tags?.name || null,
-                lat: el.lat || el.center?.lat,
-                lon: el.lon || el.center?.lon,
-                type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
-            })).filter(p => p.nom && p.lat && p.lon);
-
-        } catch (err) {
-            console.error(`Erreur miroir ${miroir}: ${err.message}`);
+        if (!response.ok) {
+            return [];
         }
 
-    }
+        const data = await response.json();
 
-    return [];
+        return (data.elements || []).map(el => ({
+            nom: el.tags?.name || null,
+            lat: el.lat || el.center?.lat,
+            lon: el.lon || el.center?.lon,
+            type: el.tags?.tourism || el.tags?.amenity || el.tags?.place || el.tags?.natural || el.tags?.historic || el.tags?.leisure || ""
+        })).filter(p => p.nom && p.lat && p.lon);
+
+    } catch (err) {
+
+        console.error(`Erreur proxy Overpass: ${err.message}`);
+        return [];
+
+    }
 
 }
 
