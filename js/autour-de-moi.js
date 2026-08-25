@@ -6,9 +6,11 @@ import { createColoredIcon } from "./carte.js";
 import { chercherPoiAutourPoint, CATEGORIES_POI } from "./poi-route.js";
 import { createEnvie } from "./storage.js";
 
+
 let rayonActuel = 20;
 let carteAutourDeMoi = null;
 let markersAutourDeMoi = null;
+let dernierResultatsComplet = [];
 
 export function initAutourDeMoi() {
 
@@ -160,7 +162,71 @@ function ajouterMarkersResultats(resultats, position) {
 
 function renderResultatsAutourDeMoi(resultats) {
 
+    dernierResultatsComplet = resultats;
+
+    renderFiltreCategories(resultats);
+    renderListeFiltree("toutes");
+
+}
+
+function renderFiltreCategories(resultats) {
+
+    const filtreContainer = document.getElementById("autourDeMoiFiltreCategorie");
+
+    const categoriesPresentes = new Map();
+
+    resultats.forEach(({ envie }) => {
+
+        if (!envie.categorie)
+            return;
+
+        if (!categoriesPresentes.has(envie.categorie)) {
+
+            const cat = getCategorieById(envie.categorie);
+            categoriesPresentes.set(envie.categorie, cat?.emoji || "💡");
+
+        }
+
+    });
+
+    if (categoriesPresentes.size === 0) {
+        filtreContainer.innerHTML = "";
+        return;
+    }
+
+    let html = `<button type="button" class="itemTypeChip filtreCategorieChip active" data-cat="toutes" style="flex-shrink:0;">Toutes (${resultats.length})</button>`;
+
+    categoriesPresentes.forEach((emoji, catId) => {
+
+        const nb = resultats.filter(r => r.envie.categorie === catId).length;
+        html += `<button type="button" class="itemTypeChip filtreCategorieChip" data-cat="${catId}" style="flex-shrink:0;">${emoji} ${nb}</button>`;
+
+    });
+
+    filtreContainer.innerHTML = html;
+
+    filtreContainer.querySelectorAll(".filtreCategorieChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            filtreContainer.querySelectorAll(".filtreCategorieChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            renderListeFiltree(chip.dataset.cat);
+
+        });
+
+    });
+
+}
+
+function renderListeFiltree(categorieFiltre) {
+
     const container = document.getElementById("autourDeMoiListe");
+
+    const resultats = categorieFiltre === "toutes"
+        ? dernierResultatsComplet
+        : dernierResultatsComplet.filter(r => r.envie.categorie === categorieFiltre);
 
     if (resultats.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune envie enregistrée dans un rayon de ${rayonActuel} km.</div>`;
@@ -210,9 +276,10 @@ function renderResultatsAutourDeMoi(resultats) {
 
 function initDecouvrirAutour() {
 
-    document.getElementById("decouvrirAutourButton")?.addEventListener("click", async () => {
+     document.getElementById("decouvrirAutourButton")?.addEventListener("click", async () => {
 
         if (!dernierePosition) {
+            document.getElementById("decouvrirAutourListe").innerHTML = `<div class="emptyState">❌ Localise-toi d'abord (vérifie l'autorisation de géolocalisation).</div>`;
             return;
         }
 
