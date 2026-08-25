@@ -89,7 +89,13 @@ async function lancerRechercheAutourDeMoi() {
     container.innerHTML = `<div class="emptyState">📍 Localisation en cours...</div>`;
 
     if (!dernierePosition) {
-        dernierePosition = await obtenirPositionActuelle();
+
+        const positionAutomatique = await obtenirPositionActuelle();
+
+        if (!dernierePosition) {
+            dernierePosition = positionAutomatique;
+        }
+
     }
 
     if (!dernierePosition || !dernierePosition.latitude) {
