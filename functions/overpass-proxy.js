@@ -1,7 +1,7 @@
-const MIRRORS = [
+const OVERPASS_SERVERS = [
+    "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
-    "https://overpass.private.coffee/api/interpreter",
-    "https://overpass-api.de/api/interpreter"
+    "https://overpass.private.coffee/api/interpreter"
 ];
 
 export async function onRequestPost(context) {
@@ -21,44 +21,67 @@ export async function onRequestPost(context) {
 
         const { query } = await context.request.json();
 
-        for (const miroir of MIRRORS) {
+        if (!query || typeof query !== "string") {
+
+            return new Response(JSON.stringify({ error: "Requête Overpass manquante" }), {
+                status: 400,
+                headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+            });
+
+        }
+
+        let derniereErreur = null;
+
+        for (const server of OVERPASS_SERVERS) {
 
             try {
 
-                const reponse = await fetch(miroir, {
+                const body = new URLSearchParams();
+                body.set("data", query);
+
+                const response = await fetch(server, {
                     method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: "data=" + encodeURIComponent(query)
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "User-Agent": "EnVie-App/1.0 (contact via mes-envies.pages.dev)"
+                    },
+                    body: body.toString()
                 });
 
-                if (reponse.ok) {
+                const text = await response.text();
 
-                    const data = await reponse.json();
+                if (response.ok) {
 
-                    return new Response(JSON.stringify(data), {
-                        headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+                    return new Response(text, {
+                        status: 200,
+                        headers: {
+                            "Content-Type": response.headers.get("Content-Type") || "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        }
                     });
 
                 }
 
-            } catch (err) {
+                derniereErreur = `${server} → HTTP ${response.status}: ${text.substring(0, 200)}`;
 
-                console.error(`Miroir ${miroir} échoué: ${err.message}`);
+            } catch (error) {
+
+                derniereErreur = `${server} → ${error.message}`;
 
             }
 
         }
 
-        return new Response(JSON.stringify({ error: "Tous les miroirs Overpass ont échoué" }), {
+        return new Response(JSON.stringify({ error: "Tous les serveurs Overpass ont échoué", details: derniereErreur }), {
             status: 502,
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
         });
 
-    } catch (err) {
+    } catch (error) {
 
-        return new Response(JSON.stringify({ error: err.message }), {
+        return new Response(JSON.stringify({ error: "Erreur du proxy Overpass", details: error.message }), {
             status: 500,
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
         });
 
     }
@@ -68,6 +91,7 @@ export async function onRequestPost(context) {
 export async function onRequestOptions() {
 
     return new Response(null, {
+        status: 204,
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Methods": "POST, OPTIONS",
