@@ -173,8 +173,11 @@ function ajouterMarkersResultats(resultats, position) {
             { icon: createColoredIcon("#6FAFC4", emoji, envie.realise) }
         ).addTo(coucheResultats);
 
+        const voyageParentMarker = envie.voyageId ? getEnvies().find(e => e.id === envie.voyageId) : null;
+        const titrePopup = voyageParentMarker ? `${voyageParentMarker.titre} - ${envie.titre}` : envie.titre;
+
         marker.bindPopup(`
-            <strong>${envie.titre}</strong><br>
+            <strong>${titrePopup}</strong><br>
             <button class="mapPopupButton" data-id="${envie.id}">Ouvrir</button>
         `);
 
