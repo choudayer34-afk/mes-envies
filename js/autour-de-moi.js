@@ -277,6 +277,8 @@ function renderListeFiltree(categorieFiltre) {
     container.innerHTML = resultats.map(({ envie, distance }) => {
 
         const emoji = getCategorieById(envie.categorie)?.emoji || "💡";
+        const voyageParent = envie.voyageId ? getEnvies().find(e => e.id === envie.voyageId) : null;
+        const titreAffiche = voyageParent ? `${voyageParent.titre} - ${envie.titre}` : envie.titre;
 
         let badgeStatut;
 
@@ -293,7 +295,7 @@ function renderListeFiltree(categorieFiltre) {
         return `
             <div class="templateRow autourDeMoiRow" data-id="${envie.id}" style="cursor:pointer;">
                 <div class="templateRowNom">
-                    ${emoji} ${envie.titre}
+                    ${emoji} ${titreAffiche}
                     <div style="display:flex;gap:8px;margin-top:4px;align-items:center;">
                         <small style="color:var(--color-text-light);">${distanceLisible}</small>
                         ${badgeStatut}
