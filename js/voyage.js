@@ -604,7 +604,7 @@ function ouvrirPreparerVoyage(envie) {
     obtenirPositionActuelle().then(positionActuelle => {
 
         const origine = positionActuelle?.nom?.split(",")[0]?.trim() || "Montpellier";
-
+document.getElementById("lienOmio").href = construireUrlOmio();
         document.getElementById("lienGoogleFlights").textContent = "🚄 Google Flights";
                document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut);
         document.getElementById("lienSkyscanner").href = construireUrlSkyscanner(destination);
