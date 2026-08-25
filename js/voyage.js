@@ -2,6 +2,7 @@ import { groupAndSort, getGroupKey } from "./grouping.js";
 import { makeRowDraggable } from "./dragdrop.js";
 import { groupEnvieWith, reorderEnvieNear, removeFromJourGroup, updateEnvieDate, updateNoteJour, updateEnvieDocumentRequis } from "./storage.js";
 import { ouvrirTableauSaisie } from "./tableau-saisie.js";
+import { obtenirPositionActuelle } from "./location.js";
 import { activerCollectePhotos } from "./storage.js";
 import { creerJourneeSilencieuse, calculerNumeroJour } from "./storage.js";
 import { obtenirPositionActuelle } from "./location.js";
@@ -591,12 +592,20 @@ export function renderOutilsVoyage(envie) {
 
 }
 
-function ouvrirPreparerVoyage(envie) {
+async function ouvrirPreparerVoyage(envie) {
 
     const destinationComplete = envie.lieu?.nom || envie.titre;
     const destination = destinationComplete.split(",")[0].trim();
     const dateDebut = envie.date?.start || new Date().toISOString().split("T")[0];
     const dateFin = envie.date?.type === "range" ? envie.date.end : dateDebut;
+
+    document.getElementById("lienGoogleFlights").textContent = "Google Flights (localisation...)";
+    document.getElementById("preparerVoyageModal").classList.remove("hidden");
+
+    const positionActuelle = await obtenirPositionActuelle();
+    const origine = positionActuelle?.nom?.split(",")[0]?.trim() || "Montpellier";
+
+    document.getElementById("lienGoogleFlights").textContent = "Google Flights";
 
     const personnesDuVoyage = getPersonnes().filter(p => (envie.personnesIds || []).includes(p.id));
 
@@ -629,7 +638,7 @@ function ouvrirPreparerVoyage(envie) {
     document.getElementById("lienAirbnb").href = construireUrlAirbnb(destination, dateDebut, dateFin, adultes || 1, ages.length);
     document.getElementById("lienCozycozy").href = `https://www.cozycozy.com/fr/search/${encodeURIComponent(destination)}/${dateDebut}/${dateFin}/${codeVoyageurs}/progress`;
     document.getElementById("lienSNCF").href = construireUrlSNCF();
-    document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(destination, dateDebut);
+        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin);
 
     document.getElementById("preparerActivitesButton").onclick = () => {
 
@@ -646,7 +655,7 @@ function ouvrirPreparerVoyage(envie) {
 
     };
 
-    document.getElementById("preparerVoyageModal").classList.remove("hidden");
+
 
 }
 
