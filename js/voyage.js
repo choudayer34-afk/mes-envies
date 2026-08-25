@@ -608,7 +608,7 @@ document.getElementById("parametresVoyageBackdrop")?.addEventListener("click", f
         const origine = positionActuelle?.nom?.split(",")[0]?.trim() || "Montpellier";
 
         document.getElementById("lienGoogleFlights").textContent = "🚄 Google Flights";
-        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, adultes || 1, ages.length);
+        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, adultes || 1, ages);
 
     });
 
