@@ -82,7 +82,7 @@ async function lancerRechercheAutourDeMoi() {
         .filter(r => r.distance <= rayonActuel)
         .sort((a, b) => a.distance - b.distance);
 
-    ajouterMarkersResultats(resultats);
+        ajouterMarkersResultats(resultats, dernierePosition);
     renderResultatsAutourDeMoi(resultats);
 
 }
@@ -102,10 +102,7 @@ function initCarteAutourDeMoi(position) {
 
     setTimeout(() => carteAutourDeMoi.invalidateSize(), 100);
 
-    carteAutourDeMoi.setView([position.latitude, position.longitude], 12);
-
     markersAutourDeMoi.clearLayers();
-
     const iconPosition = L.divIcon({
         className: "custom-map-pin",
         html: `<div style="width:16px;height:16px;border-radius:50%;background:#3E7CB1;border:3px solid white;box-shadow:0 0 0 2px rgba(62,124,177,.4);"></div>`,
@@ -117,7 +114,9 @@ function initCarteAutourDeMoi(position) {
 
 }
 
-function ajouterMarkersResultats(resultats) {
+function ajouterMarkersResultats(resultats, position) {
+
+    const pointsPourCadrage = [[position.latitude, position.longitude]];
 
     resultats.forEach(({ envie }) => {
 
@@ -142,7 +141,15 @@ function ajouterMarkersResultats(resultats) {
 
         });
 
+        pointsPourCadrage.push([envie.lieu.latitude, envie.lieu.longitude]);
+
     });
+
+    if (pointsPourCadrage.length > 1) {
+        carteAutourDeMoi.fitBounds(pointsPourCadrage, { padding: [30, 30] });
+    } else {
+        carteAutourDeMoi.setView(pointsPourCadrage[0], 12);
+    }
 
 }
 
