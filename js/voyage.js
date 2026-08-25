@@ -551,9 +551,7 @@ function ouvrirPreparerVoyage(envie) {
     document.getElementById("lienCozycozy").href = `https://www.cozycozy.com/fr/search/${encodeURIComponent(destination)}/${dateDebut}/${dateFin}/${codeVoyageurs}/progress`;
     document.getElementById("lienSNCF").href = construireUrlSNCF();
 
-        document.getElementById("closeParametresVoyage")?.addEventListener("click", fermerParametresVoyage);
-document.getElementById("parametresVoyageBackdrop")?.addEventListener("click", fermerParametresVoyage);
-    
+
     document.getElementById("preparerActivitesButton").onclick = () => {
 
         fermerPreparerVoyage();
@@ -1796,7 +1794,8 @@ export function initVoyage() {
 
 
 document.getElementById("closePreparerVoyage")?.addEventListener("click", fermerPreparerVoyage);
-document.getElementById("preparerVoyageBackdrop")?.addEventListener("click", fermerPreparerVoyage);
+document.getElementById("closeParametresVoyage")?.addEventListener("click", fermerParametresVoyage);
+document.getElementById("parametresVoyageBackdrop")?.addEventListener("click", fermerParametresVoyage);
 
 
 }
