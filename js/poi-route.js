@@ -81,7 +81,11 @@ export async function chercherPoiAutourPoint(point, rayonM, tags) {
         }, 20000);
 
         if (!response.ok) {
+
+            const detail = await response.text();
+            console.error(`Overpass proxy en échec (${response.status}): ${detail}`);
             return [];
+
         }
 
         const data = await response.json();
