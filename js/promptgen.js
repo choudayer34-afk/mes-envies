@@ -133,9 +133,7 @@ export function construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultes, 
 
 }
 
-export function construireUrlCozycozy(destination) {
-    return `https://www.cozycozy.com/fr/search?q=${encodeURIComponent(destination)}`;
-}
+
 
 export function construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, nbAdultes = 1, nbEnfants = 0) {
 
