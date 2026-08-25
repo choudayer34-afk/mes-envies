@@ -828,35 +828,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <div id="preparerVoyageBackdrop" class="assistantBackdrop hidden"></div>
 
+<div id="preparerVoyageBackdrop" class="assistantBackdrop hidden"></div>
+
 <div id="preparerVoyageModal" class="assistantPanel">
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-        <h2 style="margin:0;">🤖 Préparer le voyage</h2>
+        <h2 style="margin:0;">🤖 Assistant du voyage</h2>
         <button id="closePreparerVoyage" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
     </div>
 
-        <label class="fieldTitle">🏨 Logement</label>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-            <a id="lienBooking" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Booking.com</a>
-            <a id="lienAirbnb" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Airbnb</a>
-            <a id="lienCozycozy" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Cozycozy</a>
-        </div>
+    <label class="fieldTitle">➕ Ajouter</label>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;">
+        <button id="assistantNouvelleIdeeButton" class="secondaryButton" style="flex:1 1 45%;">💡 Idée</button>
+        <button id="assistantJourneeButton" class="secondaryButton" style="flex:1 1 45%;">📅 Journée</button>
+        <button id="assistantBilletButton" class="secondaryButton" style="flex:1 1 45%;">🎫 Billet</button>
+        <button id="assistantExistanteButton" class="secondaryButton" style="flex:1 1 45%;">📎 Existante</button>
+    </div>
 
-        <label class="fieldTitle">🚄 Billet</label>
-        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
-            <a id="lienSNCF" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">SNCF Connect (recherche à refaire sur place)</a> 
-            <a id="lienGoogleFlights" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">Google Flights</a>
-        </div>
+    <label class="fieldTitle">🧭 Préparer</label>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;">
+        <a id="lienBooking" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🏨 Booking.com</a>
+        <a id="lienAirbnb" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🏨 Airbnb</a>
+        <a id="lienCozycozy" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🏨 Cozycozy</a>
+        <a id="lienSNCF" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🚄 SNCF Connect</a>
+        <a id="lienGoogleFlights" href="#" target="_blank" class="secondaryButton" style="text-decoration:none;text-align:center;">🚄 Google Flights</a>
+        <button id="preparerActivitesButton" class="secondaryButton" style="width:100%;">🏞️ Idées d'activités (prompt IA)</button>
+        <button id="preparerChecklistButton" class="secondaryButton" style="width:100%;">📋 Checklist depuis un voyage précédent</button>
+    </div>
 
-        <label class="fieldTitle">🏞️ Activités</label>
-        <button id="preparerActivitesButton" class="secondaryButton" style="width:100%;margin-bottom:20px;">🤖 Générer le prompt IA</button>
+    <button type="button" id="assistantPlusOutilsHeader" class="checklistCategorieHeader checklistCategorieHeaderCliquable" style="margin-top:8px;width:100%;">
+        <span>🛠️ Plus d'outils</span>
+        <span class="accordionIcon">▸</span>
+    </button>
 
-        <label class="fieldTitle">📋 Checklist</label>
-        <button id="preparerChecklistButton" class="secondaryButton" style="width:100%;">Copier depuis un voyage précédent</button>
-
+    <div id="assistantPlusOutilsContenu" class="hidden" style="margin-top:10px;display:flex;flex-direction:column;gap:8px;">
+        <button id="assistantLienButton" class="secondaryButton" style="width:100%;">📥 Ajouter depuis un lien</button>
+        <button id="assistantTableauButton" class="secondaryButton" style="width:100%;">📊 Tableau de saisie</button>
+        <a id="assistantCarteTouristiqueLien" href="#" target="_blank" class="secondaryButton hidden" style="text-decoration:none;text-align:center;">🗺️ Carte touristique autour</a>
+        <button id="assistantImportIALibreButton" class="secondaryButton" style="width:100%;">🤖 Import IA libre</button>
     </div>
 
 </div>
+    
     
 <div id="gameboyMenuModal" class="modal-overlay hidden">
 
