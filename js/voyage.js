@@ -593,7 +593,8 @@ export function renderOutilsVoyage(envie) {
 
 function ouvrirPreparerVoyage(envie) {
 
-    const destination = envie.lieu?.nom || envie.titre;
+    const destinationComplete = envie.lieu?.nom || envie.titre;
+    const destination = destinationComplete.split(",")[0].trim();
     const dateDebut = envie.date?.start || new Date().toISOString().split("T")[0];
     const dateFin = envie.date?.type === "range" ? envie.date.end : dateDebut;
 
