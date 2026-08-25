@@ -624,10 +624,9 @@ function ouvrirPreparerVoyage(envie) {
     }
 
     const codeVoyageurs = formatVoyageursCozycozy({ adultes: adultes || 1, enfants: ages.length, ages, chambres: 1 });
-    const nbAdultesTotal = adultes + ages.length;
 
-    document.getElementById("lienBooking").href = construireUrlBooking(destination, dateDebut, dateFin, nbAdultesTotal);
-    document.getElementById("lienAirbnb").href = construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultesTotal);
+    document.getElementById("lienBooking").href = construireUrlBooking(destination, dateDebut, dateFin, adultes || 1, ages);
+    document.getElementById("lienAirbnb").href = construireUrlAirbnb(destination, dateDebut, dateFin, adultes || 1, ages.length);
     document.getElementById("lienCozycozy").href = `https://www.cozycozy.com/fr/search/${encodeURIComponent(destination)}/${dateDebut}/${dateFin}/${codeVoyageurs}/progress`;
     document.getElementById("lienSNCF").href = construireUrlSNCF();
     document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(destination, dateDebut);
