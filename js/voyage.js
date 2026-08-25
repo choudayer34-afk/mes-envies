@@ -638,7 +638,7 @@ async function ouvrirPreparerVoyage(envie) {
     document.getElementById("lienAirbnb").href = construireUrlAirbnb(destination, dateDebut, dateFin, adultes || 1, ages.length);
     document.getElementById("lienCozycozy").href = `https://www.cozycozy.com/fr/search/${encodeURIComponent(destination)}/${dateDebut}/${dateFin}/${codeVoyageurs}/progress`;
     document.getElementById("lienSNCF").href = construireUrlSNCF();
-        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin);
+        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, adultes || 1, ages.length);
 
     document.getElementById("preparerActivitesButton").onclick = () => {
 
