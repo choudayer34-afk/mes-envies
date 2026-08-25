@@ -1,13 +1,3 @@
-
-import {
-    convertSearchData,
-    LocationType,
-    Seat,
-    TripType,
-    Passenger
-} from "google-flights-url-generator";
-
-
 export function buildPromptSortie(envie) {
 
     const lieu = envie.lieu?.nom || "[lieu à préciser]";
@@ -145,238 +135,27 @@ export function construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultes, 
 
 
 
+export function construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, nbAdultes = 1, nbEnfants = 0) {
 
+    const formaterDate = (dateStr) => new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
-export function construireUrlGoogleFlights(
-    origine,
-    destination,
-    dateDebut,
-    dateFin,
-    nbAdultes = 1,
-    agesEnfants = []
-) {
+    const dateDebutLisible = formaterDate(dateDebut);
 
-    // ------------------------------------------------------------
-    // Correspondances villes -> codes IATA
-    // ------------------------------------------------------------
+    let partiePassagers = "";
 
-    const codesIATA = {
-        // France
-        "montpellier": "MPL",
-        "paris": "PAR",
-        "lyon": "LYS",
-        "marseille": "MRS",
-        "toulouse": "TLS",
-        "bordeaux": "BOD",
-        "nice": "NCE",
-        "nantes": "NTE",
-        "strasbourg": "SXB",
-        "lille": "LIL",
-        "rennes": "RNS",
-        "brest": "BES",
-        "biarritz": "BIQ",
-        "ajaccio": "AJA",
-        "bastia": "BIA",
-        "figari": "FSC",
-        "calvi": "CLY",
-        "perpignan": "PGF",
-        "béziers": "BZR",
-        "beziers": "BZR",
-
-        // Espagne
-        "barcelone": "BCN",
-        "madrid": "MAD",
-        "séville": "SVQ",
-        "seville": "SVQ",
-        "malaga": "AGP",
-        "alicante": "ALC",
-        "valence": "VLC",
-        "palma": "PMI",
-        "ibiza": "IBZ",
-
-        // Portugal
-        "lisbonne": "LIS",
-        "porto": "OPO",
-        "faro": "FAO",
-
-        // Italie
-        "rome": "ROM",
-        "milan": "MIL",
-        "venise": "VCE",
-        "naples": "NAP",
-        "florence": "FLR",
-
-        // Royaume-Uni
-        "londres": "LON",
-        "dublin": "DUB",
-        "edinburgh": "EDI",
-        "manchester": "MAN",
-
-        // Belgique / Pays-Bas
-        "bruxelles": "BRU",
-        "amsterdam": "AMS",
-
-        // Suisse
-        "genève": "GVA",
-        "geneve": "GVA",
-        "zurich": "ZRH",
-
-        // Grèce
-        "athènes": "ATH",
-        "athenes": "ATH",
-
-        // Maroc
-        "marrakech": "RAK",
-        "casablanca": "CMN",
-        "agadir": "AGA",
-        "rabat": "RBA",
-        "tanger": "TNG",
-        "fès": "FEZ",
-        "fes": "FEZ"
-    };
-
-
-    // ------------------------------------------------------------
-    // Normalisation
-    // ------------------------------------------------------------
-
-    function normaliserVille(ville) {
-
-        if (!ville) return "";
-
-        return ville
-            .toLowerCase()
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .trim();
+    if (nbEnfants > 0) {
+        partiePassagers = ` pour ${nbAdultes} adulte${nbAdultes > 1 ? "s" : ""} et ${nbEnfants} enfant${nbEnfants > 1 ? "s" : ""}`;
+    } else if (nbAdultes > 1) {
+        partiePassagers = ` pour ${nbAdultes} adultes`;
     }
 
+    const requete = dateFin && dateFin !== dateDebut
+        ? `Vols de ${origine} à ${destination} du ${dateDebutLisible} au ${formaterDate(dateFin)}${partiePassagers}`
+        : `Vols de ${origine} à ${destination} le ${dateDebutLisible}${partiePassagers}`;
 
-    // ------------------------------------------------------------
-    // Ville -> IATA
-    // ------------------------------------------------------------
+    return `https://www.google.com/travel/flights?q=${encodeURIComponent(requete)}`;
 
-    function obtenirIATA(ville) {
-
-        if (!ville) return "";
-
-        const valeur = ville.trim();
-
-        // Déjà un code IATA
-        if (/^[A-Za-z]{3}$/.test(valeur)) {
-            return valeur.toUpperCase();
-        }
-
-        const normalisee = normaliserVille(valeur);
-
-        return codesIATA[normalisee] || valeur;
-    }
-
-
-    const origineIATA = obtenirIATA(origine);
-    const destinationIATA = obtenirIATA(destination);
-
-
-    // ------------------------------------------------------------
-    // Passagers
-    // ------------------------------------------------------------
-
-    const passagers = [];
-
-    // Adultes
-    for (let i = 0; i < Number(nbAdultes || 1); i++) {
-        passagers.push(Passenger.ADULT);
-    }
-
-    // Enfants
-    if (Array.isArray(agesEnfants)) {
-
-        agesEnfants.forEach(() => {
-            passagers.push(Passenger.CHILD);
-        });
-
-    }
-
-
-    // ------------------------------------------------------------
-    // Aller
-    // ------------------------------------------------------------
-
-    const vols = [
-        {
-            source: {
-                type: LocationType.AIRPORT,
-                name: origineIATA
-            },
-
-            destination: {
-                type: LocationType.AIRPORT,
-                name: destinationIATA
-            },
-
-            date: dateDebut,
-
-            airline: [],
-
-            maxStops: undefined
-        }
-    ];
-
-
-    // ------------------------------------------------------------
-    // Retour
-    // ------------------------------------------------------------
-
-    if (dateFin && dateFin !== dateDebut) {
-
-        vols.push({
-            source: {
-                type: LocationType.AIRPORT,
-                name: destinationIATA
-            },
-
-            destination: {
-                type: LocationType.AIRPORT,
-                name: origineIATA
-            },
-
-            date: dateFin,
-
-            airline: [],
-
-            maxStops: undefined
-        });
-    }
-
-
-    // ------------------------------------------------------------
-    // Type de voyage
-    // ------------------------------------------------------------
-
-    const tripType =
-        dateFin && dateFin !== dateDebut
-            ? TripType.ROUND_TRIP
-            : TripType.ONE_WAY;
-
-
-    // ------------------------------------------------------------
-    // Génération du TFS Google Flights
-    // ------------------------------------------------------------
-
-    const resultat = convertSearchData({
-        seat: Seat.ECONOMY,
-
-        passengers: passagers,
-
-        tripType: tripType,
-
-        flights: vols
-    });
-
-
-    return resultat.URL;
 }
-
 
 
 export function construireUrlSNCF() {
