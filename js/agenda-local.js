@@ -1,13 +1,30 @@
 
 import { searchLocation, getVilleDepuisCoordonnees } from "./location.js";
 import { normaliserTexte } from "./utils.js";
+import { ouvrirSelecteurPeriodeLibre, formatPeriode } from "./periode.js";
 
 const CITIZENKID_VILLES = ["paris", "lyon", "marseille", "lille", "bordeaux", "nantes", "toulouse", "strasbourg", "nice"];
+const aujourdhuiAgenda = new Date();
+const dans7JoursAgenda = new Date();
+dans7JoursAgenda.setDate(dans7JoursAgenda.getDate() + 7);
 
+let periodeAgendaLocal = {
+    start: aujourdhuiAgenda.toISOString().split("T")[0],
+    end: dans7JoursAgenda.toISOString().split("T")[0],
+    type: "range"
+};
 let agendaLocalLieuChoisi = null;
 let agendaLocalDebounce = null;
 
+function mettreAJourLabelPeriodeAgenda() {
 
+    const bouton = document.getElementById("agendaLocalDateButton");
+
+    if (bouton) {
+        bouton.textContent = `📅 ${formatPeriode(periodeAgendaLocal)}`;
+    }
+
+}
 
 async function getDepartementRegion(latitude, longitude) {
 
@@ -220,7 +237,18 @@ function utiliserPositionActuelle() {
 
 export function initAgendaLocal() {
 
+    mettreAJourLabelPeriodeAgenda();
 
+    document.getElementById("agendaLocalDateButton")?.addEventListener("click", () => {
+
+        ouvrirSelecteurPeriodeLibre((periode) => {
+
+            periodeAgendaLocal = periode;
+            mettreAJourLabelPeriodeAgenda();
+
+        }, periodeAgendaLocal, true);
+
+    });
 
     const input = document.getElementById("agendaLocalLieu");
 
@@ -265,9 +293,7 @@ export function initAgendaLocal() {
         bouton.disabled = true;
         bouton.textContent = "⏳ Recherche...";
 
-        const dateDebut = document.getElementById("agendaLocalDateDebut").value;
-        const dateFin = document.getElementById("agendaLocalDateFin").value;
-        const periode = formaterPeriodeRecherche(dateDebut, dateFin);
+        const periode = formaterPeriodeRecherche(periodeAgendaLocal.start, periodeAgendaLocal.end);
 
                 const [{ departement, region }, villesAlentours] = await Promise.all([
             getDepartementRegion(agendaLocalLieuChoisi.latitude, agendaLocalLieuChoisi.longitude),
