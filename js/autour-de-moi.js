@@ -13,6 +13,7 @@ let couchePosition = null;
 let coucheResultats = null;
 let coucheDecouverte = null;
 let dernierResultatsComplet = [];
+let dernieresDecouvertesCompletes = [];
 
 export function initAutourDeMoi() {
 
@@ -346,10 +347,65 @@ function initDecouvrirAutour() {
 
 function renderDecouvrirAutour(resultats) {
 
-    const container = document.getElementById("decouvrirAutourListe");
+    dernieresDecouvertesCompletes = resultats;
+
+    renderFiltreTypeDecouverte(resultats);
+    renderListeDecouverteFiltree("tous");
+
+}
+
+function renderFiltreTypeDecouverte(resultats) {
+
+    const filtreContainer = document.getElementById("decouvrirAutourFiltreType");
 
     if (resultats.length === 0) {
-        container.innerHTML = `<div class="emptyState">Rien trouvé de nouveau dans ce rayon.</div>`;
+        filtreContainer.innerHTML = "";
+        return;
+    }
+
+    const typesPresents = new Map();
+
+    resultats.forEach(poi => {
+
+        const type = poi.type || "autre";
+        typesPresents.set(type, (typesPresents.get(type) || 0) + 1);
+
+    });
+
+    let html = `<button type="button" class="itemTypeChip filtreTypeChip active" data-type="tous" style="flex-shrink:0;">🆕 Tous (${resultats.length})</button>`;
+
+    typesPresents.forEach((nb, type) => {
+        html += `<button type="button" class="itemTypeChip filtreTypeChip" data-type="${type}" style="flex-shrink:0;">🆕 ${type} (${nb})</button>`;
+    });
+
+    filtreContainer.innerHTML = html;
+
+    filtreContainer.querySelectorAll(".filtreTypeChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            filtreContainer.querySelectorAll(".filtreTypeChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            renderListeDecouverteFiltree(chip.dataset.type);
+
+        });
+
+    });
+
+}
+
+function renderListeDecouverteFiltree(typeFiltre) {
+
+    const container = document.getElementById("decouvrirAutourListe");
+
+    const resultats = typeFiltre === "tous"
+        ? dernieresDecouvertesCompletes
+        : dernieresDecouvertesCompletes.filter(poi => (poi.type || "autre") === typeFiltre);
+
+    if (resultats.length === 0) {
+        container.innerHTML = `<div class="emptyState">Rien dans cette catégorie.</div>`;
+        ajouterMarkersDecouverte([]);
         return;
     }
 
@@ -387,13 +443,7 @@ function renderDecouvrirAutour(resultats) {
 
     });
 
-    const markersPoi = resultats.map(poi => ({
-        lat: poi.lat,
-        lon: poi.lon,
-        nom: poi.nom
-    }));
-
-    ajouterMarkersDecouverte(markersPoi);
+    ajouterMarkersDecouverte(resultats.map(poi => ({ lat: poi.lat, lon: poi.lon, nom: poi.nom })));
 
 }
 
