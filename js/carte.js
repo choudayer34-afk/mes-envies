@@ -142,7 +142,7 @@ function getJourColor(envie, jourColorMap) {
 
 }
 
-function createColoredIcon(color, emoji, realise = false) {
+export function createColoredIcon(color, emoji, realise = false) {
 
     return L.divIcon({
         className: "custom-map-pin",
