@@ -332,10 +332,15 @@ function initDecouvrirAutour() {
 
         const point = { lat: dernierePosition.latitude, lon: dernierePosition.longitude };
         let resultats = [];
+        let echecs = 0;
 
-        for (const [nomCategorie, categorie] of Object.entries(CATEGORIES_POI)) {
+        const categories = Object.entries(CATEGORIES_POI);
 
-            bouton.textContent = `🌍 Recherche : ${categorie.label}...`;
+        for (let i = 0; i < categories.length; i++) {
+
+            const [nomCategorie, categorie] = categories[i];
+
+            bouton.textContent = `🌍 Recherche : ${categorie.label}... (${i + 1}/${categories.length})`;
 
             try {
 
@@ -345,8 +350,22 @@ function initDecouvrirAutour() {
             } catch (err) {
 
                 console.error(`Erreur recherche ${nomCategorie}: ${err.message}`);
+                echecs++;
 
             }
+
+            if (i < categories.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 800));
+            }
+
+        }
+
+        if (echecs === categories.length) {
+
+            document.getElementById("decouvrirAutourListe").innerHTML = `<div class="emptyState">❌ Les serveurs de recherche (Overpass) sont actuellement indisponibles ou surchargés. Réessaie dans quelques minutes.</div>`;
+            bouton.disabled = false;
+            bouton.textContent = "🌍 Découvrir autour (nouveaux lieux)";
+            return;
 
         }
 
