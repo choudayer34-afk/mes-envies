@@ -1,3 +1,13 @@
+
+import {
+    convertSearchData,
+    LocationType,
+    Seat,
+    TripType,
+    Passenger
+} from "google-flights-url-generator";
+
+
 export function buildPromptSortie(envie) {
 
     const lieu = envie.lieu?.nom || "[lieu à préciser]";
@@ -134,6 +144,9 @@ export function construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultes, 
 }
 
 
+
+
+
 export function construireUrlGoogleFlights(
     origine,
     destination,
@@ -142,23 +155,15 @@ export function construireUrlGoogleFlights(
     nbAdultes = 1,
     agesEnfants = []
 ) {
-    // ============================================================
-    // GOOGLE FLIGHTS - CONSTRUCTION DE L'URL
-    // ============================================================
 
     // ------------------------------------------------------------
-    // 1. Correspondances villes / codes IATA
-    // ------------------------------------------------------------
-    // On ne met ici que les destinations/aéroports courants.
-    // Si une ville n'est pas présente, son nom sera utilisé tel quel.
+    // Correspondances villes -> codes IATA
     // ------------------------------------------------------------
 
     const codesIATA = {
         // France
         "montpellier": "MPL",
         "paris": "PAR",
-        "paris charles de gaulle": "CDG",
-        "paris orly": "ORY",
         "lyon": "LYS",
         "marseille": "MRS",
         "toulouse": "TLS",
@@ -174,15 +179,9 @@ export function construireUrlGoogleFlights(
         "bastia": "BIA",
         "figari": "FSC",
         "calvi": "CLY",
-        "carcassonne": "CCF",
         "perpignan": "PGF",
-        "beziers": "BZR",
         "béziers": "BZR",
-        "pau": "PUF",
-        "grenoble": "GNB",
-        "annecy": "NCY",
-        "chambery": "CMF",
-        "chambéry": "CMF",
+        "beziers": "BZR",
 
         // Espagne
         "barcelone": "BCN",
@@ -207,17 +206,11 @@ export function construireUrlGoogleFlights(
         "naples": "NAP",
         "florence": "FLR",
 
-        // Royaume-Uni / Irlande
+        // Royaume-Uni
         "londres": "LON",
         "dublin": "DUB",
         "edinburgh": "EDI",
         "manchester": "MAN",
-
-        // Allemagne
-        "berlin": "BER",
-        "munich": "MUC",
-        "francfort": "FRA",
-        "frankfurt": "FRA",
 
         // Belgique / Pays-Bas
         "bruxelles": "BRU",
@@ -231,9 +224,6 @@ export function construireUrlGoogleFlights(
         // Grèce
         "athènes": "ATH",
         "athenes": "ATH",
-        "thessalonique": "SKG",
-        "crete": "HER",
-        "crète": "HER",
 
         // Maroc
         "marrakech": "RAK",
@@ -241,49 +231,17 @@ export function construireUrlGoogleFlights(
         "agadir": "AGA",
         "rabat": "RBA",
         "tanger": "TNG",
-        "fes": "FEZ",
         "fès": "FEZ",
-
-        // États-Unis
-        "new york": "NYC",
-        "los angeles": "LAX",
-        "miami": "MIA",
-        "orlando": "ORL",
-        "san francisco": "SFO",
-
-        // Canada
-        "montréal": "YMQ",
-        "montreal": "YMQ",
-        "toronto": "YTO",
-        "vancouver": "YVR",
-
-        // Asie
-        "tokyo": "TYO",
-        "osaka": "OSA",
-        "bangkok": "BKK",
-        "singapour": "SIN",
-        "singapore": "SIN",
-        "bali": "DPS",
-        "jakarta": "CGK",
-
-        // Moyen-Orient
-        "dubai": "DXB",
-        "dubaï": "DXB",
-        "doha": "DOH",
-        "abu dhabi": "AUH",
-
-        // Afrique
-        "le caire": "CAI",
-        "cape town": "CPT",
-        "le cap": "CPT"
+        "fes": "FEZ"
     };
 
 
     // ------------------------------------------------------------
-    // 2. Normalisation du nom de ville
+    // Normalisation
     // ------------------------------------------------------------
 
-    const normaliserVille = (ville) => {
+    function normaliserVille(ville) {
+
         if (!ville) return "";
 
         return ville
@@ -291,122 +249,133 @@ export function construireUrlGoogleFlights(
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
             .trim();
-    };
+    }
 
 
     // ------------------------------------------------------------
-    // 3. Convertit une ville en code IATA si on le connaît
+    // Ville -> IATA
     // ------------------------------------------------------------
 
-    const obtenirCodeIATA = (ville) => {
+    function obtenirIATA(ville) {
+
         if (!ville) return "";
 
-        const normalisee = normaliserVille(ville);
+        const valeur = ville.trim();
 
-        // Cherche d'abord directement
-        if (codesIATA[normalisee]) {
-            return codesIATA[normalisee];
+        // Déjà un code IATA
+        if (/^[A-Za-z]{3}$/.test(valeur)) {
+            return valeur.toUpperCase();
         }
 
-        // Si on reçoit déjà un code IATA
-        if (/^[A-Z]{3}$/i.test(ville.trim())) {
-            return ville.trim().toUpperCase();
-        }
+        const normalisee = normaliserVille(valeur);
 
-        // Sinon on conserve le nom de la ville
-        return ville.trim();
-    };
+        return codesIATA[normalisee] || valeur;
+    }
 
 
-    // ------------------------------------------------------------
-    // 4. Dates au format Google : YYYY-MM-DD
-    // ------------------------------------------------------------
-
-    const formaterDate = (dateStr) => {
-        if (!dateStr) return "";
-
-        // Si la date est déjà au format YYYY-MM-DD
-        if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-            return dateStr;
-        }
-
-        const date = new Date(dateStr);
-
-        if (Number.isNaN(date.getTime())) {
-            return "";
-        }
-
-        const annee = date.getFullYear();
-        const mois = String(date.getMonth() + 1).padStart(2, "0");
-        const jour = String(date.getDate()).padStart(2, "0");
-
-        return `${annee}-${mois}-${jour}`;
-    };
+    const origineIATA = obtenirIATA(origine);
+    const destinationIATA = obtenirIATA(destination);
 
 
     // ------------------------------------------------------------
-    // 5. Origine / destination
+    // Passagers
     // ------------------------------------------------------------
 
-    const origineGoogle = obtenirCodeIATA(origine);
-    const destinationGoogle = obtenirCodeIATA(destination);
+    const passagers = [];
 
+    // Adultes
+    for (let i = 0; i < Number(nbAdultes || 1); i++) {
+        passagers.push(Passenger.ADULT);
+    }
 
-    // ------------------------------------------------------------
-    // 6. Dates
-    // ------------------------------------------------------------
+    // Enfants
+    if (Array.isArray(agesEnfants)) {
 
-    const depart = formaterDate(dateDebut);
-    const retour = formaterDate(dateFin);
+        agesEnfants.forEach(() => {
+            passagers.push(Passenger.CHILD);
+        });
 
-
-    // ------------------------------------------------------------
-    // 7. Construction de la requête Google Flights
-    // ------------------------------------------------------------
-
-    let requete = "";
-
-    if (retour && retour !== depart) {
-        requete =
-            `Flights from ${origineGoogle} to ${destinationGoogle} ` +
-            `on ${depart} through ${retour}`;
-    } else {
-        requete =
-            `Flights from ${origineGoogle} to ${destinationGoogle} ` +
-            `on ${depart}`;
     }
 
 
     // ------------------------------------------------------------
-    // 8. Nombre de passagers
+    // Aller
     // ------------------------------------------------------------
 
-    const enfants = Array.isArray(agesEnfants)
-        ? agesEnfants.length
-        : Number(agesEnfants) || 0;
+    const vols = [
+        {
+            source: {
+                type: LocationType.AIRPORT,
+                name: origineIATA
+            },
 
-    const adultes = Number(nbAdultes) || 1;
+            destination: {
+                type: LocationType.AIRPORT,
+                name: destinationIATA
+            },
 
-    const totalPassagers = adultes + enfants;
+            date: dateDebut,
 
-    if (totalPassagers > 1) {
-        requete += ` for ${totalPassagers} passengers`;
+            airline: [],
+
+            maxStops: undefined
+        }
+    ];
+
+
+    // ------------------------------------------------------------
+    // Retour
+    // ------------------------------------------------------------
+
+    if (dateFin && dateFin !== dateDebut) {
+
+        vols.push({
+            source: {
+                type: LocationType.AIRPORT,
+                name: destinationIATA
+            },
+
+            destination: {
+                type: LocationType.AIRPORT,
+                name: origineIATA
+            },
+
+            date: dateFin,
+
+            airline: [],
+
+            maxStops: undefined
+        });
     }
 
 
     // ------------------------------------------------------------
-    // 9. Construction finale
+    // Type de voyage
     // ------------------------------------------------------------
 
-    const params = new URLSearchParams();
+    const tripType =
+        dateFin && dateFin !== dateDebut
+            ? TripType.ROUND_TRIP
+            : TripType.ONE_WAY;
 
-    params.set("q", requete);
-    params.set("hl", "fr");
-    params.set("curr", "EUR");
 
-    return `https://www.google.com/travel/flights?${params.toString()}`;
+    // ------------------------------------------------------------
+    // Génération du TFS Google Flights
+    // ------------------------------------------------------------
+
+    const resultat = convertSearchData({
+        seat: Seat.ECONOMY,
+
+        passengers: passagers,
+
+        tripType: tripType,
+
+        flights: vols
+    });
+
+
+    return resultat.URL;
 }
-
 
 
 
