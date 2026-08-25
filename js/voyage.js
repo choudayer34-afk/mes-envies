@@ -618,8 +618,16 @@ function ouvrirParametresVoyage(envie) {
     const container = document.getElementById("parametresVoyageContenu");
     container.innerHTML = "";
 
+    // ---------- Statut ----------
+
+    const labelStatut = document.createElement("label");
+    labelStatut.className = "fieldTitle";
+    labelStatut.textContent = "📊 Statut";
+    container.appendChild(labelStatut);
+
     const statutManuelRow = document.createElement("div");
     statutManuelRow.className = "itemTypeToggle";
+    statutManuelRow.style.marginBottom = "22px";
 
     statutManuelRow.innerHTML = `
         <button type="button" class="itemTypeChip statutManuelChip ${!envie.statutManuel ? "active" : ""}" data-statut="">🤖 Auto</button>
@@ -645,15 +653,22 @@ function ouvrirParametresVoyage(envie) {
 
     container.appendChild(statutManuelRow);
 
+    // ---------- Partage & confidentialité ----------
+
+    const labelPartage = document.createElement("label");
+    labelPartage.className = "fieldTitle";
+    labelPartage.textContent = "🔗 Partage & confidentialité";
+    container.appendChild(labelPartage);
+
     const visibiliteRow = document.createElement("div");
     visibiliteRow.className = "itemTypeToggle";
-    visibiliteRow.style.marginTop = "10px";
+    visibiliteRow.style.marginBottom = "10px";
 
     const estPrive = envie.visibilite === "prive";
 
     visibiliteRow.innerHTML = `
-        <button type="button" class="itemTypeChip visibiliteChip ${!estPrive ? "active" : ""}" data-visibilite="foyer">👪 Partagé avec le foyer</button>
-        <button type="button" class="itemTypeChip visibiliteChip ${estPrive ? "active" : ""}" data-visibilite="prive">🔒 Privé (seulement moi)</button>
+        <button type="button" class="itemTypeChip visibiliteChip ${!estPrive ? "active" : ""}" data-visibilite="foyer">👪 Foyer</button>
+        <button type="button" class="itemTypeChip visibiliteChip ${estPrive ? "active" : ""}" data-visibilite="prive">🔒 Privé</button>
     `;
 
     visibiliteRow.querySelectorAll(".visibiliteChip").forEach(chip => {
@@ -676,15 +691,37 @@ function ouvrirParametresVoyage(envie) {
 
     container.appendChild(visibiliteRow);
 
+    const partageButton = document.createElement("button");
+    partageButton.className = "secondaryButton";
+    partageButton.style.width = "100%";
+    partageButton.style.marginBottom = "22px";
+    partageButton.textContent = envie.partagePublic
+        ? "🔗 Gérer le partage"
+        : (estMaison ? "🔗 Partager ce projet" : "🔗 Partager ce voyage");
+
+    partageButton.addEventListener("click", () => {
+        fermerParametresVoyage();
+        ouvrirPartageModal(envie);
+    });
+
+    container.appendChild(partageButton);
+
+    // ---------- Documents de voyage ----------
+
     if (!estMaison) {
+
+        const labelDocuments = document.createElement("label");
+        labelDocuments.className = "fieldTitle";
+        labelDocuments.textContent = "🪪 Documents de voyage";
+        container.appendChild(labelDocuments);
 
         const documentRow = document.createElement("div");
         documentRow.className = "itemTypeToggle";
-        documentRow.style.marginTop = "10px";
+        documentRow.style.marginBottom = "22px";
 
         documentRow.innerHTML = `
             <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "cni" ? "active" : ""}" data-document="cni">🪪 CNI suffit</button>
-            <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "passeport" ? "active" : ""}" data-document="passeport">📔 Passeport nécessaire</button>
+            <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "passeport" ? "active" : ""}" data-document="passeport">📔 Passeport</button>
         `;
 
         documentRow.querySelectorAll(".documentChip").forEach(chip => {
@@ -706,34 +743,19 @@ function ouvrirParametresVoyage(envie) {
 
     }
 
+    // ---------- Personnes ----------
+
     const personnesLabel = document.createElement("label");
     personnesLabel.className = "fieldTitle";
-    personnesLabel.style.marginTop = "10px";
-    personnesLabel.textContent = estMaison ? "Personnes concernées" : "Personnes du voyage";
+    personnesLabel.textContent = estMaison ? "👥 Personnes concernées" : "👥 Personnes du voyage";
     container.appendChild(personnesLabel);
 
     const personnesContainer = document.createElement("div");
     personnesContainer.id = "voyageParamsPersonnesSelector";
     personnesContainer.className = "categorieSelector fiche";
-    personnesContainer.style.marginBottom = "10px";
     container.appendChild(personnesContainer);
 
     renderPersonnesSelector(envie, "voyageParamsPersonnesSelector");
-
-    const partageButton = document.createElement("button");
-    partageButton.className = "secondaryButton";
-    partageButton.style.width = "100%";
-    partageButton.style.marginTop = "10px";
-    partageButton.textContent = envie.partagePublic
-        ? "🔗 Gérer le partage"
-        : (estMaison ? "🔗 Partager ce projet" : "🔗 Partager ce voyage");
-
-    partageButton.addEventListener("click", () => {
-        fermerParametresVoyage();
-        ouvrirPartageModal(envie);
-    });
-
-    container.appendChild(partageButton);
 
     document.getElementById("parametresVoyageBackdrop").classList.remove("hidden");
     document.getElementById("parametresVoyageModal").classList.add("ouvert");
