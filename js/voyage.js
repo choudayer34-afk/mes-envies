@@ -71,7 +71,7 @@ if (statut === "termine" && !forceEdition) {
         } else {
 
             renderVoyageContenu(envie, container);
-    renderOutilsVoyage(envie);
+
 
             if (envie.contexte === "maison") {
 
