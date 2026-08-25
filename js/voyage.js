@@ -593,21 +593,61 @@ export function renderOutilsVoyage(envie) {
 
 }
 
-async function ouvrirPreparerVoyage(envie) {
+function ouvrirPreparerVoyage(envie) {
+
+    document.getElementById("preparerVoyageBackdrop").classList.remove("hidden");
+    document.getElementById("preparerVoyageModal").classList.add("ouvert");
+
+    // ---------- Ajouter ----------
+
+    document.getElementById("assistantNouvelleIdeeButton").onclick = () => {
+        fermerPreparerVoyage();
+        openModalVoyageContext(envie.id);
+    };
+
+    document.getElementById("assistantExistanteButton").onclick = () => {
+        fermerPreparerVoyage();
+        openEnviePicker(envie.id);
+    };
+
+    document.getElementById("assistantJourneeButton").onclick = async (event) => {
+
+        event.target.disabled = true;
+
+        const place = await obtenirPositionActuelle();
+        const nouvelleJournee = creerJourneeSilencieuse(envie, place);
+
+        event.target.disabled = false;
+
+        showToast(`✓ "${nouvelleJournee.titre}" créé`);
+        fermerPreparerVoyage();
+        renderVoyageSection({ ...envie });
+
+    };
+
+    document.getElementById("assistantBilletButton").onclick = () => {
+
+        const nouveauBillet = creerBilletSilencieux(envie);
+
+        fermerPreparerVoyage();
+        openEnvie(nouveauBillet.id, null);
+
+        setTimeout(() => {
+            document.getElementById("addBilletButton")?.click();
+        }, 300);
+
+    };
+
+    document.getElementById("assistantLienButton").onclick = () => {
+        window.location.href = `./share-target.html?contexte=${envie.contexte}&conteneurId=${envie.id}`;
+    };
+
+    // ---------- Préparer ----------
 
     const destinationComplete = envie.lieu?.nom || envie.titre;
     const destination = destinationComplete.split(",")[0].trim();
     const dateDebut = envie.date?.start || new Date().toISOString().split("T")[0];
     const dateFin = envie.date?.type === "range" ? envie.date.end : dateDebut;
-
-    document.getElementById("lienGoogleFlights").textContent = "Google Flights (localisation...)";
-    document.getElementById("preparerVoyageBackdrop").classList.remove("hidden");
-    document.getElementById("preparerVoyageModal").classList.add("ouvert");
-
-    const positionActuelle = await obtenirPositionActuelle();
-    const origine = positionActuelle?.nom?.split(",")[0]?.trim() || "Montpellier";
-
-    document.getElementById("lienGoogleFlights").textContent = "Google Flights";
 
     const personnesDuVoyage = getPersonnes().filter(p => (envie.personnesIds || []).includes(p.id));
 
@@ -640,24 +680,64 @@ async function ouvrirPreparerVoyage(envie) {
     document.getElementById("lienAirbnb").href = construireUrlAirbnb(destination, dateDebut, dateFin, adultes || 1, ages.length);
     document.getElementById("lienCozycozy").href = `https://www.cozycozy.com/fr/search/${encodeURIComponent(destination)}/${dateDebut}/${dateFin}/${codeVoyageurs}/progress`;
     document.getElementById("lienSNCF").href = construireUrlSNCF();
-        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, adultes || 1, ages.length);
 
     document.getElementById("preparerActivitesButton").onclick = () => {
 
-        document.getElementById("preparerVoyageModal").classList.add("hidden");
+        fermerPreparerVoyage();
         document.getElementById("promptModalContent").value = buildPromptVoyage(envie);
         document.getElementById("promptModal").classList.remove("hidden");
 
     };
 
     document.getElementById("preparerChecklistButton").onclick = () => {
-
-        document.getElementById("preparerVoyageModal").classList.add("hidden");
+        fermerPreparerVoyage();
         ouvrirCopieChecklistDepuisVoyage(envie);
+    };
+
+    document.getElementById("assistantTableauButton").onclick = () => {
+        fermerPreparerVoyage();
+        ouvrirTableauSaisie(envie.id);
+    };
+
+    document.getElementById("assistantImportIALibreButton").onclick = () => {
+        fermerPreparerVoyage();
+        openVoyageImport(envie.id);
+    };
+
+    const lienCarteTouristique = document.getElementById("assistantCarteTouristiqueLien");
+
+    if (envie.lieu?.latitude && envie.lieu?.longitude) {
+
+        lienCarteTouristique.classList.remove("hidden");
+        lienCarteTouristique.href = `https://www.google.com/maps/search/choses+à+faire+tourisme/@${envie.lieu.latitude},${envie.lieu.longitude},12z`;
+
+    } else {
+
+        lienCarteTouristique.classList.add("hidden");
+
+    }
+
+    document.getElementById("assistantPlusOutilsHeader").onclick = () => {
+
+        const contenu = document.getElementById("assistantPlusOutilsContenu");
+        contenu.classList.toggle("hidden");
+
+        document.getElementById("assistantPlusOutilsHeader").querySelector(".accordionIcon").textContent = contenu.classList.contains("hidden") ? "▸" : "▾";
 
     };
 
+    // ---------- Google Flights (géoloc asynchrone) ----------
 
+    document.getElementById("lienGoogleFlights").textContent = "🚄 Google Flights (localisation...)";
+
+    obtenirPositionActuelle().then(positionActuelle => {
+
+        const origine = positionActuelle?.nom?.split(",")[0]?.trim() || "Montpellier";
+
+        document.getElementById("lienGoogleFlights").textContent = "🚄 Google Flights";
+        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, adultes || 1, ages.length);
+
+    });
 
 }
 
