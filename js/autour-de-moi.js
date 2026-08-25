@@ -457,18 +457,12 @@ function renderFiltreTypeDecouverte(resultats) {
 
     filtreContainer.innerHTML = html;
 
-    filtreContainer.querySelectorAll(".filtreCategorieChip").forEach(chip => {
-
+       filtreContainer.querySelectorAll(".filtreTypeChip").forEach(chip => {
         chip.addEventListener("click", () => {
-
-            filtreContainer.querySelectorAll(".filtreCategorieChip").forEach(c => c.classList.remove("active"));
+            filtreContainer.querySelectorAll(".filtreTypeChip").forEach(c => c.classList.remove("active"));
             chip.classList.add("active");
-
-            filtreCategorieActuel = chip.dataset.cat;
-            renderListeFiltree();
-
+            renderListeDecouverteFiltree(chip.dataset.type);
         });
-
     });
 
 }
