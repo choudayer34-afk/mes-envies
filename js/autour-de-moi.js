@@ -328,13 +328,25 @@ function initDecouvrirAutour() {
         bouton.disabled = true;
         bouton.textContent = "🌍 Recherche en cours...";
 
-        const toutesLesTags = Object.values(CATEGORIES_POI).flatMap(c => c.overpassTags);
+        const point = { lat: dernierePosition.latitude, lon: dernierePosition.longitude };
+        let resultats = [];
 
-        const resultats = await chercherPoiAutourPoint(
-            { lat: dernierePosition.latitude, lon: dernierePosition.longitude },
-            rayonActuel * 1000,
-            toutesLesTags
-        );
+        for (const [nomCategorie, categorie] of Object.entries(CATEGORIES_POI)) {
+
+            bouton.textContent = `🌍 Recherche : ${categorie.label}...`;
+
+            try {
+
+                const resultatsCategorie = await chercherPoiAutourPoint(point, rayonActuel * 1000, categorie.overpassTags);
+                resultats = [...resultats, ...resultatsCategorie];
+
+            } catch (err) {
+
+                console.error(`Erreur recherche ${nomCategorie}: ${err.message}`);
+
+            }
+
+        }
 
         bouton.disabled = false;
         bouton.textContent = "🌍 Découvrir autour (nouveaux lieux)";
