@@ -169,150 +169,7 @@ function renderVoyageContenu(envie, container) {
     `;
     container.appendChild(statutBox);
 
-    /* ---------- Paramètres (repliable) ---------- */
 
-    const parametresOuvert = parametresOuvertsSet.has(envie.id);
-
-    const parametresWrapper = document.createElement("div");
-    parametresWrapper.style.marginTop = "10px";
-
-    const parametresHeader = document.createElement("button");
-    parametresHeader.type = "button";
-    parametresHeader.className = "checklistCategorieHeader checklistCategorieHeaderCliquable";
-    parametresHeader.innerHTML = `
-        <span>⚙️ Paramètres</span>
-        <span class="accordionIcon">${parametresOuvert ? "▾" : "▸"}</span>
-    `;
-
-    parametresHeader.addEventListener("click", () => {
-
-        if (parametresOuvertsSet.has(envie.id)) {
-            parametresOuvertsSet.delete(envie.id);
-        } else {
-            parametresOuvertsSet.add(envie.id);
-        }
-
-        renderVoyageSection(envie);
-
-    });
-
-    parametresWrapper.appendChild(parametresHeader);
-
-    if (!parametresOuvert) {
-
-        const resume = document.createElement("p");
-        resume.style.cssText = "font-style:italic;font-size:12px;color:var(--color-text-light);margin:4px 0 0;";
-        resume.textContent = calculerResumeParametres(envie, estMaison);
-        parametresWrapper.appendChild(resume);
-
-    } else {
-
-        const statutManuelRow = document.createElement("div");
-        statutManuelRow.className = "itemTypeToggle";
-        statutManuelRow.style.marginTop = "10px";
-
-        statutManuelRow.innerHTML = `
-            <button type="button" class="itemTypeChip statutManuelChip ${!envie.statutManuel ? "active" : ""}" data-statut="">🤖 Auto</button>
-            <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "planifie" ? "active" : ""}" data-statut="planifie">📋 À faire</button>
-            <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "en_cours" ? "active" : ""}" data-statut="en_cours">🔄 En cours</button>
-            <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "termine" ? "active" : ""}" data-statut="termine">✅ Terminé</button>
-        `;
-
-        statutManuelRow.querySelectorAll(".statutManuelChip").forEach(chip => {
-
-            chip.addEventListener("click", () => {
-                updateEnvieStatutManuel(envie.id, chip.dataset.statut || null);
-                renderVoyageSection({ ...envie, statutManuel: chip.dataset.statut || null });
-            });
-
-        });
-
-        parametresWrapper.appendChild(statutManuelRow);
-
-        const visibiliteRow = document.createElement("div");
-        visibiliteRow.className = "itemTypeToggle";
-        visibiliteRow.style.marginTop = "10px";
-
-        const estPrive = envie.visibilite === "prive";
-
-        visibiliteRow.innerHTML = `
-            <button type="button" class="itemTypeChip visibiliteChip ${!estPrive ? "active" : ""}" data-visibilite="foyer">👪 Partagé avec le foyer</button>
-            <button type="button" class="itemTypeChip visibiliteChip ${estPrive ? "active" : ""}" data-visibilite="prive">🔒 Privé (seulement moi)</button>
-        `;
-
-        visibiliteRow.querySelectorAll(".visibiliteChip").forEach(chip => {
-
-            chip.addEventListener("click", () => {
-
-                const nouvelleVisibilite = chip.dataset.visibilite;
-                const uid = auth.currentUser?.uid;
-
-                updateEnvieVisibilite(envie.id, nouvelleVisibilite, uid);
-                renderVoyageSection({ ...envie, visibilite: nouvelleVisibilite, proprietaireId: nouvelleVisibilite === "prive" ? uid : envie.proprietaireId });
-
-            });
-
-        });
-
-        parametresWrapper.appendChild(visibiliteRow);
-
-        if (!estMaison) {
-
-            const documentRow = document.createElement("div");
-            documentRow.className = "itemTypeToggle";
-            documentRow.style.marginTop = "10px";
-
-            documentRow.innerHTML = `
-                <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "cni" ? "active" : ""}" data-document="cni">🪪 CNI suffit</button>
-                <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "passeport" ? "active" : ""}" data-document="passeport">📔 Passeport nécessaire</button>
-            `;
-
-            documentRow.querySelectorAll(".documentChip").forEach(chip => {
-
-                chip.addEventListener("click", () => {
-                    updateEnvieDocumentRequis(envie.id, chip.dataset.document);
-                    renderVoyageSection({ ...envie, documentRequis: chip.dataset.document });
-                });
-
-            });
-
-            parametresWrapper.appendChild(documentRow);
-
-        }
-
-        const personnesLabel = document.createElement("label");
-        personnesLabel.className = "fieldTitle";
-        personnesLabel.style.marginTop = "10px";
-        personnesLabel.textContent = estMaison ? "Personnes concernées" : "Personnes du voyage";
-        parametresWrapper.appendChild(personnesLabel);
-
-         const personnesContainer = document.createElement("div");
-        personnesContainer.id = "voyageParamsPersonnesSelector";
-        personnesContainer.className = "categorieSelector fiche";
-        personnesContainer.style.marginBottom = "10px";
-        parametresWrapper.appendChild(personnesContainer);
-
-        const partageButton = document.createElement("button");
-        partageButton.className = "secondaryButton";
-        partageButton.style.width = "100%";
-        partageButton.style.marginTop = "10px";
-        partageButton.textContent = envie.partagePublic
-            ? "🔗 Gérer le partage"
-            : (estMaison ? "🔗 Partager ce projet" : "🔗 Partager ce voyage");
-
-        partageButton.addEventListener("click", () => {
-            ouvrirPartageModal(envie);
-        });
-
-        parametresWrapper.appendChild(partageButton);
-
-    }
-
-    container.appendChild(parametresWrapper);
-
-    if (parametresOuvert) {
-        renderPersonnesSelector(envie, "voyageParamsPersonnesSelector");
-    }
 
     /* ---------- Carte (déplacée au-dessus des logements) ---------- */
 
@@ -433,6 +290,17 @@ function renderVoyageContenu(envie, container) {
         boutonAssistant.classList.toggle("hidden", !isContainer(envie.categorie));
 
         boutonAssistant.onclick = () => ouvrirPreparerVoyage(envie);
+
+    }
+
+
+        const boutonParametres = document.getElementById("ficheParametresButton");
+
+    if (boutonParametres) {
+
+        boutonParametres.classList.toggle("hidden", !isContainer(envie.categorie));
+
+        boutonParametres.onclick = () => ouvrirParametresVoyage(envie);
 
     }
     
@@ -605,6 +473,9 @@ function ouvrirPreparerVoyage(envie) {
         openModalVoyageContext(envie.id);
     };
 
+    document.getElementById("closeParametresVoyage")?.addEventListener("click", fermerParametresVoyage);
+document.getElementById("parametresVoyageBackdrop")?.addEventListener("click", fermerParametresVoyage);
+
     document.getElementById("assistantExistanteButton").onclick = () => {
         fermerPreparerVoyage();
         openEnviePicker(envie.id);
@@ -740,6 +611,140 @@ function ouvrirPreparerVoyage(envie) {
     });
 
 }
+
+function ouvrirParametresVoyage(envie) {
+
+    const estMaison = estContexteMaison(envie);
+    const container = document.getElementById("parametresVoyageContenu");
+    container.innerHTML = "";
+
+    const statutManuelRow = document.createElement("div");
+    statutManuelRow.className = "itemTypeToggle";
+
+    statutManuelRow.innerHTML = `
+        <button type="button" class="itemTypeChip statutManuelChip ${!envie.statutManuel ? "active" : ""}" data-statut="">🤖 Auto</button>
+        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "planifie" ? "active" : ""}" data-statut="planifie">📋 À faire</button>
+        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "en_cours" ? "active" : ""}" data-statut="en_cours">🔄 En cours</button>
+        <button type="button" class="itemTypeChip statutManuelChip ${envie.statutManuel === "termine" ? "active" : ""}" data-statut="termine">✅ Terminé</button>
+    `;
+
+    statutManuelRow.querySelectorAll(".statutManuelChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            updateEnvieStatutManuel(envie.id, chip.dataset.statut || null);
+
+            const envieMaj = { ...envie, statutManuel: chip.dataset.statut || null };
+
+            renderVoyageSection(envieMaj);
+            ouvrirParametresVoyage(envieMaj);
+
+        });
+
+    });
+
+    container.appendChild(statutManuelRow);
+
+    const visibiliteRow = document.createElement("div");
+    visibiliteRow.className = "itemTypeToggle";
+    visibiliteRow.style.marginTop = "10px";
+
+    const estPrive = envie.visibilite === "prive";
+
+    visibiliteRow.innerHTML = `
+        <button type="button" class="itemTypeChip visibiliteChip ${!estPrive ? "active" : ""}" data-visibilite="foyer">👪 Partagé avec le foyer</button>
+        <button type="button" class="itemTypeChip visibiliteChip ${estPrive ? "active" : ""}" data-visibilite="prive">🔒 Privé (seulement moi)</button>
+    `;
+
+    visibiliteRow.querySelectorAll(".visibiliteChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            const nouvelleVisibilite = chip.dataset.visibilite;
+            const uid = auth.currentUser?.uid;
+
+            updateEnvieVisibilite(envie.id, nouvelleVisibilite, uid);
+
+            const envieMaj = { ...envie, visibilite: nouvelleVisibilite, proprietaireId: nouvelleVisibilite === "prive" ? uid : envie.proprietaireId };
+
+            renderVoyageSection(envieMaj);
+            ouvrirParametresVoyage(envieMaj);
+
+        });
+
+    });
+
+    container.appendChild(visibiliteRow);
+
+    if (!estMaison) {
+
+        const documentRow = document.createElement("div");
+        documentRow.className = "itemTypeToggle";
+        documentRow.style.marginTop = "10px";
+
+        documentRow.innerHTML = `
+            <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "cni" ? "active" : ""}" data-document="cni">🪪 CNI suffit</button>
+            <button type="button" class="itemTypeChip documentChip ${envie.documentRequis === "passeport" ? "active" : ""}" data-document="passeport">📔 Passeport nécessaire</button>
+        `;
+
+        documentRow.querySelectorAll(".documentChip").forEach(chip => {
+
+            chip.addEventListener("click", () => {
+
+                updateEnvieDocumentRequis(envie.id, chip.dataset.document);
+
+                const envieMaj = { ...envie, documentRequis: chip.dataset.document };
+
+                renderVoyageSection(envieMaj);
+                ouvrirParametresVoyage(envieMaj);
+
+            });
+
+        });
+
+        container.appendChild(documentRow);
+
+    }
+
+    const personnesLabel = document.createElement("label");
+    personnesLabel.className = "fieldTitle";
+    personnesLabel.style.marginTop = "10px";
+    personnesLabel.textContent = estMaison ? "Personnes concernées" : "Personnes du voyage";
+    container.appendChild(personnesLabel);
+
+    const personnesContainer = document.createElement("div");
+    personnesContainer.id = "voyageParamsPersonnesSelector";
+    personnesContainer.className = "categorieSelector fiche";
+    personnesContainer.style.marginBottom = "10px";
+    container.appendChild(personnesContainer);
+
+    renderPersonnesSelector(envie, "voyageParamsPersonnesSelector");
+
+    const partageButton = document.createElement("button");
+    partageButton.className = "secondaryButton";
+    partageButton.style.width = "100%";
+    partageButton.style.marginTop = "10px";
+    partageButton.textContent = envie.partagePublic
+        ? "🔗 Gérer le partage"
+        : (estMaison ? "🔗 Partager ce projet" : "🔗 Partager ce voyage");
+
+    partageButton.addEventListener("click", () => {
+        fermerParametresVoyage();
+        ouvrirPartageModal(envie);
+    });
+
+    container.appendChild(partageButton);
+
+    document.getElementById("parametresVoyageBackdrop").classList.remove("hidden");
+    document.getElementById("parametresVoyageModal").classList.add("ouvert");
+
+}
+
+function fermerParametresVoyage() {
+    document.getElementById("parametresVoyageModal").classList.remove("ouvert");
+    document.getElementById("parametresVoyageBackdrop").classList.add("hidden");
+}
+
 
 function calculerResumeParametres(envie, estMaison) {
 
