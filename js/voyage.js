@@ -544,16 +544,21 @@ export function renderOutilsVoyage(envie) {
 
         outilsRow.appendChild(promptButton);
 
-            const preparerButton = document.createElement("button");
-    preparerButton.className = "secondaryButton";
-    preparerButton.style.flex = "1 1 100%";
-    preparerButton.textContent = "🧭 Préparer le voyage (logement, billet...)";
+    const preparerLigne = document.createElement("div");
+    preparerLigne.style.cssText = "display:flex;align-items:center;gap:10px;flex:1 1 100%;background:#F4F4F4;border-radius:12px;padding:10px 14px;";
+    preparerLigne.innerHTML = `<span style="flex:1;font-size:14px;">Envie d'aide pour préparer ce voyage ?</span>`;
+
+    const preparerButton = document.createElement("button");
+    preparerButton.className = "assistantRobotButton";
+    preparerButton.title = "Préparer le voyage";
+    preparerButton.textContent = "🤖";
 
     preparerButton.addEventListener("click", () => {
         ouvrirPreparerVoyage(envie);
     });
 
-    outilsRow.appendChild(preparerButton);
+    preparerLigne.appendChild(preparerButton);
+    outilsRow.appendChild(preparerLigne);
         
         const importButton = document.createElement("button");
         importButton.className = "secondaryButton";
@@ -599,7 +604,8 @@ async function ouvrirPreparerVoyage(envie) {
     const dateFin = envie.date?.type === "range" ? envie.date.end : dateDebut;
 
     document.getElementById("lienGoogleFlights").textContent = "Google Flights (localisation...)";
-    document.getElementById("preparerVoyageModal").classList.remove("hidden");
+    document.getElementById("preparerVoyageBackdrop").classList.remove("hidden");
+    document.getElementById("preparerVoyageModal").classList.add("ouvert");
 
     const positionActuelle = await obtenirPositionActuelle();
     const origine = positionActuelle?.nom?.split(",")[0]?.trim() || "Montpellier";
@@ -1662,7 +1668,10 @@ function setupAdresseManuelle(inputId, suggestionsId, onSelect) {
 
 }
 
-
+function fermerPreparerVoyage() {
+    document.getElementById("preparerVoyageModal").classList.remove("ouvert");
+    document.getElementById("preparerVoyageBackdrop").classList.add("hidden");
+}
 
 export function initVoyage() {
 
@@ -1678,9 +1687,10 @@ export function initVoyage() {
         document.getElementById("optimiserModal").classList.add("hidden");
     });
 
-    document.getElementById("closePreparerVoyage")?.addEventListener("click", () => {
-    document.getElementById("preparerVoyageModal").classList.add("hidden");
-});
+
+
+document.getElementById("closePreparerVoyage")?.addEventListener("click", fermerPreparerVoyage);
+document.getElementById("preparerVoyageBackdrop")?.addEventListener("click", fermerPreparerVoyage);
 
 
 }
