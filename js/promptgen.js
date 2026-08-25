@@ -104,7 +104,7 @@ export function buildPromptRegion(criteres) {
 }
 
 
-export function construireUrlBooking(destination, dateDebut, dateFin, nbAdultes) {
+export function construireUrlBooking(destination, dateDebut, dateFin, nbAdultes, agesEnfants = []) {
 
     const params = new URLSearchParams({
         ss: destination,
@@ -112,18 +112,24 @@ export function construireUrlBooking(destination, dateDebut, dateFin, nbAdultes)
         checkout: dateFin || dateDebut,
         group_adults: nbAdultes || 2,
         no_rooms: 1,
-        group_children: 0
+        group_children: agesEnfants.length
     });
 
-    return `https://www.booking.com/searchresults.html?${params.toString()}`;
+    let url = `https://www.booking.com/searchresults.html?${params.toString()}`;
+
+    agesEnfants.forEach(age => {
+        url += `&age=${age}`;
+    });
+
+    return url;
 
 }
 
-export function construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultes) {
+export function construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultes, nbEnfants = 0) {
 
     const dest = encodeURIComponent(destination);
 
-    return `https://www.airbnb.fr/s/${dest}/homes?checkin=${dateDebut}&checkout=${dateFin || dateDebut}&adults=${nbAdultes || 2}`;
+    return `https://www.airbnb.fr/s/${dest}/homes?checkin=${dateDebut}&checkout=${dateFin || dateDebut}&adults=${nbAdultes || 2}&children=${nbEnfants}`;
 
 }
 
