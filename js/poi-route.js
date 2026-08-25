@@ -43,7 +43,7 @@ function filtrerTrajetParDistance(points, minKm, maxKm) {
 
 }
 
-async function fetchAvecTimeout(url, options, timeoutMs = 10000) {
+async function fetchAvecTimeout(url, options, timeoutMs = 20000) {
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
