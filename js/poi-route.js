@@ -1,4 +1,4 @@
-const CATEGORIES_POI = {
+export const CATEGORIES_POI = {
     village: { emoji: "🏘️", label: "Villages & bourgs", overpassTags: ['place=village', 'place=hamlet', 'place=town'] },
     tourisme: { emoji: "🏛️", label: "Tourisme", overpassTags: ['tourism=attraction', 'tourism=museum', 'tourism=viewpoint', 'historic=castle', 'historic=monument'] },
     nature: { emoji: "🌳", label: "Nature", overpassTags: ['leisure=park', 'natural=water', 'waterway=waterfall'] },
@@ -63,7 +63,7 @@ async function fetchAvecTimeout(url, options, timeoutMs = 10000) {
 
 }
 
-async function chercherPoiAutourPoint(point, rayonM, tags) {
+export async function chercherPoiAutourPoint(point, rayonM, tags) {
 
     const filtreTags = tags.map(t => {
         const [cle, valeur] = t.split("=");
