@@ -830,6 +830,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <div id="preparerVoyageBackdrop" class="assistantBackdrop hidden"></div>
 
+    <div id="parametresVoyageBackdrop" class="assistantBackdrop hidden"></div>
+
+<div id="parametresVoyageModal" class="assistantPanel">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="margin:0;">⚙️ Paramètres</h2>
+        <button id="closeParametresVoyage" style="background:none;border:none;font-size:20px;cursor:pointer;">✕</button>
+    </div>
+
+    <div id="parametresVoyageContenu"></div>
+
+</div>
+
+    
 <div id="preparerVoyageModal" class="assistantPanel">
 
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
@@ -994,7 +1008,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ← Retour
 </button>
 
-<button id="ficheParametresButton" class="deleteFicheButton hidden" title="Paramètres" aria-label="Paramètres" style="background:#EEF4F6;color:#4B5B66;right:56px;">
+<button id="ficheParametresButton" class="deleteFicheButton" title="Paramètres" aria-label="Paramètres" style="background:#EEF4F6;color:#4B5B66;right:56px;">
     ⚙️
 </button>
 
