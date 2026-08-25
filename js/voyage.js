@@ -13,7 +13,7 @@ import { closeFiche } from "./envie.js";
 import { openModalConteneurSelonMode } from "./modal.js";
 import { updateEnvieStatutManuel } from "./storage.js";
 import { openModalVoyageContext } from "./modal.js";
-import { construireUrlBooking, construireUrlAirbnb, construireUrlGoogleFlights, construireUrlSNCF } from "./promptgen.js";
+import { construireUrlBooking, construireUrlAirbnb, construireUrlSkyscanner, construireUrlGoogleFlights, construireUrlSNCF } from "./promptgen.js";
 import { formatVoyageursCozycozy } from "./voyageurs.js";
 import { getPersonnes, calculerAgeDepuisNaissance } from "./storage.js";
 import { optimiserOrdre, buildLienGoogleMapsMultiEtapes, buildLienWazePremiereEtape, buildLienGoogleMapsApp, calculerDistancesEtapes } from "./itineraire.js";
@@ -606,7 +606,8 @@ function ouvrirPreparerVoyage(envie) {
         const origine = positionActuelle?.nom?.split(",")[0]?.trim() || "Montpellier";
 
         document.getElementById("lienGoogleFlights").textContent = "🚄 Google Flights";
-        document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, adultes || 1, ages.length);
+               document.getElementById("lienGoogleFlights").href = construireUrlGoogleFlights(origine, destination, dateDebut);
+        document.getElementById("lienSkyscanner").href = construireUrlSkyscanner(destination);
 
     });
 
