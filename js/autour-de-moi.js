@@ -3,6 +3,8 @@ import { getCategorieById, openEnvie } from "./envie.js";
 import { obtenirPositionActuelle } from "./location.js";
 import { distanceKm } from "./agenda-local.js";
 import { createColoredIcon } from "./carte.js";
+import { chercherPoiAutourPoint, CATEGORIES_POI } from "./poi-route.js";
+import { createEnvie } from "./storage.js";
 
 let rayonActuel = 20;
 let carteAutourDeMoi = null;
@@ -10,6 +12,8 @@ let markersAutourDeMoi = null;
 
 export function initAutourDeMoi() {
 
+        initDecouvrirAutour();
+    
     document.getElementById("ideesMenuBtnAutourDeMoi")?.addEventListener("click", () => {
 
         document.getElementById("ideesMenu")?.classList.add("hidden");
@@ -40,6 +44,7 @@ export function initAutourDeMoi() {
 export async function ouvrirAutourDeMoi() {
 
     document.getElementById("autourDeMoiModal").classList.remove("hidden");
+    document.getElementById("decouvrirAutourListe").innerHTML = "";
 
     await lancerRechercheAutourDeMoi();
 
@@ -198,6 +203,107 @@ function renderResultatsAutourDeMoi(resultats) {
             document.getElementById("autourDeMoiModal").classList.add("hidden");
             openEnvie(row.dataset.id, null);
         });
+
+    });
+
+}
+
+function initDecouvrirAutour() {
+
+    document.getElementById("decouvrirAutourButton")?.addEventListener("click", async () => {
+
+        if (!dernierePosition) {
+            return;
+        }
+
+        const bouton = document.getElementById("decouvrirAutourButton");
+        bouton.disabled = true;
+        bouton.textContent = "🌍 Recherche en cours...";
+
+        const toutesLesTags = Object.values(CATEGORIES_POI).flatMap(c => c.overpassTags);
+
+        const resultats = await chercherPoiAutourPoint(
+            { lat: dernierePosition.latitude, lon: dernierePosition.longitude },
+            rayonActuel * 1000,
+            toutesLesTags
+        );
+
+        bouton.disabled = false;
+        bouton.textContent = "🌍 Découvrir autour (nouveaux lieux)";
+
+        renderDecouvrirAutour(resultats);
+
+    });
+
+}
+
+function renderDecouvrirAutour(resultats) {
+
+    const container = document.getElementById("decouvrirAutourListe");
+
+    if (resultats.length === 0) {
+        container.innerHTML = `<div class="emptyState">Rien trouvé de nouveau dans ce rayon.</div>`;
+        return;
+    }
+
+    container.innerHTML = resultats.slice(0, 30).map((poi, i) => `
+        <div class="templateRow">
+            <div class="templateRowNom">
+                📍 ${poi.nom}
+                <small class="assignBadge" style="background:#FFF3E0;color:#B5763F;">🆕 Nouveau · ${poi.type}</small>
+            </div>
+            <div class="templateRowActions">
+                <button class="actionButton editButton ajouterPoiButton" data-index="${i}">➕ Ajouter</button>
+            </div>
+        </div>
+    `).join("");
+
+    container.querySelectorAll(".ajouterPoiButton").forEach(bouton => {
+
+        bouton.addEventListener("click", () => {
+
+            const poi = resultats[parseInt(bouton.dataset.index, 10)];
+
+            createEnvie({
+                titre: poi.nom,
+                categorie: null,
+                lieu: { nom: poi.nom, adresse: poi.nom, latitude: poi.lat, longitude: poi.lon },
+                date: null,
+                voyageId: null,
+                contexte: "voyage"
+            });
+
+            bouton.textContent = "✓ Ajouté";
+            bouton.disabled = true;
+
+        });
+
+    });
+
+    const markersPoi = resultats.map(poi => ({
+        lat: poi.lat,
+        lon: poi.lon,
+        nom: poi.nom
+    }));
+
+    ajouterMarkersDecouverte(markersPoi);
+
+}
+
+function ajouterMarkersDecouverte(pois) {
+
+    pois.forEach(poi => {
+
+        const iconDecouverte = L.divIcon({
+            className: "custom-map-pin",
+            html: `<div style="width:14px;height:14px;border-radius:50%;background:#E7A94C;border:2px solid white;"></div>`,
+            iconSize: [14, 14],
+            iconAnchor: [7, 7]
+        });
+
+        L.marker([poi.lat, poi.lon], { icon: iconDecouverte })
+            .bindPopup(`<strong>${poi.nom}</strong>`)
+            .addTo(markersAutourDeMoi);
 
     });
 
