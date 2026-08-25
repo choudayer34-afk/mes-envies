@@ -9,7 +9,9 @@ import { createEnvie } from "./storage.js";
 
 let rayonActuel = 20;
 let carteAutourDeMoi = null;
-let markersAutourDeMoi = null;
+let couchePosition = null;
+let coucheResultats = null;
+let coucheDecouverte = null;
 let dernierResultatsComplet = [];
 
 export function initAutourDeMoi() {
@@ -120,11 +122,11 @@ async function lancerRechercheAutourDeMoi() {
 
 function initCarteAutourDeMoi(position) {
 
-                if (!document.getElementById("autourDeMoiCarte")) {
+    if (!document.getElementById("autourDeMoiCarte")) {
         console.error("Conteneur de carte introuvable — la modale n'est peut-être pas encore affichée.");
         return;
     }
-            
+
     if (!carteAutourDeMoi) {
 
         carteAutourDeMoi = L.map("autourDeMoiCarte");
@@ -132,13 +134,16 @@ function initCarteAutourDeMoi(position) {
             attribution: "© OpenStreetMap"
         }).addTo(carteAutourDeMoi);
 
-        markersAutourDeMoi = L.layerGroup().addTo(carteAutourDeMoi);
+        couchePosition = L.layerGroup().addTo(carteAutourDeMoi);
+        coucheResultats = L.layerGroup().addTo(carteAutourDeMoi);
+        coucheDecouverte = L.layerGroup().addTo(carteAutourDeMoi);
 
     }
 
     setTimeout(() => carteAutourDeMoi.invalidateSize(), 100);
 
-    markersAutourDeMoi.clearLayers();
+    couchePosition.clearLayers();
+
     const iconPosition = L.divIcon({
         className: "custom-map-pin",
         html: `<div style="width:16px;height:16px;border-radius:50%;background:#3E7CB1;border:3px solid white;box-shadow:0 0 0 2px rgba(62,124,177,.4);"></div>`,
@@ -146,11 +151,15 @@ function initCarteAutourDeMoi(position) {
         iconAnchor: [8, 8]
     });
 
-    L.marker([position.latitude, position.longitude], { icon: iconPosition }).addTo(markersAutourDeMoi);
+    L.marker([position.latitude, position.longitude], { icon: iconPosition })
+        .bindPopup("📍 Ma position")
+        .addTo(couchePosition);
 
 }
 
 function ajouterMarkersResultats(resultats, position) {
+
+    coucheResultats.clearLayers();
 
     const pointsPourCadrage = [[position.latitude, position.longitude]];
 
@@ -161,7 +170,7 @@ function ajouterMarkersResultats(resultats, position) {
         const marker = L.marker(
             [envie.lieu.latitude, envie.lieu.longitude],
             { icon: createColoredIcon("#6FAFC4", emoji, envie.realise) }
-        ).addTo(markersAutourDeMoi);
+        ).addTo(coucheResultats);
 
         marker.bindPopup(`
             <strong>${envie.titre}</strong><br>
@@ -256,6 +265,8 @@ function renderListeFiltree(categorieFiltre) {
     const resultats = categorieFiltre === "toutes"
         ? dernierResultatsComplet
         : dernierResultatsComplet.filter(r => r.envie.categorie === categorieFiltre);
+
+    ajouterMarkersResultats(resultats, dernierePosition);
 
     if (resultats.length === 0) {
         container.innerHTML = `<div class="emptyState">Aucune envie enregistrée dans un rayon de ${rayonActuel} km.</div>`;
@@ -388,6 +399,8 @@ function renderDecouvrirAutour(resultats) {
 
 function ajouterMarkersDecouverte(pois) {
 
+    coucheDecouverte.clearLayers();
+
     pois.forEach(poi => {
 
         const iconDecouverte = L.divIcon({
@@ -399,7 +412,7 @@ function ajouterMarkersDecouverte(pois) {
 
         L.marker([poi.lat, poi.lon], { icon: iconDecouverte })
             .bindPopup(`<strong>${poi.nom}</strong>`)
-            .addTo(markersAutourDeMoi);
+            .addTo(coucheDecouverte);
 
     });
 
