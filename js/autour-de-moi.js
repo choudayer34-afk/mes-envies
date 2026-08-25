@@ -14,6 +14,28 @@ let dernierResultatsComplet = [];
 
 export function initAutourDeMoi() {
 
+
+            document.getElementById("autourDeMoiTitre")?.addEventListener("click", () => {
+        document.getElementById("autourDeMoiSaisieManuelle").classList.toggle("hidden");
+    });
+
+    document.getElementById("autourDeMoiValiderPosition")?.addEventListener("click", () => {
+
+        const lat = parseFloat(document.getElementById("autourDeMoiLat").value);
+        const lon = parseFloat(document.getElementById("autourDeMoiLon").value);
+
+        if (isNaN(lat) || isNaN(lon)) {
+            return;
+        }
+
+        dernierePosition = { latitude: lat, longitude: lon, nom: "Position saisie manuellement" };
+
+        document.getElementById("autourDeMoiSaisieManuelle").classList.add("hidden");
+
+        lancerRechercheAutourDeMoi();
+
+    });
+        
         initDecouvrirAutour();
     
     document.getElementById("ideesMenuBtnAutourDeMoi")?.addEventListener("click", () => {
