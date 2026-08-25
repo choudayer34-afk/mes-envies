@@ -3301,16 +3301,8 @@ document.addEventListener("DOMContentLoaded", () => {
             <div id="agendaLocalSuggestions" class="autocompleteSuggestions hidden"></div>
         </div>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;">
-            <div>
-                <label class="fieldTitle">Du</label>
-                <input type="date" id="agendaLocalDateDebut" class="numberInput">
-            </div>
-            <div>
-                <label class="fieldTitle">Au (optionnel)</label>
-                <input type="date" id="agendaLocalDateFin" class="numberInput">
-            </div>
-        </div>
+     <label class="fieldTitle" style="margin-top:12px;">Période</label>
+<button type="button" id="agendaLocalDateButton" class="secondaryButton" style="width:100%;text-align:left;">📅 Choisir la période</button>
 
         <button id="agendaLocalBtnChercher" class="primaryButton" style="width:100%;margin-top:16px;" disabled>
             🔍 Voir les liens
