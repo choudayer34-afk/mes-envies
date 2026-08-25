@@ -14,6 +14,8 @@ let coucheResultats = null;
 let coucheDecouverte = null;
 let dernierResultatsComplet = [];
 let dernieresDecouvertesCompletes = [];
+let filtreCategorieActuel = "toutes";
+let filtreStatutActuel = "tous";
 
 export function initAutourDeMoi() {
 
@@ -105,7 +107,8 @@ async function lancerRechercheAutourDeMoi() {
     const envies = getEnvies().filter(e =>
         e.contexte === "voyage" &&
         e.lieu?.latitude &&
-        e.lieu?.longitude
+        e.lieu?.longitude &&
+        !(e.billets && e.billets.length > 0)
     );
 
     const resultats = envies
@@ -205,9 +208,12 @@ function ajouterMarkersResultats(resultats, position) {
 function renderResultatsAutourDeMoi(resultats) {
 
     dernierResultatsComplet = resultats;
+    filtreCategorieActuel = "toutes";
+    filtreStatutActuel = "tous";
 
     renderFiltreCategories(resultats);
-    renderListeFiltree("toutes");
+    renderFiltreStatut();
+    renderListeFiltree();
 
 }
 
@@ -262,13 +268,48 @@ function renderFiltreCategories(resultats) {
 
 }
 
-function renderListeFiltree(categorieFiltre) {
+function renderFiltreStatut() {
+
+    const filtreContainer = document.getElementById("autourDeMoiFiltreStatut");
+
+    filtreContainer.innerHTML = `
+        <button type="button" class="itemTypeChip filtreStatutChip active" data-statut="tous" style="flex-shrink:0;">Tous</button>
+        <button type="button" class="itemTypeChip filtreStatutChip" data-statut="afaire" style="flex-shrink:0;">📋 À faire</button>
+        <button type="button" class="itemTypeChip filtreStatutChip" data-statut="favori" style="flex-shrink:0;">⭐ Favori</button>
+        <button type="button" class="itemTypeChip filtreStatutChip" data-statut="fait" style="flex-shrink:0;">✅ Déjà fait</button>
+    `;
+
+    filtreContainer.querySelectorAll(".filtreStatutChip").forEach(chip => {
+
+        chip.addEventListener("click", () => {
+
+            filtreContainer.querySelectorAll(".filtreStatutChip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            filtreStatutActuel = chip.dataset.statut;
+            renderListeFiltree();
+
+        });
+
+    });
+
+}
+
+function renderListeFiltree() {
 
     const container = document.getElementById("autourDeMoiListe");
 
-    const resultats = categorieFiltre === "toutes"
+    let resultats = filtreCategorieActuel === "toutes"
         ? dernierResultatsComplet
-        : dernierResultatsComplet.filter(r => r.envie.categorie === categorieFiltre);
+        : dernierResultatsComplet.filter(r => r.envie.categorie === filtreCategorieActuel);
+
+    if (filtreStatutActuel === "afaire") {
+        resultats = resultats.filter(r => !r.envie.realise && !r.envie.favorite);
+    } else if (filtreStatutActuel === "favori") {
+        resultats = resultats.filter(r => r.envie.favorite && !r.envie.realise);
+    } else if (filtreStatutActuel === "fait") {
+        resultats = resultats.filter(r => r.envie.realise);
+    }
 
     ajouterMarkersResultats(resultats, dernierePosition);
 
@@ -416,14 +457,15 @@ function renderFiltreTypeDecouverte(resultats) {
 
     filtreContainer.innerHTML = html;
 
-    filtreContainer.querySelectorAll(".filtreTypeChip").forEach(chip => {
+    filtreContainer.querySelectorAll(".filtreCategorieChip").forEach(chip => {
 
         chip.addEventListener("click", () => {
 
-            filtreContainer.querySelectorAll(".filtreTypeChip").forEach(c => c.classList.remove("active"));
+            filtreContainer.querySelectorAll(".filtreCategorieChip").forEach(c => c.classList.remove("active"));
             chip.classList.add("active");
 
-            renderListeDecouverteFiltree(chip.dataset.type);
+            filtreCategorieActuel = chip.dataset.cat;
+            renderListeFiltree();
 
         });
 
