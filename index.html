@@ -3044,6 +3044,10 @@ document.addEventListener("DOMContentLoaded", () => {
     🎉 Agenda local
 </button>
 
+        <button id="ideesMenuBtnAutourDeMoi" class="secondaryButton" style="width:100%;margin-top:10px;">
+    📍 Envie autour de moi
+</button>
+        
     </div>
 
 </div>
@@ -3241,6 +3245,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
 </div>
 
+    <div id="autourDeMoiModal" class="modal-overlay hidden">
+
+    <div class="modal">
+
+        <button id="closeAutourDeMoi" class="backButton">← Retour</button>
+
+        <h2>📍 Envie autour de moi</h2>
+
+        <p id="autourDeMoiPosition" style="font-size:13px;color:var(--color-text-light);margin-bottom:10px;"></p>
+
+        <label class="fieldTitle">Rayon de recherche</label>
+        <div class="itemTypeToggle" style="margin-bottom:16px;">
+            <button type="button" class="itemTypeChip rayonChip" data-rayon="5">5 km</button>
+            <button type="button" class="itemTypeChip rayonChip active" data-rayon="20">20 km</button>
+            <button type="button" class="itemTypeChip rayonChip" data-rayon="50">50 km</button>
+        </div>
+
+        <label class="fieldTitle">❤️ Mes envies à proximité</label>
+        <div id="autourDeMoiListe" style="margin-top:8px;"></div>
+
+    </div>
+
+</div>
+
+    
 <div id="agendaLocalModal" class="modal-overlay hidden">
 
     <div class="modal">
