@@ -135,26 +135,16 @@ export function construireUrlAirbnb(destination, dateDebut, dateFin, nbAdultes, 
 
 
 
-export function construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, nbAdultes = 1, nbEnfants = 0) {
+export function construireUrlGoogleFlights(origine, destination, dateDebut) {
 
-    const formaterDate = (dateStr) => new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    const dateLisible = new Date(dateDebut).toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
 
-    const dateDebutLisible = formaterDate(dateDebut);
+    return `https://www.google.com/travel/flights?q=${encodeURIComponent(`vols ${origine} ${destination} ${dateLisible}`)}`;
 
-    let partiePassagers = "";
+}
 
-    if (nbEnfants > 0) {
-        partiePassagers = ` pour ${nbAdultes} adulte${nbAdultes > 1 ? "s" : ""} et ${nbEnfants} enfant${nbEnfants > 1 ? "s" : ""}`;
-    } else if (nbAdultes > 1) {
-        partiePassagers = ` pour ${nbAdultes} adultes`;
-    }
-
-    const requete = dateFin && dateFin !== dateDebut
-        ? `Vols de ${origine} à ${destination} du ${dateDebutLisible} au ${formaterDate(dateFin)}${partiePassagers}`
-        : `Vols de ${origine} à ${destination} le ${dateDebutLisible}${partiePassagers}`;
-
-    return `https://www.google.com/travel/flights?q=${encodeURIComponent(requete)}`;
-
+export function construireUrlSkyscanner(destination) {
+    return `https://www.skyscanner.fr/transport/flights?query=${encodeURIComponent(destination)}`;
 }
 
 
