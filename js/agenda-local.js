@@ -315,7 +315,7 @@ export function initAgendaLocal() {
 
 }
 
-function distanceKm(lat1, lon1, lat2, lon2) {
+export function distanceKm(lat1, lon1, lat2, lon2) {
 
     const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
