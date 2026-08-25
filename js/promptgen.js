@@ -32,6 +32,10 @@ Réponds de façon concise, exploitable directement sur le terrain, sans blabla 
 
 }
 
+export function construireUrlOmio() {
+    return `https://www.omio.fr/`;
+}
+
 export function buildPromptVoyage(envie) {
 
     const lieu = envie.lieu?.nom || "[base du voyage à préciser]";
