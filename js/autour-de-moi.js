@@ -260,7 +260,8 @@ function renderFiltreCategories(resultats) {
             filtreContainer.querySelectorAll(".filtreCategorieChip").forEach(c => c.classList.remove("active"));
             chip.classList.add("active");
 
-            renderListeFiltree(chip.dataset.cat);
+                   filtreCategorieActuel = chip.dataset.cat;
+            renderListeFiltree();
 
         });
 
