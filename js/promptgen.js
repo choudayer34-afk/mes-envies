@@ -137,12 +137,17 @@ export function construireUrlCozycozy(destination) {
     return `https://www.cozycozy.com/fr/search?q=${encodeURIComponent(destination)}`;
 }
 
-export function construireUrlGoogleFlights(destination, date) {
+export function construireUrlGoogleFlights(origine, destination, dateDebut, dateFin) {
 
-    const dateObj = new Date(date);
-    const dateLisible = dateObj.toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+    const formaterDate = (dateStr) => new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
-    return `https://www.google.com/travel/flights?q=${encodeURIComponent(`Vols vers ${destination} le ${dateLisible}`)}`;
+    const dateDebutLisible = formaterDate(dateDebut);
+
+    const requete = dateFin && dateFin !== dateDebut
+        ? `Vols de ${origine} à ${destination} du ${dateDebutLisible} au ${formaterDate(dateFin)}`
+        : `Vols de ${origine} à ${destination} le ${dateDebutLisible}`;
+
+    return `https://www.google.com/travel/flights?q=${encodeURIComponent(requete)}`;
 
 }
 
