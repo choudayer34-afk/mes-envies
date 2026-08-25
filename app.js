@@ -14,6 +14,7 @@ import { openVoyageImport, genererPromptArticleADecortiquer, definirUrlArticleSo
 import { initChangelogSync } from "./js/storage.js";
 import { initBillets } from "./js/billets.js";
 import { renderNouveautes } from "./js/plus.js";
+import { initAutourDeMoi } from "./js/autour-de-moi.js";
 import { initCorbeille } from "./js/corbeille.js";
 import { initEnvieCategoriesSync } from "./js/storage.js";
 import { initTodo } from "./js/todo.js";
@@ -192,6 +193,7 @@ initCroquis();
  initTodo();
     initAjoutPhotoRapide();
     initZoomImageViewer();
+     initAutourDeMoi();
     initCorbeille();
  initTricount();
     initEnvironnementsSync(() => {});
