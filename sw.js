@@ -18,6 +18,7 @@ const APP_SHELL = [
      './js/calendrier.js',
     './js/itineraire.js',
     './js/tableau-saisie.js',
+ './js/ autour-de-moi.js',
     './js/album.js',
     './js/album-pdf.js',
     './js/etape-finder.js',
