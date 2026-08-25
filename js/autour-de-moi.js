@@ -65,12 +65,14 @@ export function initAutourDeMoi() {
 
 }
 
-export async function ouvrirAutourDeMoi() {
+export function ouvrirAutourDeMoi() {
 
     document.getElementById("autourDeMoiModal").classList.remove("hidden");
     document.getElementById("decouvrirAutourListe").innerHTML = "";
 
-    await lancerRechercheAutourDeMoi();
+    requestAnimationFrame(() => {
+        lancerRechercheAutourDeMoi();
+    });
 
 }
 
@@ -118,6 +120,11 @@ async function lancerRechercheAutourDeMoi() {
 
 function initCarteAutourDeMoi(position) {
 
+                if (!document.getElementById("autourDeMoiCarte")) {
+        console.error("Conteneur de carte introuvable — la modale n'est peut-être pas encore affichée.");
+        return;
+    }
+            
     if (!carteAutourDeMoi) {
 
         carteAutourDeMoi = L.map("autourDeMoiCarte");
