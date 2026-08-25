@@ -137,15 +137,23 @@ export function construireUrlCozycozy(destination) {
     return `https://www.cozycozy.com/fr/search?q=${encodeURIComponent(destination)}`;
 }
 
-export function construireUrlGoogleFlights(origine, destination, dateDebut, dateFin) {
+export function construireUrlGoogleFlights(origine, destination, dateDebut, dateFin, nbAdultes = 1, nbEnfants = 0) {
 
     const formaterDate = (dateStr) => new Date(dateStr).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
 
     const dateDebutLisible = formaterDate(dateDebut);
 
+    let partiePassagers = "";
+
+    if (nbEnfants > 0) {
+        partiePassagers = ` pour ${nbAdultes} adulte${nbAdultes > 1 ? "s" : ""} et ${nbEnfants} enfant${nbEnfants > 1 ? "s" : ""}`;
+    } else if (nbAdultes > 1) {
+        partiePassagers = ` pour ${nbAdultes} adultes`;
+    }
+
     const requete = dateFin && dateFin !== dateDebut
-        ? `Vols de ${origine} à ${destination} du ${dateDebutLisible} au ${formaterDate(dateFin)}`
-        : `Vols de ${origine} à ${destination} le ${dateDebutLisible}`;
+        ? `Vols de ${origine} à ${destination} du ${dateDebutLisible} au ${formaterDate(dateFin)}${partiePassagers}`
+        : `Vols de ${origine} à ${destination} le ${dateDebutLisible}${partiePassagers}`;
 
     return `https://www.google.com/travel/flights?q=${encodeURIComponent(requete)}`;
 
