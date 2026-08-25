@@ -426,6 +426,17 @@ function renderVoyageContenu(envie, container) {
 
     initPhotoCouverture();
 
+        const boutonAssistant = document.getElementById("ficheAssistantVoyageButton");
+
+    if (boutonAssistant) {
+
+        boutonAssistant.classList.toggle("hidden", !isContainer(envie.categorie));
+
+        boutonAssistant.onclick = () => ouvrirPreparerVoyage(envie);
+
+    }
+    
+
 }
 
 export function renderOutilsVoyage(envie) {
@@ -544,21 +555,7 @@ export function renderOutilsVoyage(envie) {
 
         outilsRow.appendChild(promptButton);
 
-    const preparerLigne = document.createElement("div");
-    preparerLigne.style.cssText = "display:flex;align-items:center;gap:10px;flex:1 1 100%;background:#F4F4F4;border-radius:12px;padding:10px 14px;";
-    preparerLigne.innerHTML = `<span style="flex:1;font-size:14px;">Envie d'aide pour préparer ce voyage ?</span>`;
 
-    const preparerButton = document.createElement("button");
-    preparerButton.className = "assistantRobotButton";
-    preparerButton.title = "Préparer le voyage";
-    preparerButton.textContent = "🤖";
-
-    preparerButton.addEventListener("click", () => {
-        ouvrirPreparerVoyage(envie);
-    });
-
-    preparerLigne.appendChild(preparerButton);
-    outilsRow.appendChild(preparerLigne);
         
         const importButton = document.createElement("button");
         importButton.className = "secondaryButton";
