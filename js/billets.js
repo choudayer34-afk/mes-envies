@@ -76,11 +76,18 @@ export function getBilletsAujourdhui(envies) {
 
                 items.push({
                     id: `billet_${envie.id}_${billet.id}`,
-                    titre: `${EMOJI_PAR_TYPE[billet.type] || "🎫"} ${[billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || "Billet"}${billet.heureDepart ? ` — ${billet.heureDepart}` : ""} (${envie.titre})`,
                     categorie: null,
                     realise: false,
                     _billetVoyageId: envie.id,
-                    _billetLieu: billet.lieuDepart?.nom || envie.lieu?.nom || null 
+                    _billetEmoji: EMOJI_PAR_TYPE[billet.type] || "🎫",
+                    _billetCompagnie: billet.compagnie || null,
+                    _billetNumero: billet.numeroVol || null,
+                    _billetHeureDepart: billet.heureDepart || null,
+                    _billetHeureArrivee: billet.heureArrivee || null,
+                    _billetLieu: billet.lieuDepart?.nom || envie.lieu?.nom || "Départ",
+                    _billetDestination: billet.destination || "Arrivée",
+                    _billetDuree: calculerDureeBillet(billet.heureDepart, billet.heureArrivee),
+                    _billetFichiers: billet.fichiers || []
                 });
 
             }
@@ -92,6 +99,7 @@ export function getBilletsAujourdhui(envies) {
     return items;
 
 }
+
 
 export function getBilletsDetailsAujourdhui(envies) {
 
