@@ -9,7 +9,7 @@ import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { showToast } from "./toast.js";
 import { ouvrirFicheProduitDepuisChecklist } from "./checklist.js";
-import { getBilletsDetailsAujourdhui, ouvrirFichier } from "./billets.js";
+import { ouvrirFichier } from "./billets.js";
 
 import { getModeActif, basculerMode } from "./storage.js";
 
