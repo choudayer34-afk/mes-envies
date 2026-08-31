@@ -166,6 +166,11 @@ export function ouvrirFichier(fichiers, indexDepart) {
         const fichier = visionneuseFichiers[visionneuseIndex];
         const plusieurs = visionneuseFichiers.length > 1;
 
+           const boutonsNavigation = plusieurs ? `
+            <button id="fichierPrecedentButton" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:20px;z-index:1;" ${visionneuseIndex === 0 ? "disabled" : ""}>‹</button>
+            <button id="fichierSuivantButton" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,.15);border:none;color:white;width:40px;height:40px;border-radius:50%;font-size:20px;z-index:1;" ${visionneuseIndex === visionneuseFichiers.length - 1 ? "disabled" : ""}>›</button>
+        ` : "";
+
         if (fichier.type === "pdf") {
 
             modal.innerHTML = `
@@ -173,7 +178,10 @@ export function ouvrirFichier(fichiers, indexDepart) {
                     <button id="fermerFichierViewer" style="background:none;border:none;color:white;font-size:16px;">← Retour</button>
                     ${plusieurs ? `<span style="color:white;font-size:13px;">${visionneuseIndex + 1} / ${visionneuseFichiers.length}</span>` : ""}
                 </div>
-                <iframe src="${fichier.dataUrl}" style="flex:1;border:none;border-radius:12px;background:white;"></iframe>
+                <div style="position:relative;flex:1;">
+                    ${boutonsNavigation}
+                    <iframe src="${fichier.dataUrl}" style="width:100%;height:100%;border:none;border-radius:12px;background:white;"></iframe>
+                </div>
             `;
 
         } else {
@@ -183,17 +191,36 @@ export function ouvrirFichier(fichiers, indexDepart) {
                     <button id="fermerFichierViewer" style="background:none;border:none;color:white;font-size:16px;">← Retour</button>
                     ${plusieurs ? `<span style="color:white;font-size:13px;">${visionneuseIndex + 1} / ${visionneuseFichiers.length}</span>` : ""}
                 </div>
-                <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                <div style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                    ${boutonsNavigation}
                     <img src="${fichier.dataUrl}" style="max-width:100%;max-height:100%;border-radius:12px;">
                 </div>
-                ${plusieurs ? `<p style="color:rgba(255,255,255,.5);font-size:12px;text-align:center;margin-top:10px;">← Balaye pour changer de photo →</p>` : ""}
             `;
 
         }
 
         modal.querySelector("#fermerFichierViewer").addEventListener("click", () => modal.remove());
 
+        modal.querySelector("#fichierPrecedentButton")?.addEventListener("click", () => {
+
+            if (visionneuseIndex > 0) {
+                visionneuseIndex--;
+                render();
+            }
+
+        });
+
+        modal.querySelector("#fichierSuivantButton")?.addEventListener("click", () => {
+
+            if (visionneuseIndex < visionneuseFichiers.length - 1) {
+                visionneuseIndex++;
+                render();
+            }
+
+        });
+
     }
+
 
     modal.addEventListener("touchstart", (event) => {
         touchStartX = event.touches[0].clientX;
