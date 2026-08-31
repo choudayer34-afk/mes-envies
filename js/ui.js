@@ -268,7 +268,7 @@ function createCompactRow(envie) {
 
            if (envie._billetVoyageId) {
 
-        row.style.cssText = "flex-direction:column;align-items:stretch;padding:14px;";
+        row.style.cssText = "flex-direction:column;align-items:stretch;padding:14px;background:linear-gradient(135deg, #1B2A4A, #24365E);border-radius:16px;color:white;"; 
 
         row.innerHTML = `
 
@@ -280,27 +280,29 @@ function createCompactRow(envie) {
 
                 <div>
                     <div style="font-size:18px;font-weight:700;">${envie._billetHeureDepart || "--:--"}</div>
-                    <div style="font-size:12px;color:var(--color-text-light);max-width:130px;">${envie._billetLieu}</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,.7);max-width:130px;">${envie._billetLieu}</div>
                 </div>
 
-                <div style="text-align:center;color:var(--color-text-light);font-size:12px;">
+                <div style="text-align:center;color:rgba(255,255,255,.6);font-size:12px;">
                     ${envie._billetDuree ? `⏱️ ${envie._billetDuree}` : "→"}
                 </div>
 
                 <div style="text-align:right;">
                     <div style="font-size:18px;font-weight:700;">${envie._billetHeureArrivee || "--:--"}</div>
-                    <div style="font-size:12px;color:var(--color-text-light);max-width:130px;">${envie._billetDestination}</div>
+                    <div style="font-size:12px;color:rgba(255,255,255,.7);max-width:130px;">${envie._billetDestination}</div>
                 </div>
 
             </div>
 
             <div style="display:flex;gap:8px;margin-top:12px;">
-                ${envie._billetFichiers.length > 0 ? `<button class="secondaryButton voirFichiersBilletButtonAccueil" style="flex:1;">🎫 Voir les billets</button>` : ""}
-                <button class="secondaryButton ouvrirFicheBilletButtonAccueil" style="flex:1;">Ouvrir la fiche</button>
+                ${envie._billetFichiers.length > 0 ? `<button class="voirFichiersBilletButtonAccueil" style="flex:1;background:rgba(255,255,255,.15);color:white;border:none;border-radius:10px;padding:10px;font-weight:600;">🎫 Voir les billets</button>` : ""}
+                <button class="ouvrirFicheBilletButtonAccueil" style="flex:1;background:rgba(255,255,255,.15);color:white;border:none;border-radius:10px;padding:10px;font-weight:600;">Ouvrir la fiche</button>
             </div>
 
         `;
 
+
+        
         row.querySelector(".voirFichiersBilletButtonAccueil")?.addEventListener("click", (event) => {
             event.stopPropagation();
             ouvrirFichier(envie._billetFichiers, 0);
