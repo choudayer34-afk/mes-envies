@@ -9,6 +9,7 @@ import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { showToast } from "./toast.js";
 import { ouvrirFicheProduitDepuisChecklist } from "./checklist.js";
+import { getBilletsDetailsAujourdhui, ouvrirFichier } from "./billets.js";
 
 import { getModeActif, basculerMode } from "./storage.js";
 
@@ -265,28 +266,55 @@ function createCompactRow(envie) {
     const row = document.createElement("div");
     row.className = "checklistRow";
 
-          if (envie._billetVoyageId) {
+           if (envie._billetVoyageId) {
+
+        row.style.cssText = "flex-direction:column;align-items:stretch;padding:14px;";
 
         row.innerHTML = `
-            <span style="flex:1;">
-                ${envie.titre}
-                ${envie._billetLieu ? `<span class="lieuBilletCliquable" style="display:block;font-size:12px;color:#3E7CB1;text-decoration:underline;">📍 ${envie._billetLieu}</span>` : ""}
-            </span>
-            <button class="editAgendaButton" title="Voir le billet">🎫</button>
+
+            <div style="font-weight:700;margin-bottom:10px;">
+                ${envie._billetEmoji} ${[envie._billetCompagnie, envie._billetNumero].filter(Boolean).join(" ") || "Billet"}
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+
+                <div>
+                    <div style="font-size:18px;font-weight:700;">${envie._billetHeureDepart || "--:--"}</div>
+                    <div style="font-size:12px;color:var(--color-text-light);max-width:130px;">${envie._billetLieu}</div>
+                </div>
+
+                <div style="text-align:center;color:var(--color-text-light);font-size:12px;">
+                    ${envie._billetDuree ? `⏱️ ${envie._billetDuree}` : "→"}
+                </div>
+
+                <div style="text-align:right;">
+                    <div style="font-size:18px;font-weight:700;">${envie._billetHeureArrivee || "--:--"}</div>
+                    <div style="font-size:12px;color:var(--color-text-light);max-width:130px;">${envie._billetDestination}</div>
+                </div>
+
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                ${envie._billetFichiers.length > 0 ? `<button class="secondaryButton voirFichiersBilletButtonAccueil" style="flex:1;">🎫 Voir les billets</button>` : ""}
+                <button class="secondaryButton ouvrirFicheBilletButtonAccueil" style="flex:1;">Ouvrir la fiche</button>
+            </div>
+
         `;
 
-        row.querySelector(".lieuBilletCliquable")?.addEventListener("click", (event) => {
+        row.querySelector(".voirFichiersBilletButtonAccueil")?.addEventListener("click", (event) => {
             event.stopPropagation();
-            ouvrirGoogleMaps(envie._billetLieu);
+            ouvrirFichier(envie._billetFichiers, 0);
         });
 
-        row.querySelector(".editAgendaButton").addEventListener("click", () => {
+        row.querySelector(".ouvrirFicheBilletButtonAccueil").addEventListener("click", (event) => {
+            event.stopPropagation();
             openEnvie(envie._billetVoyageId, null);
         });
 
         return row;
 
     }
+
 
 
        row.innerHTML = `
