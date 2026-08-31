@@ -78,6 +78,33 @@ function renderPhotosRecues(envieId, photosRecues) {
 
 }
 
+async function extraireExifPhoto(file) {
+
+    try {
+
+        const exifr = await import("https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.esm.js");
+
+        const [donnees, position] = await Promise.all([
+            exifr.parse(file, { pick: ["DateTimeOriginal", "CreateDate"] }),
+            exifr.gps(file)
+        ]);
+
+        const dateCapture = donnees?.DateTimeOriginal || donnees?.CreateDate || null;
+
+        return {
+            dateCapture: dateCapture ? new Date(dateCapture).toISOString() : null,
+            latitude: position?.latitude ?? null,
+            longitude: position?.longitude ?? null
+        };
+
+    } catch (err) {
+
+        return { dateCapture: null, latitude: null, longitude: null };
+
+    }
+
+}
+
 export function initPhotos() {
 
     const ficheOverlay = document.getElementById("ficheOverlay");
@@ -132,13 +159,17 @@ export function initPhotos() {
 
             try {
 
+                const exif = await extraireExifPhoto(file);
                 const fichierCompresse = await compresserImageAvantEnvoi(file);
                 const result = await uploadToCloudinary(fichierCompresse);
 
                 nouvellesPhotos.push({
                     id: crypto.randomUUID(),
                     url: result.secure_url,
-                    publicId: result.public_id
+                    publicId: result.public_id,
+                    dateCapture: exif.dateCapture,
+                    latitude: exif.latitude,
+                    longitude: exif.longitude
                 });
 
             } catch (err) {
@@ -146,6 +177,7 @@ export function initPhotos() {
             }
 
         }
+
 
 
         const toutesPhotos = [...(envie.photos || []), ...nouvellesPhotos];
@@ -193,9 +225,24 @@ export function renderPhotosGrid(envie) {
     if (!container)
         return;
 
-    container.innerHTML = "";
+     container.innerHTML = "";
 
-    (envie.photos || []).forEach(photo => {
+    const photosTriees = [...(envie.photos || [])].sort((a, b) => {
+
+        if (!a.dateCapture && !b.dateCapture)
+            return 0;
+
+        if (!a.dateCapture)
+            return 1;
+
+        if (!b.dateCapture)
+            return -1;
+
+        return new Date(a.dateCapture) - new Date(b.dateCapture);
+
+    });
+
+    photosTriees.forEach(photo => {
 
         const item = document.createElement("div");
         item.className = "photoItem";
