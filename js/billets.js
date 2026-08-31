@@ -47,6 +47,22 @@ function formatDateBillet(dateIso) {
     return `${jour}/${mois}/${an}`;
 }
 
+function calculerDureeBillet(heureDepart, heureArrivee) {
+
+    if (!heureDepart || !heureArrivee)
+        return null;
+
+    const [h1, m1] = heureDepart.split(":").map(Number);
+    const [h2, m2] = heureArrivee.split(":").map(Number);
+
+    let minutes = (h2 * 60 + m2) - (h1 * 60 + m1);
+
+    if (minutes < 0) minutes += 24 * 60;
+
+    return `${Math.floor(minutes / 60)}h${(minutes % 60).toString().padStart(2, "0")}`;
+
+}
+
 export function getBilletsAujourdhui(envies) {
 
     const aujourdhui = new Date().toISOString().split("T")[0];
@@ -77,6 +93,39 @@ export function getBilletsAujourdhui(envies) {
 
 }
 
+export function getBilletsDetailsAujourdhui(envies) {
+
+    const aujourdhui = new Date().toISOString().split("T")[0];
+    const items = [];
+
+    envies.forEach(envie => {
+
+        (envie.billets || []).forEach(billet => {
+
+            if (billet.dateDepart === aujourdhui) {
+
+                items.push({
+                    envieId: envie.id,
+                    emoji: EMOJI_PAR_TYPE[billet.type] || "🎫",
+                    compagnie: billet.compagnie || null,
+                    numeroVol: billet.numeroVol || null,
+                    heureDepart: billet.heureDepart || null,
+                    heureArrivee: billet.heureArrivee || null,
+                    lieuDepart: billet.lieuDepart?.nom || envie.lieu?.nom || "Départ",
+                    destination: billet.destination || "Arrivée",
+                    duree: calculerDureeBillet(billet.heureDepart, billet.heureArrivee),
+                    fichiers: billet.fichiers || []
+                });
+
+            }
+
+        });
+
+    });
+
+    return items;
+
+}
 
 export function renderBilletsSection(envie) {
 
@@ -91,7 +140,7 @@ export function renderBilletsSection(envie) {
 }
 
 
-function ouvrirFichier(fichiers, indexDepart) {
+export function ouvrirFichier(fichiers, indexDepart) { 
 
     visionneuseFichiers = fichiers;
     visionneuseIndex = indexDepart;
