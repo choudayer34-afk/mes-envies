@@ -194,7 +194,7 @@ renderAchatsMaison();
         document.getElementById("actionSection")?.classList.add("hidden");
     }
 
-    renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow);
+    renderCollapsibleSection("ajourdhuiSection", "ajourdhuiContainer", "🔆 Aujourd'hui", ajourdhuiItems, createCompactRow, true);
     renderCollapsibleSection("continuerSection", "continuerContainer", "▶️ En cours", enCoursItems, createEnvieCard, true);
     renderCollapsibleSection("avenirSection", "avenirContainer", "📅 À venir", aVenirItems, createEnvieCard);
     renderCollapsibleSection("projetSection", "projetContainer", "🛠️ En projet", enProjetItems, createEnvieCardDraggable);
