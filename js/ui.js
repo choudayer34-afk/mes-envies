@@ -150,6 +150,8 @@ function renderHomeSections() {
         ...getBilletsAujourdhui(envies)
     ];
 
+    mettreAJourBadgeApp(ajourdhuiItems.length, calculerMesTaches().length);
+
 
     const enCoursItems = envies.filter(e => {
         if (!isContainer(e.categorie)) return false;
@@ -1202,6 +1204,30 @@ export function renderMesTachesSection() {
     });
 
 }
+
+async function mettreAJourBadgeApp(nbAujourdhui, nbTaches) {
+
+    if (!("setAppBadge" in navigator))
+        return;
+
+    const total = nbAujourdhui + nbTaches;
+
+    try {
+
+        if (total > 0) {
+            await navigator.setAppBadge(total);
+        } else {
+            await navigator.clearAppBadge();
+        }
+
+    } catch (err) {
+
+        console.warn("Badge d'icône non disponible: " + err.message);
+
+    }
+
+}
+
 export function renderBilletsAujourdhui() {
 
     const section = document.getElementById("billetsAujourdhuiSection");
