@@ -173,6 +173,10 @@ function init() {
 
     log("Initialisation...");
 
+     if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+    }
+ 
     updateTitle();
     initMainButton();
     initLocation();
