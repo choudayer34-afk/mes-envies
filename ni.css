@@ -738,3 +738,16 @@ body.niActive #assignModal,body.niActive #checklistEditItemModal{z-index:2300}
 .niSemChoix .niSemLettre{color:rgba(255,255,255,.75)}
 .niSemJour .niCalPoint{bottom:4px}
 .niSemChoix .niCalPoint{background:#fff}
+
+/* Urgence */
+#niUrgence{z-index:2200}
+.niUrgLigne{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ni-line);color:var(--ni-ink);text-decoration:none}
+.niUrgLigne:last-child{border-bottom:0}
+.niUrgRef{display:block;margin-top:4px;font-size:22px;font-weight:800;letter-spacing:.04em}
+.niUrgAdresse{font-size:18px;font-weight:700;line-height:1.3}
+.niUrgPays{padding:10px 0 2px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ni-muted)}
+.niUrgNum{font-size:22px;font-weight:800;color:var(--ni-brand)}
+a.niUrgTel{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:48px}
+.niAujEntete{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.niBoutonUrgence{flex:none;min-height:44px;padding:0 16px;color:#B42318;border-color:#F0B8B0;background:#FFF4F2;font-weight:700}
+.niHubUrgence{width:100%;margin-top:12px;min-height:48px;color:#B42318;border-color:#F0B8B0;background:#FFF4F2;font-weight:700}
