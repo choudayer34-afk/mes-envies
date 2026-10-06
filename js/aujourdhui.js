@@ -6,6 +6,7 @@
 ==========================================================
 */
 
+import { openListes } from "./listes.js";
 import { openBilletForm } from "./billet-form.js";
 import { openArgent } from "./argent.js";
 import { openReservations } from "./reservations.js";
@@ -383,11 +384,11 @@ export function openAujourdhui() {
             if (idBouton) document.getElementById(idBouton)?.click();
         }, 400);
     };
-    ecran.querySelector("#niOuvrirListes")?.addEventListener("click", () => ouvrirRubrique("checklistSection"));
+    ecran.querySelector("#niOuvrirListes")?.addEventListener("click", () => openListes(voyage.id));
     ecran.querySelectorAll("[data-faire]").forEach(b => b.addEventListener("click", () => {
         const action = b.dataset.faire;
         if (action === "billet") openBilletForm(voyage.id, { apres: () => openAujourdhui() });
-        else if (action === "listes") ouvrirRubrique("checklistSection");
+        else if (action === "listes") openListes(voyage.id);
         else if (action === "programme") openProgramme(voyage);
         else ouvrirFiche();
     }));

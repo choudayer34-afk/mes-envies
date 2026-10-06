@@ -6,6 +6,8 @@
 ==========================================================
 */
 
+import { openBilletForm } from "./billet-form.js";
+import { openDepenseForm } from "./depense-form.js";
 import { getEnvies, createEnvie, updateEnviePhotos, isContainerCategory } from "./storage.js";
 import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
 import { openEnvie } from "./envie.js";
@@ -192,8 +194,8 @@ export function openCapturer() {
                 const id = voyageId;
                 fermerCapturer();
                 document.getElementById("niAujourdhui")?.remove();
-                openEnvie(id);
-                cliquerBoutonDansFiche(action === "billet" ? "addBilletButton" : "addDepenseButton");
+                if (action === "billet") openBilletForm(id);
+                else openDepenseForm(id);
             }
         });
     });

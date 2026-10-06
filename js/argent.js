@@ -8,6 +8,7 @@
 ==========================================================
 */
 
+import { openDepenseForm } from "./depense-form.js";
 import { getEnvies, updateEnvieBudget } from "./storage.js";
 import { openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
@@ -154,12 +155,12 @@ export function openArgent(voyageOuId) {
                         </button>`).join("")}</div>`
                     : '<div class="niVide">Aucune dépense saisie pour ce voyage.</div>'}
                 </div>
-                ${!nbVoyageurs ? '<div class="niBandeau">Aucun participant au partage des dépenses : ajoute-les dans la fiche (rubrique dépenses) avant de saisir.</div>' : ""}
+                ${!nbVoyageurs ? '<div class="niBandeau">Personne ne partage encore les dépenses : touche « + Dépense » pour choisir les personnes.</div>' : ""}
             </div>`;
 
         ecran.querySelector("#niArgentRetour").addEventListener("click", fermerArgent);
         ecran.querySelector("#niArgentModifier").addEventListener("click", () => editerBudget(voyage, valeur => { budgetLocal = valeur; dessiner(); }));
-        ecran.querySelector("#niArgentAjouter").addEventListener("click", () => ouvrirRubrique(id, "addDepenseButton"));
+        ecran.querySelector("#niArgentAjouter").addEventListener("click", () => openDepenseForm(id, { apres: dessiner }));
         ecran.querySelector("#niArgentSolde").addEventListener("click", () => ouvrirRubrique(id));
         ecran.querySelectorAll("[data-depense]").forEach(l => l.addEventListener("click", () => ouvrirRubrique(id)));
     }

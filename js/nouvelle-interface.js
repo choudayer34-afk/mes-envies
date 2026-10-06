@@ -6,6 +6,8 @@
 ==========================================================
 */
 
+import { fermerListes } from "./listes.js";
+import { fermerDepenseForm } from "./depense-form.js";
 import { fermerArgent } from "./argent.js";
 import { fermerReservations } from "./reservations.js";
 import { openVoyages, fermerVoyages, configurerVoyages, ancienneListeChoisie } from "./voyages.js";
@@ -115,6 +117,8 @@ function fermerEcransNouveaux() {
     fermerCapturer();
     fermerVoyages();
     fermerBilletForm();
+    fermerListes();
+    fermerDepenseForm();
     fermerArgent();
     fermerDocuments();
     fermerReservations();

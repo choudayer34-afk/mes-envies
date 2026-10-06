@@ -15,6 +15,7 @@ import { compresserImageAvantEnvoi } from "./photos.js";
 import { setupAutocomplete } from "./location.js";
 import { showToast } from "./toast.js";
 import { TYPES_RESERVATION, TYPES_TRAJET } from "./types-reservation.js";
+import { lireBillet } from "./billet-lecture.js";
 
 const POINT_ENVOI = "/upload-partage";
 const LIMITE_FICHIER_LOCAL = 700000;
@@ -91,7 +92,10 @@ export function openBilletForm(voyageId, options = {}) {
         depart: existant?.lieuDepart || null,
         vers: existant?.destination || null,
         retour: !!existant?.retour,
-        enCours: 0
+        enCours: 0,
+        lus: new Set(),
+        bandeau: "",
+        dejaLu: !!existant
     };
     const debut = voyage.date?.start || "";
     const fin = voyage.date?.end || voyage.date?.start || "";
@@ -136,6 +140,7 @@ export function openBilletForm(voyageId, options = {}) {
                 <div class="niBarreTitre"><h1>${existant ? "Modifier le billet" : "Nouveau billet"}</h1><span>${echapper(voyage.titre || "")}</span></div>
             </div>
             <div class="niCorps niBfCorps">
+                ${etat.bandeau ? `<div class="niBandeau niBandeauInfo">${echapper(etat.bandeau)}</div>` : ""}
 
                 <div class="niSection">
                     <span class="niEtiquette">Fichier du billet</span>
@@ -212,7 +217,50 @@ export function openBilletForm(voyageId, options = {}) {
                 <button type="button" class="niBouton niBoutonPrimaire" id="niBfValider">${existant ? "Enregistrer" : "Ajouter le billet"}</button>
             </div>`;
 
+        /* Champs remplis par la lecture automatique : repérés pour vérification */
+        etat.lus.forEach(cle => {
+            const champ = ecran.querySelector(`[data-champ="${cle}"]`);
+            const label = champ?.closest("label");
+            if (!label) return;
+            label.classList.add("niBfLu");
+            label.insertAdjacentHTML("afterbegin", '<span class="niBfTagLu">✨ lu sur le billet</span>');
+        });
+
         branchements();
+    }
+
+    function appliquerLecture(champs, fichierNom) {
+
+        const types = options.type ? null : champs.type;
+        if (!existant && types && PARAMS[types]) etat.type = types;
+        const p = PARAMS[etat.type] || PARAMS.autre;
+        const trajet = !!p.trajet;
+        let n = 0;
+        const poser = (cle, valeur, force = false) => {
+            if (!valeur) return;
+            if (valeurs[cle] && !force) return;
+            valeurs[cle] = valeur;
+            etat.lus.add(cle);
+            n++;
+        };
+
+        poser("nom", champs.compagnie);
+        poser("numero", champs.numero);
+        poser("date", champs.date, valeurs.date === debut);
+        if (p.heure) poser("heure", champs.heure);
+        if (trajet) {
+            poser("arrivee", champs.arrivee);
+            poser("de", champs.de);
+            if (champs.de && valeurs.de === champs.de) etat.depart = null;
+        }
+        if (trajet || p.lieu) poser("vers", champs.vers);
+        if (champs.retourDate && (trajet || p.fin) && !etat.retour) {
+            etat.retour = true;
+            poser("retourDate", champs.retourDate, true);
+        }
+        etat.bandeau = n
+            ? `Lecture automatique de « ${fichierNom} » : ${n} champ${n > 1 ? "s" : ""} rempli${n > 1 ? "s" : ""}. Vérifie les champs marqués avant d'ajouter.`
+            : `Aucune information lisible dans « ${fichierNom} » : saisis à la main.`;
     }
 
     function branchements() {
@@ -319,6 +367,21 @@ export function openBilletForm(voyageId, options = {}) {
 
         etat.enCours--;
         if (document.getElementById("niBilletForm")) { lireChamps(); dessiner(); }
+
+        /* Lecture automatique du premier fichier (si le formulaire n'a pas déjà été lu) */
+        if (!etat.dejaLu && liste.length && document.getElementById("niBilletForm")) {
+            etat.dejaLu = true;
+            const surEtat = texte => { const el = ecran.querySelector("#niBfEtatFichier"); if (el) el.textContent = texte; };
+            const lu = await lireBillet(liste[0], {
+                refAnnee: Number((debut || fin || String(new Date().getFullYear())).slice(0, 4)),
+                surEtat
+            });
+            if (!document.getElementById("niBilletForm")) return;
+            lireChamps();
+            if (lu) appliquerLecture(lu.champs, liste[0].name);
+            else etat.bandeau = "Lecture automatique impossible (réseau ou document illisible) : saisis à la main.";
+            dessiner();
+        }
     }
 
     function lieuDepuisChamp(valeur, choisi) {
