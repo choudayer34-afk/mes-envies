@@ -42,11 +42,12 @@ export function bilanPreparation(voyage) {
             && billets.some(b => TRAJETS.includes(b.type) && b.dateDepart && b.dateDepart >= v.date.end);
         const attendRetour = billets.length > 0 && !!v.date?.end && v.date.end !== v.date.start && !aRetour
             && billets.some(b => TRAJETS.includes(b.type));
+        const nbBillets = new Set(billets.map(b => b._idOrigine || b.id)).size;
         const ratio = billets.length === 0 ? 0 : (attendRetour ? 0.5 : 1);
         criteres.push({
             id: "reservations", titre: "Réservations", ratio,
             detail: billets.length
-                ? `${billets.length} billet${billets.length > 1 ? "s" : ""}${attendRetour ? " · retour non ajouté" : ""}`
+                ? `${nbBillets} billet${nbBillets > 1 ? "s" : ""}${attendRetour ? " · retour non ajouté" : ""}`
                 : "Aucun billet ajouté"
         });
         if (billets.length === 0) manques.push({ id: "billet", texte: "Aucun billet ajouté", sous: "Ajouter un billet", bouton: "Ajouter" });

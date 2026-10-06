@@ -10,7 +10,7 @@
 ==========================================================
 */
 
-import { emojiType, motType } from "./types-reservation.js";
+import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import { getEnvies, isContainerCategory, updateEnvieDate, updateEnvieMoment, createEnvie } from "./storage.js";
 import { listerBillets, dateLocaleISO } from "./documents.js";
 import { listeJours, etapesDuJour, plateau, MOMENTS, libelleMoment } from "./programme.js";
@@ -139,7 +139,7 @@ export function openEspacePc(voyageDepart = null) {
                     </section>
                     <section class="niCarte niPcCarte">
                         <span class="niEtiquette">Réservations</span>
-                        ${billets.length ? billets.slice(0, 5).map(b => `<div class="niPcLigne"><span>${echapper([b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → ") || b.numeroVol || motType(b.type))}</span><span class="niDocSous">${b.dateDepart ? new Date(b.dateDepart + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : ""}</span></div>`).join("") : '<span class="niDocSous">Aucun billet ajouté</span>'}
+                        ${billets.length ? billets.slice(0, 5).map(b => `<div class="niPcLigne"><span>${echapper([nomLieu(b.lieuDepart), nomLieu(b.destination)].filter(Boolean).join(" → ") || b.numeroVol || motType(b.type))}</span><span class="niDocSous">${b.dateDepart ? new Date(b.dateDepart + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) : ""}</span></div>`).join("") : '<span class="niDocSous">Aucun billet ajouté</span>'}
                         <button type="button" class="niBouton" id="niPcBillet">Ajouter un billet</button>
                     </section>
                 </div>

@@ -14,7 +14,7 @@ import { listerBillets, dateLocaleISO } from "./documents.js";
 import { bilanPreparation } from "./preparation.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { showToast } from "./toast.js";
-import { TYPES_RESERVATION, GROUPES_RESERVATION, typeReservation, titreCourtBillet } from "./types-reservation.js";
+import { TYPES_RESERVATION, GROUPES_RESERVATION, typeReservation, titreCourtBillet, nomLieu } from "./types-reservation.js";
 
 function echapper(texte) {
     return String(texte ?? "").replace(/[&<>"']/g, c => ({
@@ -28,7 +28,7 @@ function formatCourt(iso) {
 }
 
 function titreBillet(b) {
-    const trajet = [b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → ");
+    const trajet = [nomLieu(b.lieuDepart), nomLieu(b.destination)].filter(Boolean).join(" → ");
     return trajet || titreCourtBillet(b);
 }
 
@@ -55,7 +55,7 @@ function ajouterReservation(voyageId, typeId) {
 function ligne(b, aujourdhui) {
     const t = typeReservation(b.type);
     const nb = (b.fichiers || []).length;
-    const details = [formatCourt(b.dateDepart), b.heureDepart, b.compagnie, b.numeroVol]
+    const details = [b._sens === "retour" ? "Retour" : (b._sens === "aller" ? "Aller" : ""), formatCourt(b.dateDepart), b.heureDepart, b.compagnie, b.numeroVol]
         .filter(Boolean).join(" · ");
     const maintenant = b.dateDepart === aujourdhui;
     return `

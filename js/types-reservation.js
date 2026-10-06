@@ -48,3 +48,35 @@ export function titreCourtBillet(billet) {
 
 // Objet { id: emoji } pour le code ancien
 export const EMOJI_PAR_TYPE = Object.fromEntries(TYPES_RESERVATION.map(t => [t.id, t.emoji]));
+
+/* Aller-retour sur un même billet : le champ optionnel billet.retour
+   { dateDepart, heureDepart, heureArrivee, numeroVol } est lu comme une
+   seconde étape (lieux inversés, mêmes fichiers). Les billets sans retour
+   sont renvoyés tels quels. */
+export function etapesBillets(billets) {
+    const etapes = [];
+    (billets || []).forEach(b => {
+        if (!b.retour) { etapes.push(b); return; }
+        etapes.push({ ...b, _sens: "aller", _idOrigine: b.id });
+        etapes.push({
+            ...b,
+            id: `${b.id}#retour`,
+            _idOrigine: b.id,
+            _sens: "retour",
+            dateDepart: b.retour.dateDepart || null,
+            heureDepart: b.retour.heureDepart || null,
+            heureArrivee: b.retour.heureArrivee || null,
+            numeroVol: b.retour.numeroVol || b.numeroVol || null,
+            lieuDepart: b.destination ? (typeof b.destination === "string" ? { nom: b.destination } : b.destination) : null,
+            destination: b.lieuDepart || null,
+            retour: null
+        });
+    });
+    return etapes;
+}
+
+/* Nom d'un lieu de billet : objet {nom, …} (autocomplétion) ou simple texte */
+export function nomLieu(lieu) {
+    if (!lieu) return "";
+    return typeof lieu === "string" ? lieu : (lieu.nom || "");
+}

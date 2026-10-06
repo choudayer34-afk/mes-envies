@@ -9,7 +9,7 @@
 ==========================================================
 */
 
-import { emojiType, motType } from "./types-reservation.js";
+import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import { getEnvies, getEnvieCategories, createEnvie, updateEnvieRealise } from "./storage.js";
 import { listerBillets, dateLocaleISO } from "./documents.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
@@ -60,7 +60,7 @@ function evenementsDuJour(voyage, jour) {
             heure: b.heureDepart || "",
             minutes: minutes(b.heureDepart),
             titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || motType(b.type)}`.trim(),
-            sous: [b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "),
+            sous: [nomLieu(b.lieuDepart), nomLieu(b.destination)].filter(Boolean).join(" → "),
             lieu: b.lieuDepart?.nom || b.destination || null,
             emoji: emojiType(b.type),
             fichiers: (b.fichiers || []).length

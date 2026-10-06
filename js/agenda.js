@@ -1,5 +1,5 @@
 import { getEnvies, updateEnvieRealise, getModeActif, updateEnvieChecklistTodo } from "./storage.js";
-import { EMOJI_PAR_TYPE, motType } from "./types-reservation.js";
+import { EMOJI_PAR_TYPE, motType, etapesBillets } from "./types-reservation.js";
 import { groupForAgenda } from "./grouping.js";
 import { getBilletsAujourdhui } from "./billets.js";
 import { getCategorieById, openEvaluationAccordion, openEnvie } from "./envie.js";
@@ -147,7 +147,7 @@ function construirePseudoEnviesBillets(envies) {
 
     envies.forEach(envie => {
 
-        (envie.billets || []).forEach(billet => {
+        etapesBillets(envie.billets).forEach(billet => {
 
             if (billet.dateDepart) {
 

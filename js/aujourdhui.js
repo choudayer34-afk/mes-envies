@@ -7,7 +7,7 @@
 */
 
 import { openReservations } from "./reservations.js";
-import { emojiType, motType } from "./types-reservation.js";
+import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import { getEnvies, isContainerCategory, getEnvieCategories } from "./storage.js";
 import { computeContainerStatus } from "./progress.js";
 import { formatPeriode } from "./periode.js";
@@ -126,7 +126,7 @@ function evenementsDuJour(voyage) {
             heure: b.heureDepart || null,
             minutes: heureEnMinutes(b.heureDepart),
             titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || motType(b.type)}`.trim(),
-            sous: [b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "),
+            sous: [nomLieu(b.lieuDepart), nomLieu(b.destination)].filter(Boolean).join(" → "),
             lieu: b.lieuDepart?.nom || b.destination || null,
             emoji: emojiType(b.type)
         }))
@@ -294,7 +294,7 @@ export function openAujourdhui() {
         ? evenementsDuJour(voyage)
         : { billets: [], activites: [], prochain: null, minutesMaintenant: 0 };
 
-    const nbBillets = listerBillets(voyage.id).length;
+    const nbBillets = new Set(listerBillets(voyage.id).map(b => b._idOrigine || b.id)).size;
     const bilan = bilanPreparation(voyage);
     const nbATrier = nombreIdeesATrier();
 

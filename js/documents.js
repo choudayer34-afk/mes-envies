@@ -6,7 +6,7 @@
 ==========================================================
 */
 
-import { emojiType, motType, typeReservation, GROUPES_RESERVATION } from "./types-reservation.js";
+import { emojiType, motType, typeReservation, GROUPES_RESERVATION, etapesBillets, nomLieu } from "./types-reservation.js";
 import { getEnvies } from "./storage.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { showToast } from "./toast.js";
@@ -31,14 +31,14 @@ function formatCourt(iso) {
 
 export function listerBillets(voyageId) {
     const voyage = getEnvies().find(e => e.id === voyageId);
-    return (voyage?.billets || []).slice().sort((a, b) =>
+    return etapesBillets(voyage?.billets).sort((a, b) =>
         `${a.dateDepart || "9999"}${a.heureDepart || ""}`.localeCompare(`${b.dateDepart || "9999"}${b.heureDepart || ""}`)
     );
 }
 
 function titreBillet(billet) {
-    const depart = billet.lieuDepart?.nom;
-    const arrivee = billet.destination;
+    const depart = nomLieu(billet.lieuDepart);
+    const arrivee = nomLieu(billet.destination);
     if (depart && arrivee) return `${depart} → ${arrivee}`;
     return arrivee || depart || billet.numeroVol || billet.compagnie || motType(billet.type);
 }
@@ -47,6 +47,7 @@ function ligneBillet(billet, aujourdhui) {
     const nbFichiers = (billet.fichiers || []).length;
     const estAujourdhui = billet.dateDepart === aujourdhui;
     const details = [
+        billet._sens === "retour" ? "Retour" : (billet._sens === "aller" ? "Aller" : ""),
         formatCourt(billet.dateDepart),
         billet.heureDepart,
         billet.compagnie,

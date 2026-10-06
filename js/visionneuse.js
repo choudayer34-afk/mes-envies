@@ -7,7 +7,7 @@
 ==========================================================
 */
 
-import { emojiType, motType } from "./types-reservation.js";
+import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import { resoudreSource } from "./hors-ligne.js";
 
 let verrouEcran = null;
@@ -30,7 +30,7 @@ function echapper(texte) {
 }
 
 function resumeBillet(billet) {
-    const trajet = [billet.lieuDepart?.nom, billet.destination].filter(Boolean).join(" → ");
+    const trajet = [nomLieu(billet.lieuDepart), nomLieu(billet.destination)].filter(Boolean).join(" → ");
     const jour = billet.dateDepart
         ? new Date(billet.dateDepart + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })
         : "";

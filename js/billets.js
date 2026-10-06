@@ -18,7 +18,7 @@ let currentBilletDestination = null;
 let currentBilletLieuDepart = null;
 let currentBilletDate = null;
 
-import { EMOJI_PAR_TYPE } from "./types-reservation.js";
+import { EMOJI_PAR_TYPE, etapesBillets } from "./types-reservation.js";
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());
@@ -70,7 +70,7 @@ export function getBilletsAujourdhui(envies) {
 
     envies.forEach(envie => {
 
-        (envie.billets || []).forEach(billet => {
+        etapesBillets(envie.billets).forEach(billet => {
 
             if (billet.dateDepart === aujourdhui) {
 
@@ -108,7 +108,7 @@ export function getBilletsDetailsAujourdhui(envies) {
 
     envies.forEach(envie => {
 
-        (envie.billets || []).forEach(billet => {
+        etapesBillets(envie.billets).forEach(billet => {
 
             if (billet.dateDepart === aujourdhui) {
 
@@ -296,6 +296,7 @@ function renderBilletsListe(envie) {
         const infosLigne2 = [
             billet.dateDepart ? `📅 ${formatDateBillet(billet.dateDepart)}` : null,
             billet.heureDepart ? `🕐 ${billet.heureDepart}` : null,
+            billet.retour ? `↔ retour ${billet.retour.dateDepart ? formatDateBillet(billet.retour.dateDepart) : ""}`.trim() : null,
             nbFichiers > 0 ? `📎 ${nbFichiers} fichier${nbFichiers > 1 ? "s" : ""}` : null
         ].filter(Boolean).join(" · ");
 
@@ -358,6 +359,28 @@ function renderBilletsListe(envie) {
 
 }
 
+/* Aller-retour sur un même billet : champ optionnel billet.retour */
+function remplirRetour(retour) {
+    const case_ = document.getElementById("billetAllerRetour");
+    if (!case_) return;
+    case_.checked = !!retour;
+    document.getElementById("billetRetourBloc")?.classList.toggle("hidden", !retour);
+    document.getElementById("billetRetourDate").value = retour?.dateDepart || "";
+    document.getElementById("billetRetourHeure").value = retour?.heureDepart || "";
+    document.getElementById("billetRetourHeureArrivee").value = retour?.heureArrivee || "";
+    document.getElementById("billetRetourNumero").value = retour?.numeroVol || "";
+}
+
+function lireRetour() {
+    if (!document.getElementById("billetAllerRetour")?.checked) return null;
+    return {
+        dateDepart: document.getElementById("billetRetourDate").value || null,
+        heureDepart: document.getElementById("billetRetourHeure").value || null,
+        heureArrivee: document.getElementById("billetRetourHeureArrivee").value || null,
+        numeroVol: document.getElementById("billetRetourNumero").value.trim() || null
+    };
+}
+
 function reinitialiserFormulaireBillet() {
 
     editingBilletId = null;
@@ -378,6 +401,7 @@ function reinitialiserFormulaireBillet() {
         currentBilletDestination = null;
     document.getElementById("billetHeureArrivee").value = "";
     document.getElementById("billetDestinationInput").value = "";
+    remplirRetour(null);
 
     currentBilletLieuDepart = null;
     document.getElementById("billetLieuDepartInput").value = "";
@@ -440,6 +464,7 @@ function ouvrirEditionBillet(billet) {
     currentBilletDestination = billet.destination || null;
     document.getElementById("billetHeureArrivee").value = billet.heureArrivee || "";
     document.getElementById("billetDestinationInput").value = billet.destination?.nom || "";
+    remplirRetour(billet.retour || null);
 
 }
 
@@ -477,6 +502,10 @@ export function initBillets() {
         (place) => { currentBilletLieuDepart = place; }
     );
 
+
+    document.getElementById("billetAllerRetour")?.addEventListener("change", e => {
+        document.getElementById("billetRetourBloc")?.classList.toggle("hidden", !e.target.checked);
+    });
 
     document.querySelectorAll("#billetTypeToggle .itemTypeChip").forEach(chip => {
 
@@ -582,6 +611,7 @@ export function initBillets() {
             lieuDepart: currentBilletLieuDepart,
             destination: currentBilletDestination,
             lienApp: document.getElementById("billetLien").value.trim() || null,
+            retour: lireRetour(),
             fichiers: currentFichiers
         };
 

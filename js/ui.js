@@ -1,4 +1,5 @@
 
+import { etapesBillets } from "./types-reservation.js";
 import { removeEnvie } from "./modal.js";
 import { computeContainerStatus, formatStatutLabel } from "./progress.js";
 import { getBilletsAujourdhui } from "./billets.js";
@@ -1243,7 +1244,7 @@ export function renderBilletsAujourdhui() {
 
     voyages.forEach(voyage => {
 
-        (voyage.billets || []).forEach(billet => {
+        etapesBillets(voyage.billets).forEach(billet => {
 
             if (billet.dateDepart === aujourdhui) {
                 billetsDuJour.push({ ...billet, voyageId: voyage.id, voyageTitre: voyage.titre });
