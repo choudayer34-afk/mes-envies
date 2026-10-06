@@ -1,0 +1,263 @@
+diff --git a/js/aujourdhui.js b/js/aujourdhui.js
+index de4c3b8..7ba8303 100644
+--- a/js/aujourdhui.js
++++ b/js/aujourdhui.js
+@@ -50,7 +50,20 @@ function estLogement(envie) {
+ 
+ /* ---------- Choix du voyage à afficher ---------- */
+ 
+-export function trouverVoyage() {
++const CLE_CHOIX = "niAujourdhuiVoyage";
++
++function lireChoix() {
++    try { return sessionStorage.getItem(CLE_CHOIX) || ""; }
++    catch { return ""; }
++}
++
++function memoriserChoix(id) {
++    try { sessionStorage.setItem(CLE_CHOIX, id); }
++    catch { /* sans effet */ }
++}
++
++/* Voyages datés, dans l'ordre : en cours, à venir (le plus proche d'abord), puis passés récents. */
++export function listerVoyagesDates() {
+ 
+     const envies = getEnvies().filter(e => e.contexte === "voyage" && !e.supprime);
+     const parents = new Set(envies.map(e => e.voyageId).filter(Boolean));
+@@ -62,14 +75,20 @@ export function trouverVoyage() {
+ 
+     const fin = v => v.date.end || v.date.start;
+ 
+-    const enCours = voyages.filter(v => v.date.start <= aujourdhui && aujourdhui <= fin(v));
+-    if (enCours.length) return enCours.sort((a, b) => a.date.start.localeCompare(b.date.start))[0];
++    const enCours = voyages.filter(v => v.date.start <= aujourdhui && aujourdhui <= fin(v))
++        .sort((a, b) => a.date.start.localeCompare(b.date.start));
++    const aVenir = voyages.filter(v => v.date.start > aujourdhui)
++        .sort((a, b) => a.date.start.localeCompare(b.date.start));
++    const passes = voyages.filter(v => fin(v) < aujourdhui)
++        .sort((a, b) => fin(b).localeCompare(fin(a)));
+ 
+-    const aVenir = voyages.filter(v => v.date.start > aujourdhui);
+-    if (aVenir.length) return aVenir.sort((a, b) => a.date.start.localeCompare(b.date.start))[0];
++    return [...enCours, ...aVenir, ...passes];
++}
+ 
+-    const passes = voyages.sort((a, b) => fin(b).localeCompare(fin(a)));
+-    return passes[0] || null;
++/* Sans choix explicite : voyage en cours, sinon prochain, sinon dernier passé. */
++export function trouverVoyage(idChoisi = lireChoix()) {
++    const liste = listerVoyagesDates();
++    return liste.find(v => v.id === idChoisi) || liste[0] || null;
+ }
+ 
+ export function phaseDuVoyage(voyage) {
+@@ -263,6 +282,15 @@ export function openAujourdhui() {
+     }
+ 
+     const phase = phaseDuVoyage(voyage);
++    const tous = listerVoyagesDates();
++    const selecteur = tous.length > 1 ? `
++            <div class="niSelecteurVoyage" role="tablist" aria-label="Voyage affiché">
++                ${tous.map(v => `
++                    <button type="button" role="tab" class="niPuce${v.id === voyage.id ? " niPuceActive" : ""}" data-voyage="${echapper(v.id)}" aria-selected="${v.id === voyage.id}">
++                        <span class="niPuceTitre">${echapper(v.titre || "Voyage")}</span>
++                        <span class="niPuceSous">${echapper(phaseDuVoyage(v).libelle)}</span>
++                    </button>`).join("")}
++            </div>` : "";
+     const donnees = phase.code === "pendant" || phase.jours <= 1
+         ? evenementsDuJour(voyage)
+         : { billets: [], activites: [], prochain: null, minutesMaintenant: 0 };
+@@ -273,6 +301,7 @@ export function openAujourdhui() {
+         <div class="niCorps">
+             <span class="niEtiquette">${echapper(dateLongue)}</span>
+             <h1 class="niTitrePage">Aujourd'hui</h1>
++            ${selecteur}
+             ${carteVoyage(voyage, phase)}
+             ${blocProchain(donnees.prochain, donnees.minutesMaintenant)}
+             ${blocSuite(donnees, donnees.prochain)}
+@@ -293,6 +322,13 @@ export function openAujourdhui() {
+             </div>
+         </div>`;
+ 
++    ecran.querySelectorAll(".niPuce").forEach(puce => {
++        puce.addEventListener("click", () => {
++            memoriserChoix(puce.dataset.voyage);
++            openAujourdhui();
++        });
++    });
++
+     const ouvrirFiche = () => {
+         fermerAujourdhui();
+         openEnvie(voyage.id);
+diff --git a/js/gestes-listes.js b/js/gestes-listes.js
+new file mode 100644
+index 0000000..4e1eb29
+--- /dev/null
++++ b/js/gestes-listes.js
+@@ -0,0 +1,108 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ gestes-listes.js : glisser une ligne de liste pour agir
++   - vers la droite : cocher / décocher
++   - vers la gauche : supprimer (avec la confirmation habituelle)
++ S'appuie sur les boutons existants : aucune logique dupliquée.
++ Listes des voyages seulement (pas Maison). Glisser-déposer
++ par la poignée ⠿ et boutons de chaque ligne inchangés.
++==========================================================
++*/
++
++import { getModeActif } from "./storage.js";
++
++const SEUIL = 80;          /* distance pour déclencher l'action */
++const DEMARRAGE = 12;      /* distance avant de considérer un glissement horizontal */
++const CONTENEURS = ["checklistContainer", "todoContainer"];
++
++function gestesPermis() {
++    return getModeActif() !== "maison"
++        && document.getElementById("ficheModeIcone")?.textContent.trim() !== "🏠";
++}
++
++function installer(conteneur) {
++
++    let ligne = null, x0 = 0, y0 = 0, dx = 0, actif = false, annule = false, vientDeGlisser = false;
++
++    function reinitialiser() {
++        if (ligne) {
++            ligne.style.transition = "transform .18s ease, background-color .18s ease";
++            ligne.style.transform = "";
++            ligne.style.backgroundColor = "";
++            const l = ligne;
++            setTimeout(() => { l.style.transition = ""; }, 200);
++        }
++        ligne = null; dx = 0; actif = false; annule = false;
++    }
++
++    conteneur.addEventListener("pointerdown", e => {
++        if (e.pointerType === "mouse" && e.button !== 0) return;
++        if (!gestesPermis()) return;
++        const cible = e.target.closest(".checklistRow");
++        if (!cible || !conteneur.contains(cible)) return;
++        if (e.target.closest(".dragHandle, button, a, input, select, textarea")) return;
++        ligne = cible;
++        x0 = e.clientX; y0 = e.clientY; dx = 0; actif = false; annule = false;
++    });
++
++    conteneur.addEventListener("pointermove", e => {
++        if (!ligne || annule) return;
++        dx = e.clientX - x0;
++        const dy = e.clientY - y0;
++
++        if (!actif) {
++            if (Math.abs(dy) > DEMARRAGE && Math.abs(dy) > Math.abs(dx)) { annule = true; ligne = null; return; }
++            if (Math.abs(dx) < DEMARRAGE || Math.abs(dx) < Math.abs(dy) * 1.5) return;
++            actif = true;
++            ligne.setPointerCapture?.(e.pointerId);
++        }
++
++        const decalage = Math.max(-140, Math.min(140, dx));
++        ligne.style.transform = `translateX(${decalage}px)`;
++        const force = Math.min(1, Math.abs(dx) / SEUIL);
++        ligne.style.backgroundColor = dx > 0
++            ? `rgba(15,118,110,${0.18 * force})`
++            : `rgba(190,60,60,${0.18 * force})`;
++    });
++
++    function fin() {
++        if (!ligne) return;
++        const cible = ligne;
++        const distance = dx;
++        const etaitActif = actif;
++        reinitialiser();
++        if (!etaitActif) return;
++
++        if (distance >= SEUIL) {
++            cible.querySelector('input[type="checkbox"]')?.click();
++        } else if (distance <= -SEUIL) {
++            cible.querySelector(".deleteChecklistButton")?.click();
++        }
++
++        /* Après l'action : le clic parasite qui suit le relâchement est ignoré. */
++        vientDeGlisser = true;
++        setTimeout(() => { vientDeGlisser = false; }, 400);
++    }
++
++    conteneur.addEventListener("pointerup", fin);
++    conteneur.addEventListener("pointercancel", reinitialiser);
++
++    /* Un glissement ne doit pas être pris pour un clic sur le texte (qui coche la case). */
++    conteneur.addEventListener("click", e => {
++        if (vientDeGlisser && e.target.closest(".checklistRow")) {
++            e.preventDefault();
++            e.stopPropagation();
++        }
++    }, true);
++
++    /* Le défilement vertical reste libre ; l'horizontal est pour le geste. */
++    conteneur.style.touchAction = "pan-y";
++}
++
++export function initGestesListes() {
++    CONTENEURS.forEach(id => {
++        const conteneur = document.getElementById(id);
++        if (conteneur) installer(conteneur);
++    });
++}
+diff --git a/js/nouvelle-interface.js b/js/nouvelle-interface.js
+index 1393bc6..d2d6f3d 100644
+--- a/js/nouvelle-interface.js
++++ b/js/nouvelle-interface.js
+@@ -15,6 +15,7 @@ import { exporterSauvegarde } from "./sauvegarde.js";
+ import { openMigration, fermerMigration } from "./migration-billets.js";
+ import { fermerPret } from "./pret.js";
+ import { fermerVisionneuse } from "./visionneuse.js";
++import { initGestesListes } from "./gestes-listes.js";
+ 
+ const CLE = "envie_nouvelle_interface";
+ 
+@@ -264,5 +265,6 @@ export function initNouvelleInterface() {
+     if (nouvelleInterfaceActive()) {
+         monterBarre();
+         initFicheVoyage();
++        initGestesListes();
+     }
+ }
+diff --git a/ni.css b/ni.css
+index 40cf705..c71ce4e 100644
+--- a/ni.css
++++ b/ni.css
+@@ -485,3 +485,16 @@ body.niActive.niModeVoyage .homeIconRow{display:none;}
+ /* ---------- Boutons : variantes ---------- */
+ .niBouton:disabled{opacity:.45;cursor:not-allowed;}
+ .niBoutonFichier{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
++
++/* ---------- Sélecteur de voyage (Aujourd'hui) ---------- */
++.niSelecteurVoyage{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 14px;padding:2px 16px 6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
++.niSelecteurVoyage::-webkit-scrollbar{display:none;}
++.niPuce{flex:none;scroll-snap-align:start;min-height:48px;padding:6px 14px;border-radius:14px;border:1px solid var(--ni-line);background:var(--ni-card,#fff);color:var(--ni-ink);font:inherit;text-align:left;display:flex;flex-direction:column;justify-content:center;cursor:pointer;}
++.niPuceTitre{font-weight:600;font-size:14px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
++.niPuceSous{font-size:12px;color:var(--ni-muted);}
++.niPuceActive{background:var(--ni-ink);border-color:var(--ni-ink);color:#fff;}
++.niPuceActive .niPuceSous{color:rgba(255,255,255,.75);}
++
++/* ---------- Gestes sur les listes ---------- */
++body.niModeVoyage #checklistContainer .checklistRow,
++body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+diff --git a/sw.js b/sw.js
+index dd04730..36c2b79 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'envie-cache-v229';
++const CACHE_NAME = 'envie-cache-v230';
+ 
+  
+  
+@@ -16,6 +16,7 @@ const APP_SHELL = [
+     './js/sauvegarde.js',
+     './js/migration-billets.js',
+     './js/pret.js',
++    './js/gestes-listes.js',
+     './share-target.html',
+     './js/share-target.js',
+  './js/corbeille.js',

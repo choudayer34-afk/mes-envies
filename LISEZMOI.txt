@@ -1,37 +1,18 @@
-ENVIE - ÉTAPE 5 : sauvegarde, migration des billets, « Prêt à partir ? »
+ENVIE - ÉTAPE 6 : gestes sur les listes + Aujourd'hui multi-voyages
 
-À copier à la racine du dépôt (mêmes dossiers) :
-  sw.js                         (CACHE_NAME passe à v228)
+À copier à la racine du dépôt :
+  sw.js                       (cache v230)
   ni.css
-  js/hors-ligne.js              (nouveau)
-  js/visionneuse.js             (nouveau)
-  js/sauvegarde.js              (nouveau)
-  js/migration-billets.js       (nouveau)
-  js/pret.js                    (nouveau)
-  js/aujourdhui.js              (modifié)
-  js/documents.js               (modifié)
-  js/nouvelle-interface.js      (modifié)
-  js/billets.js                 (ANCIEN CODE MODIFIÉ, voir ci-dessous)
+  js/gestes-listes.js         (nouveau)
+  js/aujourdhui.js            (modifié)
+  js/nouvelle-interface.js    (modifié)
+Aucun ancien fichier de l'application n'est modifié.
 
-Ce qui change dans js/billets.js (3 lignes, rien d'autre) :
-  - estimerTailleOctets accepte un fichier sans dataUrl
-  - les deux lecteurs (PDF et image) utilisent fichier.dataUrl || fichier.url
-  Sans cette modification, un billet libéré (sans dataUrl) ne s'afficherait plus
-  dans l'ancienne interface. Pour un billet non migré, le comportement est identique.
+Gestes (listes « À emporter » et « Tâches » des voyages, pas Maison) :
+  - glisser une ligne vers la droite : coche / décoche
+  - glisser vers la gauche : supprime, avec la confirmation habituelle
+  - la poignée ⠿, les boutons et le défilement vertical ne changent pas
 
-Dans le menu Plus (nouvelle interface activée) :
-  - « Sauvegarde complète (fichier) » : télécharge un .json de toutes les fiches, corbeille comprise
-  - « Billets : déplacer vers le stockage » : écran voyage par voyage
-Sur l'écran Aujourd'hui : tuile « Prêt à partir ? ».
-
-Ordre conseillé pour la migration :
-  1. Sauvegarde complète, garder le fichier.
-  2. Essayer sur UN seul voyage : Copier. Ouvrir ses billets et vérifier.
-  3. Libérer la place seulement si tout s'ouvre. Retours : « Annuler la copie » (avant l'étape 3),
-     « Restaurer depuis une sauvegarde » (après).
-
-Points à savoir :
-  - L'envoi utilise la fonction /upload-partage déjà présente dans le dépôt. Elle n'a pas pu être testée
-    en réel ici : c'est la raison de l'essai sur un seul voyage.
-  - Après déploiement, fermer et rouvrir l'application deux fois pour que la nouvelle version s'installe.
-  - Les fonds de carte ne sont pas téléchargés pour le hors-ligne.
+Aujourd'hui :
+  - une rangée de puces en haut liste tous les voyages datés (en cours, à venir, passés)
+  - le choix est retenu pendant la session ; il sert aussi au bouton Capturer

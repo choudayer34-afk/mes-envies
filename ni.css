@@ -485,3 +485,16 @@ body.niActive.niModeVoyage .homeIconRow{display:none;}
 /* ---------- Boutons : variantes ---------- */
 .niBouton:disabled{opacity:.45;cursor:not-allowed;}
 .niBoutonFichier{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+
+/* ---------- Sélecteur de voyage (Aujourd'hui) ---------- */
+.niSelecteurVoyage{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 14px;padding:2px 16px 6px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.niSelecteurVoyage::-webkit-scrollbar{display:none;}
+.niPuce{flex:none;scroll-snap-align:start;min-height:48px;padding:6px 14px;border-radius:14px;border:1px solid var(--ni-line);background:var(--ni-card,#fff);color:var(--ni-ink);font:inherit;text-align:left;display:flex;flex-direction:column;justify-content:center;cursor:pointer;}
+.niPuceTitre{font-weight:600;font-size:14px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.niPuceSous{font-size:12px;color:var(--ni-muted);}
+.niPuceActive{background:var(--ni-ink);border-color:var(--ni-ink);color:#fff;}
+.niPuceActive .niPuceSous{color:rgba(255,255,255,.75);}
+
+/* ---------- Gestes sur les listes ---------- */
+body.niModeVoyage #checklistContainer .checklistRow,
+body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:none;-webkit-user-select:none;}
