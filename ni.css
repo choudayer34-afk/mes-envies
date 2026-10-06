@@ -523,3 +523,48 @@ body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:no
 /* Écrans ouverts depuis la fiche d'un voyage : au-dessus de la fenêtre de la fiche (2100). */
 #niProgramme, #niFrise, #niSouvenirs, #niPret{z-index:2200;}
 #niPlacer{z-index:2300;}
+
+/* ---------- Préparer sur grand écran ---------- */
+.niPc{position:fixed;inset:0;z-index:2000;background:var(--ni-bg,#F1F5F6);color:var(--ni-ink);display:grid;grid-template-columns:240px minmax(0,1fr) 340px;overflow:hidden;}
+body:has(#niPc) .niFeuilleFond{z-index:2250;}
+.niPcLateral{background:#fff;border-right:1px solid var(--ni-line);padding:20px 14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;}
+.niPcMarque{font-size:24px;font-weight:700;padding:0 8px 12px;}
+.niPcLien{min-height:44px;padding:0 10px;border-radius:12px;border:0;background:none;color:var(--ni-muted);font:inherit;font-weight:700;text-align:left;cursor:pointer;display:flex;align-items:center;}
+.niPcLienActif{background:#E3F1EF;color:#0F5F58;cursor:default;}
+.niPcVoyages{display:flex;flex-direction:column;gap:2px;padding:0 0 6px 18px;}
+.niPcVoyage{padding:6px 8px;border-radius:8px;border:0;background:none;font:inherit;font-size:14px;color:var(--ni-muted);text-align:left;cursor:pointer;display:flex;flex-direction:column;}
+.niPcVoyageActif{background:#fff;color:var(--ni-ink);font-weight:700;box-shadow:0 0 0 1px var(--ni-line);}
+.niPcCentre{padding:20px 24px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;min-width:0;}
+.niPcEntete{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.niPcPuces{display:flex;gap:8px;flex-wrap:wrap;}
+.niPcJours{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(220px,1fr);gap:12px;align-items:start;overflow-x:auto;padding-bottom:6px;}
+.niPcJour{display:flex;flex-direction:column;gap:8px;min-width:0;}
+.niPcJourAuj .niDocTitre{color:#0F5F58;}
+.niPcEnteteLigne{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.niPcFixe,.niPcIdee{background:#fff;border:1px solid var(--ni-line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;}
+.niPcIdee{flex-direction:row;align-items:center;gap:8px;cursor:grab;}
+.niPcIdee:active{cursor:grabbing;}
+.niPcPoignee{color:var(--ni-muted);}
+.niPcGlisse{opacity:.4;}
+.niPcZones{display:none;flex-direction:column;gap:6px;}
+.niPcEnGlisse .niPcZones{display:flex;}
+.niPcZone{min-height:48px;border:2px dashed var(--ni-line);border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--ni-muted);font-weight:700;font-size:14px;}
+.niPcSurvol{border-color:#0F766E;background:#E3F1EF;color:#0F5F58;}
+.niPcBas{display:flex;gap:16px;flex-wrap:wrap;align-items:stretch;}
+.niPcCarte{flex:1 1 260px;padding:16px;display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+.niPcGros{font-size:28px;font-weight:700;}
+.niPcLigne{display:flex;justify-content:space-between;gap:12px;width:100%;}
+.niPcPlateau{background:#fff;border-left:1px solid var(--ni-line);padding:20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;}
+.niPcPlateau.niPcSurvol{background:#E3F1EF;}
+@media (max-width:1099px){ .niPc{display:none;} }
+
+/* Accès : seulement sur grand écran */
+.niNavPc,.niRaccourciPc{display:none !important;}
+@media (min-width:1100px){
+  .niNavPc{display:flex !important;}
+  .niRaccourciPc{display:inline-flex !important;}
+}
+.niPc .niBouton{flex:none;min-height:44px;padding:0 14px;}
+.niPc .niPcLateral .niBouton{width:100%;}
+.niPcVideJour{min-height:90px;border:2px dashed var(--ni-line);border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:var(--ni-muted);}
+.niPcEnGlisse .niPcVideJour{display:none;}

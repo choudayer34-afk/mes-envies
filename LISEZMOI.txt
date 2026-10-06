@@ -1,23 +1,21 @@
-ENVIE - ÉTAPE 9 : Programme par jour, plateau d'idées, placement
+ENVIE - ÉTAPE 10 : Préparer sur grand écran
 
 À copier à la racine du dépôt :
-  sw.js                       (cache v233)
-  js/programme.js             (nouveau)
-  js/frise.js                 (modifié : moment affiché et trié)
-  js/aujourdhui.js            (modifié : tuile Programme)
-  js/fiche-voyage.js          (modifié : raccourci Programme)
-  js/nouvelle-interface.js    (modifié)
-  js/storage.js               (ANCIEN FICHIER MODIFIÉ : 5 lignes ajoutées, voir ci-dessous)
-  ni.css                      (inchangé, inclus par sécurité)
+  sw.js                       (cache v235)
+  ni.css
+  js/espace-pc.js             (nouveau)
+  js/programme.js             (modifié : trois fonctions exportées, rien d'autre)
+  js/fiche-voyage.js          (modifié : bouton « Grand écran »)
+  js/nouvelle-interface.js    (modifié : onglet « Préparer »)
+Aucun ancien fichier de l'application n'est modifié.
 
-Modification de js/storage.js : ajout de la fonction updateEnvieMoment (juste après updateEnvieDate).
-  Aucune ligne existante n'est changée. Voir storage.patch.
-  Nouveau champ facultatif sur les étapes : "moment" (matin, midi, apres-midi, soir). Les étapes
-  existantes ne l'ont pas et continuent de fonctionner ; l'ancienne interface ignore ce champ.
-
-Programme : jours J1, J2... ; billets et étapes du jour ; plateau des idées du voyage sans date ;
-  « Placer » = choisir le jour et le moment (date de l'étape + moment) ; « Déplacer » ; « Retirer »
-  (remet l'étape sans date dans le plateau, rien n'est supprimé) ; ajout rapide d'une idée au plateau.
-  Les séjours sur plusieurs jours (logement) ne se déplacent pas d'ici : ils portent la mention « Séjour ».
-  Une alerte s'affiche quand un jour compte déjà 3 étapes.
-Non repris des maquettes : durée du trajet depuis le logement, coût estimé ajouté au budget.
+Accès (écran de 1100 px de large ou plus, nouvelle interface activée) :
+  - accueil Voyages : onglet « Préparer » à droite de Liste / Carte / Agenda / Idées
+  - fiche d'un voyage : bouton « Grand écran » en tête
+Contenu : colonne de gauche (Capturer, Aujourd'hui, liste des voyages, Plus), jours en colonnes au centre,
+  plateau d'idées à droite, puces de synthèse, dépenses, réservations.
+Glisser-déposer : idée du plateau vers un jour (4 zones : matin, midi, après-midi, soir) ;
+  d'un jour à un autre ; d'un jour vers le plateau pour la retirer. Double-clic : ouvre la fiche.
+Raccourcis : N ouvre Capturer, Échap ferme l'espace.
+Pas repris des maquettes : recherche globale (Ctrl+K), carte du jour et trajets recalculés, budget par catégorie
+  (le bloc « Dépenses » affiche le total des dépenses saisies), bascule Voyages / Maison (inchangée dans l'application).
