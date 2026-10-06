@@ -7,6 +7,7 @@
 */
 
 import { fermerReservations } from "./reservations.js";
+import { openVoyages, fermerVoyages, configurerVoyages, ancienneListeChoisie } from "./voyages.js";
 import { getModeActif } from "./storage.js";
 import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
 import { fermerDocuments } from "./documents.js";
@@ -109,6 +110,7 @@ function cliquerSurPremierVisible(ids) {
 function fermerEcransNouveaux() {
     document.getElementById("niIdees")?.remove();
     fermerCapturer();
+    fermerVoyages();
     fermerDocuments();
     fermerReservations();
     fermerPret();
@@ -199,12 +201,20 @@ function monterNavVoyages() {
             case "agenda": declencher("btnAgenda"); break;
             case "idees": ouvrirMenuIdees(); break;
             case "pc": openEspacePc(); break;
-            default: window.scrollTo({ top: 0 });
+            default: openVoyages();
         }
     });
 }
 
 function monterBarre() {
+
+    configurerVoyages({
+        carte: () => declencher("btnCarteVoyages"),
+        agenda: () => declencher("btnAgenda"),
+        idees: () => ouvrirMenuIdees(),
+        pc: () => openEspacePc()
+    });
+
 
     if (document.getElementById("niBarreOnglets")) return;
 
@@ -240,7 +250,7 @@ function monterBarre() {
                 break;
             case "voyages":
                 fermerEcransNouveaux();
-                window.scrollTo({ top: 0 });
+                openVoyages();
                 marquer("voyages");
                 break;
             case "capturer":
@@ -254,6 +264,7 @@ function monterBarre() {
 
     /* Visible seulement en mode Voyages, sans fenêtre ancienne ouverte. */
     let planifie = false;
+    let ouvertAuDemarrage = false;
     const actualiser = () => {
         planifie = false;
         const maison = getModeActif() === "maison";
@@ -265,6 +276,11 @@ function monterBarre() {
         barre.classList.toggle("hidden", !visible);
         document.body.classList.toggle("niBarreVisible", visible);
         if (maison) fermerEcransNouveaux();
+        /* Au démarrage, l'écran Voyages s'ouvre une fois (sauf si l'ancienne liste a été choisie). */
+        if (visible && !ouvertAuDemarrage) {
+            ouvertAuDemarrage = true;
+            if (!ancienneListeChoisie() && !document.querySelector(".niEcran")) openVoyages();
+        }
     };
     const planifier = () => {
         if (planifie) return;
