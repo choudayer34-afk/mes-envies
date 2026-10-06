@@ -10,6 +10,7 @@ import { getEnvies, createEnvie, updateEnviePhotos, isContainerCategory } from "
 import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
 import { openEnvie } from "./envie.js";
 import { trouverVoyage } from "./aujourdhui.js";
+import { openNouveauVoyage } from "./nouveau-voyage.js";
 import { showToast } from "./toast.js";
 
 function echapper(texte) {
@@ -131,9 +132,11 @@ export function openCapturer() {
                 <button type="button" class="niCase" data-action="billet"><span class="niIcone niIconeSombre">${ICONES.billet}</span><span class="niDocTitre">Billet</span></button>
                 <button type="button" class="niCase" data-action="depense"><span class="niIcone niIconeSombre">${ICONES.depense}</span><span class="niDocTitre">Dépense</span></button>
                 <button type="button" class="niCase" data-action="idee-complete"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Idée détaillée</span></button>
+                <button type="button" class="niCase" data-action="nouveau-voyage"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Nouveau voyage</span></button>
             </div>` : `
             <div class="niGrille">
                 <button type="button" class="niCase" data-action="idee-complete"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Idée détaillée</span></button>
+                <button type="button" class="niCase" data-action="nouveau-voyage"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Nouveau voyage</span></button>
             </div>`}
         </div>`;
     document.body.appendChild(fond);
@@ -167,6 +170,12 @@ export function openCapturer() {
                 const id = voyageId;
                 fermerCapturer();
                 choisirPhotos(id);
+                return;
+            }
+
+            if (action === "nouveau-voyage") {
+                fermerCapturer();
+                openNouveauVoyage();
                 return;
             }
 

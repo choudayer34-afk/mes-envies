@@ -62,7 +62,7 @@ function memoriserChoix(id) {
     catch { /* sans effet */ }
 }
 
-/* Voyages datés, dans l'ordre : en cours, à venir (le plus proche d'abord), puis passés récents. */
+/* Voyages datés non terminés, dans l'ordre : en cours, puis à venir (le plus proche d'abord). */
 export function listerVoyagesDates() {
 
     const envies = getEnvies().filter(e => e.contexte === "voyage" && !e.supprime);
@@ -79,13 +79,11 @@ export function listerVoyagesDates() {
         .sort((a, b) => a.date.start.localeCompare(b.date.start));
     const aVenir = voyages.filter(v => v.date.start > aujourdhui)
         .sort((a, b) => a.date.start.localeCompare(b.date.start));
-    const passes = voyages.filter(v => fin(v) < aujourdhui)
-        .sort((a, b) => fin(b).localeCompare(fin(a)));
 
-    return [...enCours, ...aVenir, ...passes];
+    return [...enCours, ...aVenir];
 }
 
-/* Sans choix explicite : voyage en cours, sinon prochain, sinon dernier passé. */
+/* Sans choix explicite : voyage en cours, sinon le plus proche à venir. */
 export function trouverVoyage(idChoisi = lireChoix()) {
     const liste = listerVoyagesDates();
     return liste.find(v => v.id === idChoisi) || liste[0] || null;
@@ -276,7 +274,7 @@ export function openAujourdhui() {
             <div class="niCorps">
                 <span class="niEtiquette">${echapper(dateLongue)}</span>
                 <h1 class="niTitrePage">Aujourd'hui</h1>
-                <div class="niVide">Aucun voyage avec des dates pour le moment. Ajoute des dates à un voyage pour le retrouver ici.</div>
+                <div class="niVide">Aucun voyage en cours ou à venir. Ajoute des dates à un voyage pour le retrouver ici.</div>
             </div>`;
         return;
     }

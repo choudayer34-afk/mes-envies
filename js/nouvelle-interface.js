@@ -16,6 +16,8 @@ import { openMigration, fermerMigration } from "./migration-billets.js";
 import { fermerPret } from "./pret.js";
 import { fermerVisionneuse } from "./visionneuse.js";
 import { initGestesListes } from "./gestes-listes.js";
+import { openTrier, fermerTrier } from "./trier.js";
+import { fermerNouveauVoyage } from "./nouveau-voyage.js";
 
 const CLE = "envie_nouvelle_interface";
 
@@ -104,6 +106,8 @@ function fermerEcransNouveaux() {
     fermerCapturer();
     fermerDocuments();
     fermerPret();
+    fermerTrier();
+    fermerNouveauVoyage();
     fermerMigration();
     fermerVisionneuse();
     fermerAujourdhui();
@@ -123,7 +127,8 @@ function ouvrirMenuIdees() {
 
     const nbATrier = (document.getElementById("inboxBadge")?.textContent || "").trim();
     const lignes = [
-        { id: "btnInbox", titre: "À trier", sous: "Les idées capturées, à organiser", badge: nbATrier && nbATrier !== "0" ? nbATrier : "" },
+        { id: "niTrier", titre: "À trier", sous: "Retenir ou laisser les idées capturées", badge: nbATrier && nbATrier !== "0" ? nbATrier : "" },
+        { id: "btnInbox", titre: "À trier (ancien écran)", sous: "Cartes complètes, comme avant" },
         { id: "btnCatalogue", titre: "Catalogue d'idées", sous: "Tes idées de voyage classées" },
         { id: "btnIdeesMenu", titre: "Trouver des idées", sous: "Autour de moi, étapes, régions" },
         { id: "btnCarte", titre: "Carte des lieux", sous: "Tous les lieux sur une carte" }
@@ -151,6 +156,7 @@ function ouvrirMenuIdees() {
         const ligne = evenement.target.closest("[data-cible]");
         if (!ligne) return;
         fond.remove();
+        if (ligne.dataset.cible === "niTrier") { openTrier(); return; }
         declencher(ligne.dataset.cible);
     });
 }
