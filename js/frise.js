@@ -17,6 +17,7 @@ import { ouvrirGoogleMaps } from "./location.js";
 import { openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
 import { libelleMoment, rangMoment } from "./programme.js";
+import { chargerMeteo, meteoEnCache, coordonnees, estimerTrajet, formaterTrajet, lienTrajet, lienJournee } from "./journee-infos.js";
 
 
 function echapper(texte) {
@@ -63,6 +64,7 @@ function evenementsDuJour(voyage, jour) {
             sous: [nomLieu(b.lieuDepart), nomLieu(b.destination)].filter(Boolean).join(" → "),
             lieu: b.lieuDepart?.nom || b.destination || null,
             emoji: emojiType(b.type),
+            coord: coordonnees(b.lieuDepart) || coordonnees(b.destination),
             fichiers: (b.fichiers || []).length
         }))
         .sort((a, b) => (a.minutes ?? 1e9) - (b.minutes ?? 1e9));
@@ -78,6 +80,7 @@ function evenementsDuJour(voyage, jour) {
             sous: [libelleMoment(e.moment), e.lieu?.nom].filter(Boolean).join(" · "),
             lieu: e.lieu?.nom || null,
             emoji: estLogement(e) ? "🛏️" : "📍",
+            coord: coordonnees(e.lieu),
             fait: !!e.realise
         }));
 
@@ -136,6 +139,8 @@ export function openFrise(voyage, jourDepart = null) {
                     ${jours.map((j, i) => `<button type="button" role="tab" class="niPuce niPuceJour${j === jour ? " niPuceActive" : ""}" data-jour="${j}" aria-selected="${j === jour}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${new Date(j + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" })}</span></button>`).join("")}
                 </div>
 
+                <div id="niMeteoJour"></div>
+
                 ${donnees.sejours.map(s => `
                 <div class="niDocLigne niLigneStatique" style="background:#fff;border:1px solid var(--ni-line);border-radius:14px;margin-bottom:8px">
                     <span class="niIcone">🛏️</span>
@@ -143,10 +148,8 @@ export function openFrise(voyage, jourDepart = null) {
                 </div>`).join("")}
 
                 ${vide ? '<div class="niVide">Rien de prévu ce jour-là.</div>' : `
-                <div class="niCarte">
-                    ${donnees.billets.map(b => ligneBillet(b, b.id === prochainId)).join("")}
-                    ${donnees.activites.map(a => ligneActivite(a)).join("")}
-                </div>`}
+                <div class="niCarte">${lignesAvecTrajets(donnees, prochainId)}</div>
+                ${boutonJournee(donnees)}`}
 
                 <form id="niFriseForm" class="niIdeeForm" autocomplete="off">
                     <input id="niFriseChamp" class="niRecherche" type="text" placeholder="Ajouter à la journée…" aria-label="Ajouter à la journée" enterkeyhint="done">
@@ -155,6 +158,9 @@ export function openFrise(voyage, jourDepart = null) {
             </div>`;
 
         ecran.querySelector("#niFriseRetour").addEventListener("click", fermerFrise);
+        afficherMeteo(v, donnees);
+        ecran.querySelector("#niJourneeItineraire")?.addEventListener("click", e => window.open(e.currentTarget.dataset.lien, "_blank", "noopener"));
+        ecran.querySelectorAll("[data-trajet]").forEach(b => b.addEventListener("click", () => window.open(b.dataset.trajet, "_blank", "noopener")));
 
         ecran.querySelectorAll("[data-jour]").forEach(b => b.addEventListener("click", () => { jour = b.dataset.jour; dessiner(); }));
 
@@ -164,6 +170,58 @@ export function openFrise(voyage, jourDepart = null) {
             e.preventDefault();
             ajouter(v, ecran.querySelector("#niFriseChamp").value);
         });
+    }
+
+    /* Billets puis activités, avec une ligne de trajet estimé entre deux lieux connus. */
+    function lignesAvecTrajets(donnees, prochainId) {
+        const elements = [
+            ...donnees.billets.map(b => ({ coord: b.coord, html: ligneBillet(b, b.id === prochainId) })),
+            ...donnees.activites.map(a => ({ coord: a.coord, html: ligneActivite(a) }))
+        ];
+        let html = "";
+        elements.forEach((el, i) => {
+            const prec = elements[i - 1];
+            if (prec?.coord && el.coord) {
+                const t = estimerTrajet(prec.coord, el.coord);
+                if (t) html += `<button type="button" class="niTrajet" data-trajet="${lienTrajet(prec.coord, el.coord, t.mode)}" aria-label="Itinéraire estimé"><span aria-hidden="true">${t.emoji}</span> ${formaterTrajet(t)}<span class="niTrajetVoir">Itinéraire</span></button>`;
+            }
+            html += el.html;
+        });
+        return html;
+    }
+
+    function boutonJournee(donnees) {
+        const points = [...donnees.billets, ...donnees.activites].map(x => x.coord).filter(Boolean);
+        const lien = lienJournee(points);
+        return lien ? `<button type="button" class="niBouton" id="niJourneeItineraire" data-lien="${echapper(lien)}" style="width:100%;margin-top:10px">Itinéraire de la journée (${points.length} lieux)</button>` : "";
+    }
+
+    /* Météo du jour : lieu de la première étape du jour, sinon lieu du voyage. */
+    function afficherMeteo(v, donnees) {
+        const zone = ecran.querySelector("#niMeteoJour");
+        if (!zone) return;
+        const point = [...donnees.billets, ...donnees.activites].map(x => x.coord).find(Boolean) || coordonnees(v.lieu);
+        if (!point) {
+            zone.innerHTML = '<div class="niMeteo niMeteoVide">Ajoute un lieu au voyage pour voir la météo.</div>';
+            return;
+        }
+        const jourCible = jour;
+        const montrer = jours => {
+            if (jourCible !== jour || !zone.isConnected) return;
+            const m = jours?.get(jourCible);
+            if (!m) {
+                zone.innerHTML = jours === null
+                    ? ""
+                    : '<div class="niMeteo niMeteoVide">Prévisions disponibles environ 16 jours avant la date.</div>';
+                return;
+            }
+            zone.innerHTML = `<div class="niMeteo"><span class="niMeteoEmoji" aria-hidden="true">${m.emoji}</span>
+                <span class="niMeteoTexte"><strong>${m.max}° <span class="niMeteoMin">${m.min}°</span></strong>
+                <span>${echapper(m.libelle)}${m.pluie !== null ? ` · ${m.pluie} % de pluie` : ""} · vent ${m.vent} km/h</span></span></div>`;
+        };
+        const enCache = meteoEnCache(point.lat, point.lon);
+        if (!enCache) zone.innerHTML = '<div class="niMeteo niMeteoVide">Météo…</div>';
+        chargerMeteo(point.lat, point.lon).then(montrer);
     }
 
     function ligneBillet(b, maintenant) {
