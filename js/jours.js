@@ -59,3 +59,36 @@ export function calendrierVoyage(jours, choix, occupes = new Map()) {
     }
     return html + "</div>";
 }
+
+/* Feuille « Aller au jour » : le calendrier du voyage, pour les longs séjours. */
+export function ouvrirCalendrierJour({ jours, courant, occupes, surChoix }) {
+
+    document.getElementById("niCalendrierJour")?.remove();
+
+    const fond = document.createElement("div");
+    fond.id = "niCalendrierJour";
+    fond.className = "niFeuilleFond";
+    fond.innerHTML = `
+        <div class="niFeuille" role="dialog" aria-label="Choisir un jour">
+            <div class="niPoignee"></div>
+            <h2 class="niTitreSection" style="font-size:22px">Aller au jour</h2>
+            ${calendrierVoyage(jours, courant, occupes)}
+        </div>`;
+    document.body.appendChild(fond);
+
+    fond.addEventListener("click", e => {
+        if (e.target === fond) { fond.remove(); return; }
+        const b = e.target.closest("[data-j]");
+        if (!b) return;
+        fond.remove();
+        surChoix(b.dataset.j);
+    });
+    fond.querySelector(".niCalChoix")?.scrollIntoView({ block: "center" });
+}
+
+export const SEUIL_CALENDRIER = 10;   /* au-delà de 10 jours, le bouton calendrier apparaît */
+
+export function boutonCalendrier(jours, courant) {
+    if (jours.length <= SEUIL_CALENDRIER) return "";
+    return `<button type="button" class="niBouton niBoutonCalendrier" id="niJourCalendrier">📅 Calendrier · ${libelleJourCourt(courant, [...jours, "0000-00"])}</button>`;
+}

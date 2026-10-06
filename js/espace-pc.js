@@ -10,6 +10,7 @@
 ==========================================================
 */
 
+import { calendrierVoyage } from "./jours.js";
 import { openBilletForm } from "./billet-form.js";
 import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import { getEnvies, isContainerCategory, updateEnvieDate, updateEnvieMoment, createEnvie } from "./storage.js";
@@ -126,6 +127,12 @@ export function openEspacePc(voyageDepart = null) {
                     <span class="niTag">Listes ${faits} / ${checklist.length}</span>
                     <span class="niTag">Documents ${nbDocuments}</span>
                 </div>
+
+                ${jours.length > 1 ? `
+                <details class="niPcCal" open>
+                    <summary>Calendrier du voyage <span class="niDocSous">cliquer un jour pour y aller, ou y glisser une idée</span></summary>
+                    ${calendrierVoyage(jours, aujourdhui, new Map(parJour.map(p => [p.jour, p.etapes.length + p.billets.length])))}
+                </details>` : ""}
 
                 ${jours.length ? `
                 <div class="niPcJours">
@@ -257,6 +264,23 @@ export function openEspacePc(voyageDepart = null) {
                 if (e.target.closest(".niPcZone")) return;
                 e.preventDefault();
                 placer(glisse, col.dataset.jour, "matin", v);
+            });
+        });
+
+        /* Calendrier : un clic mène à la colonne du jour ; y déposer une idée la place le matin. */
+        ecran.querySelectorAll(".niPcCal [data-j]").forEach(b => {
+            b.addEventListener("click", () => {
+                const col = ecran.querySelector(`.niPcJour[data-jour="${b.dataset.j}"]`);
+                col?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                col?.classList.add("niPcSurvol");
+                setTimeout(() => col?.classList.remove("niPcSurvol"), 900);
+            });
+            b.addEventListener("dragover", e => { if (glisse) { e.preventDefault(); survol(b, true); } });
+            b.addEventListener("dragleave", () => survol(b, false));
+            b.addEventListener("drop", e => {
+                e.preventDefault();
+                survol(b, false);
+                placer(glisse, b.dataset.j, "matin", v);
             });
         });
 
