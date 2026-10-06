@@ -228,7 +228,7 @@ function monterBarre() {
                 openCapturer();
                 break;
             case "plus":
-                cliquerSurPremierVisible(["btnPlus"]);
+                declencher("btnPlus");
                 break;
         }
     });
