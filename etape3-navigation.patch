@@ -1,0 +1,149 @@
+diff --git a/js/nouvelle-interface.js b/js/nouvelle-interface.js
+index 3e4b898..98b8b35 100644
+--- a/js/nouvelle-interface.js
++++ b/js/nouvelle-interface.js
+@@ -72,16 +72,95 @@ function cliquerSurPremierVisible(ids) {
+ }
+ 
+ function fermerEcransNouveaux() {
++    document.getElementById("niIdees")?.remove();
+     fermerCapturer();
+     fermerDocuments();
+     fermerAujourdhui();
+ }
+ 
++
++/* ---------- Navigation Voyages : Liste, Carte, Agenda, Idées ---------- */
++
++function declencher(id) {
++    /* Déclenche le bouton existant, même masqué : la fonction ancienne s'exécute telle quelle. */
++    document.getElementById(id)?.click();
++}
++
++function ouvrirMenuIdees() {
++
++    document.getElementById("niIdees")?.remove();
++
++    const nbATrier = (document.getElementById("inboxBadge")?.textContent || "").trim();
++    const lignes = [
++        { id: "btnInbox", titre: "À trier", sous: "Les idées capturées, à organiser", badge: nbATrier && nbATrier !== "0" ? nbATrier : "" },
++        { id: "btnCatalogue", titre: "Catalogue d'idées", sous: "Tes idées de voyage classées" },
++        { id: "btnIdeesMenu", titre: "Trouver des idées", sous: "Autour de moi, étapes, régions" },
++        { id: "btnCarte", titre: "Carte des lieux", sous: "Tous les lieux sur une carte" }
++    ];
++
++    const fond = document.createElement("div");
++    fond.id = "niIdees";
++    fond.className = "niFeuilleFond";
++    fond.innerHTML = `
++        <div class="niFeuille" role="dialog" aria-label="Idées">
++            <div class="niPoignee"></div>
++            <h2 class="niTitreSection" style="font-size:24px">Idées</h2>
++            <div class="niCarte">
++                ${lignes.map(l => `
++                    <button type="button" class="niDocLigne" data-cible="${l.id}">
++                        <span class="niDocTexte"><span class="niDocTitre">${l.titre}</span><span class="niDocSous">${l.sous}</span></span>
++                        ${l.badge ? `<span class="niTag niTagMaintenant">${l.badge}</span>` : ""}
++                    </button>`).join("")}
++            </div>
++        </div>`;
++    document.body.appendChild(fond);
++
++    fond.addEventListener("click", evenement => {
++        if (evenement.target === fond) { fond.remove(); return; }
++        const ligne = evenement.target.closest("[data-cible]");
++        if (!ligne) return;
++        fond.remove();
++        declencher(ligne.dataset.cible);
++    });
++}
++
++function monterNavVoyages() {
++
++    if (document.getElementById("niNavVoyages")) return;
++
++    const accueil = document.getElementById("headerAccueilActif");
++    const rangeeIcones = accueil?.querySelector(".homeIconRow");
++    if (!accueil || !rangeeIcones) return;
++
++    const nav = document.createElement("div");
++    nav.id = "niNavVoyages";
++    nav.className = "niNavVoyages";
++    nav.setAttribute("role", "tablist");
++    nav.innerHTML = `
++        <button type="button" class="niNavOnglet niNavActif" data-vue="liste">Liste</button>
++        <button type="button" class="niNavOnglet" data-vue="carte">Carte</button>
++        <button type="button" class="niNavOnglet" data-vue="agenda">Agenda</button>
++        <button type="button" class="niNavOnglet" data-vue="idees">Idées</button>`;
++    rangeeIcones.before(nav);
++
++    nav.addEventListener("click", evenement => {
++        const bouton = evenement.target.closest(".niNavOnglet");
++        if (!bouton) return;
++        switch (bouton.dataset.vue) {
++            case "carte": declencher("btnCarteVoyages"); break;
++            case "agenda": declencher("btnAgenda"); break;
++            case "idees": ouvrirMenuIdees(); break;
++            default: window.scrollTo({ top: 0 });
++        }
++    });
++}
++
+ function monterBarre() {
+ 
+     if (document.getElementById("niBarreOnglets")) return;
+ 
+     document.body.classList.add("niActive");
++    monterNavVoyages();
+ 
+     const barre = document.createElement("nav");
+     barre.id = "niBarreOnglets";
+@@ -129,6 +208,7 @@ function monterBarre() {
+     const actualiser = () => {
+         planifie = false;
+         const maison = getModeActif() === "maison";
++        document.body.classList.toggle("niModeVoyage", !maison);
+         const fenetreOuverte = !!document.querySelector(".modal-overlay:not(.hidden), .authScreen:not(.hidden)");
+         const accueilVisible = !!document.getElementById("headerAccueilActif")
+             && !document.getElementById("headerAccueilActif").classList.contains("hidden");
+diff --git a/ni.css b/ni.css
+index 31be393..c4d7573 100644
+--- a/ni.css
++++ b/ni.css
+@@ -403,3 +403,26 @@ body.niBarreVisible main{
+ 
+ .niIconeSombre{background:var(--ni-ink);color:#fff;}
+ .niIconeSombre .niIco{width:22px;height:22px;}
++
++/* ---------- Navigation Voyages (remplace la rangée d'icônes en mode Voyages) ---------- */
++
++.niNavVoyages{display:none;margin-bottom:14px;background:#E1EAED;border-radius:14px;padding:4px;gap:4px;}
++body.niActive.niModeVoyage .niNavVoyages{display:flex;}
++body.niActive.niModeVoyage .homeIconRow{display:none;}
++
++.niNavOnglet{
++    flex:1;
++    min-height:44px;
++    display:flex;
++    align-items:center;
++    justify-content:center;
++    border:0;
++    border-radius:11px;
++    background:none;
++    font:inherit;
++    font-size:14px;
++    font-weight:700;
++    color:var(--ni-muted);
++    cursor:pointer;
++}
++.niNavActif{background:#fff;color:var(--ni-ink);box-shadow:0 1px 2px rgba(14,42,51,.18);}
+diff --git a/sw.js b/sw.js
+index 9666e21..9be28ec 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'envie-cache-v225';
++const CACHE_NAME = 'envie-cache-v226';
+ 
+  
+  

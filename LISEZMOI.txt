@@ -1,16 +1,21 @@
-EnVie - Étape 2 : feuille Capturer (à appliquer APRÈS l'étape 1)
+EnVie - Étape 4 : fiche voyage en 3 phases et blocs (à appliquer APRÈS les étapes 1, 2 et 3)
 
 ARBORESCENCE (à copier à la racine du dépôt)
-  js/capturer.js              NOUVEAU
-  js/nouvelle-interface.js    MODIFIÉ (onglet Capturer ouvre la feuille)
-  ni.css                      MODIFIÉ (styles de la feuille ajoutés en fin de fichier)
-  sw.js                       MODIFIÉ (CACHE_NAME v225 + capturer.js dans le cache)
+  js/fiche-voyage.js          NOUVEAU
+  js/aujourdhui.js            MODIFIÉ (une fonction exportée : phaseDuVoyage)
+  js/nouvelle-interface.js    MODIFIÉ
+  ni.css                      MODIFIÉ
+  sw.js                       MODIFIÉ (CACHE_NAME v227)
 
-Si tu as modifié sw.js depuis l'étape 1, applique plutôt le patch :
-  git apply etape2-capturer.patch
+Si tu as modifié sw.js depuis, applique plutôt le patch : git apply etape4-fiche.patch
 
-Test : bêta activée > onglet Capturer.
-  - Écrire une idée puis Noter : elle arrive dans « À trier ».
-  - Photo : choisir des photos, elles vont dans le voyage sélectionné.
-  - Billet / Dépense : ouvre la fiche du voyage puis la fenêtre d'ajout existante.
-  - Idée détaillée : ancienne fenêtre de création, inchangée.
+PRINCIPE
+  Les 17 accordéons de la fiche ne sont ni réécrits ni supprimés : ils sont déplacés dans des blocs
+  quand la fiche affichée est un voyage, et remis à leur place d'origine pour tout le reste (Maison, idée simple).
+  Pour revenir en arrière : désactiver la bêta dans Plus.
+
+TEST (bêta activée)
+  1. Ouvrir un voyage : phases Préparer | En voyage | Souvenirs, puis les blocs.
+  2. Ouvrir un bloc : les rubriques d'origine sont dedans (billets, tricount, checklist, photos...).
+  3. Ouvrir une fiche Maison : strictement l'ancienne fiche.
+  4. Vérifier que billets, tricount, checklist, photos, lieu, période s'ouvrent et se modifient comme avant.
