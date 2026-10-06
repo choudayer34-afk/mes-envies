@@ -6,11 +6,11 @@
    - Retenir : rattacher l'idée à un voyage (updateEnvieVoyage)
    - Plus tard : la laisser, elle sort de cet écran pour la session
    - Ouvrir : la fiche complète
- Aucune idée n'est supprimée ni modifiée en dehors du rattachement.
+   - Supprimer : mise à la corbeille après confirmation (récupérable)
 ==========================================================
 */
 
-import { getEnvies, getEnvieCategories, isContainerCategory, updateEnvieVoyage } from "./storage.js";
+import { getEnvies, getEnvieCategories, isContainerCategory, updateEnvieVoyage, deleteEnvie } from "./storage.js";
 import { computeContainerStatus } from "./progress.js";
 import { openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
@@ -101,7 +101,8 @@ export function openTrier() {
                 <div class="niBoutons">
                     <button type="button" class="niBouton niBoutonPrimaire" data-act="retenir" ${voyages.length ? "" : "disabled"}>Retenir</button>
                     <button type="button" class="niBouton" data-act="plustard">Plus tard</button>
-                </div>`}
+                </div>
+                <button type="button" class="niLienDiscret" data-act="supprimer" style="align-self:flex-start;min-height:44px;color:#B42318">Supprimer cette idée</button>`}
             </div>`;
     }
 
@@ -111,6 +112,17 @@ export function openTrier() {
         const act = bouton.dataset.act;
 
         if (act === "ouvrir") { fermerTrier(); openEnvie(id); return; }
+
+        if (act === "supprimer") {
+            const idee = getEnvies().find(e => e.id === id);
+            if (!confirm(`Supprimer « ${idee?.titre || "cette idée"} » ?\nElle ira dans la corbeille (récupérable).`)) return;
+            deleteEnvie(id);
+            plusTard.add(id);
+            choixEnCours = null;
+            showToast("Idée supprimée (corbeille)");
+            dessiner();
+            return;
+        }
 
         if (act === "plustard") { plusTard.add(id); choixEnCours = null; dessiner(); return; }
 
