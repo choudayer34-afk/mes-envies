@@ -11,6 +11,7 @@
 ==========================================================
 */
 
+import { emojiType, motType } from "./types-reservation.js";
 import {
     getEnvies, getEnvieCategories, createEnvie, updateEnvieDate, updateEnvieMoment
 } from "./storage.js";
@@ -131,7 +132,7 @@ export function openProgramme(voyage, jourDepart = null) {
                             ${billets.map(b => `
                             <div class="niDocLigne niLigneStatique">
                                 <span class="niHeureCourte">${echapper(b.heureDepart || "")}</span>
-                                <span class="niDocTexte"><span class="niDocTitre">${b.type === "train" ? "🚆" : b.type === "avion" ? "✈️" : "🎫"} ${echapper([b.compagnie, b.numeroVol].filter(Boolean).join(" ") || "Billet")}</span><span class="niDocSous">${echapper([b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "))}</span></span>
+                                <span class="niDocTexte"><span class="niDocTitre">${emojiType(b.type)} ${echapper([b.compagnie, b.numeroVol].filter(Boolean).join(" ") || motType(b.type))}</span><span class="niDocSous">${echapper([b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "))}</span></span>
                                 <span class="niTag">Réservation</span>
                             </div>`).join("")}
                             ${duJour.map(e => `

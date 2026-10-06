@@ -6,11 +6,11 @@
 ==========================================================
 */
 
+import { emojiType, motType, typeReservation, GROUPES_RESERVATION } from "./types-reservation.js";
 import { getEnvies } from "./storage.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { showToast } from "./toast.js";
 
-const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
 
 function echapper(texte) {
     return String(texte ?? "").replace(/[&<>"']/g, c => ({
@@ -40,7 +40,7 @@ function titreBillet(billet) {
     const depart = billet.lieuDepart?.nom;
     const arrivee = billet.destination;
     if (depart && arrivee) return `${depart} → ${arrivee}`;
-    return arrivee || depart || billet.numeroVol || "Billet";
+    return arrivee || depart || billet.numeroVol || billet.compagnie || motType(billet.type);
 }
 
 function ligneBillet(billet, aujourdhui) {
@@ -55,7 +55,7 @@ function ligneBillet(billet, aujourdhui) {
 
     return `
         <button type="button" class="niDocLigne" data-billet="${echapper(billet.id)}" aria-label="Ouvrir ${echapper(titreBillet(billet))}">
-            <span class="niIcone${estAujourdhui ? " niIconeMaintenant" : ""}">${EMOJI_TYPE[billet.type] || "🎫"}</span>
+            <span class="niIcone${estAujourdhui ? " niIconeMaintenant" : ""}">${emojiType(billet.type)}</span>
             <span class="niDocTexte">
                 <span class="niDocTitre">${echapper(titreBillet(billet))}</span>
                 <span class="niDocSous">${echapper(details)}${nbFichiers ? ` · ${nbFichiers} fichier${nbFichiers > 1 ? "s" : ""}` : " · aucun fichier"}</span>
@@ -85,13 +85,16 @@ export function openDocuments(voyageId) {
     ecran.setAttribute("aria-label", "Documents du voyage");
     document.body.appendChild(ecran);
 
+    let groupe = "";
+
     function dessiner(filtre = "") {
 
         const aujourdhui = dateLocaleISO();
         const terme = filtre.trim().toLowerCase();
 
         const billets = listerBillets(voyageId).filter(b =>
-            !terme || `${titreBillet(b)} ${b.compagnie || ""} ${b.numeroVol || ""}`.toLowerCase().includes(terme)
+            (!groupe || typeReservation(b.type).groupe === groupe) &&
+            (!terme || `${titreBillet(b)} ${b.compagnie || ""} ${b.numeroVol || ""}`.toLowerCase().includes(terme))
         );
 
         const utiles = billets.filter(b => b.dateDepart === aujourdhui);
@@ -108,11 +111,19 @@ export function openDocuments(voyageId) {
             </div>
             <div class="niCorps">
                 <input id="niDocRecherche" class="niRecherche" type="search" placeholder="Rechercher un document" aria-label="Rechercher un document" value="${echapper(filtre)}">
+                <div class="niSelecteurVoyage" role="group" aria-label="Filtrer par catégorie">
+                    ${[{ id: "", libelle: "Tous" }, ...GROUPES_RESERVATION].map(g => `<button type="button" class="niPuce${g.id === groupe ? " niPuceActive" : ""}" data-groupe="${g.id}"><span class="niPuceTitre">${g.libelle}</span></button>`).join("")}
+                </div>
                 ${horsLigne}
                 ${utiles.length ? `<div class="niSection"><span class="niEtiquette">Utiles maintenant</span><div class="niCarte">${utiles.map(b => ligneBillet(b, aujourdhui)).join("")}</div></div>` : ""}
                 ${autres.length ? `<div class="niSection"><span class="niEtiquette">${utiles.length ? "Autres documents" : "Billets et titres de transport"}</span><div class="niCarte">${autres.map(b => ligneBillet(b, aujourdhui)).join("")}</div></div>` : ""}
                 ${billets.length === 0 ? `<div class="niVide">${terme ? "Aucun résultat." : "Aucun billet ajouté pour ce voyage. Ajoute-en depuis la fiche du voyage."}</div>` : ""}
             </div>`;
+
+        ecran.querySelectorAll("[data-groupe]").forEach(b => b.addEventListener("click", () => {
+            groupe = b.dataset.groupe;
+            dessiner(ecran.querySelector("#niDocRecherche")?.value || "");
+        }));
 
         ecran.querySelector("#niDocRetour").addEventListener("click", fermerDocuments);
 

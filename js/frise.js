@@ -9,6 +9,7 @@
 ==========================================================
 */
 
+import { emojiType, motType } from "./types-reservation.js";
 import { getEnvies, getEnvieCategories, createEnvie, updateEnvieRealise } from "./storage.js";
 import { listerBillets, dateLocaleISO } from "./documents.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
@@ -17,7 +18,6 @@ import { openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
 import { libelleMoment, rangMoment } from "./programme.js";
 
-const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
 
 function echapper(texte) {
     return String(texte ?? "").replace(/[&<>"']/g, c => ({
@@ -59,10 +59,10 @@ function evenementsDuJour(voyage, jour) {
             genre: "billet", billet: b, id: b.id,
             heure: b.heureDepart || "",
             minutes: minutes(b.heureDepart),
-            titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || (b.type === "train" ? "Train" : "Billet")}`.trim(),
+            titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || motType(b.type)}`.trim(),
             sous: [b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "),
             lieu: b.lieuDepart?.nom || b.destination || null,
-            emoji: EMOJI_TYPE[b.type] || "🎫",
+            emoji: emojiType(b.type),
             fichiers: (b.fichiers || []).length
         }))
         .sort((a, b) => (a.minutes ?? 1e9) - (b.minutes ?? 1e9));

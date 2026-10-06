@@ -6,6 +6,8 @@
 ==========================================================
 */
 
+import { openReservations } from "./reservations.js";
+import { emojiType, motType } from "./types-reservation.js";
 import { getEnvies, isContainerCategory, getEnvieCategories } from "./storage.js";
 import { computeContainerStatus } from "./progress.js";
 import { formatPeriode } from "./periode.js";
@@ -21,7 +23,6 @@ import { openEnvie } from "./envie.js";
 import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
 import { showToast } from "./toast.js";
 
-const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
 
 function echapper(texte) {
     return String(texte ?? "").replace(/[&<>"']/g, c => ({
@@ -124,10 +125,10 @@ function evenementsDuJour(voyage) {
             billet: b,
             heure: b.heureDepart || null,
             minutes: heureEnMinutes(b.heureDepart),
-            titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || (b.type === "train" ? "Train" : "Billet")}`.trim(),
+            titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || motType(b.type)}`.trim(),
             sous: [b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "),
             lieu: b.lieuDepart?.nom || b.destination || null,
-            emoji: EMOJI_TYPE[b.type] || "🎫"
+            emoji: emojiType(b.type)
         }))
         .sort((a, b) => (a.minutes ?? 1e9) - (b.minutes ?? 1e9));
 
@@ -312,6 +313,10 @@ export function openAujourdhui() {
                     <span class="niTuileTitre">Valises</span>
                     <span class="niDocSous">${bilan.valises.faits} / ${bilan.valises.total} articles</span>
                 </button>` : ""}
+                <button type="button" class="niTuile" id="niOuvrirReservations">
+                    <span class="niTuileTitre">Réservations</span>
+                    <span class="niDocSous">${(voyage.billets || []).length} ajoutée${(voyage.billets || []).length > 1 ? "s" : ""}</span>
+                </button>
                 <button type="button" class="niTuile" id="niOuvrirDocuments">
                     <span class="niTuileTitre">Documents</span>
                     <span class="niDocSous">${bilan.pieces} pièce${bilan.pieces > 1 ? "s" : ""}</span>
@@ -380,6 +385,7 @@ export function openAujourdhui() {
         else if (action === "programme") openProgramme(voyage);
         else ouvrirFiche();
     }));
+    ecran.querySelector("#niOuvrirReservations")?.addEventListener("click", () => openReservations(voyage.id));
     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
     ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
     ecran.querySelector("#niOuvrirProgramme")?.addEventListener("click", () => openProgramme(voyage));

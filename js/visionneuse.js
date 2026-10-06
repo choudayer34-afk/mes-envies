@@ -7,6 +7,7 @@
 ==========================================================
 */
 
+import { emojiType, motType } from "./types-reservation.js";
 import { resoudreSource } from "./hors-ligne.js";
 
 let verrouEcran = null;
@@ -33,7 +34,7 @@ function resumeBillet(billet) {
     const jour = billet.dateDepart
         ? new Date(billet.dateDepart + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })
         : "";
-    const ligne1 = [billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || (billet.type === "train" ? "Train" : "Billet");
+    const ligne1 = [billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || motType(billet.type);
     const ligne2 = [jour, billet.heureDepart ? "départ " + billet.heureDepart : "", billet.heureArrivee ? "arrivée " + billet.heureArrivee : ""].filter(Boolean).join(" · ");
     return { ligne1, trajet, ligne2, reference: billet.reference || billet.referenceReservation || "" };
 }

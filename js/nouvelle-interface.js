@@ -6,6 +6,7 @@
 ==========================================================
 */
 
+import { fermerReservations } from "./reservations.js";
 import { getModeActif } from "./storage.js";
 import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
 import { fermerDocuments } from "./documents.js";
@@ -109,6 +110,7 @@ function fermerEcransNouveaux() {
     document.getElementById("niIdees")?.remove();
     fermerCapturer();
     fermerDocuments();
+    fermerReservations();
     fermerPret();
     fermerFrise();
     fermerEspacePc();

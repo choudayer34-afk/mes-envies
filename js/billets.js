@@ -18,7 +18,7 @@ let currentBilletDestination = null;
 let currentBilletLieuDepart = null;
 let currentBilletDate = null;
 
-const EMOJI_PAR_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
+import { EMOJI_PAR_TYPE } from "./types-reservation.js";
 
 function getEnvieCourante() {
     return getEnvies().find(e => e.id === getCurrentEnvieId());

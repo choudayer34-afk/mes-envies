@@ -1,4 +1,5 @@
 import { getEnvies, updateEnvieRealise, getModeActif, updateEnvieChecklistTodo } from "./storage.js";
+import { EMOJI_PAR_TYPE, motType } from "./types-reservation.js";
 import { groupForAgenda } from "./grouping.js";
 import { getBilletsAujourdhui } from "./billets.js";
 import { getCategorieById, openEvaluationAccordion, openEnvie } from "./envie.js";
@@ -141,7 +142,7 @@ function construirePseudoEnviesTodo(envies) {
 
 function construirePseudoEnviesBillets(envies) {
 
-    const emojiParType = { avion: "✈️", train: "🚆", autre: "🎫" };
+    const emojiParType = EMOJI_PAR_TYPE;
     const pseudos = [];
 
     envies.forEach(envie => {
@@ -152,7 +153,7 @@ function construirePseudoEnviesBillets(envies) {
 
                 pseudos.push({
                     id: `billetAgenda_${envie.id}_${billet.id}`,
-                    titre: `${emojiParType[billet.type] || "🎫"} ${[billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || "Billet"} (${envie.titre})`,
+                    titre: `${emojiParType[billet.type] || "🎫"} ${[billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || motType(billet.type)} (${envie.titre})`,
                     categorie: null,
                     date: { start: billet.dateDepart, type: "single" },
                     realise: false,

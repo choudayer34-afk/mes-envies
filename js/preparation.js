@@ -12,6 +12,8 @@ import { getEnvies, getEnvieCategories, voyageADocumentExpire } from "./storage.
 import { listerBillets } from "./documents.js";
 import { listeJours, etapesDuJour } from "./programme.js";
 
+const TRAJETS = ["avion", "train", "busferry"];
+
 function estLogement(envie) {
     const cat = getEnvieCategories().find(c => c.id === envie.categorie);
     return cat?.label?.toLowerCase().includes("logement") || false;
@@ -37,9 +39,9 @@ export function bilanPreparation(voyage) {
     /* Réservations */
     {
         const aRetour = !!fin && v.date?.end && v.date.end !== v.date.start
-            && billets.some(b => b.dateDepart && b.dateDepart >= v.date.end);
+            && billets.some(b => TRAJETS.includes(b.type) && b.dateDepart && b.dateDepart >= v.date.end);
         const attendRetour = billets.length > 0 && !!v.date?.end && v.date.end !== v.date.start && !aRetour
-            && billets.some(b => b.type === "avion" || b.type === "train");
+            && billets.some(b => TRAJETS.includes(b.type));
         const ratio = billets.length === 0 ? 0 : (attendRetour ? 0.5 : 1);
         criteres.push({
             id: "reservations", titre: "Réservations", ratio,
@@ -53,7 +55,7 @@ export function bilanPreparation(voyage) {
 
     /* Logement */
     {
-        const ok = enfants.some(estLogement);
+        const ok = enfants.some(estLogement) || billets.some(b => b.type === "logement");
         criteres.push({ id: "logement", titre: "Logement", ratio: ok ? 1 : 0, detail: ok ? "Ajouté au voyage" : "Aucun logement ajouté" });
         if (!ok) manques.push({ id: "fiche", texte: "Aucun logement ajouté", sous: "Ouvrir la fiche du voyage", bouton: "Ouvrir" });
     }
