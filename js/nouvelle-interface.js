@@ -7,6 +7,7 @@
 */
 
 import { fermerListes } from "./listes.js";
+import { fermerRecherche, poserRaccourciRecherche } from "./recherche.js";
 import { fermerHub } from "./fiche-hub.js";
 import { fermerVoyageurs } from "./voyageurs-ecran.js";
 import { fermerNotesLiens } from "./notes-liens.js";
@@ -121,6 +122,7 @@ function fermerEcransNouveaux() {
     fermerVoyages();
     fermerBilletForm();
     fermerListes();
+    fermerRecherche();
     fermerHub();
     fermerVoyageurs();
     fermerNotesLiens();
@@ -243,6 +245,7 @@ function monterBarre() {
     if (document.getElementById("niBarreOnglets")) return;
 
     document.body.classList.add("niActive");
+    poserRaccourciRecherche();
     monterNavVoyages();
 
     const barre = document.createElement("nav");

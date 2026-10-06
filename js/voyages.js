@@ -7,6 +7,7 @@
 ==========================================================
 */
 
+import { openRecherche } from "./recherche.js";
 import { getEnvies, isContainerCategory } from "./storage.js";
 import { formatPeriode } from "./periode.js";
 import { openEnvie } from "./envie.js";
@@ -195,6 +196,7 @@ function dessiner(ecran) {
         <div class="niCorps">
             <div class="niVoyagesEntete">
                 <h1 class="niTitrePage">Voyages</h1>
+                <button type="button" class="niBoutonIcone niVoyagesLoupe" id="niVoyagesLoupe" aria-label="Rechercher">🔍</button>
                 <button type="button" class="niBouton niBoutonPrimaire niVoyagesNouveau" id="niVoyagesNouveau">+ Nouveau</button>
             </div>
             <div class="niNavVoyagesFiche" role="tablist">
@@ -243,6 +245,7 @@ function branchements(ecran) {
 
     ecran.querySelector("#niVoyagesTrier")?.addEventListener("click", () => openTrier());
     ecran.querySelector("#niVoyagesPasses")?.addEventListener("click", () => { filtre = "passes"; redessiner(); });
+    ecran.querySelector("#niVoyagesLoupe")?.addEventListener("click", () => openRecherche());
     ecran.querySelector("#niVoyagesNouveau")?.addEventListener("click", () => openNouveauVoyage());
     ecran.querySelector("#niVoyagesAncienne")?.addEventListener("click", () => {
         memoriserAncienneListe(true);
