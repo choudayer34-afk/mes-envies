@@ -687,6 +687,7 @@ button.niArgentCase{cursor:pointer;min-height:44px;}
 #niRecherche .niBarreHaut{gap:10px}
 #niRecherche .niRecherche{flex:1;min-width:0}
 .niVoyagesLoupe{flex:none;width:44px;height:44px;margin-left:auto;margin-right:8px}
+.niVoyagesReglages{flex:none;width:44px;height:44px;margin-right:8px}
 
 /* Les fenêtres de l'ancienne application (Plus, Jeux, Survie, Guide, À propos, Corbeille…)
    n'ont pas de niveau défini : elles passaient sous les écrans de la nouvelle interface. */
