@@ -15,7 +15,7 @@ import { listerBillets, dateLocaleISO } from "./documents.js";
 import { bilanPreparation } from "./preparation.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { showToast } from "./toast.js";
-import { TYPES_RESERVATION, GROUPES_RESERVATION, typeReservation, titreCourtBillet, nomLieu, libelleSens } from "./types-reservation.js";
+import { TYPES_RESERVATION, GROUPES_RESERVATION, typeReservation, titreCourtBillet, nomLieu, libelleSens, libelleArrivee } from "./types-reservation.js";
 
 function echapper(texte) {
     return String(texte ?? "").replace(/[&<>"']/g, c => ({
@@ -45,7 +45,7 @@ function ajouterReservation(voyageId, typeId, billetId = null) {
 function ligne(b, aujourdhui) {
     const t = typeReservation(b.type);
     const nb = (b.fichiers || []).length;
-    const details = [libelleSens(b), formatCourt(b.dateDepart), b.heureDepart, b.compagnie, b.numeroVol]
+    const details = [libelleSens(b), formatCourt(b.dateDepart), b.heureDepart, libelleArrivee(b), b.compagnie, b.numeroVol]
         .filter(Boolean).join(" · ");
     const maintenant = b.dateDepart === aujourdhui;
     return `

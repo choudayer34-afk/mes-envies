@@ -66,6 +66,7 @@ export function etapesBillets(billets) {
             dateDepart: b.retour.dateDepart || null,
             heureDepart: b.retour.heureDepart || null,
             heureArrivee: b.retour.heureArrivee || null,
+            dateArrivee: b.retour.dateArrivee || null,
             numeroVol: b.retour.numeroVol || b.numeroVol || null,
             lieuDepart: b.destination ? (typeof b.destination === "string" ? { nom: b.destination } : b.destination) : null,
             destination: b.lieuDepart || null,
@@ -73,6 +74,14 @@ export function etapesBillets(billets) {
         });
     });
     return etapes;
+}
+
+/* « arrive 06:10 » ou « arrive jeu. 8 oct. 06:10 » si l'arrivée est un autre jour que le départ */
+export function libelleArrivee(b) {
+    if (!b.heureArrivee && !(b.dateArrivee && b.dateArrivee !== b.dateDepart)) return "";
+    const autreJour = b.dateArrivee && b.dateArrivee !== b.dateDepart;
+    const jour = autreJour ? new Date(b.dateArrivee + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" }) : "";
+    return `arrive ${[jour, b.heureArrivee].filter(Boolean).join(" ")}`;
 }
 
 /* Nom d'un lieu de billet : objet {nom, …} (autocomplétion) ou simple texte */

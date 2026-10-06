@@ -10,7 +10,7 @@
 
 import { getEnvies, getEnvieCategories, getPersonnes, updateEnvieNumeros } from "./storage.js";
 import { listerBillets, dateLocaleISO } from "./documents.js";
-import { nomLieu, emojiType, titreCourtBillet, motType } from "./types-reservation.js";
+import { nomLieu, emojiType, titreCourtBillet, motType, libelleArrivee } from "./types-reservation.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { etatHorsLigne } from "./hors-ligne.js";
@@ -111,7 +111,7 @@ export function openUrgence(voyageOuId = null) {
                 <span class="niIcone">${emojiType(b.type)}</span>
                 <span class="niDocTexte">
                     <span class="niDocTitre">${echapper(lieux || titreCourtBillet(b))}</span>
-                    <span class="niDocSous">${echapper([b.heureDepart, b.compagnie, b.numeroVol].filter(Boolean).join(" · ") || motType(b.type))}</span>
+                    <span class="niDocSous">${echapper([b.heureDepart, libelleArrivee(b), b.compagnie, b.numeroVol].filter(Boolean).join(" · ") || motType(b.type))}</span>
                     ${b.numeroVol ? `<span class="niUrgRef">${echapper(b.numeroVol)}</span>` : ""}
                 </span>
                 ${(b.fichiers || []).length ? `<button type="button" class="niBouton niBoutonPrimaire" data-billet="${echapper(b.id)}">Voir</button>` : '<span class="niTag niTagAttention">Sans fichier</span>'}

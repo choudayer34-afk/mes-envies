@@ -75,6 +75,17 @@ export function fermerBilletForm() {
 }
 
 /* options : { billetId, type, apres } — billetId : identifiant du billet à modifier */
+/* Vrai si l'arrivée tombe le même jour mais avant l'heure de départ (vol de nuit, par exemple). */
+function avertirNuit(dateDepart, heureDepart, dateArrivee, heureArrivee) {
+    return !!(dateDepart && heureDepart && heureArrivee && (!dateArrivee || dateArrivee === dateDepart) && heureArrivee < heureDepart);
+}
+
+function jourSuivant(iso) {
+    const d = new Date(iso + "T12:00:00");
+    d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 export function openBilletForm(voyageId, options = {}) {
 
     fermerBilletForm();
@@ -95,7 +106,10 @@ export function openBilletForm(voyageId, options = {}) {
         enCours: 0,
         lus: new Set(),
         bandeau: "",
-        dejaLu: !!existant
+        dejaLu: !!existant,
+        /* Date d'arrivée : par défaut celle du départ ; « manuelle » dès qu'elle est choisie ou différente */
+        arriveeManuelle: !!existant?.dateArrivee && existant.dateArrivee !== existant.dateDepart,
+        retourArriveeManuelle: !!existant?.retour?.dateArrivee && existant.retour.dateArrivee !== existant.retour.dateDepart
     };
     const debut = voyage.date?.start || "";
     const fin = voyage.date?.end || voyage.date?.start || "";
@@ -105,6 +119,8 @@ export function openBilletForm(voyageId, options = {}) {
         date: existant ? (existant.dateDepart || "") : debut,
         heure: existant?.heureDepart || "",
         arrivee: existant?.heureArrivee || "",
+        dateArrivee: existant?.dateArrivee || (existant ? (existant.dateDepart || "") : debut),
+        retourDateArrivee: existant?.retour?.dateArrivee || existant?.retour?.dateDepart || (existant ? "" : fin),
         retourDate: existant?.retour?.dateDepart || (existant ? "" : fin),
         retourHeure: existant?.retour?.heureDepart || "",
         retourArrivee: existant?.retour?.heureArrivee || "",
@@ -122,13 +138,19 @@ export function openBilletForm(voyageId, options = {}) {
     document.body.appendChild(ecran);
 
     function lireChamps() {
-        ["nom", "numero", "date", "heure", "arrivee", "retourDate", "retourHeure", "retourArrivee", "retourNumero", "lien", "de", "vers"].forEach(k => {
+        ["nom", "numero", "date", "heure", "arrivee", "dateArrivee", "retourDate", "retourHeure", "retourArrivee", "retourDateArrivee", "retourNumero", "lien", "de", "vers"].forEach(k => {
             const el = ecran.querySelector(`[data-champ="${k}"]`);
             if (el) valeurs[k] = el.value;
         });
+        /* Tant que l'arrivée n'a pas été choisie, elle suit le départ. */
+        if (!etat.arriveeManuelle) valeurs.dateArrivee = valeurs.date;
+        if (!etat.retourArriveeManuelle) valeurs.retourDateArrivee = valeurs.retourDate;
     }
 
     function dessiner() {
+
+        if (!etat.arriveeManuelle) valeurs.dateArrivee = valeurs.date;
+        if (!etat.retourArriveeManuelle) valeurs.retourDateArrivee = valeurs.retourDate;
 
         const p = PARAMS[etat.type] || PARAMS.autre;
         const trajet = !!p.trajet;
@@ -176,7 +198,11 @@ export function openBilletForm(voyageId, options = {}) {
                         <label class="niBfLabel">${p.date}<input class="niRecherche" data-champ="date" type="date" value="${echapper(valeurs.date)}"></label>
                         ${p.heure ? `<label class="niBfLabel">${p.heure}<input class="niRecherche" data-champ="heure" type="time" value="${echapper(valeurs.heure)}"></label>` : ""}
                     </div>
-                    ${trajet ? `<label class="niBfLabel">Heure d'arrivée<input class="niRecherche" data-champ="arrivee" type="time" value="${echapper(valeurs.arrivee)}"></label>` : ""}
+                    ${trajet ? `<div class="niBfDeux">
+                        <label class="niBfLabel">Arrivée le<input class="niRecherche" data-champ="dateArrivee" type="date" value="${echapper(valeurs.dateArrivee)}"></label>
+                        <label class="niBfLabel">Heure d'arrivée<input class="niRecherche" data-champ="arrivee" type="time" value="${echapper(valeurs.arrivee)}"></label>
+                    </div>
+                    ${avertirNuit(valeurs.date, valeurs.heure, valeurs.dateArrivee, valeurs.arrivee) ? `<div class="niBandeau">L'arrivée (${echapper(valeurs.arrivee)}) est avant le départ (${echapper(valeurs.heure)}) le même jour. <button type="button" class="niLienDiscret" data-lendemain="aller">Arrivée le lendemain</button></div>` : ""}` : ""}
                     ${!debut ? "" : (!existant ? `<span class="niDocSous">Dates pré-remplies avec celles du voyage : à ajuster si besoin.</span>` : "")}
                 </div>
 
@@ -199,8 +225,10 @@ export function openBilletForm(voyageId, options = {}) {
                         <label class="niBfLabel">Date du retour<input class="niRecherche" data-champ="retourDate" type="date" value="${echapper(valeurs.retourDate)}"></label>
                         <div class="niBfDeux">
                             <label class="niBfLabel">Départ du retour<input class="niRecherche" data-champ="retourHeure" type="time" value="${echapper(valeurs.retourHeure)}"></label>
-                            <label class="niBfLabel">Arrivée du retour<input class="niRecherche" data-champ="retourArrivee" type="time" value="${echapper(valeurs.retourArrivee)}"></label>
+                            <label class="niBfLabel">Arrivée du retour le<input class="niRecherche" data-champ="retourDateArrivee" type="date" value="${echapper(valeurs.retourDateArrivee)}"></label>
                         </div>
+                        <label class="niBfLabel">Heure d'arrivée du retour<input class="niRecherche" data-champ="retourArrivee" type="time" value="${echapper(valeurs.retourArrivee)}"></label>
+                        ${avertirNuit(valeurs.retourDate, valeurs.retourHeure, valeurs.retourDateArrivee, valeurs.retourArrivee) ? `<div class="niBandeau">L'arrivée du retour est avant son départ le même jour. <button type="button" class="niLienDiscret" data-lendemain="retour">Arrivée le lendemain</button></div>` : ""}
                         <label class="niBfLabel">Numéro du retour (si différent)<input class="niRecherche" data-champ="retourNumero" type="text" value="${echapper(valeurs.retourNumero)}" autocomplete="off"></label>`
                     : `<label class="niBfLabel">${p.fin}<input class="niRecherche" data-champ="retourDate" type="date" value="${echapper(valeurs.retourDate)}"></label>`) : ""}
                 </div>` : ""}
@@ -273,6 +301,26 @@ export function openBilletForm(voyageId, options = {}) {
             lireChamps();
             etat.type = b.dataset.type;
             if (!(PARAMS[etat.type].trajet || PARAMS[etat.type].fin)) etat.retour = false;
+            dessiner();
+        }));
+
+        ecran.querySelector('[data-champ="dateArrivee"]')?.addEventListener("change", () => {
+            lireChamps();
+            etat.arriveeManuelle = valeurs.dateArrivee !== valeurs.date;
+            dessiner();
+        });
+        ecran.querySelector('[data-champ="retourDateArrivee"]')?.addEventListener("change", () => {
+            lireChamps();
+            etat.retourArriveeManuelle = valeurs.retourDateArrivee !== valeurs.retourDate;
+            dessiner();
+        });
+        ["heure", "arrivee", "retourHeure", "retourArrivee", "date", "retourDate"].forEach(k => {
+            ecran.querySelector(`[data-champ="${k}"]`)?.addEventListener("change", () => { lireChamps(); dessiner(); });
+        });
+        ecran.querySelectorAll("[data-lendemain]").forEach(b => b.addEventListener("click", () => {
+            lireChamps();
+            if (b.dataset.lendemain === "retour") { valeurs.retourDateArrivee = jourSuivant(valeurs.retourDate); etat.retourArriveeManuelle = true; }
+            else { valeurs.dateArrivee = jourSuivant(valeurs.date); etat.arriveeManuelle = true; }
             dessiner();
         }));
 
@@ -413,6 +461,7 @@ export function openBilletForm(voyageId, options = {}) {
                 dateDepart: valeurs.retourDate || null,
                 heureDepart: trajet ? (valeurs.retourHeure || null) : null,
                 heureArrivee: trajet ? (valeurs.retourArrivee || null) : null,
+                dateArrivee: trajet && valeurs.retourDateArrivee && valeurs.retourDateArrivee !== valeurs.retourDate ? valeurs.retourDateArrivee : null,
                 numeroVol: trajet ? (valeurs.retourNumero.trim() || null) : null
             };
         }
@@ -424,6 +473,7 @@ export function openBilletForm(voyageId, options = {}) {
             dateDepart: valeurs.date || null,
             heureDepart: p.heure ? (valeurs.heure || null) : null,
             heureArrivee: trajet ? (valeurs.arrivee || null) : null,
+            dateArrivee: trajet && valeurs.dateArrivee && valeurs.dateArrivee !== valeurs.date ? valeurs.dateArrivee : null,
             lieuDepart: depart,
             destination,
             lienApp: valeurs.lien.trim() || null,
