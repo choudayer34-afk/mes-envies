@@ -695,3 +695,15 @@ body.niActive .modal-overlay{z-index:2000}
 
 /* Fenêtres de l'ancienne application ouvertes depuis l'écran Listes */
 body.niActive #assignModal,body.niActive #checklistEditItemModal{z-index:2300}
+
+/* Calendrier du voyage (feuille « Placer ») */
+.niCal{display:flex;flex-direction:column;gap:12px}
+.niCalTitre{display:block;font-weight:700;text-transform:capitalize;margin-bottom:4px}
+.niCalGrille{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.niCalEntete{text-align:center;font-size:11px;font-weight:700;color:var(--ni-muted)}
+.niCalJour{position:relative;display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:12px;border:1px solid var(--ni-line);background:#fff;color:var(--ni-ink);font:inherit;font-weight:600;padding:0}
+.niCalHors{background:transparent;border-color:transparent;color:var(--ni-line);font-weight:400}
+.niCalChoix{background:var(--ni-ink);color:#fff;border-color:var(--ni-ink)}
+.niCalPoint{position:absolute;bottom:5px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ni-brand)}
+.niCalChoix .niCalPoint{background:#fff}
+#niPlacer .niBoutons{position:sticky;bottom:-20px;background:var(--ni-bg);padding:8px 0 4px}
