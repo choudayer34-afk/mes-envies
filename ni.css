@@ -629,3 +629,28 @@ button.niArgentCase{cursor:pointer;min-height:44px;}
 .niLigneAction .niDocLigne{border-top:0;flex:1;min-width:0;width:auto;}
 .niLigneAction .niBoutonIcone{flex:none;width:44px;height:44px;}
 .niBfLieu .autocompleteSuggestions:empty{display:none;}
+
+/* ---------- Nouvelle dépense ---------- */
+#niDepenseForm{z-index:2400;}
+.niDfGros{font-size:28px;font-weight:700;min-height:60px;}
+
+.niBfLu .niRecherche{background:#F1FAF7;border-color:#7CC8B5;}
+.niBfTagLu{align-self:flex-start;font-size:11px;font-weight:700;color:var(--ni-brand-d);background:var(--ni-brand-s);border-radius:999px;padding:2px 8px;}
+.niBfLabel{position:relative;}
+
+/* ---------- Écran Listes ---------- */
+#niListes{z-index:2200;}
+#niListesReprise{z-index:2250;}
+.niListeLigne{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--ni-line);}
+.niListeLigne:first-child{border-top:0;}
+.niListeCase{flex:none;width:44px;height:44px;border-radius:12px;border:2px solid var(--ni-line);background:#fff;font-size:22px;font-weight:700;color:#fff;cursor:pointer;}
+.niListeCase[aria-pressed="true"]{background:var(--ni-brand);border-color:var(--ni-brand);}
+.niListeLigne.niFait .niDocTitre{text-decoration:line-through;}
+.niListePers{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.niPuceMini{min-height:36px;padding:0 12px;border-radius:999px;border:1px solid var(--ni-line);background:#fff;font:inherit;font-size:13px;font-weight:600;color:var(--ni-ink);cursor:pointer;}
+.niPuceMiniOk{background:var(--ni-brand-s);border-color:var(--ni-brand);color:var(--ni-brand-d);}
+.niPuceSeparateur{flex:none;width:1px;background:var(--ni-line);margin:6px 2px;}
+.niListeAjout{align-items:center;}
+.niListeAjout .niRecherche{flex:1;min-width:0;}
+.niListeAjout .niListeCat{flex:0 0 38%;}
+.niBfCorps .niSelecteurVoyage{margin:0;padding:2px 0 6px;}
