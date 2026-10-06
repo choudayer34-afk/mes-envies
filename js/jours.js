@@ -92,3 +92,55 @@ export function boutonCalendrier(jours, courant) {
     if (jours.length <= SEUIL_CALENDRIER) return "";
     return `<button type="button" class="niBouton niBoutonCalendrier" id="niJourCalendrier">📅 Calendrier · ${libelleJourCourt(courant, [...jours, "0000-00"])}</button>`;
 }
+
+/* ---------- Sélecteur de jour pour les longs voyages : semaine + flèches + calendrier ---------- */
+
+const LETTRES = ["L", "M", "M", "J", "V", "S", "D"];
+
+function lundiDe(iso) {
+    const d = new Date(iso + "T12:00:00");
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d;
+}
+
+function isoLocal(d) {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export function selecteurJour(jours, courant, occupes = new Map()) {
+
+    const dansVoyage = new Set(jours);
+    const i = jours.indexOf(courant);
+    const lundi = lundiDe(courant);
+    const mois = new Date(courant + "T12:00:00").toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
+
+    let semaine = "";
+    for (let k = 0; k < 7; k++) {
+        const d = new Date(lundi);
+        d.setDate(lundi.getDate() + k);
+        const iso = isoLocal(d);
+        const n = occupes.get(iso) || 0;
+        semaine += dansVoyage.has(iso)
+            ? `<button type="button" class="niSemJour${iso === courant ? " niSemChoix" : ""}" data-sj="${iso}" aria-pressed="${iso === courant}" aria-label="J${jours.indexOf(iso) + 1}, ${d.getDate()}${n ? `, ${n} prévu${n > 1 ? "s" : ""}` : ""}"><span class="niSemLettre">${LETTRES[k]}</span><span class="niSemNum">${d.getDate()}</span>${n ? '<i class="niCalPoint"></i>' : ""}</button>`
+            : `<span class="niSemJour niSemHors" aria-hidden="true"><span class="niSemLettre">${LETTRES[k]}</span><span class="niSemNum">${d.getDate()}</span></span>`;
+    }
+
+    return `
+        <div class="niSemaine" role="group" aria-label="Choisir un jour">
+            <div class="niSemaineEntete">
+                <button type="button" class="niBoutonIcone" data-snav="-1" aria-label="Jour précédent"${i <= 0 ? " disabled" : ""}>‹</button>
+                <button type="button" class="niSemaineTitre" id="niJourCalendrier"><span>📅 <span style="text-transform:capitalize">${mois}</span></span><span class="niDocSous">J${i + 1} sur ${jours.length}</span></button>
+                <button type="button" class="niBoutonIcone" data-snav="1" aria-label="Jour suivant"${i >= jours.length - 1 ? " disabled" : ""}>›</button>
+            </div>
+            <div class="niSemaineJours">${semaine}</div>
+        </div>`;
+}
+
+export function brancherSelecteurJour(racine, { jours, courant, occupes, surChoix }) {
+    racine.querySelectorAll("[data-sj]").forEach(b => b.addEventListener("click", () => surChoix(b.dataset.sj)));
+    racine.querySelectorAll("[data-snav]").forEach(b => b.addEventListener("click", () => {
+        const cible = jours[jours.indexOf(courant) + Number(b.dataset.snav)];
+        if (cible) surChoix(cible);
+    }));
+    racine.querySelector("#niJourCalendrier")?.addEventListener("click", () => ouvrirCalendrierJour({ jours, courant, occupes, surChoix }));
+}

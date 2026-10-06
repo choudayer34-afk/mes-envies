@@ -11,7 +11,7 @@
 ==========================================================
 */
 
-import { libelleJourCourt, calendrierVoyage, ouvrirCalendrierJour, boutonCalendrier } from "./jours.js";
+import { libelleJourCourt, calendrierVoyage, selecteurJour, brancherSelecteurJour, SEUIL_CALENDRIER } from "./jours.js";
 import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import {
     getEnvies, getEnvieCategories, createEnvie, updateEnvieDate, updateEnvieMoment
@@ -131,10 +131,10 @@ export function openProgramme(voyage, jourDepart = null) {
                 <div class="niBarreTitre"><h1>Programme</h1><span>${echapper(v.titre || "Voyage")} · ${planifies} jour${planifies > 1 ? "s" : ""} sur ${jours.length} planifié${planifies > 1 ? "s" : ""}</span></div>
             </div>
             <div class="niCorps">
-                ${boutonCalendrier(jours, jour)}
+                ${jours.length > SEUIL_CALENDRIER ? selecteurJour(jours, jour, nbParJour) : `
                 <div class="niSelecteurVoyage" role="tablist" aria-label="Jours du voyage">
                     ${jours.map((j, i) => `<button type="button" role="tab" class="niPuce niPuceJour${j === jour ? " niPuceActive" : ""}" data-jour="${j}" aria-selected="${j === jour}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${libelleJourCourt(j, jours)}</span><span class="niPuceSous">${nbParJour.get(j) ? nbParJour.get(j) + " prévu" + (nbParJour.get(j) > 1 ? "s" : "") : "vide"}</span></button>`).join("")}
-                </div>
+                </div>`}
 
                 <div class="niSection">
                     <h2 class="niTitreSection" style="font-size:18px">J${numero} · ${echapper(libelle)}</h2>
@@ -196,8 +196,8 @@ export function openProgramme(voyage, jourDepart = null) {
             </div>`;
 
         ecran.querySelector("#niProgRetour").addEventListener("click", fermerProgramme);
-        ecran.querySelector("#niJourCalendrier")?.addEventListener("click", () => ouvrirCalendrierJour({ jours, courant: jour, occupes: nbParJour, surChoix: j => { jour = j; dessiner(); } }));
-        ecran.querySelector(".niPuceActive")?.scrollIntoView({ inline: "center", block: "nearest" });
+        if (jours.length > SEUIL_CALENDRIER) brancherSelecteurJour(ecran, { jours, courant: jour, occupes: nbParJour, surChoix: j => { jour = j; dessiner(); ecran.scrollTop = 0; } });
+        else ecran.querySelector(".niPuceActive")?.scrollIntoView({ inline: "center", block: "nearest" });
         ecran.querySelectorAll("[data-jour]").forEach(b => b.addEventListener("click", () => { jour = b.dataset.jour; dessiner(); }));
         ecran.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => agir(b, v)));
         ecran.querySelector("#niProgForm").addEventListener("submit", e => {
