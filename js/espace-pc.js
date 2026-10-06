@@ -69,6 +69,8 @@ export function openEspacePc(voyageDepart = null) {
     document.addEventListener("keydown", toucheClavier);
 
     let glisse = null;   /* id de l'étape en cours de glissement */
+    let calOuvert = true;   /* le calendrier se replie après le choix d'un jour, pour voir la colonne */
+    let jourCal = "";
 
     function dessiner() {
 
@@ -129,9 +131,9 @@ export function openEspacePc(voyageDepart = null) {
                 </div>
 
                 ${jours.length > 1 ? `
-                <details class="niPcCal" open>
-                    <summary>Calendrier du voyage <span class="niDocSous">cliquer un jour pour y aller, ou y glisser une idée</span></summary>
-                    ${calendrierVoyage(jours, aujourdhui, new Map(parJour.map(p => [p.jour, p.etapes.length + p.billets.length])))}
+                <details class="niPcCal"${calOuvert ? " open" : ""}>
+                    <summary>Calendrier du voyage <span class="niDocSous" id="niPcCalInfo">${jourCal ? echapper("· " + new Date(jourCal + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })) : "cliquer un jour pour y aller, ou y glisser une idée"}</span></summary>
+                    ${calendrierVoyage(jours, jourCal || aujourdhui, new Map(parJour.map(p => [p.jour, p.etapes.length + p.billets.length])))}
                 </details>` : ""}
 
                 ${jours.length ? `
@@ -267,13 +269,26 @@ export function openEspacePc(voyageDepart = null) {
             });
         });
 
+        ecran.querySelector(".niPcCal")?.addEventListener("toggle", e => { calOuvert = e.target.open; });
+
         /* Calendrier : un clic mène à la colonne du jour ; y déposer une idée la place le matin. */
         ecran.querySelectorAll(".niPcCal [data-j]").forEach(b => {
             b.addEventListener("click", () => {
                 const col = ecran.querySelector(`.niPcJour[data-jour="${b.dataset.j}"]`);
-                col?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
-                col?.classList.add("niPcSurvol");
-                setTimeout(() => col?.classList.remove("niPcSurvol"), 900);
+                jourCal = b.dataset.j;
+                calOuvert = false;
+                const bloc = ecran.querySelector(".niPcCal");
+                if (bloc) bloc.open = false;
+                const info = ecran.querySelector("#niPcCalInfo");
+                if (info) info.textContent = "· " + new Date(jourCal + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+                ecran.querySelectorAll(".niPcCal .niCalChoix").forEach(x => x.classList.remove("niCalChoix"));
+                b.classList.add("niCalChoix");
+                /* Après le repli, la colonne est amenée en haut de la zone visible. */
+                setTimeout(() => {
+                    col?.scrollIntoView({ behavior: "smooth", inline: "center", block: "start" });
+                    col?.classList.add("niPcSurvol");
+                    setTimeout(() => col?.classList.remove("niPcSurvol"), 1200);
+                }, 60);
             });
             b.addEventListener("dragover", e => { if (glisse) { e.preventDefault(); survol(b, true); } });
             b.addEventListener("dragleave", () => survol(b, false));
