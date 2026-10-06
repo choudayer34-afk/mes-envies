@@ -9,6 +9,7 @@
 import { getModeActif } from "./storage.js";
 import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
 import { fermerDocuments } from "./documents.js";
+import { openCapturer, fermerCapturer } from "./capturer.js";
 
 const CLE = "envie_nouvelle_interface";
 
@@ -71,6 +72,7 @@ function cliquerSurPremierVisible(ids) {
 }
 
 function fermerEcransNouveaux() {
+    fermerCapturer();
     fermerDocuments();
     fermerAujourdhui();
 }
@@ -114,7 +116,7 @@ function monterBarre() {
                 marquer("voyages");
                 break;
             case "capturer":
-                cliquerSurPremierVisible(["btnEnvieCompact", "btnEnvie"]);
+                openCapturer();
                 break;
             case "plus":
                 cliquerSurPremierVisible(["btnPlus"]);
