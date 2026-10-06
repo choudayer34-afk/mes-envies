@@ -1,0 +1,907 @@
+diff --git a/js/aujourdhui.js b/js/aujourdhui.js
+index cad2ed9..de4c3b8 100644
+--- a/js/aujourdhui.js
++++ b/js/aujourdhui.js
+@@ -9,7 +9,8 @@
+ import { getEnvies, isContainerCategory, getEnvieCategories } from "./storage.js";
+ import { computeContainerStatus } from "./progress.js";
+ import { formatPeriode } from "./periode.js";
+-import { ouvrirFichier } from "./billets.js";
++import { ouvrirVisionneuse } from "./visionneuse.js";
++import { openPret } from "./pret.js";
+ import { ouvrirGoogleMaps } from "./location.js";
+ import { openEnvie } from "./envie.js";
+ import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
+@@ -281,6 +282,10 @@ export function openAujourdhui() {
+                     <span class="niTuileTitre">Documents</span>
+                     <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
+                 </button>
++                <button type="button" class="niTuile" id="niOuvrirPret">
++                    <span class="niTuileTitre">Prêt à partir ?</span>
++                    <span class="niDocSous">Vérifier et télécharger</span>
++                </button>
+                 <button type="button" class="niTuile" id="niOuvrirFicheTuile">
+                     <span class="niTuileTitre">Fiche du voyage</span>
+                     <span class="niDocSous">Programme, listes, dépenses</span>
+@@ -297,11 +302,12 @@ export function openAujourdhui() {
+     ecran.querySelector("#niOuvrirFicheTuile")?.addEventListener("click", ouvrirFiche);
+     ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
+     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
++    ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
+ 
+     const prochain = donnees.prochain;
+ 
+     ecran.querySelector("#niProchainBillet")?.addEventListener("click", () => {
+-        ouvrirFichier(prochain.billet.fichiers, 0);
++        ouvrirVisionneuse(prochain.billet.fichiers, 0);
+     });
+ 
+     ecran.querySelector("#niProchainItineraire")?.addEventListener("click", () => {
+diff --git a/js/billets.js b/js/billets.js
+index c08b62d..70f8a43 100644
+--- a/js/billets.js
++++ b/js/billets.js
+@@ -38,7 +38,7 @@ function fichierVersDataURL(file) {
+ }
+ 
+ function estimerTailleOctets(dataUrl) {
+-    return Math.ceil((dataUrl.length * 3) / 4);
++    return Math.ceil(((dataUrl || "").length * 3) / 4);
+ }
+ 
+ function formatDateBillet(dateIso) {
+@@ -180,7 +180,7 @@ export function ouvrirFichier(fichiers, indexDepart) {
+                 </div>
+                 <div style="position:relative;flex:1;">
+                     ${boutonsNavigation}
+-                    <iframe src="${fichier.dataUrl}" style="width:100%;height:100%;border:none;border-radius:12px;background:white;"></iframe>
++                    <iframe src="${fichier.dataUrl || fichier.url}" style="width:100%;height:100%;border:none;border-radius:12px;background:white;"></iframe>
+                 </div>
+             `;
+ 
+@@ -193,7 +193,7 @@ export function ouvrirFichier(fichiers, indexDepart) {
+                 </div>
+                 <div style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                     ${boutonsNavigation}
+-                    <img src="${fichier.dataUrl}" style="max-width:100%;max-height:100%;border-radius:12px;">
++                    <img src="${fichier.dataUrl || fichier.url}" style="max-width:100%;max-height:100%;border-radius:12px;">
+                 </div>
+             `;
+ 
+diff --git a/js/documents.js b/js/documents.js
+index ecb5a0a..67c3129 100644
+--- a/js/documents.js
++++ b/js/documents.js
+@@ -7,7 +7,7 @@
+ */
+ 
+ import { getEnvies } from "./storage.js";
+-import { ouvrirFichier } from "./billets.js";
++import { ouvrirVisionneuse } from "./visionneuse.js";
+ import { showToast } from "./toast.js";
+ 
+ const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
+@@ -132,7 +132,7 @@ export function openDocuments(voyageId) {
+                     showToast("Aucun fichier joint à ce billet");
+                     return;
+                 }
+-                ouvrirFichier(billet.fichiers, 0);
++                ouvrirVisionneuse(billet.fichiers, 0);
+             });
+         });
+     }
+diff --git a/js/hors-ligne.js b/js/hors-ligne.js
+new file mode 100644
+index 0000000..ebd1f7f
+--- /dev/null
++++ b/js/hors-ligne.js
+@@ -0,0 +1,85 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ hors-ligne.js : copie locale (IndexedDB) des fichiers hébergés
++ Les fichiers encore stockés dans les documents (dataUrl) n'ont pas
++ besoin de cette copie : l'application les conserve déjà.
++==========================================================
++*/
++
++const BASE = "envie-hors-ligne";
++const MAGASIN = "fichiers";
++
++function ouvrirBase() {
++    return new Promise((resolve, reject) => {
++        if (!("indexedDB" in window)) { reject(new Error("IndexedDB indisponible")); return; }
++        const requete = indexedDB.open(BASE, 1);
++        requete.onupgradeneeded = () => requete.result.createObjectStore(MAGASIN);
++        requete.onsuccess = () => resolve(requete.result);
++        requete.onerror = () => reject(requete.error);
++    });
++}
++
++async function transaction(mode, action) {
++    const base = await ouvrirBase();
++    return new Promise((resolve, reject) => {
++        const tx = base.transaction(MAGASIN, mode);
++        const resultat = action(tx.objectStore(MAGASIN));
++        tx.oncomplete = () => { base.close(); resolve(resultat?.result); };
++        tx.onerror = () => { base.close(); reject(tx.error); };
++    });
++}
++
++export async function enregistrerFichier(url, blob) {
++    await transaction("readwrite", magasin => magasin.put(blob, url));
++}
++
++export async function lireFichier(url) {
++    try { return (await transaction("readonly", magasin => magasin.get(url))) || null; }
++    catch { return null; }
++}
++
++export async function estDisponibleLocalement(fichier) {
++    if (!fichier) return false;
++    if (fichier.dataUrl) return true;
++    if (!fichier.url) return false;
++    return !!(await lireFichier(fichier.url));
++}
++
++/* Source utilisable dans <img> ou <iframe> : copie locale si elle existe, sinon l'adresse en ligne. */
++export async function resoudreSource(fichier) {
++    if (fichier.dataUrl) return fichier.dataUrl;
++    if (!fichier.url) return "";
++    const local = await lireFichier(fichier.url);
++    return local ? URL.createObjectURL(local) : fichier.url;
++}
++
++/* Télécharge les fichiers hébergés d'un voyage. Ne modifie aucune donnée. */
++export async function telechargerFichiersVoyage(voyage, surProgression = () => {}) {
++
++    const fichiers = (voyage.billets || [])
++        .flatMap(b => b.fichiers || [])
++        .filter(f => f.url && !f.dataUrl);
++
++    let faits = 0, nouveaux = 0, echecs = 0;
++
++    for (const fichier of fichiers) {
++        try {
++            if (await lireFichier(fichier.url)) {
++                faits++;
++            } else {
++                const reponse = await fetch(fichier.url);
++                if (!reponse.ok) throw new Error("HTTP " + reponse.status);
++                await enregistrerFichier(fichier.url, await reponse.blob());
++                nouveaux++;
++                faits++;
++            }
++        } catch (erreur) {
++            console.error("Hors-ligne : échec de copie : " + erreur.message);
++            echecs++;
++        }
++        surProgression(faits + echecs, fichiers.length);
++    }
++
++    return { total: fichiers.length, nouveaux, echecs };
++}
+diff --git a/js/migration-billets.js b/js/migration-billets.js
+new file mode 100644
+index 0000000..28b7129
+--- /dev/null
++++ b/js/migration-billets.js
+@@ -0,0 +1,327 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ migration-billets.js : déplacer les fichiers des billets hors des documents
++
++ Déroulement, voyage par voyage, avec retour possible :
++   1. Sauvegarde complète (obligatoire)
++   2. Copier : envoi vers le stockage + vérification de la taille.
++      Les fichiers d'origine restent dans le document.
++   3. Libérer la place : retire la copie d'origine, seulement après
++      une nouvelle vérification de l'adresse.
++ Retours : « Annuler la copie » (avant l'étape 3) ou
++           « Restaurer depuis une sauvegarde » (après).
++==========================================================
++*/
++
++import { getEnvies, updateEnvieBillets } from "./storage.js";
++import { exporterSauvegarde, sauvegardeFaiteDansLaSession, lireSauvegarde } from "./sauvegarde.js";
++import { showToast } from "./toast.js";
++
++const POINT_ENVOI = "/upload-partage";
++const TOLERANCE_TAILLE = 0.02;
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++function octetsDataUrl(dataUrl) {
++    const virgule = dataUrl.indexOf(",");
++    return Math.floor(((dataUrl.length - (virgule + 1)) * 3) / 4);
++}
++
++function formatTaille(octets) {
++    return octets > 1048576 ? `${(octets / 1048576).toFixed(1)} Mo` : `${Math.round(octets / 1024)} Ko`;
++}
++
++/* ---------- Analyse (lecture seule) ---------- */
++
++export function analyserVoyages() {
++    return getEnvies()
++        .filter(e => (e.billets || []).some(b => (b.fichiers || []).length))
++        .map(e => {
++            const fichiers = e.billets.flatMap(b => b.fichiers || []);
++            return {
++                id: e.id,
++                titre: e.titre || "Sans titre",
++                total: fichiers.length,
++                aCopier: fichiers.filter(f => f.dataUrl && !f.url).length,
++                copies: fichiers.filter(f => f.dataUrl && f.url).length,
++                libres: fichiers.filter(f => !f.dataUrl && f.url).length,
++                octets: fichiers.reduce((s, f) => s + (f.dataUrl ? octetsDataUrl(f.dataUrl) : 0), 0)
++            };
++        });
++}
++
++/* ---------- Envoi et vérification ---------- */
++
++async function verifierAdresse(url, octetsAttendus) {
++    const reponse = await fetch(url);
++    if (!reponse.ok) throw new Error("adresse inaccessible (" + reponse.status + ")");
++    const blob = await reponse.blob();
++    const ecart = Math.abs(blob.size - octetsAttendus) / Math.max(octetsAttendus, 1);
++    if (ecart > TOLERANCE_TAILLE) throw new Error("taille différente de l'original");
++}
++
++async function envoyer(fichier) {
++
++    const blob = await (await fetch(fichier.dataUrl)).blob();
++    const type = blob.type || (fichier.type === "pdf" ? "application/pdf" : "image/jpeg");
++
++    const formulaire = new FormData();
++    formulaire.append("fichier", new File([blob], fichier.nom || "billet", { type }));
++
++    const reponse = await fetch(POINT_ENVOI, { method: "POST", body: formulaire });
++    if (!reponse.ok) throw new Error("envoi refusé (" + reponse.status + ")");
++
++    const donnees = await reponse.json();
++    if (!donnees.url) throw new Error("aucune adresse reçue");
++
++    await verifierAdresse(donnees.url, blob.size);
++    return donnees.url;
++}
++
++/* ---------- Étape 2 : copier ---------- */
++
++export async function copierVoyage(voyageId, surProgression = () => {}) {
++
++    const voyage = getEnvies().find(e => e.id === voyageId);
++    if (!voyage) throw new Error("Voyage introuvable");
++
++    const adresses = new Map();   /* "billetId:index" -> { url, longueur } */
++    const echecs = [];
++
++    const aTraiter = (voyage.billets || []).flatMap(b =>
++        (b.fichiers || []).map((f, i) => ({ billetId: b.id, i, f })).filter(x => x.f.dataUrl && !x.f.url)
++    );
++
++    let fait = 0;
++    for (const { billetId, i, f } of aTraiter) {
++        try {
++            const url = await envoyer(f);
++            adresses.set(`${billetId}:${i}`, { url, longueur: f.dataUrl.length });
++        } catch (erreur) {
++            console.error("Migration : " + (f.nom || "fichier") + " : " + erreur.message);
++            echecs.push(`${f.nom || "fichier"} : ${erreur.message}`);
++        }
++        surProgression(++fait, aTraiter.length);
++    }
++
++    if (adresses.size) {
++        /* Relecture juste avant l'écriture, pour ne pas écraser une modification faite entre-temps. */
++        const frais = getEnvies().find(e => e.id === voyageId);
++        const billets = (frais.billets || []).map(b => ({
++            ...b,
++            fichiers: (b.fichiers || []).map((f, i) => {
++                const trouve = adresses.get(`${b.id}:${i}`);
++                if (trouve && f.dataUrl && !f.url && f.dataUrl.length === trouve.longueur) {
++                    return { ...f, url: trouve.url, migreLe: Date.now() };
++                }
++                return f;
++            })
++        }));
++        updateEnvieBillets(voyageId, billets);
++    }
++
++    return { copies: adresses.size, echecs };
++}
++
++/* ---------- Étape 3 : libérer la place ---------- */
++
++export async function libererVoyage(voyageId) {
++
++    if (!sauvegardeFaiteDansLaSession()) throw new Error("Fais d'abord la sauvegarde complète");
++
++    const voyage = getEnvies().find(e => e.id === voyageId);
++    if (!voyage) throw new Error("Voyage introuvable");
++
++    const sains = new Set();
++    const echecs = [];
++
++    for (const b of voyage.billets || []) {
++        for (let i = 0; i < (b.fichiers || []).length; i++) {
++            const f = b.fichiers[i];
++            if (f.dataUrl && f.url && f.migreLe) {
++                try {
++                    await verifierAdresse(f.url, octetsDataUrl(f.dataUrl));
++                    sains.add(`${b.id}:${i}`);
++                } catch (erreur) {
++                    echecs.push(`${f.nom || "fichier"} : ${erreur.message}`);
++                }
++            }
++        }
++    }
++
++    if (sains.size) {
++        const frais = getEnvies().find(e => e.id === voyageId);
++        const billets = (frais.billets || []).map(b => ({
++            ...b,
++            fichiers: (b.fichiers || []).map((f, i) => {
++                if (sains.has(`${b.id}:${i}`) && f.dataUrl && f.url) {
++                    const { dataUrl, ...reste } = f;
++                    return { ...reste, libereLe: Date.now() };
++                }
++                return f;
++            })
++        }));
++        updateEnvieBillets(voyageId, billets);
++    }
++
++    return { liberes: sains.size, echecs };
++}
++
++/* ---------- Retours ---------- */
++
++export function annulerCopie(voyageId) {
++
++    const voyage = getEnvies().find(e => e.id === voyageId);
++    if (!voyage) throw new Error("Voyage introuvable");
++
++    let annules = 0;
++    const billets = (voyage.billets || []).map(b => ({
++        ...b,
++        fichiers: (b.fichiers || []).map(f => {
++            if (f.dataUrl && f.url) {
++                const { url, migreLe, ...reste } = f;
++                annules++;
++                return reste;
++            }
++            return f;
++        })
++    }));
++
++    if (annules) updateEnvieBillets(voyageId, billets);
++    return annules;
++}
++
++export async function restaurerDepuisSauvegarde(voyageId, fichierSauvegarde) {
++
++    const sauvegarde = await lireSauvegarde(fichierSauvegarde);
++    const ancien = sauvegarde.envies.find(e => e.id === voyageId);
++
++    if (!ancien) throw new Error("Ce voyage n'existe pas dans cette sauvegarde");
++    if (!Array.isArray(ancien.billets)) throw new Error("Aucun billet dans la sauvegarde pour ce voyage");
++
++    updateEnvieBillets(voyageId, ancien.billets);
++    return ancien.billets.length;
++}
++
++/* ---------- Écran ---------- */
++
++export function fermerMigration() {
++    document.getElementById("niMigration")?.remove();
++}
++
++export function openMigration() {
++
++    fermerMigration();
++
++    const ecran = document.createElement("div");
++    ecran.id = "niMigration";
++    ecran.className = "niEcran";
++    document.body.appendChild(ecran);
++
++    let message = "";
++
++    function dessiner() {
++
++        const voyages = analyserVoyages();
++        const sauvegarde = sauvegardeFaiteDansLaSession();
++
++        ecran.innerHTML = `
++            <div class="niBarreHaut">
++                <button type="button" class="niBoutonIcone" id="niMigRetour" aria-label="Retour">←</button>
++                <div class="niBarreTitre"><h1>Billets : stockage</h1><span>Déplacer les fichiers hors des documents</span></div>
++            </div>
++            <div class="niCorps">
++                <div class="niBandeau">Les billets sont aujourd'hui enregistrés dans le document du voyage, qui a une taille limitée. On les déplace voyage par voyage, avec une sauvegarde d'abord et un retour possible à chaque étape.</div>
++
++                <div class="niCarte" style="padding:14px;display:flex;flex-direction:column;gap:10px">
++                    <span class="niDocTitre">1. Sauvegarde complète</span>
++                    <span class="niDocSous">${sauvegarde ? "Faite pendant cette session." : "Obligatoire avant de continuer. Garde le fichier en lieu sûr."}</span>
++                    <button type="button" class="niBouton ${sauvegarde ? "" : "niBoutonPrimaire"}" id="niMigSauvegarde">${sauvegarde ? "Refaire la sauvegarde" : "Faire la sauvegarde"}</button>
++                </div>
++
++                ${message ? `<div class="niBandeau niBandeauInfo" role="status">${echapper(message)}</div>` : ""}
++
++                ${voyages.length === 0 ? '<div class="niVide">Aucun voyage avec des billets.</div>' : voyages.map(v => `
++                <div class="niCarte" style="padding:14px;display:flex;flex-direction:column;gap:10px" data-voyage="${echapper(v.id)}">
++                    <span class="niDocTitre">${echapper(v.titre)}</span>
++                    <span class="niDocSous">${v.total} fichier${v.total > 1 ? "s" : ""} · ${v.aCopier} à copier · ${v.copies} copié${v.copies > 1 ? "s" : ""} (à libérer) · ${v.libres} déjà libéré${v.libres > 1 ? "s" : ""}${v.octets ? ` · ${formatTaille(v.octets)} dans le document` : ""}</span>
++                    <div class="niBoutons" style="flex-wrap:wrap">
++                        <button type="button" class="niBouton niBoutonPrimaire" data-act="copier" ${!sauvegarde || !v.aCopier ? "disabled" : ""}>2. Copier</button>
++                        <button type="button" class="niBouton" data-act="liberer" ${!sauvegarde || !v.copies ? "disabled" : ""}>3. Libérer la place</button>
++                    </div>
++                    <div class="niBoutons" style="flex-wrap:wrap">
++                        <button type="button" class="niBouton" data-act="annuler" ${!v.copies ? "disabled" : ""}>Annuler la copie</button>
++                        <label class="niBouton niBoutonFichier">Restaurer depuis une sauvegarde<input type="file" accept="application/json,.json" data-act="restaurer" hidden></label>
++                    </div>
++                </div>`).join("")}
++            </div>`;
++
++        ecran.querySelector("#niMigRetour").addEventListener("click", fermerMigration);
++
++        ecran.querySelector("#niMigSauvegarde").addEventListener("click", () => {
++            exporterSauvegarde();
++            message = "Sauvegarde téléchargée.";
++            dessiner();
++        });
++
++        ecran.querySelectorAll("[data-act]").forEach(el => {
++            const evenement = el.tagName === "INPUT" ? "change" : "click";
++            el.addEventListener(evenement, () => agir(el));
++        });
++    }
++
++    async function agir(el) {
++
++        const carte = el.closest("[data-voyage]");
++        const id = carte.dataset.voyage;
++        const voyage = analyserVoyages().find(v => v.id === id);
++        const act = el.dataset.act;
++
++        try {
++
++            if (act === "copier") {
++                el.disabled = true;
++                const r = await copierVoyage(id, (n, total) => { message = `Copie en cours : ${n} / ${total}…`; el.textContent = message; });
++                message = r.echecs.length
++                    ? `${r.copies} copié(s). Échecs (rien n'a été modifié pour ceux-là) : ${r.echecs.join(" ; ")}`
++                    : `${r.copies} fichier(s) copié(s) et vérifié(s). Les originaux sont toujours dans le document.`;
++            }
++
++            else if (act === "liberer") {
++                if (!confirm(`Retirer du document les ${voyage.copies} fichier(s) déjà copié(s) de « ${voyage.titre} » ?\n\nLe retour se fait ensuite avec « Restaurer depuis une sauvegarde ».`)) return;
++                const r = await libererVoyage(id);
++                message = r.echecs.length
++                    ? `${r.liberes} libéré(s). Gardés dans le document car non vérifiés : ${r.echecs.join(" ; ")}`
++                    : `${r.liberes} fichier(s) libéré(s).`;
++            }
++
++            else if (act === "annuler") {
++                const n = annulerCopie(id);
++                message = `${n} copie(s) annulée(s). Les fichiers d'origine n'ont pas bougé.`;
++            }
++
++            else if (act === "restaurer") {
++                const fichier = el.files?.[0];
++                el.value = "";
++                if (!fichier) return;
++                if (!confirm(`Remplacer les billets de « ${voyage.titre} » par ceux de la sauvegarde « ${fichier.name} » ?`)) return;
++                const n = await restaurerDepuisSauvegarde(id, fichier);
++                message = `${n} billet(s) restauré(s) depuis la sauvegarde.`;
++            }
++
++        } catch (erreur) {
++            message = "Erreur : " + erreur.message;
++            console.error("Migration : " + erreur.message);
++        }
++
++        setTimeout(dessiner, 600);
++        dessiner();
++    }
++
++    dessiner();
++}
+diff --git a/js/nouvelle-interface.js b/js/nouvelle-interface.js
+index 4042842..21f69ec 100644
+--- a/js/nouvelle-interface.js
++++ b/js/nouvelle-interface.js
+@@ -11,6 +11,10 @@ import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
+ import { fermerDocuments } from "./documents.js";
+ import { openCapturer, fermerCapturer } from "./capturer.js";
+ import { initFicheVoyage } from "./fiche-voyage.js";
++import { exporterSauvegarde } from "./sauvegarde.js";
++import { openMigration, fermerMigration } from "./migration-billets.js";
++import { fermerPret } from "./pret.js";
++import { fermerVisionneuse } from "./visionneuse.js";
+ 
+ const CLE = "envie_nouvelle_interface";
+ 
+@@ -50,6 +54,28 @@ function injecterReglage() {
+     });
+ 
+     modale.appendChild(bouton);
++
++    /* Outils de la nouvelle interface : sauvegarde et migration des billets. */
++    if (nouvelleInterfaceActive()) {
++        const outils = [
++            { id: "plusBtnSauvegardeComplete", texte: "💾 Sauvegarde complète (fichier)", action: () => exporterSauvegarde() },
++            { id: "plusBtnMigrationBillets", texte: "📦 Billets : déplacer vers le stockage", action: () => {
++                document.getElementById("plusModal")?.classList.add("hidden");
++                openMigration();
++            } }
++        ];
++        outils.forEach(o => {
++            if (document.getElementById(o.id)) return;
++            const b = document.createElement("button");
++            b.id = o.id;
++            b.type = "button";
++            b.className = "secondaryButton";
++            b.style.cssText = "width:100%;margin-bottom:10px;";
++            b.textContent = o.texte;
++            b.addEventListener("click", o.action);
++            modale.appendChild(b);
++        });
++    }
+ }
+ 
+ /* ---------- Barre d'onglets ---------- */
+@@ -76,6 +102,9 @@ function fermerEcransNouveaux() {
+     document.getElementById("niIdees")?.remove();
+     fermerCapturer();
+     fermerDocuments();
++    fermerPret();
++    fermerMigration();
++    fermerVisionneuse();
+     fermerAujourdhui();
+ }
+ 
+diff --git a/js/pret.js b/js/pret.js
+new file mode 100644
+index 0000000..577aa4c
+--- /dev/null
++++ b/js/pret.js
+@@ -0,0 +1,137 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ pret.js : écran « Prêt à partir ? »
++ Vérifie ce qui est prévu (lecture seule) et permet de télécharger
++ sur l'appareil les fichiers hébergés pour les avoir sans réseau.
++==========================================================
++*/
++
++import { getEnvies, getEnvieCategories } from "./storage.js";
++import { listerBillets } from "./documents.js";
++import { telechargerFichiersVoyage, estDisponibleLocalement } from "./hors-ligne.js";
++import { openEnvie } from "./envie.js";
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++function estLogement(envie) {
++    const cat = getEnvieCategories().find(c => c.id === envie.categorie);
++    return cat?.label?.toLowerCase().includes("logement") || false;
++}
++
++export function fermerPret() {
++    document.getElementById("niPret")?.remove();
++}
++
++async function etatFichiers(voyage) {
++    const fichiers = listerBillets(voyage.id).flatMap(b => b.fichiers || []);
++    const hebergesAbsents = [];
++    let dansDocument = 0, locaux = 0;
++    for (const f of fichiers) {
++        if (f.dataUrl) { dansDocument++; continue; }
++        if (f.url && await estDisponibleLocalement(f)) locaux++;
++        else if (f.url) hebergesAbsents.push(f);
++    }
++    return { total: fichiers.length, dansDocument, locaux, absents: hebergesAbsents.length };
++}
++
++export async function openPret(voyage) {
++
++    fermerPret();
++    if (!voyage) return;
++
++    const ecran = document.createElement("div");
++    ecran.id = "niPret";
++    ecran.className = "niEcran";
++    document.body.appendChild(ecran);
++
++    let message = "";
++
++    async function dessiner() {
++
++        const v = getEnvies().find(e => e.id === voyage.id) || voyage;
++        const enfants = getEnvies().filter(e => e.voyageId === v.id && !e.supprime);
++        const billets = listerBillets(v.id);
++        const sansFichier = billets.filter(b => !(b.fichiers || []).length).length;
++        const fichiers = await etatFichiers(v);
++        const aFaire = (v.checklist || []).filter(i => !i.checked).length;
++
++        const lignes = [
++            {
++                ok: billets.length > 0,
++                titre: "Réservations",
++                sous: billets.length
++                    ? `${billets.length} billet${billets.length > 1 ? "s" : ""}${sansFichier ? ` · ${sansFichier} sans fichier joint` : ""}`
++                    : "Aucun billet ajouté",
++                attention: sansFichier > 0
++            },
++            {
++                ok: enfants.some(estLogement),
++                titre: "Logement",
++                sous: enfants.some(estLogement) ? "Ajouté au voyage" : "Aucun logement ajouté"
++            },
++            {
++                ok: enfants.length > 0,
++                titre: "Programme",
++                sous: enfants.length ? `${enfants.length} élément${enfants.length > 1 ? "s" : ""}` : "Programme vide"
++            },
++            {
++                ok: fichiers.total > 0 && fichiers.absents === 0,
++                titre: "Documents sans réseau",
++                sous: fichiers.total === 0
++                    ? "Aucun fichier joint"
++                    : `${fichiers.dansDocument} dans l'application · ${fichiers.locaux} copié${fichiers.locaux > 1 ? "s" : ""} sur l'appareil${fichiers.absents ? ` · ${fichiers.absents} à télécharger` : ""}`
++            },
++            {
++                ok: aFaire === 0 && (v.checklist || []).length > 0,
++                titre: "Listes",
++                sous: (v.checklist || []).length
++                    ? (aFaire ? `${aFaire} à cocher` : "Tout est coché")
++                    : "Aucune liste"
++            }
++        ];
++
++        ecran.innerHTML = `
++            <div class="niBarreHaut">
++                <button type="button" class="niBoutonIcone" id="niPretRetour" aria-label="Retour">←</button>
++                <div class="niBarreTitre"><h1>Prêt à partir ?</h1><span>${echapper(v.titre || "Voyage")}</span></div>
++            </div>
++            <div class="niCorps">
++                <div class="niCarte">
++                    ${lignes.map(l => `
++                        <div class="niDocLigne niLigneStatique">
++                            <span class="niIcone ${l.ok && !l.attention ? "" : "niIconeAttention"}">${l.ok && !l.attention ? "✅" : "⚠️"}</span>
++                            <span class="niDocTexte"><span class="niDocTitre">${l.titre}</span><span class="niDocSous">${echapper(l.sous)}</span></span>
++                        </div>`).join("")}
++                </div>
++
++                ${message ? `<div class="niBandeau niBandeauInfo" role="status">${echapper(message)}</div>` : ""}
++
++                <div class="niBandeau">Les fichiers déjà enregistrés dans l'application restent disponibles sans réseau. Les fichiers hébergés en ligne se copient ici sur l'appareil. Les fonds de carte ne sont pas téléchargés : sans réseau, la carte peut rester vide.</div>
++
++                <div class="niBoutons" style="flex-wrap:wrap">
++                    <button type="button" class="niBouton niBoutonPrimaire" id="niPretTelecharger" ${fichiers.absents ? "" : "disabled"}>Télécharger pour le voyage</button>
++                    <button type="button" class="niBouton" id="niPretFiche">Ouvrir la fiche</button>
++                </div>
++            </div>`;
++
++        ecran.querySelector("#niPretRetour").addEventListener("click", fermerPret);
++        ecran.querySelector("#niPretFiche").addEventListener("click", () => { fermerPret(); openEnvie(v.id); });
++
++        const bouton = ecran.querySelector("#niPretTelecharger");
++        bouton.addEventListener("click", async () => {
++            bouton.disabled = true;
++            const r = await telechargerFichiersVoyage(v, (n, total) => { bouton.textContent = `Téléchargement ${n} / ${total}…`; });
++            message = r.echecs
++                ? `${r.nouveaux} fichier(s) téléchargé(s), ${r.echecs} en échec. Vérifie le réseau et recommence.`
++                : `${r.nouveaux} fichier(s) téléchargé(s). Ils sont disponibles sans réseau.`;
++            dessiner();
++        });
++    }
++
++    await dessiner();
++}
+diff --git a/js/sauvegarde.js b/js/sauvegarde.js
+new file mode 100644
+index 0000000..83f8af3
+--- /dev/null
++++ b/js/sauvegarde.js
+@@ -0,0 +1,63 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ sauvegarde.js : export complet des données (JSON) et lecture
++ Lecture seule : aucune donnée n'est modifiée par l'export.
++==========================================================
++*/
++
++import { getEnvies, getEnviesCorbeille } from "./storage.js";
++import { showToast } from "./toast.js";
++
++const CLE_SESSION = "niSauvegardeFaite";
++
++export function sauvegardeFaiteDansLaSession() {
++    try { return !!sessionStorage.getItem(CLE_SESSION); }
++    catch { return false; }
++}
++
++function marquerSauvegarde() {
++    try { sessionStorage.setItem(CLE_SESSION, String(Date.now())); }
++    catch { /* sans effet */ }
++}
++
++export function construireSauvegarde() {
++    const envies = [...getEnvies(), ...getEnviesCorbeille()];
++    return {
++        application: "EnVie",
++        version: 1,
++        date: new Date().toISOString(),
++        nombre: envies.length,
++        envies
++    };
++}
++
++export function exporterSauvegarde() {
++
++    const donnees = construireSauvegarde();
++    const blob = new Blob([JSON.stringify(donnees)], { type: "application/json" });
++    const url = URL.createObjectURL(blob);
++
++    const jour = new Date().toISOString().slice(0, 10);
++    const lien = document.createElement("a");
++    lien.href = url;
++    lien.download = `envie-sauvegarde-${jour}.json`;
++    document.body.appendChild(lien);
++    lien.click();
++    lien.remove();
++    setTimeout(() => URL.revokeObjectURL(url), 10000);
++
++    marquerSauvegarde();
++    showToast(`💾 Sauvegarde de ${donnees.nombre} éléments (${Math.round(blob.size / 1024)} Ko)`);
++
++    return { nombre: donnees.nombre, octets: blob.size };
++}
++
++export async function lireSauvegarde(fichier) {
++    const texte = await fichier.text();
++    const donnees = JSON.parse(texte);
++    if (!donnees || !Array.isArray(donnees.envies)) {
++        throw new Error("Ce fichier n'est pas une sauvegarde EnVie");
++    }
++    return donnees;
++}
+diff --git a/js/visionneuse.js b/js/visionneuse.js
+new file mode 100644
+index 0000000..d811f51
+--- /dev/null
++++ b/js/visionneuse.js
+@@ -0,0 +1,73 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ visionneuse.js : affichage plein écran des fichiers d'un billet
++ Gère les fichiers dans le document (dataUrl) et hébergés (url),
++ avec la copie locale quand elle existe.
++==========================================================
++*/
++
++import { resoudreSource } from "./hors-ligne.js";
++
++export function fermerVisionneuse() {
++    document.getElementById("niVisionneuse")?.remove();
++}
++
++export async function ouvrirVisionneuse(fichiers, indexDepart = 0) {
++
++    fermerVisionneuse();
++
++    const liste = (fichiers || []).filter(f => f && (f.dataUrl || f.url));
++    if (!liste.length) return;
++
++    let index = Math.min(Math.max(indexDepart, 0), liste.length - 1);
++
++    const fond = document.createElement("div");
++    fond.id = "niVisionneuse";
++    fond.className = "niVisionneuse";
++    fond.setAttribute("role", "dialog");
++    fond.setAttribute("aria-label", "Fichier du billet");
++    document.body.appendChild(fond);
++
++    let debutX = 0;
++    fond.addEventListener("touchstart", e => { debutX = e.changedTouches[0].clientX; }, { passive: true });
++    fond.addEventListener("touchend", e => {
++        const delta = e.changedTouches[0].clientX - debutX;
++        if (Math.abs(delta) > 60) aller(delta < 0 ? 1 : -1);
++    }, { passive: true });
++
++    async function dessiner() {
++
++        const fichier = liste[index];
++        const source = await resoudreSource(fichier);
++        const plusieurs = liste.length > 1;
++
++        const contenu = fichier.type === "pdf"
++            ? `<iframe class="niVisionneuseCadre" src="${source}" title="Document"></iframe>`
++            : `<img class="niVisionneuseImage" src="${source}" alt="Billet">`;
++
++        fond.innerHTML = `
++            <div class="niVisionneuseHaut">
++                <button type="button" class="niVisionneuseBouton" id="niVisFermer">← Retour</button>
++                ${plusieurs ? `<span class="niVisionneuseCompteur">${index + 1} / ${liste.length}</span>` : ""}
++            </div>
++            <div class="niVisionneuseCorps">
++                ${plusieurs ? '<button type="button" class="niVisionneuseNav niVisionneusePrec" id="niVisPrec" aria-label="Précédent">‹</button>' : ""}
++                ${contenu}
++                ${plusieurs ? '<button type="button" class="niVisionneuseNav niVisionneuseSuiv" id="niVisSuiv" aria-label="Suivant">›</button>' : ""}
++            </div>`;
++
++        fond.querySelector("#niVisFermer").addEventListener("click", fermerVisionneuse);
++        fond.querySelector("#niVisPrec")?.addEventListener("click", () => aller(-1));
++        fond.querySelector("#niVisSuiv")?.addEventListener("click", () => aller(1));
++    }
++
++    function aller(pas) {
++        const suivant = index + pas;
++        if (suivant < 0 || suivant >= liste.length) return;
++        index = suivant;
++        dessiner();
++    }
++
++    await dessiner();
++}
+diff --git a/ni.css b/ni.css
+index 768c836..40cf705 100644
+--- a/ni.css
++++ b/ni.css
+@@ -469,3 +469,19 @@ body.niActive.niModeVoyage .homeIconRow{display:none;}
+ 
+ /* Bloc à un seul accordéon : son titre fait double emploi avec celui du bloc. */
+ .niBloc[data-solo] .niDansBloc > .accordionHeader{display:none;}
++
++/* ---------- Visionneuse de fichiers ---------- */
++.niVisionneuse{position:fixed;inset:0;z-index:3000;background:#000;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);}
++.niVisionneuseHaut{display:flex;justify-content:space-between;align-items:center;min-height:52px;}
++.niVisionneuseBouton{background:none;border:0;color:#fff;font:inherit;font-size:16px;min-height:44px;padding:0 8px;cursor:pointer;}
++.niVisionneuseCompteur{color:#fff;font-size:13px;}
++.niVisionneuseCorps{position:relative;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;min-height:0;}
++.niVisionneuseCadre{width:100%;height:100%;border:0;border-radius:12px;background:#fff;}
++.niVisionneuseImage{max-width:100%;max-height:100%;border-radius:12px;object-fit:contain;}
++.niVisionneuseNav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.25);color:#fff;font-size:26px;cursor:pointer;z-index:1;}
++.niVisionneusePrec{left:4px;}
++.niVisionneuseSuiv{right:4px;}
++
++/* ---------- Boutons : variantes ---------- */
++.niBouton:disabled{opacity:.45;cursor:not-allowed;}
++.niBoutonFichier{display:inline-flex;align-items:center;justify-content:center;cursor:pointer;}
+diff --git a/sw.js b/sw.js
+index 72f062c..60f9688 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'envie-cache-v227';
++const CACHE_NAME = 'envie-cache-v228';
+ 
+  
+  
+@@ -11,6 +11,11 @@ const APP_SHELL = [
+     './js/documents.js',
+     './js/capturer.js',
+     './js/fiche-voyage.js',
++    './js/hors-ligne.js',
++    './js/visionneuse.js',
++    './js/sauvegarde.js',
++    './js/migration-billets.js',
++    './js/pret.js',
+     './share-target.html',
+     './js/share-target.js',
+  './js/corbeille.js',
