@@ -527,7 +527,7 @@ body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:no
 #niPlacer{z-index:2300;}
 
 /* ---------- Préparer sur grand écran ---------- */
-.niPc{position:fixed;inset:0;z-index:2000;background:var(--ni-bg,#F1F5F6);color:var(--ni-ink);display:grid;grid-template-columns:240px minmax(0,1fr) 340px;overflow:hidden;}
+.niPc{position:fixed;inset:0;z-index:2200;background:var(--ni-bg,#F1F5F6);color:var(--ni-ink);display:grid;grid-template-columns:240px minmax(0,1fr) 340px;overflow:hidden;}
 body:has(#niPc) .niFeuilleFond{z-index:2250;}
 .niPcLateral{background:#fff;border-right:1px solid var(--ni-line);padding:20px 14px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;}
 .niPcMarque{font-size:24px;font-weight:700;padding:0 8px 12px;}
