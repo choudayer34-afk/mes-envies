@@ -1,0 +1,643 @@
+diff --git a/js/aujourdhui.js b/js/aujourdhui.js
+index 2e0f417..254236e 100644
+--- a/js/aujourdhui.js
++++ b/js/aujourdhui.js
+@@ -11,6 +11,8 @@ import { computeContainerStatus } from "./progress.js";
+ import { formatPeriode } from "./periode.js";
+ import { ouvrirVisionneuse } from "./visionneuse.js";
+ import { openPret } from "./pret.js";
++import { openFrise } from "./frise.js";
++import { openSouvenirs } from "./souvenirs.js";
+ import { ouvrirGoogleMaps } from "./location.js";
+ import { openEnvie } from "./envie.js";
+ import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
+@@ -309,6 +311,14 @@ export function openAujourdhui() {
+                     <span class="niTuileTitre">Documents</span>
+                     <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
+                 </button>
++                <button type="button" class="niTuile" id="niOuvrirFrise">
++                    <span class="niTuileTitre">La journée</span>
++                    <span class="niDocSous">Jour par jour</span>
++                </button>
++                <button type="button" class="niTuile" id="niOuvrirSouvenirs">
++                    <span class="niTuileTitre">Souvenirs</span>
++                    <span class="niDocSous">Photos et album</span>
++                </button>
+                 <button type="button" class="niTuile" id="niOuvrirPret">
+                     <span class="niTuileTitre">Prêt à partir ?</span>
+                     <span class="niDocSous">Vérifier et télécharger</span>
+@@ -337,11 +347,13 @@ export function openAujourdhui() {
+     ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
+     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
+     ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
++    ecran.querySelector("#niOuvrirFrise")?.addEventListener("click", () => openFrise(voyage));
++    ecran.querySelector("#niOuvrirSouvenirs")?.addEventListener("click", () => openSouvenirs(voyage));
+ 
+     const prochain = donnees.prochain;
+ 
+     ecran.querySelector("#niProchainBillet")?.addEventListener("click", () => {
+-        ouvrirVisionneuse(prochain.billet.fichiers, 0);
++        ouvrirVisionneuse(prochain.billet.fichiers, 0, { billet: prochain.billet });
+     });
+ 
+     ecran.querySelector("#niProchainItineraire")?.addEventListener("click", () => {
+diff --git a/js/documents.js b/js/documents.js
+index 67c3129..9e5921d 100644
+--- a/js/documents.js
++++ b/js/documents.js
+@@ -132,7 +132,7 @@ export function openDocuments(voyageId) {
+                     showToast("Aucun fichier joint à ce billet");
+                     return;
+                 }
+-                ouvrirVisionneuse(billet.fichiers, 0);
++                ouvrirVisionneuse(billet.fichiers, 0, { billet });
+             });
+         });
+     }
+diff --git a/js/fiche-voyage.js b/js/fiche-voyage.js
+index 017435e..1420b60 100644
+--- a/js/fiche-voyage.js
++++ b/js/fiche-voyage.js
+@@ -14,6 +14,9 @@ import { getEnvies, isContainerCategory } from "./storage.js";
+ import { getCurrentEnvieId } from "./envie.js";
+ import { computeContainerStatus } from "./progress.js";
+ import { phaseDuVoyage } from "./aujourdhui.js";
++import { openFrise } from "./frise.js";
++import { openSouvenirs } from "./souvenirs.js";
++import { openPret } from "./pret.js";
+ 
+ /* Chaque accordéon de la fiche appartient à un bloc.
+    Tout accordéon non listé ici va dans « Plus d'outils » : rien n'est perdu. */
+@@ -232,6 +235,11 @@ function dessiner(envie) {
+             <div class="niBarre niBarreClaire"><i style="width:${Math.max(0, Math.min(100, statut.pourcentage || 0))}%"></i></div>
+             <span class="niDocSous">Avancement : ${Math.round(statut.pourcentage || 0)} %</span>
+         </div>
++        <div class="niRaccourcis">
++            <button type="button" class="niBouton" data-raccourci="frise">La journée</button>
++            <button type="button" class="niBouton" data-raccourci="pret">Prêt à partir ?</button>
++            <button type="button" class="niBouton" data-raccourci="souvenirs">Souvenirs</button>
++        </div>
+         <div class="niNavVoyagesFiche" role="tablist" aria-label="Phase du voyage">
+             ${PHASES.map(p => `<button type="button" role="tab" class="niNavOnglet${p.id === phase ? " niNavActif" : ""}" data-phase="${p.id}" aria-selected="${p.id === phase}">${p.libelle}</button>`).join("")}
+         </div>
+@@ -243,6 +251,14 @@ function dessiner(envie) {
+     repartir(envie, phase, racine.querySelector("#niBlocs"));
+     masquerBlocsVides();
+ 
++    racine.querySelector(".niRaccourcis").addEventListener("click", evenement => {
++        const bouton = evenement.target.closest("[data-raccourci]");
++        if (!bouton) return;
++        const ouverture = { frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
++        const voyage = getEnvies().find(e => e.id === envie.id) || envie;
++        ouverture?.(voyage);
++    });
++
+     racine.querySelector(".niNavVoyagesFiche").addEventListener("click", evenement => {
+         const bouton = evenement.target.closest("[data-phase]");
+         if (!bouton) return;
+diff --git a/js/frise.js b/js/frise.js
+new file mode 100644
+index 0000000..df23b3b
+--- /dev/null
++++ b/js/frise.js
+@@ -0,0 +1,225 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ frise.js : « La journée » d'un voyage, jour par jour (J1, J2…)
++ Billets du jour (avec heure), activités et logement.
++ Les activités n'ont pas d'heure dans EnVie : elles sont listées
++ « dans la journée », dans l'ordre de la fiche.
++ Actions : voir le billet, itinéraire, marquer fait, ajouter une idée au jour.
++==========================================================
++*/
++
++import { getEnvies, getEnvieCategories, createEnvie, updateEnvieRealise } from "./storage.js";
++import { listerBillets, dateLocaleISO } from "./documents.js";
++import { ouvrirVisionneuse } from "./visionneuse.js";
++import { ouvrirGoogleMaps } from "./location.js";
++import { openEnvie } from "./envie.js";
++import { showToast } from "./toast.js";
++
++const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++function estLogement(envie) {
++    const cat = getEnvieCategories().find(c => c.id === envie.categorie);
++    return cat?.label?.toLowerCase().includes("logement") || false;
++}
++
++function ajouterJours(iso, n) {
++    const d = new Date(iso + "T12:00:00");
++    d.setDate(d.getDate() + n);
++    return d.toISOString().slice(0, 10);
++}
++
++function listeJours(voyage) {
++    const debut = voyage.date?.start;
++    if (!debut) return [];
++    const fin = voyage.date.end || debut;
++    const jours = [];
++    for (let d = debut, i = 0; d <= fin && i < 120; d = ajouterJours(d, 1), i++) jours.push(d);
++    return jours;
++}
++
++function minutes(hhmm) {
++    if (!hhmm) return null;
++    const [h, m] = hhmm.split(":").map(Number);
++    return h * 60 + (m || 0);
++}
++
++function evenementsDuJour(voyage, jour) {
++
++    const billets = listerBillets(voyage.id)
++        .filter(b => b.dateDepart === jour)
++        .map(b => ({
++            genre: "billet", billet: b, id: b.id,
++            heure: b.heureDepart || "",
++            minutes: minutes(b.heureDepart),
++            titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || (b.type === "train" ? "Train" : "Billet")}`.trim(),
++            sous: [b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "),
++            lieu: b.lieuDepart?.nom || b.destination || null,
++            emoji: EMOJI_TYPE[b.type] || "🎫",
++            fichiers: (b.fichiers || []).length
++        }))
++        .sort((a, b) => (a.minutes ?? 1e9) - (b.minutes ?? 1e9));
++
++    const enfants = getEnvies().filter(e => e.voyageId === voyage.id && !e.supprime && e.date?.start);
++
++    const activites = enfants
++        .filter(e => e.date.start === jour)
++        .sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
++        .map(e => ({
++            genre: "activite", envie: e, id: e.id,
++            titre: e.titre || "Sans titre",
++            sous: e.lieu?.nom || "",
++            lieu: e.lieu?.nom || null,
++            emoji: estLogement(e) ? "🛏️" : "📍",
++            fait: !!e.realise
++        }));
++
++    const sejours = enfants
++        .filter(e => estLogement(e) && e.date.end && e.date.start < jour && jour <= e.date.end)
++        .map(e => ({ id: e.id, titre: e.titre || "Logement", sous: e.lieu?.nom || "" }));
++
++    return { billets, activites, sejours };
++}
++
++export function fermerFrise() {
++    document.getElementById("niFrise")?.remove();
++}
++
++export function openFrise(voyage, jourDepart = null) {
++
++    fermerFrise();
++    if (!voyage?.date?.start) {
++        showToast("Ajoute des dates au voyage pour voir la journée");
++        return;
++    }
++
++    const jours = listeJours(voyage);
++    const aujourdhui = dateLocaleISO();
++    let jour = jourDepart && jours.includes(jourDepart)
++        ? jourDepart
++        : (jours.includes(aujourdhui) ? aujourdhui : jours[0]);
++
++    const ecran = document.createElement("div");
++    ecran.id = "niFrise";
++    ecran.className = "niEcran";
++    ecran.setAttribute("role", "dialog");
++    ecran.setAttribute("aria-label", "La journée");
++    document.body.appendChild(ecran);
++
++    function dessiner() {
++
++        const v = getEnvies().find(e => e.id === voyage.id) || voyage;
++        const numero = jours.indexOf(jour) + 1;
++        const donnees = evenementsDuJour(v, jour);
++        const estAujourdhui = jour === aujourdhui;
++        const maintenant = new Date().getHours() * 60 + new Date().getMinutes();
++        const prochainId = estAujourdhui
++            ? donnees.billets.find(b => b.minutes === null || b.minutes >= maintenant - 30)?.id
++            : null;
++        const libelleJour = new Date(jour + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
++        const vide = !donnees.billets.length && !donnees.activites.length && !donnees.sejours.length;
++
++        ecran.innerHTML = `
++            <div class="niBarreHaut">
++                <button type="button" class="niBoutonIcone" id="niFriseRetour" aria-label="Retour">←</button>
++                <div class="niBarreTitre"><h1>${echapper(v.titre || "Voyage")}</h1><span>Jour ${numero} sur ${jours.length} · ${echapper(libelleJour)}</span></div>
++            </div>
++            <div class="niCorps">
++                <div class="niSelecteurVoyage" role="tablist" aria-label="Jours du voyage">
++                    ${jours.map((j, i) => `<button type="button" role="tab" class="niPuce niPuceJour${j === jour ? " niPuceActive" : ""}" data-jour="${j}" aria-selected="${j === jour}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${new Date(j + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" })}</span></button>`).join("")}
++                </div>
++
++                ${donnees.sejours.map(s => `
++                <div class="niDocLigne niLigneStatique" style="background:#fff;border:1px solid var(--ni-line);border-radius:14px;margin-bottom:8px">
++                    <span class="niIcone">🛏️</span>
++                    <span class="niDocTexte"><span class="niDocTitre">${echapper(s.titre)}</span><span class="niDocSous">Logement · nuit</span></span>
++                </div>`).join("")}
++
++                ${vide ? '<div class="niVide">Rien de prévu ce jour-là.</div>' : `
++                <div class="niCarte">
++                    ${donnees.billets.map(b => ligneBillet(b, b.id === prochainId)).join("")}
++                    ${donnees.activites.map(a => ligneActivite(a)).join("")}
++                </div>`}
++
++                <form id="niFriseForm" class="niIdeeForm" autocomplete="off">
++                    <input id="niFriseChamp" class="niRecherche" type="text" placeholder="Ajouter à la journée…" aria-label="Ajouter à la journée" enterkeyhint="done">
++                    <button type="submit" class="niBouton niBoutonPrimaire" style="flex:0 0 auto;padding:0 18px">Ajouter</button>
++                </form>
++            </div>`;
++
++        ecran.querySelector("#niFriseRetour").addEventListener("click", fermerFrise);
++
++        ecran.querySelectorAll("[data-jour]").forEach(b => b.addEventListener("click", () => { jour = b.dataset.jour; dessiner(); }));
++
++        ecran.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => agir(b, donnees, v)));
++
++        ecran.querySelector("#niFriseForm").addEventListener("submit", e => {
++            e.preventDefault();
++            ajouter(v, ecran.querySelector("#niFriseChamp").value);
++        });
++    }
++
++    function ligneBillet(b, maintenant) {
++        return `
++            <div class="niDocLigne niLigneStatique" data-ligne="${echapper(b.id)}">
++                <span class="niHeureCourte">${echapper(b.heure)}</span>
++                <span class="niDocTexte">
++                    <span class="niDocTitre">${b.emoji} ${echapper(b.titre)}</span>
++                    ${b.sous ? `<span class="niDocSous">${echapper(b.sous)}</span>` : ""}
++                </span>
++                ${maintenant ? '<span class="niTag niTagMaintenant">Prochain</span>' : ""}
++                ${b.fichiers ? '<button type="button" class="niBouton" data-act="billet" aria-label="Voir le billet">Billet</button>' : ""}
++            </div>`;
++    }
++
++    function ligneActivite(a) {
++        return `
++            <div class="niDocLigne niLigneStatique${a.fait ? " niFait" : ""}" data-ligne="${echapper(a.id)}">
++                <span class="niHeureCourte" aria-hidden="true">${a.emoji}</span>
++                <button type="button" class="niDocTexte" data-act="fiche" style="background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer">
++                    <span class="niDocTitre">${echapper(a.titre)}</span>
++                    ${a.sous ? `<span class="niDocSous">${echapper(a.sous)}</span>` : ""}
++                </button>
++                ${a.lieu ? '<button type="button" class="niBouton" data-act="itineraire">Itinéraire</button>' : ""}
++                <button type="button" class="niBouton" data-act="fait" aria-label="${a.fait ? "Annuler fait" : "Marquer fait"}">${a.fait ? "↺" : "✓"}</button>
++            </div>`;
++    }
++
++    function agir(bouton, donnees, v) {
++        const id = bouton.closest("[data-ligne]").dataset.ligne;
++        const act = bouton.dataset.act;
++        const billet = donnees.billets.find(b => b.id === id);
++        const activite = donnees.activites.find(a => a.id === id);
++
++        if (act === "billet" && billet) ouvrirVisionneuse(billet.billet.fichiers, 0, { billet: billet.billet });
++        if (act === "itineraire") {
++            const lieu = (billet || activite)?.lieu;
++            if (lieu) ouvrirGoogleMaps(lieu);
++        }
++        if (act === "fiche" && activite) { fermerFrise(); openEnvie(activite.id); }
++        if (act === "fait" && activite) {
++            updateEnvieRealise(activite.id, !activite.fait);
++            setTimeout(dessiner, 250);
++        }
++    }
++
++    function ajouter(v, titre) {
++        if (!titre || !titre.trim()) return;
++        createEnvie({
++            titre: titre.trim(),
++            voyageId: v.id,
++            date: { type: "single", start: jour, end: null },
++            contexte: "voyage"
++        });
++        showToast("✓ Ajouté à la journée");
++        setTimeout(dessiner, 600);
++    }
++
++    dessiner();
++}
+diff --git a/js/nouvelle-interface.js b/js/nouvelle-interface.js
+index a8a6898..f995e18 100644
+--- a/js/nouvelle-interface.js
++++ b/js/nouvelle-interface.js
+@@ -18,6 +18,8 @@ import { fermerVisionneuse } from "./visionneuse.js";
+ import { initGestesListes } from "./gestes-listes.js";
+ import { openTrier, fermerTrier } from "./trier.js";
+ import { fermerNouveauVoyage } from "./nouveau-voyage.js";
++import { fermerFrise } from "./frise.js";
++import { fermerSouvenirs } from "./souvenirs.js";
+ 
+ const CLE = "envie_nouvelle_interface";
+ 
+@@ -106,6 +108,8 @@ function fermerEcransNouveaux() {
+     fermerCapturer();
+     fermerDocuments();
+     fermerPret();
++    fermerFrise();
++    fermerSouvenirs();
+     fermerTrier();
+     fermerNouveauVoyage();
+     fermerMigration();
+diff --git a/js/souvenirs.js b/js/souvenirs.js
+new file mode 100644
+index 0000000..2b6a5f1
+--- /dev/null
++++ b/js/souvenirs.js
+@@ -0,0 +1,146 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ souvenirs.js : écran « Souvenirs » d'un voyage
++ Photos rassemblées par jour, collecte famille, album PDF et
++ bilan des dépenses. Chaque action ouvre la fonction existante.
++==========================================================
++*/
++
++import { getEnvies } from "./storage.js";
++import { formatPeriode } from "./periode.js";
++import { ouvrirVisionneuse } from "./visionneuse.js";
++import { ouvrirPreparationAlbum } from "./album.js";
++import { openEnvie } from "./envie.js";
++import { showToast } from "./toast.js";
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++export function fermerSouvenirs() {
++    document.getElementById("niSouvenirs")?.remove();
++}
++
++function jourDe(photo, envie) {
++    const brut = photo.dateCapture || envie?.date?.start || "";
++    return typeof brut === "string" ? brut.slice(0, 10) : "";
++}
++
++function rassemblerPhotos(voyage) {
++    const enfants = getEnvies().filter(e => e.voyageId === voyage.id && !e.supprime);
++    const toutes = [];
++    (voyage.photos || []).forEach(p => p?.url && toutes.push({ ...p, jour: jourDe(p, null) }));
++    enfants.forEach(e => (e.photos || []).forEach(p => p?.url && toutes.push({ ...p, jour: jourDe(p, e) })));
++    return { toutes, lieux: enfants.filter(e => e.lieu?.nom).length };
++}
++
++function nbJours(voyage) {
++    const d = voyage.date;
++    if (!d?.start) return 0;
++    return Math.round((new Date((d.end || d.start) + "T12:00:00") - new Date(d.start + "T12:00:00")) / 86400000) + 1;
++}
++
++/* Ouvre la fiche puis déroule la rubrique voulue. */
++function ouvrirRubrique(voyageId, cible, motBouton = null) {
++    fermerSouvenirs();
++    openEnvie(voyageId);
++    setTimeout(() => {
++        const contenu = document.getElementById(cible);
++        if (contenu?.classList.contains("hidden")) {
++            document.querySelector(`.accordionHeader[data-target="${cible}"]`)?.click();
++        }
++        contenu?.scrollIntoView({ block: "start" });
++
++        /* Collecte famille : elle se trouve dans la fenêtre « Gérer le partage » du voyage. */
++        if (motBouton) {
++            setTimeout(() => {
++                const bouton = [...(contenu?.querySelectorAll("button") || [])]
++                    .find(b => b.textContent.toLowerCase().includes(motBouton));
++                if (bouton) bouton.click();
++                else showToast("Ouvre « Partager ce voyage » dans la rubrique Voyage");
++            }, 200);
++        }
++    }, 400);
++}
++
++export function openSouvenirs(voyage) {
++
++    fermerSouvenirs();
++    if (!voyage) return;
++
++    const ecran = document.createElement("div");
++    ecran.id = "niSouvenirs";
++    ecran.className = "niEcran";
++    ecran.setAttribute("role", "dialog");
++    ecran.setAttribute("aria-label", "Souvenirs");
++    document.body.appendChild(ecran);
++
++    const v = getEnvies().find(e => e.id === voyage.id) || voyage;
++    const { toutes, lieux } = rassemblerPhotos(v);
++
++    const parJour = new Map();
++    toutes.forEach(p => {
++        const cle = p.jour || "";
++        if (!parJour.has(cle)) parJour.set(cle, []);
++        parJour.get(cle).push(p);
++    });
++    const groupes = [...parJour.entries()].sort(([a], [b]) => (a || "9999").localeCompare(b || "9999"));
++    const aplati = groupes.flatMap(([, liste]) => liste);
++
++    const libelleJour = cle => {
++        if (!cle) return "Date inconnue";
++        const n = v.date?.start ? Math.round((new Date(cle + "T12:00:00") - new Date(v.date.start + "T12:00:00")) / 86400000) + 1 : 0;
++        const date = new Date(cle + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
++        return n >= 1 ? `Jour ${n} · ${date}` : date;
++    };
++
++    ecran.innerHTML = `
++        <div class="niBarreHaut">
++            <button type="button" class="niBoutonIcone" id="niSouvRetour" aria-label="Retour">←</button>
++            <div class="niBarreTitre"><h1>Souvenirs</h1><span>${echapper(v.titre || "Voyage")} · ${echapper(formatPeriode(v.date))}</span></div>
++        </div>
++        <div class="niCorps">
++            <div class="niTuiles" style="grid-template-columns:repeat(3,minmax(0,1fr))">
++                <div class="niTuile"><span class="niTuileTitre">${toutes.length}</span><span class="niDocSous">photo${toutes.length > 1 ? "s" : ""}</span></div>
++                <div class="niTuile"><span class="niTuileTitre">${nbJours(v)}</span><span class="niDocSous">jour${nbJours(v) > 1 ? "s" : ""}</span></div>
++                <div class="niTuile"><span class="niTuileTitre">${lieux}</span><span class="niDocSous">lieu${lieux > 1 ? "x" : ""}</span></div>
++            </div>
++
++            <div class="niCarte">
++                <button type="button" class="niDocLigne" data-act="collecte">
++                    <span class="niDocTexte"><span class="niDocTitre">Collecte famille</span><span class="niDocSous">${v.collecteActivee ? "Lien actif · voir les photos reçues" : "Recevoir les photos de la famille"}</span></span>
++                </button>
++                <button type="button" class="niDocLigne" data-act="album">
++                    <span class="niDocTexte"><span class="niDocTitre">Créer l'album PDF</span><span class="niDocSous">À partir des étapes réalisées avec photos</span></span>
++                </button>
++                <button type="button" class="niDocLigne" data-act="bilan">
++                    <span class="niDocTexte"><span class="niDocTitre">Bilan des dépenses</span><span class="niDocSous">Qui doit quoi à qui</span></span>
++                </button>
++            </div>
++
++            ${groupes.length ? groupes.map(([cle, liste]) => `
++            <div class="niSection">
++                <h2 class="niTitreSection" style="font-size:18px">${echapper(libelleJour(cle))} <span class="niDocSous">${liste.length} photo${liste.length > 1 ? "s" : ""}</span></h2>
++                <div class="niVignettes">
++                    ${liste.slice(0, 8).map(p => `<button type="button" class="niVignette" data-photo="${aplati.indexOf(p)}" aria-label="Voir la photo"><img src="${echapper(p.url)}" alt="" loading="lazy"></button>`).join("")}
++                    ${liste.length > 8 ? `<span class="niVignette niVignettePlus">+${liste.length - 8}</span>` : ""}
++                </div>
++            </div>`).join("") : '<div class="niVide">Aucune photo pour le moment.</div>'}
++        </div>`;
++
++    ecran.querySelector("#niSouvRetour").addEventListener("click", fermerSouvenirs);
++
++    ecran.querySelectorAll("[data-photo]").forEach(b => b.addEventListener("click", () => {
++        ouvrirVisionneuse(aplati.map(p => ({ url: p.url, nom: "Photo", type: "image" })), Number(b.dataset.photo));
++    }));
++
++    ecran.querySelector('[data-act="collecte"]').addEventListener("click", () => ouvrirRubrique(v.id, "voyageSection", "partage"));
++    ecran.querySelector('[data-act="bilan"]').addEventListener("click", () => ouvrirRubrique(v.id, "tricountSection"));
++    ecran.querySelector('[data-act="album"]').addEventListener("click", () => {
++        try { ouvrirPreparationAlbum(v); }
++        catch (erreur) { console.error("Souvenirs : album : " + erreur.message); showToast("❌ Impossible d'ouvrir l'album"); }
++    });
++}
+diff --git a/js/visionneuse.js b/js/visionneuse.js
+index d811f51..adcbfaf 100644
+--- a/js/visionneuse.js
++++ b/js/visionneuse.js
+@@ -9,11 +9,42 @@
+ 
+ import { resoudreSource } from "./hors-ligne.js";
+ 
++let verrouEcran = null;
++
++async function garderEcranAllume() {
++    try {
++        if ("wakeLock" in navigator) verrouEcran = await navigator.wakeLock.request("screen");
++    } catch { /* non pris en charge ou refusé : sans effet */ }
++}
++
++function relacherEcran() {
++    try { verrouEcran?.release(); } catch { /* sans effet */ }
++    verrouEcran = null;
++}
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++function resumeBillet(billet) {
++    const trajet = [billet.lieuDepart?.nom, billet.destination].filter(Boolean).join(" → ");
++    const jour = billet.dateDepart
++        ? new Date(billet.dateDepart + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })
++        : "";
++    const ligne1 = [billet.compagnie, billet.numeroVol].filter(Boolean).join(" ") || (billet.type === "train" ? "Train" : "Billet");
++    const ligne2 = [jour, billet.heureDepart ? "départ " + billet.heureDepart : "", billet.heureArrivee ? "arrivée " + billet.heureArrivee : ""].filter(Boolean).join(" · ");
++    return { ligne1, trajet, ligne2, reference: billet.reference || billet.referenceReservation || "" };
++}
++
+ export function fermerVisionneuse() {
+     document.getElementById("niVisionneuse")?.remove();
++    relacherEcran();
+ }
+ 
+-export async function ouvrirVisionneuse(fichiers, indexDepart = 0) {
++/* options.billet : affiche l'en-tête du billet (mode « portique ») et garde l'écran allumé. */
++export async function ouvrirVisionneuse(fichiers, indexDepart = 0, options = {}) {
+ 
+     fermerVisionneuse();
+ 
+@@ -29,6 +60,12 @@ export async function ouvrirVisionneuse(fichiers, indexDepart = 0) {
+     fond.setAttribute("aria-label", "Fichier du billet");
+     document.body.appendChild(fond);
+ 
++    const billet = options.billet || null;
++    if (billet) {
++        fond.classList.add("niVisionneusePortique");
++        garderEcranAllume();
++    }
++
+     let debutX = 0;
+     fond.addEventListener("touchstart", e => { debutX = e.changedTouches[0].clientX; }, { passive: true });
+     fond.addEventListener("touchend", e => {
+@@ -46,11 +83,21 @@ export async function ouvrirVisionneuse(fichiers, indexDepart = 0) {
+             ? `<iframe class="niVisionneuseCadre" src="${source}" title="Document"></iframe>`
+             : `<img class="niVisionneuseImage" src="${source}" alt="Billet">`;
+ 
++        const resume = billet ? resumeBillet(billet) : null;
++        const horsLigne = !navigator.onLine;
++
+         fond.innerHTML = `
+             <div class="niVisionneuseHaut">
+                 <button type="button" class="niVisionneuseBouton" id="niVisFermer">← Retour</button>
+-                ${plusieurs ? `<span class="niVisionneuseCompteur">${index + 1} / ${liste.length}</span>` : ""}
++                ${horsLigne ? '<span class="niVisionneuseCompteur">Sans réseau</span>' : ""}
++                ${plusieurs ? `<span class="niVisionneuseCompteur">${billet ? "Billet" : "Fichier"} ${index + 1} / ${liste.length}</span>` : ""}
+             </div>
++            ${resume ? `
++            <div class="niVisionneuseResume">
++                <span class="niVisionneuseLigne1">${echapper(resume.ligne1)}${resume.trajet ? " · " + echapper(resume.trajet) : ""}</span>
++                ${resume.ligne2 ? `<span class="niVisionneuseLigne2">${echapper(resume.ligne2)}</span>` : ""}
++                ${resume.reference ? `<span class="niVisionneuseLigne2">Réf. ${echapper(resume.reference)}</span>` : ""}
++            </div>` : ""}
+             <div class="niVisionneuseCorps">
+                 ${plusieurs ? '<button type="button" class="niVisionneuseNav niVisionneusePrec" id="niVisPrec" aria-label="Précédent">‹</button>' : ""}
+                 ${contenu}
+diff --git a/ni.css b/ni.css
+index c71ce4e..c714994 100644
+--- a/ni.css
++++ b/ni.css
+@@ -306,7 +306,7 @@ body.niBarreVisible main{
+ .niBoutonPrimaire{background:var(--ni-brand);border-color:var(--ni-brand);color:#fff;}
+ .niBoutonMaintenant{background:var(--ni-now);border-color:var(--ni-now);color:#fff;}
+ 
+-.niTuiles{display:flex;gap:10px;}
++.niTuiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+ 
+ .niTuile{
+     flex:1;
+@@ -498,3 +498,24 @@ body.niActive.niModeVoyage .homeIconRow{display:none;}
+ /* ---------- Gestes sur les listes ---------- */
+ body.niModeVoyage #checklistContainer .checklistRow,
+ body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:none;-webkit-user-select:none;}
++
++/* ---------- Billet au portique ---------- */
++.niVisionneusePortique{background:#fff;}
++.niVisionneusePortique .niVisionneuseBouton,
++.niVisionneusePortique .niVisionneuseCompteur{color:var(--ni-ink);}
++.niVisionneusePortique .niVisionneuseNav{background:rgba(14,42,51,.18);color:var(--ni-ink);}
++.niVisionneusePortique .niVisionneuseCadre{border:1px solid var(--ni-line);}
++.niVisionneuseResume{display:flex;flex-direction:column;gap:2px;padding:4px 4px 10px;color:var(--ni-ink);}
++.niVisionneuseLigne1{font-weight:700;font-size:17px;}
++.niVisionneuseLigne2{font-size:13px;color:var(--ni-muted);}
++
++/* ---------- Souvenirs : vignettes ---------- */
++.niVignettes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
++.niVignette{aspect-ratio:1;padding:0;border:0;border-radius:10px;overflow:hidden;background:var(--ni-line);cursor:pointer;}
++.niVignette img{width:100%;height:100%;object-fit:cover;display:block;}
++.niVignettePlus{display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ni-muted);}
++.niPuceJour{min-width:56px;align-items:center;}
++
++.niRaccourcis{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;}
++.niRaccourcis::-webkit-scrollbar{display:none;}
++.niRaccourcis .niBouton{flex:none;}
+diff --git a/sw.js b/sw.js
+index 91b250a..7625f39 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'envie-cache-v231';
++const CACHE_NAME = 'envie-cache-v232';
+ 
+  
+  
+@@ -18,6 +18,8 @@ const APP_SHELL = [
+     './js/pret.js',
+     './js/gestes-listes.js',
+     './js/trier.js',
++    './js/frise.js',
++    './js/souvenirs.js',
+     './js/nouveau-voyage.js',
+     './share-target.html',
+     './js/share-target.js',

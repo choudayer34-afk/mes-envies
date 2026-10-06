@@ -306,7 +306,7 @@ body.niBarreVisible main{
 .niBoutonPrimaire{background:var(--ni-brand);border-color:var(--ni-brand);color:#fff;}
 .niBoutonMaintenant{background:var(--ni-now);border-color:var(--ni-now);color:#fff;}
 
-.niTuiles{display:flex;gap:10px;}
+.niTuiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
 
 .niTuile{
     flex:1;
@@ -498,3 +498,24 @@ body.niActive.niModeVoyage .homeIconRow{display:none;}
 /* ---------- Gestes sur les listes ---------- */
 body.niModeVoyage #checklistContainer .checklistRow,
 body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:none;-webkit-user-select:none;}
+
+/* ---------- Billet au portique ---------- */
+.niVisionneusePortique{background:#fff;}
+.niVisionneusePortique .niVisionneuseBouton,
+.niVisionneusePortique .niVisionneuseCompteur{color:var(--ni-ink);}
+.niVisionneusePortique .niVisionneuseNav{background:rgba(14,42,51,.18);color:var(--ni-ink);}
+.niVisionneusePortique .niVisionneuseCadre{border:1px solid var(--ni-line);}
+.niVisionneuseResume{display:flex;flex-direction:column;gap:2px;padding:4px 4px 10px;color:var(--ni-ink);}
+.niVisionneuseLigne1{font-weight:700;font-size:17px;}
+.niVisionneuseLigne2{font-size:13px;color:var(--ni-muted);}
+
+/* ---------- Souvenirs : vignettes ---------- */
+.niVignettes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;}
+.niVignette{aspect-ratio:1;padding:0;border:0;border-radius:10px;overflow:hidden;background:var(--ni-line);cursor:pointer;}
+.niVignette img{width:100%;height:100%;object-fit:cover;display:block;}
+.niVignettePlus{display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--ni-muted);}
+.niPuceJour{min-width:56px;align-items:center;}
+
+.niRaccourcis{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;}
+.niRaccourcis::-webkit-scrollbar{display:none;}
+.niRaccourcis .niBouton{flex:none;}

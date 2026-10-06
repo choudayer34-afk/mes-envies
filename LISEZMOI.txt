@@ -1,25 +1,24 @@
-ENVIE - ÉTAPE 7 : Nouveau voyage, Trier les idées, correction Aujourd'hui
+ENVIE - ÉTAPE 8 : La journée, Souvenirs, billet au portique
 
 À copier à la racine du dépôt :
-  sw.js                       (cache v231)
-  ni.css                      (inchangé depuis l'étape 6, inclus par sécurité)
-  js/nouveau-voyage.js        (nouveau)
-  js/trier.js                 (nouveau)
-  js/aujourdhui.js            (modifié : plus de voyages passés)
-  js/capturer.js              (modifié : tuile « Nouveau voyage »)
-  js/nouvelle-interface.js    (modifié : « À trier » ouvre le nouvel écran)
+  sw.js                       (cache v232)
+  ni.css
+  js/frise.js                 (nouveau)
+  js/souvenirs.js             (nouveau)
+  js/visionneuse.js           (modifié : mode portique)
+  js/aujourdhui.js            (modifié : tuiles La journée et Souvenirs)
+  js/documents.js             (modifié : billet ouvert en mode portique)
+  js/fiche-voyage.js          (modifié : raccourcis en tête de fiche)
+  js/nouvelle-interface.js    (modifié)
 Aucun ancien fichier de l'application n'est modifié.
 
-Aujourd'hui : seuls les voyages en cours et à venir sont proposés ; le voyage en cours,
-sinon le plus proche, s'affiche par défaut.
-
-Nouveau voyage (Capturer > Nouveau voyage) :
-  - étape 1 : où (avec la recherche de lieu habituelle), départ/retour, voyageurs
-  - étape 2 : reprendre les listes d'un voyage existant (copie décochée)
-  - ensuite : ouvrir la fiche ou importer des idées avec l'IA
-  - l'ancien bouton de création reste en place
-
-Trier les idées (Voyages > Idées > À trier) :
-  - Retenir : rattache l'idée à un voyage (voyage unique = un seul toucher)
-  - Plus tard : l'idée reste intacte et sort de la liste pour la session
-  - toucher le titre ouvre la fiche ; l'ancien écran reste disponible dans le même menu
+La journée : jours J1, J2... du voyage ; billets avec heure, activités, logement ; Billet, Itinéraire,
+  marquer fait, ajouter une idée au jour. Les activités n'ont pas d'heure dans EnVie : elles sont
+  listées « dans la journée ».
+Souvenirs : photos par jour (date de prise de vue, sinon date de l'étape), collecte famille,
+  album PDF, bilan des dépenses (ouvrent les fonctions existantes).
+Billet au portique : fond blanc, trajet et heures en tête, passage d'un billet à l'autre (glisser ou
+  flèches), écran gardé allumé, mention « Sans réseau » si hors ligne.
+  La luminosité maximale ne peut pas être commandée depuis une application web : augmente-la à la main.
+Accès : tuiles sur Aujourd'hui, et raccourcis « La journée / Prêt à partir ? / Souvenirs » en tête de
+  la fiche de chaque voyage (voyages passés compris).
