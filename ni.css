@@ -640,7 +640,7 @@ button.niArgentCase{cursor:pointer;min-height:44px;}
 
 /* ---------- Écran Listes ---------- */
 #niListes{z-index:2200;}
-#niListesReprise{z-index:2250;}
+#niListesReprise,#niListesModeles{z-index:2250;}
 .niListeLigne{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--ni-line);}
 .niListeLigne:first-child{border-top:0;}
 .niListeCase{flex:none;width:44px;height:44px;border-radius:12px;border:2px solid var(--ni-line);background:#fff;font-size:22px;font-weight:700;color:#fff;cursor:pointer;}
@@ -691,3 +691,6 @@ button.niArgentCase{cursor:pointer;min-height:44px;}
 /* Les fenêtres de l'ancienne application (Plus, Jeux, Survie, Guide, À propos, Corbeille…)
    n'ont pas de niveau défini : elles passaient sous les écrans de la nouvelle interface. */
 body.niActive .modal-overlay{z-index:2000}
+
+/* Fenêtres de l'ancienne application ouvertes depuis l'écran Listes */
+body.niActive #assignModal,body.niActive #checklistEditItemModal{z-index:2300}
