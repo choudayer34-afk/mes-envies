@@ -8,8 +8,10 @@
 
 import {
     getEnvies, getPersonnes, getChecklistCategories,
-    toggleChecklistItem, toggleChecklistItemForPersonne, addChecklistItem, deleteChecklistItem, setChecklistItems
+    toggleChecklistItem, toggleChecklistItemForPersonne, addChecklistItem, deleteChecklistItem, setChecklistItems, getChecklistTemplates
 } from "./storage.js";
+import { ouvrirEditionChecklistItem, openAssignModal } from "./checklist.js";
+import { computeQuantite, getDureeJours } from "./periode.js";
 import { showToast } from "./toast.js";
 
 function echapper(texte) {
@@ -25,6 +27,7 @@ export function fermerListes() {
     minuteur = null;
     document.getElementById("niListes")?.remove();
     document.getElementById("niListesReprise")?.remove();
+    document.getElementById("niListesModeles")?.remove();
 }
 
 function listeDe(voyageId) {
@@ -92,7 +95,7 @@ export function openListes(voyageOuId) {
                         ${qui ? `<span class="niDocSous">${echapper(qui)}</span>` : ""}
                         ${parPers}
                     </div>
-                    ${etat.modifier ? `<button type="button" class="niBoutonIcone" data-suppr="${echapper(i.id)}" aria-label="Supprimer ${echapper(i.texte)}">🗑️</button>` : ""}
+                    ${etat.modifier ? `<button type="button" class="niBoutonIcone" data-edit="${echapper(i.id)}" aria-label="Modifier ${echapper(i.texte)}">✏️</button><button type="button" class="niBoutonIcone" data-assign="${echapper(i.id)}" aria-label="Répartir ${echapper(i.texte)}">👥</button><button type="button" class="niBoutonIcone" data-suppr="${echapper(i.id)}" aria-label="Supprimer ${echapper(i.texte)}">🗑️</button>` : ""}
                 </div>`;
         };
 
@@ -122,6 +125,7 @@ export function openListes(voyageOuId) {
 
                 ${!visibles.length ? `<div class="niVide">${total ? "Rien dans ce filtre." : "Aucun article pour ce voyage. Ajoute-en ci-dessous."}</div>` : ""}
 
+                <button type="button" class="niBouton" id="niListesModele" style="width:100%">Appliquer un modèle</button>
                 <button type="button" class="niLienDiscret" id="niListesReprendre">Reprendre une liste d'un voyage passé</button>
             </div>
             <form class="niBfBarre niListeAjout" id="niListesAjout">
@@ -146,6 +150,14 @@ export function openListes(voyageOuId) {
             toggleChecklistItemForPersonne(voyageId, b.dataset.item, b.dataset.pers);
             dessiner();
         }));
+        ecran.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => {
+            const item = listeDe(voyageId).find(i => i.id === b.dataset.edit);
+            if (item) ouvrirEditionChecklistItem(voyageId, item);
+        }));
+        ecran.querySelectorAll("[data-assign]").forEach(b => b.addEventListener("click", () => {
+            const item = listeDe(voyageId).find(i => i.id === b.dataset.assign);
+            if (item) openAssignModal(voyageId, item);
+        }));
         ecran.querySelectorAll("[data-suppr]").forEach(b => b.addEventListener("click", () => {
             const item = listeDe(voyageId).find(i => i.id === b.dataset.suppr);
             if (!confirm(`Supprimer « ${item?.texte || "cet article"} » ?`)) return;
@@ -165,6 +177,67 @@ export function openListes(voyageOuId) {
         });
 
         ecran.querySelector("#niListesReprendre").addEventListener("click", () => ouvrirReprise());
+        ecran.querySelector("#niListesModele").addEventListener("click", () => ouvrirModeles());
+    }
+
+    /* Modèles : même calcul que la fiche (par personne : une ligne répartie sur les voyageurs ;
+       par jour : quantité × durée du voyage). Les articles déjà présents sont ignorés. */
+    function ouvrirModeles() {
+
+        document.getElementById("niListesModeles")?.remove();
+
+        const modeles = getChecklistTemplates().filter(t => (t.contexte || "voyage") === "voyage");
+
+        const fond = document.createElement("div");
+        fond.id = "niListesModeles";
+        fond.className = "niFeuilleFond";
+        fond.innerHTML = `
+            <div class="niFeuille" role="dialog" aria-label="Appliquer un modèle">
+                <div class="niPoignee"></div>
+                <h2 class="niTitreSection" style="font-size:22px">Appliquer un modèle</h2>
+                <span class="niDocSous">Les quantités tiennent compte des voyageurs et de la durée du voyage.</span>
+                ${modeles.length ? `<div class="niCarte" style="margin-top:10px">${modeles.map(m => `
+                    <button type="button" class="niDocLigne" data-modele="${echapper(m.id)}">
+                        <span class="niIcone">🧳</span>
+                        <span class="niDocTexte"><span class="niDocTitre">${echapper(m.nom)}</span><span class="niDocSous">${m.items.length} article${m.items.length > 1 ? "s" : ""}</span></span>
+                    </button>`).join("")}</div>` : '<div class="niVide">Aucun modèle. Crée-en dans ⚙️ Paramètres.</div>'}
+            </div>`;
+        document.body.appendChild(fond);
+
+        fond.addEventListener("click", evenement => {
+            if (evenement.target === fond) { fond.remove(); return; }
+            const bouton = evenement.target.closest("[data-modele]");
+            if (!bouton) return;
+
+            const modele = modeles.find(m => m.id === bouton.dataset.modele);
+            const voyage = getEnvies().find(e => e.id === voyageId);
+            if (!modele || !voyage) return;
+
+            const actuels = listeDe(voyageId);
+            const connus = new Set(actuels.map(i => `${i.texte.toLowerCase()}|${i.categorieId || ""}`));
+
+            const nouveaux = modele.items
+                .filter(i => !connus.has(`${i.texte.toLowerCase()}|${i.categorieId || ""}`))
+                .map(i => i.parPersonne
+                    ? {
+                        id: crypto.randomUUID(), texte: i.texte,
+                        quantite: i.parJour ? i.quantite * getDureeJours(voyage.date) : i.quantite,
+                        categorieId: i.categorieId, assignedTo: voyage.personnesIds || [],
+                        parPersonne: true, checked: false, checkedBy: {}
+                    }
+                    : {
+                        id: crypto.randomUUID(), texte: i.texte,
+                        quantite: computeQuantite(i, voyage),
+                        categorieId: i.categorieId, assignedTo: [],
+                        parPersonne: false, checked: false, checkedBy: {}
+                    });
+
+            if (nouveaux.length) setChecklistItems(voyageId, [...actuels, ...nouveaux]);
+            fond.remove();
+            const ignores = modele.items.length - nouveaux.length;
+            showToast(`✓ Modèle « ${modele.nom} » : ${nouveaux.length} ajouté${nouveaux.length > 1 ? "s" : ""}${ignores ? `, ${ignores} déjà présent${ignores > 1 ? "s" : ""}` : ""}`);
+            setTimeout(dessiner, 300);
+        });
     }
 
     function ouvrirReprise() {
