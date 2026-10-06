@@ -92,6 +92,7 @@ export function openEspacePc(voyageDepart = null) {
 
         ecran.innerHTML = `
             <aside class="niPcLateral">
+                <button type="button" class="niBouton" id="niPcRetour" aria-label="Retour à la fiche du voyage" style="width:100%">← Retour à la fiche</button>
                 <div class="niPcMarque">EnVie</div>
                 <button type="button" class="niBouton niBoutonMaintenant" id="niPcCapturer" style="width:100%">+ Capturer <span style="opacity:.85;font-weight:500">N</span></button>
                 <button type="button" class="niPcLien" id="niPcAujourdhui">Aujourd'hui</button>
@@ -186,6 +187,7 @@ export function openEspacePc(voyageDepart = null) {
         ecran.querySelector("#niPcCapturer").addEventListener("click", () => openCapturer());
         ecran.querySelector("#niPcPlus").addEventListener("click", () => document.getElementById("btnPlus")?.click());
         ecran.querySelector("#niPcFermer").addEventListener("click", fermerEspacePc);
+        ecran.querySelector("#niPcRetour").addEventListener("click", fermerEspacePc);
         ecran.querySelector("#niPcAujourdhui").addEventListener("click", () => {
             fermerEspacePc();
             document.querySelector('[data-onglet="aujourdhui"]')?.click();
