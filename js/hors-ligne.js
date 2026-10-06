@@ -83,3 +83,20 @@ export async function telechargerFichiersVoyage(voyage, surProgression = () => {
 
     return { total: fichiers.length, nouveaux, echecs };
 }
+
+/* Taille connue des fichiers d'un voyage : dans le document (dataUrl) ou copiés sur l'appareil. */
+export async function tailleFichiersVoyage(voyage) {
+    const fichiers = (voyage.billets || []).flatMap(b => b.fichiers || []);
+    let octets = 0, aTelecharger = 0, locaux = 0, dansDocument = 0;
+    for (const f of fichiers) {
+        if (f.dataUrl) {
+            const virgule = f.dataUrl.indexOf(",");
+            octets += Math.floor(((f.dataUrl.length - (virgule + 1)) * 3) / 4);
+            dansDocument++;
+        } else if (f.url) {
+            const blob = await lireFichier(f.url);
+            if (blob) { octets += blob.size; locaux++; } else aTelecharger++;
+        }
+    }
+    return { total: fichiers.length, octets, aTelecharger, locaux, dansDocument };
+}

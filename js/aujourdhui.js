@@ -14,6 +14,8 @@ import { openPret } from "./pret.js";
 import { openFrise } from "./frise.js";
 import { openProgramme } from "./programme.js";
 import { openSouvenirs } from "./souvenirs.js";
+import { bilanPreparation } from "./preparation.js";
+import { nombreIdeesATrier, openTrier } from "./trier.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { openEnvie } from "./envie.js";
 import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
@@ -151,9 +153,11 @@ function evenementsDuJour(voyage) {
 
 /* ---------- Dessin ---------- */
 
-function carteVoyage(voyage, phase) {
+function carteVoyage(voyage, phase, bilan) {
 
     const statut = computeContainerStatus(voyage);
+    const avant = phase.code === "avant";
+    const largeur = avant ? bilan.score : (statut.pourcentage || 0);
     const fond = voyage.photoCouverture
         ? `background-image:linear-gradient(rgba(14,42,51,.35),rgba(14,42,51,.65)),url('${echapper(voyage.photoCouverture)}');background-size:cover;background-position:center;`
         : "";
@@ -163,8 +167,8 @@ function carteVoyage(voyage, phase) {
             <span class="niPastille">${echapper(phase.libelle)}</span>
             <span class="niCouvertureBas">
                 <span class="niCouvertureTitre">${echapper(voyage.titre || "Voyage")}</span>
-                <span class="niCouvertureSous">${echapper(formatPeriode(voyage.date))}</span>
-                <span class="niBarre"><i style="width:${Math.max(0, Math.min(100, statut.pourcentage || 0))}%"></i></span>
+                <span class="niCouvertureSous">${echapper(formatPeriode(voyage.date))}${avant ? ` · Prêt à ${bilan.score} %` : ""}</span>
+                <span class="niBarre"><i style="width:${Math.max(0, Math.min(100, largeur))}%"></i></span>
             </span>
         </button>`;
 }
@@ -226,31 +230,24 @@ function blocSuite(donnees, prochain) {
         </div>`;
 }
 
-function blocResteAFaire(voyage, phase) {
+function blocResteAFaire(bilan, phase) {
 
-    if (phase.code === "apres") return "";
+    if (phase.code === "apres" || !bilan.manques.length) return "";
 
-    const enfants = getEnvies().filter(e => e.voyageId === voyage.id && !e.supprime);
-    const manques = [];
-
-    if (listerBillets(voyage.id).length === 0)
-        manques.push("Aucun billet ajouté");
-    if (!enfants.some(estLogement))
-        manques.push("Aucun logement ajouté");
-    if (enfants.length === 0)
-        manques.push("Programme vide");
-
-    if (!manques.length) return "";
+    const visibles = bilan.manques.slice(0, 4);
+    const reste = bilan.manques.length - visibles.length;
 
     return `
         <div class="niSection">
             <h2 class="niTitreSection">Il reste à faire</h2>
             <div class="niCarte">
-                ${manques.map(m => `
-                    <button type="button" class="niDocLigne niOuvrirFicheLigne">
+                ${visibles.map(m => `
+                    <div class="niDocLigne niLigneStatique">
                         <span class="niIcone niIconeAttention">⚠️</span>
-                        <span class="niDocTexte"><span class="niDocTitre">${echapper(m)}</span><span class="niDocSous">Ouvrir la fiche du voyage</span></span>
-                    </button>`).join("")}
+                        <span class="niDocTexte"><span class="niDocTitre">${echapper(m.texte)}</span><span class="niDocSous">${echapper(m.sous)}</span></span>
+                        <button type="button" class="niBouton" data-faire="${echapper(m.id)}" style="flex:none;min-height:44px;padding:0 14px">${echapper(m.bouton)}</button>
+                    </div>`).join("")}
+                ${reste > 0 ? `<div class="niDocLigne niLigneStatique"><span class="niDocSous">et ${reste} autre${reste > 1 ? "s" : ""} dans « Prêt à partir ? »</span></div>` : ""}
             </div>
         </div>`;
 }
@@ -297,40 +294,51 @@ export function openAujourdhui() {
         : { billets: [], activites: [], prochain: null, minutesMaintenant: 0 };
 
     const nbBillets = listerBillets(voyage.id).length;
+    const bilan = bilanPreparation(voyage);
+    const nbATrier = nombreIdeesATrier();
 
     ecran.innerHTML = `
         <div class="niCorps">
             <span class="niEtiquette">${echapper(dateLongue)}</span>
             <h1 class="niTitrePage">Aujourd'hui</h1>
             ${selecteur}
-            ${carteVoyage(voyage, phase)}
+            ${carteVoyage(voyage, phase, bilan)}
             ${blocProchain(donnees.prochain, donnees.minutesMaintenant)}
             ${blocSuite(donnees, donnees.prochain)}
-            ${blocResteAFaire(voyage, phase)}
+            ${blocResteAFaire(bilan, phase)}
             <div class="niTuiles">
+                ${bilan.valises.total ? `
+                <button type="button" class="niTuile" id="niOuvrirListes">
+                    <span class="niTuileTitre">Valises</span>
+                    <span class="niDocSous">${bilan.valises.faits} / ${bilan.valises.total} articles</span>
+                </button>` : ""}
                 <button type="button" class="niTuile" id="niOuvrirDocuments">
                     <span class="niTuileTitre">Documents</span>
-                    <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
+                    <span class="niDocSous">${bilan.pieces} pièce${bilan.pieces > 1 ? "s" : ""}</span>
                 </button>
                 <button type="button" class="niTuile" id="niOuvrirProgramme">
                     <span class="niTuileTitre">Programme</span>
-                    <span class="niDocSous">Jours et idées</span>
+                    <span class="niDocSous">${bilan.jours.total ? `${bilan.jours.planifies} jour${bilan.jours.planifies > 1 ? "s" : ""} sur ${bilan.jours.total}` : "Ajouter des dates"}</span>
+                </button>
+                <button type="button" class="niTuile" id="niOuvrirTrier">
+                    <span class="niTuileTitre">À trier</span>
+                    <span class="niDocSous">${nbATrier} idée${nbATrier > 1 ? "s" : ""}</span>
                 </button>
                 <button type="button" class="niTuile" id="niOuvrirFrise">
                     <span class="niTuileTitre">La journée</span>
                     <span class="niDocSous">Jour par jour</span>
                 </button>
-                <button type="button" class="niTuile" id="niOuvrirSouvenirs">
-                    <span class="niTuileTitre">Souvenirs</span>
-                    <span class="niDocSous">Photos et album</span>
-                </button>
                 <button type="button" class="niTuile" id="niOuvrirPret">
                     <span class="niTuileTitre">Prêt à partir ?</span>
                     <span class="niDocSous">Vérifier et télécharger</span>
                 </button>
+                <button type="button" class="niTuile" id="niOuvrirSouvenirs">
+                    <span class="niTuileTitre">Souvenirs</span>
+                    <span class="niDocSous">Photos et album</span>
+                </button>
                 <button type="button" class="niTuile" id="niOuvrirFicheTuile">
                     <span class="niTuileTitre">Fiche du voyage</span>
-                    <span class="niDocSous">Programme, listes, dépenses</span>
+                    <span class="niDocSous">Tout le détail</span>
                 </button>
             </div>
         </div>`;
@@ -349,7 +357,29 @@ export function openAujourdhui() {
 
     ecran.querySelector("#niOuvrirFiche")?.addEventListener("click", ouvrirFiche);
     ecran.querySelector("#niOuvrirFicheTuile")?.addEventListener("click", ouvrirFiche);
-    ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
+    ecran.querySelector("#niOuvrirTrier")?.addEventListener("click", () => openTrier());
+
+    /* Actions de « Il reste à faire » : on ouvre la fiche à la bonne rubrique. */
+    const ouvrirRubrique = (idAccordeon, idBouton = null) => {
+        fermerAujourdhui();
+        openEnvie(voyage.id);
+        setTimeout(() => {
+            const contenu = document.getElementById(idAccordeon);
+            if (contenu?.classList.contains("hidden")) {
+                document.querySelector(`.accordionHeader[data-target="${idAccordeon}"]`)?.click();
+            }
+            contenu?.scrollIntoView({ block: "start" });
+            if (idBouton) document.getElementById(idBouton)?.click();
+        }, 400);
+    };
+    ecran.querySelector("#niOuvrirListes")?.addEventListener("click", () => ouvrirRubrique("checklistSection"));
+    ecran.querySelectorAll("[data-faire]").forEach(b => b.addEventListener("click", () => {
+        const action = b.dataset.faire;
+        if (action === "billet") ouvrirRubrique("billetsSection", "addBilletButton");
+        else if (action === "listes") ouvrirRubrique("checklistSection");
+        else if (action === "programme") openProgramme(voyage);
+        else ouvrirFiche();
+    }));
     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
     ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
     ecran.querySelector("#niOuvrirProgramme")?.addEventListener("click", () => openProgramme(voyage));

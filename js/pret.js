@@ -2,14 +2,14 @@
 ==========================================================
  EnVie - Nouvelle interface
  pret.js : écran « Prêt à partir ? »
- Vérifie ce qui est prévu (lecture seule) et permet de télécharger
- sur l'appareil les fichiers hébergés pour les avoir sans réseau.
+ Score de préparation, détail par rubrique (lecture seule) et
+ copie sur l'appareil des fichiers hébergés pour les avoir sans réseau.
 ==========================================================
 */
 
-import { getEnvies, getEnvieCategories } from "./storage.js";
-import { listerBillets } from "./documents.js";
-import { telechargerFichiersVoyage, estDisponibleLocalement } from "./hors-ligne.js";
+import { getEnvies } from "./storage.js";
+import { bilanPreparation } from "./preparation.js";
+import { telechargerFichiersVoyage, tailleFichiersVoyage } from "./hors-ligne.js";
 import { openEnvie } from "./envie.js";
 
 function echapper(texte) {
@@ -18,25 +18,13 @@ function echapper(texte) {
     }[c]));
 }
 
-function estLogement(envie) {
-    const cat = getEnvieCategories().find(c => c.id === envie.categorie);
-    return cat?.label?.toLowerCase().includes("logement") || false;
+function formatTaille(octets) {
+    if (octets >= 1048576) return `${(octets / 1048576).toFixed(1).replace(".", ",")} Mo`;
+    return `${Math.max(1, Math.round(octets / 1024))} Ko`;
 }
 
 export function fermerPret() {
     document.getElementById("niPret")?.remove();
-}
-
-async function etatFichiers(voyage) {
-    const fichiers = listerBillets(voyage.id).flatMap(b => b.fichiers || []);
-    const hebergesAbsents = [];
-    let dansDocument = 0, locaux = 0;
-    for (const f of fichiers) {
-        if (f.dataUrl) { dansDocument++; continue; }
-        if (f.url && await estDisponibleLocalement(f)) locaux++;
-        else if (f.url) hebergesAbsents.push(f);
-    }
-    return { total: fichiers.length, dansDocument, locaux, absents: hebergesAbsents.length };
 }
 
 export async function openPret(voyage) {
@@ -54,46 +42,9 @@ export async function openPret(voyage) {
     async function dessiner() {
 
         const v = getEnvies().find(e => e.id === voyage.id) || voyage;
-        const enfants = getEnvies().filter(e => e.voyageId === v.id && !e.supprime);
-        const billets = listerBillets(v.id);
-        const sansFichier = billets.filter(b => !(b.fichiers || []).length).length;
-        const fichiers = await etatFichiers(v);
-        const aFaire = (v.checklist || []).filter(i => !i.checked).length;
-
-        const lignes = [
-            {
-                ok: billets.length > 0,
-                titre: "Réservations",
-                sous: billets.length
-                    ? `${billets.length} billet${billets.length > 1 ? "s" : ""}${sansFichier ? ` · ${sansFichier} sans fichier joint` : ""}`
-                    : "Aucun billet ajouté",
-                attention: sansFichier > 0
-            },
-            {
-                ok: enfants.some(estLogement),
-                titre: "Logement",
-                sous: enfants.some(estLogement) ? "Ajouté au voyage" : "Aucun logement ajouté"
-            },
-            {
-                ok: enfants.length > 0,
-                titre: "Programme",
-                sous: enfants.length ? `${enfants.length} élément${enfants.length > 1 ? "s" : ""}` : "Programme vide"
-            },
-            {
-                ok: fichiers.total > 0 && fichiers.absents === 0,
-                titre: "Documents sans réseau",
-                sous: fichiers.total === 0
-                    ? "Aucun fichier joint"
-                    : `${fichiers.dansDocument} dans l'application · ${fichiers.locaux} copié${fichiers.locaux > 1 ? "s" : ""} sur l'appareil${fichiers.absents ? ` · ${fichiers.absents} à télécharger` : ""}`
-            },
-            {
-                ok: aFaire === 0 && (v.checklist || []).length > 0,
-                titre: "Listes",
-                sous: (v.checklist || []).length
-                    ? (aFaire ? `${aFaire} à cocher` : "Tout est coché")
-                    : "Aucune liste"
-            }
-        ];
+        const bilan = bilanPreparation(v);
+        const fichiers = await tailleFichiersVoyage(v);
+        const rest = bilan.manques.length;
 
         ecran.innerHTML = `
             <div class="niBarreHaut">
@@ -101,20 +52,38 @@ export async function openPret(voyage) {
                 <div class="niBarreTitre"><h1>Prêt à partir ?</h1><span>${echapper(v.titre || "Voyage")}</span></div>
             </div>
             <div class="niCorps">
-                <div class="niCarte">
-                    ${lignes.map(l => `
-                        <div class="niDocLigne niLigneStatique">
-                            <span class="niIcone ${l.ok && !l.attention ? "" : "niIconeAttention"}">${l.ok && !l.attention ? "✅" : "⚠️"}</span>
-                            <span class="niDocTexte"><span class="niDocTitre">${l.titre}</span><span class="niDocSous">${echapper(l.sous)}</span></span>
-                        </div>`).join("")}
+                <div class="niCarte" style="padding:16px;display:flex;flex-direction:column;gap:8px">
+                    <span class="niEtiquette">Préparation</span>
+                    <span class="niPcGros">Prêt à ${bilan.score} %</span>
+                    <span class="niBarre niBarreClaire"><i style="width:${bilan.score}%"></i></span>
+                    <span class="niDocSous">${rest ? `${rest} chose${rest > 1 ? "s" : ""} à régler` : "Rien à signaler"}</span>
                 </div>
 
-                ${message ? `<div class="niBandeau niBandeauInfo" role="status">${echapper(message)}</div>` : ""}
+                <div class="niCarte">
+                    ${bilan.criteres.map(c => {
+                        const ok = c.ratio === null ? null : c.ratio >= 1;
+                        return `
+                        <div class="niDocLigne niLigneStatique">
+                            <span class="niIcone ${ok === false ? "niIconeAttention" : ""}">${ok === null ? "•" : ok ? "✅" : "⚠️"}</span>
+                            <span class="niDocTexte"><span class="niDocTitre">${c.titre}</span><span class="niDocSous">${echapper(c.detail)}</span></span>
+                        </div>`;
+                    }).join("")}
+                </div>
 
-                <div class="niBandeau">Les fichiers déjà enregistrés dans l'application restent disponibles sans réseau. Les fichiers hébergés en ligne se copient ici sur l'appareil. Les fonds de carte ne sont pas téléchargés : sans réseau, la carte peut rester vide.</div>
+                <div class="niSection">
+                    <h2 class="niTitreSection" style="font-size:18px">Utiliser sans réseau</h2>
+                    <div class="niCarte" style="padding:14px;display:flex;flex-direction:column;gap:6px">
+                        <span class="niDocTitre">Billets et documents</span>
+                        <span class="niDocSous">${fichiers.total
+                            ? `${fichiers.total} pièce${fichiers.total > 1 ? "s" : ""} · ${formatTaille(fichiers.octets)} déjà sur l'appareil ou dans l'application${fichiers.aTelecharger ? ` · ${fichiers.aTelecharger} à télécharger` : ""}`
+                            : "Aucun fichier joint"}</span>
+                    </div>
+                    ${message ? `<div class="niBandeau niBandeauInfo" role="status">${echapper(message)}</div>` : ""}
+                    <div class="niBandeau">Les fichiers déjà enregistrés dans l'application restent disponibles sans réseau. Les fonds de carte ne se téléchargent pas : sans réseau, la carte peut rester vide. À faire de préférence avec le Wi-Fi.</div>
+                </div>
 
                 <div class="niBoutons" style="flex-wrap:wrap">
-                    <button type="button" class="niBouton niBoutonPrimaire" id="niPretTelecharger" ${fichiers.absents ? "" : "disabled"}>Télécharger pour le voyage</button>
+                    <button type="button" class="niBouton niBoutonPrimaire" id="niPretTelecharger" ${fichiers.aTelecharger ? "" : "disabled"}>Télécharger pour le voyage</button>
                     <button type="button" class="niBouton" id="niPretFiche">Ouvrir la fiche</button>
                 </div>
             </div>`;

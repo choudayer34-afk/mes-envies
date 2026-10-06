@@ -42,6 +42,10 @@ function voyagesCandidats() {
         .sort((a, b) => (a.date?.start || "9999").localeCompare(b.date?.start || "9999"));
 }
 
+export function nombreIdeesATrier() {
+    return idees(new Set()).length;
+}
+
 export function openTrier() {
 
     fermerTrier();
