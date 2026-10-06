@@ -1,0 +1,506 @@
+diff --git a/js/aujourdhui.js b/js/aujourdhui.js
+index 3fd46c9..644cdff 100644
+--- a/js/aujourdhui.js
++++ b/js/aujourdhui.js
+@@ -14,6 +14,8 @@ import { openPret } from "./pret.js";
+ import { openFrise } from "./frise.js";
+ import { openProgramme } from "./programme.js";
+ import { openSouvenirs } from "./souvenirs.js";
++import { bilanPreparation } from "./preparation.js";
++import { nombreIdeesATrier, openTrier } from "./trier.js";
+ import { ouvrirGoogleMaps } from "./location.js";
+ import { openEnvie } from "./envie.js";
+ import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
+@@ -151,9 +153,11 @@ function evenementsDuJour(voyage) {
+ 
+ /* ---------- Dessin ---------- */
+ 
+-function carteVoyage(voyage, phase) {
++function carteVoyage(voyage, phase, bilan) {
+ 
+     const statut = computeContainerStatus(voyage);
++    const avant = phase.code === "avant";
++    const largeur = avant ? bilan.score : (statut.pourcentage || 0);
+     const fond = voyage.photoCouverture
+         ? `background-image:linear-gradient(rgba(14,42,51,.35),rgba(14,42,51,.65)),url('${echapper(voyage.photoCouverture)}');background-size:cover;background-position:center;`
+         : "";
+@@ -163,8 +167,8 @@ function carteVoyage(voyage, phase) {
+             <span class="niPastille">${echapper(phase.libelle)}</span>
+             <span class="niCouvertureBas">
+                 <span class="niCouvertureTitre">${echapper(voyage.titre || "Voyage")}</span>
+-                <span class="niCouvertureSous">${echapper(formatPeriode(voyage.date))}</span>
+-                <span class="niBarre"><i style="width:${Math.max(0, Math.min(100, statut.pourcentage || 0))}%"></i></span>
++                <span class="niCouvertureSous">${echapper(formatPeriode(voyage.date))}${avant ? ` · Prêt à ${bilan.score} %` : ""}</span>
++                <span class="niBarre"><i style="width:${Math.max(0, Math.min(100, largeur))}%"></i></span>
+             </span>
+         </button>`;
+ }
+@@ -226,31 +230,24 @@ function blocSuite(donnees, prochain) {
+         </div>`;
+ }
+ 
+-function blocResteAFaire(voyage, phase) {
++function blocResteAFaire(bilan, phase) {
+ 
+-    if (phase.code === "apres") return "";
++    if (phase.code === "apres" || !bilan.manques.length) return "";
+ 
+-    const enfants = getEnvies().filter(e => e.voyageId === voyage.id && !e.supprime);
+-    const manques = [];
+-
+-    if (listerBillets(voyage.id).length === 0)
+-        manques.push("Aucun billet ajouté");
+-    if (!enfants.some(estLogement))
+-        manques.push("Aucun logement ajouté");
+-    if (enfants.length === 0)
+-        manques.push("Programme vide");
+-
+-    if (!manques.length) return "";
++    const visibles = bilan.manques.slice(0, 4);
++    const reste = bilan.manques.length - visibles.length;
+ 
+     return `
+         <div class="niSection">
+             <h2 class="niTitreSection">Il reste à faire</h2>
+             <div class="niCarte">
+-                ${manques.map(m => `
+-                    <button type="button" class="niDocLigne niOuvrirFicheLigne">
++                ${visibles.map(m => `
++                    <div class="niDocLigne niLigneStatique">
+                         <span class="niIcone niIconeAttention">⚠️</span>
+-                        <span class="niDocTexte"><span class="niDocTitre">${echapper(m)}</span><span class="niDocSous">Ouvrir la fiche du voyage</span></span>
+-                    </button>`).join("")}
++                        <span class="niDocTexte"><span class="niDocTitre">${echapper(m.texte)}</span><span class="niDocSous">${echapper(m.sous)}</span></span>
++                        <button type="button" class="niBouton" data-faire="${echapper(m.id)}" style="flex:none;min-height:44px;padding:0 14px">${echapper(m.bouton)}</button>
++                    </div>`).join("")}
++                ${reste > 0 ? `<div class="niDocLigne niLigneStatique"><span class="niDocSous">et ${reste} autre${reste > 1 ? "s" : ""} dans « Prêt à partir ? »</span></div>` : ""}
+             </div>
+         </div>`;
+ }
+@@ -297,40 +294,51 @@ export function openAujourdhui() {
+         : { billets: [], activites: [], prochain: null, minutesMaintenant: 0 };
+ 
+     const nbBillets = listerBillets(voyage.id).length;
++    const bilan = bilanPreparation(voyage);
++    const nbATrier = nombreIdeesATrier();
+ 
+     ecran.innerHTML = `
+         <div class="niCorps">
+             <span class="niEtiquette">${echapper(dateLongue)}</span>
+             <h1 class="niTitrePage">Aujourd'hui</h1>
+             ${selecteur}
+-            ${carteVoyage(voyage, phase)}
++            ${carteVoyage(voyage, phase, bilan)}
+             ${blocProchain(donnees.prochain, donnees.minutesMaintenant)}
+             ${blocSuite(donnees, donnees.prochain)}
+-            ${blocResteAFaire(voyage, phase)}
++            ${blocResteAFaire(bilan, phase)}
+             <div class="niTuiles">
++                ${bilan.valises.total ? `
++                <button type="button" class="niTuile" id="niOuvrirListes">
++                    <span class="niTuileTitre">Valises</span>
++                    <span class="niDocSous">${bilan.valises.faits} / ${bilan.valises.total} articles</span>
++                </button>` : ""}
+                 <button type="button" class="niTuile" id="niOuvrirDocuments">
+                     <span class="niTuileTitre">Documents</span>
+-                    <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
++                    <span class="niDocSous">${bilan.pieces} pièce${bilan.pieces > 1 ? "s" : ""}</span>
+                 </button>
+                 <button type="button" class="niTuile" id="niOuvrirProgramme">
+                     <span class="niTuileTitre">Programme</span>
+-                    <span class="niDocSous">Jours et idées</span>
++                    <span class="niDocSous">${bilan.jours.total ? `${bilan.jours.planifies} jour${bilan.jours.planifies > 1 ? "s" : ""} sur ${bilan.jours.total}` : "Ajouter des dates"}</span>
++                </button>
++                <button type="button" class="niTuile" id="niOuvrirTrier">
++                    <span class="niTuileTitre">À trier</span>
++                    <span class="niDocSous">${nbATrier} idée${nbATrier > 1 ? "s" : ""}</span>
+                 </button>
+                 <button type="button" class="niTuile" id="niOuvrirFrise">
+                     <span class="niTuileTitre">La journée</span>
+                     <span class="niDocSous">Jour par jour</span>
+                 </button>
+-                <button type="button" class="niTuile" id="niOuvrirSouvenirs">
+-                    <span class="niTuileTitre">Souvenirs</span>
+-                    <span class="niDocSous">Photos et album</span>
+-                </button>
+                 <button type="button" class="niTuile" id="niOuvrirPret">
+                     <span class="niTuileTitre">Prêt à partir ?</span>
+                     <span class="niDocSous">Vérifier et télécharger</span>
+                 </button>
++                <button type="button" class="niTuile" id="niOuvrirSouvenirs">
++                    <span class="niTuileTitre">Souvenirs</span>
++                    <span class="niDocSous">Photos et album</span>
++                </button>
+                 <button type="button" class="niTuile" id="niOuvrirFicheTuile">
+                     <span class="niTuileTitre">Fiche du voyage</span>
+-                    <span class="niDocSous">Programme, listes, dépenses</span>
++                    <span class="niDocSous">Tout le détail</span>
+                 </button>
+             </div>
+         </div>`;
+@@ -349,7 +357,29 @@ export function openAujourdhui() {
+ 
+     ecran.querySelector("#niOuvrirFiche")?.addEventListener("click", ouvrirFiche);
+     ecran.querySelector("#niOuvrirFicheTuile")?.addEventListener("click", ouvrirFiche);
+-    ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
++    ecran.querySelector("#niOuvrirTrier")?.addEventListener("click", () => openTrier());
++
++    /* Actions de « Il reste à faire » : on ouvre la fiche à la bonne rubrique. */
++    const ouvrirRubrique = (idAccordeon, idBouton = null) => {
++        fermerAujourdhui();
++        openEnvie(voyage.id);
++        setTimeout(() => {
++            const contenu = document.getElementById(idAccordeon);
++            if (contenu?.classList.contains("hidden")) {
++                document.querySelector(`.accordionHeader[data-target="${idAccordeon}"]`)?.click();
++            }
++            contenu?.scrollIntoView({ block: "start" });
++            if (idBouton) document.getElementById(idBouton)?.click();
++        }, 400);
++    };
++    ecran.querySelector("#niOuvrirListes")?.addEventListener("click", () => ouvrirRubrique("checklistSection"));
++    ecran.querySelectorAll("[data-faire]").forEach(b => b.addEventListener("click", () => {
++        const action = b.dataset.faire;
++        if (action === "billet") ouvrirRubrique("billetsSection", "addBilletButton");
++        else if (action === "listes") ouvrirRubrique("checklistSection");
++        else if (action === "programme") openProgramme(voyage);
++        else ouvrirFiche();
++    }));
+     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
+     ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
+     ecran.querySelector("#niOuvrirProgramme")?.addEventListener("click", () => openProgramme(voyage));
+diff --git a/js/hors-ligne.js b/js/hors-ligne.js
+index ebd1f7f..87e112c 100644
+--- a/js/hors-ligne.js
++++ b/js/hors-ligne.js
+@@ -83,3 +83,20 @@ export async function telechargerFichiersVoyage(voyage, surProgression = () => {
+ 
+     return { total: fichiers.length, nouveaux, echecs };
+ }
++
++/* Taille connue des fichiers d'un voyage : dans le document (dataUrl) ou copiés sur l'appareil. */
++export async function tailleFichiersVoyage(voyage) {
++    const fichiers = (voyage.billets || []).flatMap(b => b.fichiers || []);
++    let octets = 0, aTelecharger = 0, locaux = 0, dansDocument = 0;
++    for (const f of fichiers) {
++        if (f.dataUrl) {
++            const virgule = f.dataUrl.indexOf(",");
++            octets += Math.floor(((f.dataUrl.length - (virgule + 1)) * 3) / 4);
++            dansDocument++;
++        } else if (f.url) {
++            const blob = await lireFichier(f.url);
++            if (blob) { octets += blob.size; locaux++; } else aTelecharger++;
++        }
++    }
++    return { total: fichiers.length, octets, aTelecharger, locaux, dansDocument };
++}
+diff --git a/js/preparation.js b/js/preparation.js
+new file mode 100644
+index 0000000..69ee24b
+--- /dev/null
++++ b/js/preparation.js
+@@ -0,0 +1,119 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ preparation.js : bilan de préparation d'un voyage (lecture seule)
++ Calcule le score « Prêt à X % » et la liste de ce qui reste à faire.
++ Critères : réservations, logement, programme, documents, listes.
++ Un critère sans objet (pas de liste, pas de billet…) n'entre pas dans le score.
++==========================================================
++*/
++
++import { getEnvies, getEnvieCategories, voyageADocumentExpire } from "./storage.js";
++import { listerBillets } from "./documents.js";
++import { listeJours, etapesDuJour } from "./programme.js";
++
++function estLogement(envie) {
++    const cat = getEnvieCategories().find(c => c.id === envie.categorie);
++    return cat?.label?.toLowerCase().includes("logement") || false;
++}
++
++function dateFr(iso) {
++    return new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
++}
++
++export function bilanPreparation(voyage) {
++
++    const v = getEnvies().find(e => e.id === voyage.id) || voyage;
++    const enfants = getEnvies().filter(e => e.voyageId === v.id && !e.supprime);
++    const billets = listerBillets(v.id);
++    const jours = listeJours(v);
++    const fin = v.date?.end || v.date?.start || "";
++    const checklist = v.checklist || [];
++
++    const criteres = [];
++    const manques = [];
++    let joursPlanifies = 0;
++
++    /* Réservations */
++    {
++        const aRetour = !!fin && v.date?.end && v.date.end !== v.date.start
++            && billets.some(b => b.dateDepart && b.dateDepart >= v.date.end);
++        const attendRetour = billets.length > 0 && !!v.date?.end && v.date.end !== v.date.start && !aRetour
++            && billets.some(b => b.type === "avion" || b.type === "train");
++        const ratio = billets.length === 0 ? 0 : (attendRetour ? 0.5 : 1);
++        criteres.push({
++            id: "reservations", titre: "Réservations", ratio,
++            detail: billets.length
++                ? `${billets.length} billet${billets.length > 1 ? "s" : ""}${attendRetour ? " · retour non ajouté" : ""}`
++                : "Aucun billet ajouté"
++        });
++        if (billets.length === 0) manques.push({ id: "billet", texte: "Aucun billet ajouté", sous: "Ajouter un billet", bouton: "Ajouter" });
++        else if (attendRetour) manques.push({ id: "billet", texte: "Billet retour manquant", sous: `Aucun billet daté du ${dateFr(v.date.end)}`, bouton: "Ajouter" });
++    }
++
++    /* Logement */
++    {
++        const ok = enfants.some(estLogement);
++        criteres.push({ id: "logement", titre: "Logement", ratio: ok ? 1 : 0, detail: ok ? "Ajouté au voyage" : "Aucun logement ajouté" });
++        if (!ok) manques.push({ id: "fiche", texte: "Aucun logement ajouté", sous: "Ouvrir la fiche du voyage", bouton: "Ouvrir" });
++    }
++
++    /* Programme */
++    if (jours.length) {
++        const planifies = jours.filter(j =>
++            etapesDuJour(v.id, j).length || billets.some(b => b.dateDepart === j)
++        ).length;
++        joursPlanifies = planifies;
++        criteres.push({
++            id: "programme", titre: "Programme", ratio: planifies / jours.length,
++            detail: `${planifies} jour${planifies > 1 ? "s" : ""} sur ${jours.length} planifié${planifies > 1 ? "s" : ""}`
++        });
++        if (planifies < jours.length) {
++            const vides = jours.length - planifies;
++            manques.push({ id: "programme", texte: `Programme : ${vides} jour${vides > 1 ? "s" : ""} sans rien de prévu`, sous: "Ouvrir le programme", bouton: "Ouvrir" });
++        }
++    } else {
++        criteres.push({ id: "programme", titre: "Programme", ratio: null, detail: "Pas de dates" });
++    }
++
++    /* Documents */
++    {
++        const sansFichier = billets.filter(b => !(b.fichiers || []).length).length;
++        const expire = voyageADocumentExpire(v);
++        const nbPieces = billets.reduce((s, b) => s + (b.fichiers || []).length, 0);
++        const ratio = billets.length ? (billets.length - sansFichier) / billets.length : null;
++        criteres.push({
++            id: "documents", titre: "Documents",
++            ratio: expire ? Math.min(ratio ?? 1, 0.5) : ratio,
++            detail: billets.length
++                ? `${nbPieces} pièce${nbPieces > 1 ? "s" : ""}${sansFichier ? ` · ${sansFichier} billet${sansFichier > 1 ? "s" : ""} sans fichier` : ""}${expire ? " · papiers expirés" : ""}`
++                : (expire ? "Papiers expirés" : "Aucun billet")
++        });
++        if (sansFichier) manques.push({ id: "fiche", texte: `${sansFichier} billet${sansFichier > 1 ? "s" : ""} sans fichier joint`, sous: "Joindre le document", bouton: "Ouvrir" });
++        if (expire) manques.push({ id: "fiche", texte: "Papiers d'identité expirés avant le départ", sous: "Vérifier les voyageurs", bouton: "Ouvrir" });
++    }
++
++    /* Listes */
++    if (checklist.length) {
++        const faits = checklist.filter(i => i.checked).length;
++        criteres.push({ id: "listes", titre: "Listes", ratio: faits / checklist.length, detail: `${faits} / ${checklist.length} cochés` });
++        if (faits < checklist.length) {
++            const reste = checklist.length - faits;
++            manques.push({ id: "listes", texte: `${reste} article${reste > 1 ? "s" : ""} à préparer`, sous: "Ouvrir les listes", bouton: "Ouvrir" });
++        }
++    } else {
++        criteres.push({ id: "listes", titre: "Listes", ratio: null, detail: "Aucune liste" });
++    }
++
++    const comptes = criteres.filter(c => c.ratio !== null);
++    const score = comptes.length
++        ? Math.round(100 * comptes.reduce((s, c) => s + c.ratio, 0) / comptes.length)
++        : 0;
++
++    return {
++        score, criteres, manques,
++        valises: { faits: checklist.filter(i => i.checked).length, total: checklist.length },
++        pieces: billets.reduce((s, b) => s + (b.fichiers || []).length, 0),
++        jours: { planifies: joursPlanifies, total: jours.length }
++    };
++}
+diff --git a/js/pret.js b/js/pret.js
+index 577aa4c..0b00b4e 100644
+--- a/js/pret.js
++++ b/js/pret.js
+@@ -2,14 +2,14 @@
+ ==========================================================
+  EnVie - Nouvelle interface
+  pret.js : écran « Prêt à partir ? »
+- Vérifie ce qui est prévu (lecture seule) et permet de télécharger
+- sur l'appareil les fichiers hébergés pour les avoir sans réseau.
++ Score de préparation, détail par rubrique (lecture seule) et
++ copie sur l'appareil des fichiers hébergés pour les avoir sans réseau.
+ ==========================================================
+ */
+ 
+-import { getEnvies, getEnvieCategories } from "./storage.js";
+-import { listerBillets } from "./documents.js";
+-import { telechargerFichiersVoyage, estDisponibleLocalement } from "./hors-ligne.js";
++import { getEnvies } from "./storage.js";
++import { bilanPreparation } from "./preparation.js";
++import { telechargerFichiersVoyage, tailleFichiersVoyage } from "./hors-ligne.js";
+ import { openEnvie } from "./envie.js";
+ 
+ function echapper(texte) {
+@@ -18,27 +18,15 @@ function echapper(texte) {
+     }[c]));
+ }
+ 
+-function estLogement(envie) {
+-    const cat = getEnvieCategories().find(c => c.id === envie.categorie);
+-    return cat?.label?.toLowerCase().includes("logement") || false;
++function formatTaille(octets) {
++    if (octets >= 1048576) return `${(octets / 1048576).toFixed(1).replace(".", ",")} Mo`;
++    return `${Math.max(1, Math.round(octets / 1024))} Ko`;
+ }
+ 
+ export function fermerPret() {
+     document.getElementById("niPret")?.remove();
+ }
+ 
+-async function etatFichiers(voyage) {
+-    const fichiers = listerBillets(voyage.id).flatMap(b => b.fichiers || []);
+-    const hebergesAbsents = [];
+-    let dansDocument = 0, locaux = 0;
+-    for (const f of fichiers) {
+-        if (f.dataUrl) { dansDocument++; continue; }
+-        if (f.url && await estDisponibleLocalement(f)) locaux++;
+-        else if (f.url) hebergesAbsents.push(f);
+-    }
+-    return { total: fichiers.length, dansDocument, locaux, absents: hebergesAbsents.length };
+-}
+-
+ export async function openPret(voyage) {
+ 
+     fermerPret();
+@@ -54,46 +42,9 @@ export async function openPret(voyage) {
+     async function dessiner() {
+ 
+         const v = getEnvies().find(e => e.id === voyage.id) || voyage;
+-        const enfants = getEnvies().filter(e => e.voyageId === v.id && !e.supprime);
+-        const billets = listerBillets(v.id);
+-        const sansFichier = billets.filter(b => !(b.fichiers || []).length).length;
+-        const fichiers = await etatFichiers(v);
+-        const aFaire = (v.checklist || []).filter(i => !i.checked).length;
+-
+-        const lignes = [
+-            {
+-                ok: billets.length > 0,
+-                titre: "Réservations",
+-                sous: billets.length
+-                    ? `${billets.length} billet${billets.length > 1 ? "s" : ""}${sansFichier ? ` · ${sansFichier} sans fichier joint` : ""}`
+-                    : "Aucun billet ajouté",
+-                attention: sansFichier > 0
+-            },
+-            {
+-                ok: enfants.some(estLogement),
+-                titre: "Logement",
+-                sous: enfants.some(estLogement) ? "Ajouté au voyage" : "Aucun logement ajouté"
+-            },
+-            {
+-                ok: enfants.length > 0,
+-                titre: "Programme",
+-                sous: enfants.length ? `${enfants.length} élément${enfants.length > 1 ? "s" : ""}` : "Programme vide"
+-            },
+-            {
+-                ok: fichiers.total > 0 && fichiers.absents === 0,
+-                titre: "Documents sans réseau",
+-                sous: fichiers.total === 0
+-                    ? "Aucun fichier joint"
+-                    : `${fichiers.dansDocument} dans l'application · ${fichiers.locaux} copié${fichiers.locaux > 1 ? "s" : ""} sur l'appareil${fichiers.absents ? ` · ${fichiers.absents} à télécharger` : ""}`
+-            },
+-            {
+-                ok: aFaire === 0 && (v.checklist || []).length > 0,
+-                titre: "Listes",
+-                sous: (v.checklist || []).length
+-                    ? (aFaire ? `${aFaire} à cocher` : "Tout est coché")
+-                    : "Aucune liste"
+-            }
+-        ];
++        const bilan = bilanPreparation(v);
++        const fichiers = await tailleFichiersVoyage(v);
++        const rest = bilan.manques.length;
+ 
+         ecran.innerHTML = `
+             <div class="niBarreHaut">
+@@ -101,20 +52,38 @@ export async function openPret(voyage) {
+                 <div class="niBarreTitre"><h1>Prêt à partir ?</h1><span>${echapper(v.titre || "Voyage")}</span></div>
+             </div>
+             <div class="niCorps">
++                <div class="niCarte" style="padding:16px;display:flex;flex-direction:column;gap:8px">
++                    <span class="niEtiquette">Préparation</span>
++                    <span class="niPcGros">Prêt à ${bilan.score} %</span>
++                    <span class="niBarre niBarreClaire"><i style="width:${bilan.score}%"></i></span>
++                    <span class="niDocSous">${rest ? `${rest} chose${rest > 1 ? "s" : ""} à régler` : "Rien à signaler"}</span>
++                </div>
++
+                 <div class="niCarte">
+-                    ${lignes.map(l => `
++                    ${bilan.criteres.map(c => {
++                        const ok = c.ratio === null ? null : c.ratio >= 1;
++                        return `
+                         <div class="niDocLigne niLigneStatique">
+-                            <span class="niIcone ${l.ok && !l.attention ? "" : "niIconeAttention"}">${l.ok && !l.attention ? "✅" : "⚠️"}</span>
+-                            <span class="niDocTexte"><span class="niDocTitre">${l.titre}</span><span class="niDocSous">${echapper(l.sous)}</span></span>
+-                        </div>`).join("")}
++                            <span class="niIcone ${ok === false ? "niIconeAttention" : ""}">${ok === null ? "•" : ok ? "✅" : "⚠️"}</span>
++                            <span class="niDocTexte"><span class="niDocTitre">${c.titre}</span><span class="niDocSous">${echapper(c.detail)}</span></span>
++                        </div>`;
++                    }).join("")}
+                 </div>
+ 
+-                ${message ? `<div class="niBandeau niBandeauInfo" role="status">${echapper(message)}</div>` : ""}
+-
+-                <div class="niBandeau">Les fichiers déjà enregistrés dans l'application restent disponibles sans réseau. Les fichiers hébergés en ligne se copient ici sur l'appareil. Les fonds de carte ne sont pas téléchargés : sans réseau, la carte peut rester vide.</div>
++                <div class="niSection">
++                    <h2 class="niTitreSection" style="font-size:18px">Utiliser sans réseau</h2>
++                    <div class="niCarte" style="padding:14px;display:flex;flex-direction:column;gap:6px">
++                        <span class="niDocTitre">Billets et documents</span>
++                        <span class="niDocSous">${fichiers.total
++                            ? `${fichiers.total} pièce${fichiers.total > 1 ? "s" : ""} · ${formatTaille(fichiers.octets)} déjà sur l'appareil ou dans l'application${fichiers.aTelecharger ? ` · ${fichiers.aTelecharger} à télécharger` : ""}`
++                            : "Aucun fichier joint"}</span>
++                    </div>
++                    ${message ? `<div class="niBandeau niBandeauInfo" role="status">${echapper(message)}</div>` : ""}
++                    <div class="niBandeau">Les fichiers déjà enregistrés dans l'application restent disponibles sans réseau. Les fonds de carte ne se téléchargent pas : sans réseau, la carte peut rester vide. À faire de préférence avec le Wi-Fi.</div>
++                </div>
+ 
+                 <div class="niBoutons" style="flex-wrap:wrap">
+-                    <button type="button" class="niBouton niBoutonPrimaire" id="niPretTelecharger" ${fichiers.absents ? "" : "disabled"}>Télécharger pour le voyage</button>
++                    <button type="button" class="niBouton niBoutonPrimaire" id="niPretTelecharger" ${fichiers.aTelecharger ? "" : "disabled"}>Télécharger pour le voyage</button>
+                     <button type="button" class="niBouton" id="niPretFiche">Ouvrir la fiche</button>
+                 </div>
+             </div>`;
+diff --git a/js/trier.js b/js/trier.js
+index 347864f..b87e5d7 100644
+--- a/js/trier.js
++++ b/js/trier.js
+@@ -42,6 +42,10 @@ function voyagesCandidats() {
+         .sort((a, b) => (a.date?.start || "9999").localeCompare(b.date?.start || "9999"));
+ }
+ 
++export function nombreIdeesATrier() {
++    return idees(new Set()).length;
++}
++
+ export function openTrier() {
+ 
+     fermerTrier();
+diff --git a/sw.js b/sw.js
+index acbf7c2..4fe2fe6 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'envie-cache-v235';
++const CACHE_NAME = 'envie-cache-v236';
+ 
+  
+  
+@@ -20,6 +20,7 @@ const APP_SHELL = [
+     './js/trier.js',
+     './js/frise.js',
+     './js/programme.js',
++    './js/preparation.js',
+     './js/espace-pc.js',
+     './js/souvenirs.js',
+     './js/nouveau-voyage.js',

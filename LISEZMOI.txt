@@ -1,21 +1,21 @@
-ENVIE - ÉTAPE 10 : Préparer sur grand écran
+ENVIE - ÉTAPE 11 : Aujourd'hui et Prêt à partir complets
 
 À copier à la racine du dépôt :
-  sw.js                       (cache v235)
-  ni.css
-  js/espace-pc.js             (nouveau)
-  js/programme.js             (modifié : trois fonctions exportées, rien d'autre)
-  js/fiche-voyage.js          (modifié : bouton « Grand écran »)
-  js/nouvelle-interface.js    (modifié : onglet « Préparer »)
-Aucun ancien fichier de l'application n'est modifié.
+  sw.js                  (cache v236)
+  ni.css                 (inchangé, inclus par sécurité)
+  js/preparation.js      (nouveau : calcul du score et des restes à faire)
+  js/pret.js             (modifié : score, détail, taille hors-ligne)
+  js/aujourdhui.js       (modifié : « Prêt à X % », restes à faire avec boutons, tuiles avec chiffres)
+  js/trier.js            (modifié : une fonction exportée de plus)
+  js/hors-ligne.js       (modifié : calcul de la taille des fichiers)
+Aucun ancien fichier de l'application n'est modifié. Aucune donnée nouvelle.
 
-Accès (écran de 1100 px de large ou plus, nouvelle interface activée) :
-  - accueil Voyages : onglet « Préparer » à droite de Liste / Carte / Agenda / Idées
-  - fiche d'un voyage : bouton « Grand écran » en tête
-Contenu : colonne de gauche (Capturer, Aujourd'hui, liste des voyages, Plus), jours en colonnes au centre,
-  plateau d'idées à droite, puces de synthèse, dépenses, réservations.
-Glisser-déposer : idée du plateau vers un jour (4 zones : matin, midi, après-midi, soir) ;
-  d'un jour à un autre ; d'un jour vers le plateau pour la retirer. Double-clic : ouvre la fiche.
-Raccourcis : N ouvre Capturer, Échap ferme l'espace.
-Pas repris des maquettes : recherche globale (Ctrl+K), carte du jour et trajets recalculés, budget par catégorie
-  (le bloc « Dépenses » affiche le total des dépenses saisies), bascule Voyages / Maison (inchangée dans l'application).
+Score « Prêt à X % » : moyenne de cinq critères (réservations, logement, programme, documents, listes) ;
+un critère sans objet (pas de liste, pas de billet, pas de dates) n'entre pas dans le calcul.
+  Réservations : aucun billet = 0 ; billets mais aucun billet daté du retour = 50 % ; sinon 100 %.
+  Programme : jours avec au moins un billet ou une étape / nombre de jours.
+  Documents : billets avec fichier joint / billets ; papiers d'identité expirés avant le départ = plafonné à 50 %.
+  Listes : articles cochés / articles.
+« Il reste à faire » : chaque ligne a un bouton (Ajouter un billet, Ouvrir le programme, Ouvrir les listes...).
+Tuiles d'Aujourd'hui : Valises x / y, Documents, Programme x jours sur y, À trier (nombre d'idées).
+Prêt à partir : taille des pièces. Carte hors-ligne et rappel la veille : impossibles dans une application web.
