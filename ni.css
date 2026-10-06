@@ -707,3 +707,15 @@ body.niActive #assignModal,body.niActive #checklistEditItemModal{z-index:2300}
 .niCalPoint{position:absolute;bottom:5px;left:50%;width:5px;height:5px;margin-left:-2.5px;border-radius:50%;background:var(--ni-brand)}
 .niCalChoix .niCalPoint{background:#fff}
 #niPlacer .niBoutons{position:sticky;bottom:-20px;background:var(--ni-bg);padding:8px 0 4px}
+
+/* Calendrier : feuille « Aller au jour » et vue grand écran */
+#niCalendrierJour{z-index:2350}
+.niBoutonCalendrier{align-self:flex-start;min-height:44px;padding:0 16px;margin:2px 0 8px}
+.niPcCal{background:#fff;border:1px solid var(--ni-line);border-radius:14px;padding:8px 12px;margin-bottom:12px}
+.niPcCal summary{min-height:36px;display:flex;align-items:center;gap:10px;font-weight:700;cursor:pointer}
+.niPcCal .niCal{flex-direction:row;flex-wrap:wrap;gap:16px;padding:6px 0 4px}
+.niPcCal .niCalMois{flex:0 0 232px}
+.niPcCal .niCalJour{min-height:30px;border-radius:8px;font-size:13px}
+.niPcCal .niCalGrille{gap:3px}
+.niPcCal .niCalPoint{bottom:3px}
+.niPcCal .niPcSurvol{outline:2px solid var(--ni-brand)}
