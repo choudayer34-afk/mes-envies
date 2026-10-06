@@ -50,7 +50,20 @@ function estLogement(envie) {
 
 /* ---------- Choix du voyage à afficher ---------- */
 
-export function trouverVoyage() {
+const CLE_CHOIX = "niAujourdhuiVoyage";
+
+function lireChoix() {
+    try { return sessionStorage.getItem(CLE_CHOIX) || ""; }
+    catch { return ""; }
+}
+
+function memoriserChoix(id) {
+    try { sessionStorage.setItem(CLE_CHOIX, id); }
+    catch { /* sans effet */ }
+}
+
+/* Voyages datés, dans l'ordre : en cours, à venir (le plus proche d'abord), puis passés récents. */
+export function listerVoyagesDates() {
 
     const envies = getEnvies().filter(e => e.contexte === "voyage" && !e.supprime);
     const parents = new Set(envies.map(e => e.voyageId).filter(Boolean));
@@ -62,14 +75,20 @@ export function trouverVoyage() {
 
     const fin = v => v.date.end || v.date.start;
 
-    const enCours = voyages.filter(v => v.date.start <= aujourdhui && aujourdhui <= fin(v));
-    if (enCours.length) return enCours.sort((a, b) => a.date.start.localeCompare(b.date.start))[0];
+    const enCours = voyages.filter(v => v.date.start <= aujourdhui && aujourdhui <= fin(v))
+        .sort((a, b) => a.date.start.localeCompare(b.date.start));
+    const aVenir = voyages.filter(v => v.date.start > aujourdhui)
+        .sort((a, b) => a.date.start.localeCompare(b.date.start));
+    const passes = voyages.filter(v => fin(v) < aujourdhui)
+        .sort((a, b) => fin(b).localeCompare(fin(a)));
 
-    const aVenir = voyages.filter(v => v.date.start > aujourdhui);
-    if (aVenir.length) return aVenir.sort((a, b) => a.date.start.localeCompare(b.date.start))[0];
+    return [...enCours, ...aVenir, ...passes];
+}
 
-    const passes = voyages.sort((a, b) => fin(b).localeCompare(fin(a)));
-    return passes[0] || null;
+/* Sans choix explicite : voyage en cours, sinon prochain, sinon dernier passé. */
+export function trouverVoyage(idChoisi = lireChoix()) {
+    const liste = listerVoyagesDates();
+    return liste.find(v => v.id === idChoisi) || liste[0] || null;
 }
 
 export function phaseDuVoyage(voyage) {
@@ -263,6 +282,15 @@ export function openAujourdhui() {
     }
 
     const phase = phaseDuVoyage(voyage);
+    const tous = listerVoyagesDates();
+    const selecteur = tous.length > 1 ? `
+            <div class="niSelecteurVoyage" role="tablist" aria-label="Voyage affiché">
+                ${tous.map(v => `
+                    <button type="button" role="tab" class="niPuce${v.id === voyage.id ? " niPuceActive" : ""}" data-voyage="${echapper(v.id)}" aria-selected="${v.id === voyage.id}">
+                        <span class="niPuceTitre">${echapper(v.titre || "Voyage")}</span>
+                        <span class="niPuceSous">${echapper(phaseDuVoyage(v).libelle)}</span>
+                    </button>`).join("")}
+            </div>` : "";
     const donnees = phase.code === "pendant" || phase.jours <= 1
         ? evenementsDuJour(voyage)
         : { billets: [], activites: [], prochain: null, minutesMaintenant: 0 };
@@ -273,6 +301,7 @@ export function openAujourdhui() {
         <div class="niCorps">
             <span class="niEtiquette">${echapper(dateLongue)}</span>
             <h1 class="niTitrePage">Aujourd'hui</h1>
+            ${selecteur}
             ${carteVoyage(voyage, phase)}
             ${blocProchain(donnees.prochain, donnees.minutesMaintenant)}
             ${blocSuite(donnees, donnees.prochain)}
@@ -292,6 +321,13 @@ export function openAujourdhui() {
                 </button>
             </div>
         </div>`;
+
+    ecran.querySelectorAll(".niPuce").forEach(puce => {
+        puce.addEventListener("click", () => {
+            memoriserChoix(puce.dataset.voyage);
+            openAujourdhui();
+        });
+    });
 
     const ouvrirFiche = () => {
         fermerAujourdhui();

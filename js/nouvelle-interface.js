@@ -15,6 +15,7 @@ import { exporterSauvegarde } from "./sauvegarde.js";
 import { openMigration, fermerMigration } from "./migration-billets.js";
 import { fermerPret } from "./pret.js";
 import { fermerVisionneuse } from "./visionneuse.js";
+import { initGestesListes } from "./gestes-listes.js";
 
 const CLE = "envie_nouvelle_interface";
 
@@ -264,5 +265,6 @@ export function initNouvelleInterface() {
     if (nouvelleInterfaceActive()) {
         monterBarre();
         initFicheVoyage();
+        initGestesListes();
     }
 }
