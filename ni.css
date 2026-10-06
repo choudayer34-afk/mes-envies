@@ -519,3 +519,7 @@ body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:no
 .niRaccourcis{display:flex;gap:8px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none;}
 .niRaccourcis::-webkit-scrollbar{display:none;}
 .niRaccourcis .niBouton{flex:none;}
+
+/* Écrans ouverts depuis la fiche d'un voyage : au-dessus de la fenêtre de la fiche (2100). */
+#niProgramme, #niFrise, #niSouvenirs, #niPret{z-index:2200;}
+#niPlacer{z-index:2300;}
