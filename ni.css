@@ -654,3 +654,15 @@ button.niArgentCase{cursor:pointer;min-height:44px;}
 .niListeAjout .niRecherche{flex:1;min-width:0;}
 .niListeAjout .niListeCat{flex:0 0 38%;}
 .niBfCorps .niSelecteurVoyage{margin:0;padding:2px 0 6px;}
+
+/* ---------- Fiche voyage simplifiée ---------- */
+#niFicheHub{z-index:2150;}
+#niFicheHubMenu, #niFicheModifier{z-index:2250;}
+#niDocuments, #niVoyageurs, #niNotesLiens{z-index:2200;}
+.niHubCouverture{min-height:170px;width:100%;}
+.niHubMaintenant{display:flex;flex-direction:column;gap:10px;padding:14px;}
+.niHubGrille{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.niHubTuile{display:flex;flex-direction:column;align-items:flex-start;gap:10px;min-height:108px;padding:12px;text-align:left;font:inherit;color:var(--ni-ink);cursor:pointer;width:100%;}
+.niHubTuile .niDocTexte{flex:none;width:100%;}
+.niHubTuile .niBarre{width:100%;}
+.niHubTuile .niDocTitre{font-size:15px;}
