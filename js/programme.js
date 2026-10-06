@@ -11,7 +11,7 @@
 ==========================================================
 */
 
-import { libelleJourCourt } from "./jours.js";
+import { libelleJourCourt, calendrierVoyage } from "./jours.js";
 import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import {
     getEnvies, getEnvieCategories, createEnvie, updateEnvieDate, updateEnvieMoment
@@ -248,9 +248,8 @@ export function openProgramme(voyage, jourDepart = null) {
                     ${etape.lieu?.nom ? `<span class="niDocSous">${echapper(etape.lieu.nom)}</span>` : ""}
 
                     <span class="niEtiquette">Quel jour ?</span>
-                    <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
-                        ${jours.map((j, i) => `<button type="button" class="niPuce niPuceJour${j === choixJour ? " niPuceActive" : ""}" data-j="${j}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${libelleJourCourt(j, jours)}</span></button>`).join("")}
-                    </div>
+                    ${calendrierVoyage(jours, choixJour, new Map(jours.map(j => [j, etapesDuJour(v.id, j).filter(e => e.id !== etape.id).length + listerBillets(v.id).filter(b => b.dateDepart === j).length])))}
+                    <span class="niDocSous">J${numero} · ${echapper(new Date(choixJour + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" }))}</span>
 
                     <span class="niEtiquette">Quand ?</span>
                     <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
