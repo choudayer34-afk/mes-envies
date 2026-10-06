@@ -676,3 +676,18 @@ button.niArgentCase{cursor:pointer;min-height:44px;}
 .niMeteoMin{font-weight:500;color:var(--ni-muted,#5b6b70)}
 .niTrajet{display:flex;align-items:center;gap:6px;width:100%;min-height:36px;padding:4px 16px 4px 28px;background:transparent;border:0;border-left:3px solid var(--ni-line);margin-left:20px;width:calc(100% - 20px);font:inherit;font-size:12px;color:var(--ni-muted,#5b6b70);text-align:left;cursor:pointer}
 .niTrajetVoir{margin-left:auto;font-weight:600;color:var(--ni-brand)}
+
+/* Capturer : dictée */
+.niMicro{flex:0 0 auto;width:48px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid var(--ni-line);color:var(--ni-ink)}
+.niMicro .niIco{stroke:currentColor;fill:none}
+.niMicroActif{background:#C0392B;color:#fff;border-color:#C0392B}
+
+/* Recherche globale */
+#niRecherche{z-index:2300}
+#niRecherche .niBarreHaut{gap:10px}
+#niRecherche .niRecherche{flex:1;min-width:0}
+.niVoyagesLoupe{flex:none;width:44px;height:44px;margin-left:auto;margin-right:8px}
+
+/* Les fenêtres de l'ancienne application (Plus, Jeux, Survie, Guide, À propos, Corbeille…)
+   n'ont pas de niveau défini : elles passaient sous les écrans de la nouvelle interface. */
+body.niActive .modal-overlay{z-index:2000}
