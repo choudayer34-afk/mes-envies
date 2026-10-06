@@ -7,6 +7,9 @@
 */
 
 import { fermerListes } from "./listes.js";
+import { fermerHub } from "./fiche-hub.js";
+import { fermerVoyageurs } from "./voyageurs-ecran.js";
+import { fermerNotesLiens } from "./notes-liens.js";
 import { fermerDepenseForm } from "./depense-form.js";
 import { fermerArgent } from "./argent.js";
 import { fermerReservations } from "./reservations.js";
@@ -118,6 +121,9 @@ function fermerEcransNouveaux() {
     fermerVoyages();
     fermerBilletForm();
     fermerListes();
+    fermerHub();
+    fermerVoyageurs();
+    fermerNotesLiens();
     fermerDepenseForm();
     fermerArgent();
     fermerDocuments();

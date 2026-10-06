@@ -23,6 +23,8 @@ import { bilanPreparation } from "./preparation.js";
 import { nombreIdeesATrier, openTrier } from "./trier.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { openEnvie } from "./envie.js";
+import { masquerHub } from "./fiche-hub.js";
+import { openVoyageurs } from "./voyageurs-ecran.js";
 import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
 import { showToast } from "./toast.js";
 
@@ -374,6 +376,7 @@ export function openAujourdhui() {
     /* Actions de « Il reste à faire » : on ouvre la fiche à la bonne rubrique. */
     const ouvrirRubrique = (idAccordeon, idBouton = null) => {
         fermerAujourdhui();
+        masquerHub(voyage.id);
         openEnvie(voyage.id);
         setTimeout(() => {
             const contenu = document.getElementById(idAccordeon);
@@ -389,6 +392,9 @@ export function openAujourdhui() {
         const action = b.dataset.faire;
         if (action === "billet") openBilletForm(voyage.id, { apres: () => openAujourdhui() });
         else if (action === "listes") openListes(voyage.id);
+        else if (action === "logement") openBilletForm(voyage.id, { type: "logement", apres: () => openAujourdhui() });
+        else if (action === "reservations") openReservations(voyage.id);
+        else if (action === "voyageurs") openVoyageurs(voyage);
         else if (action === "programme") openProgramme(voyage);
         else ouvrirFiche();
     }));

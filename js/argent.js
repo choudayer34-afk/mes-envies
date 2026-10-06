@@ -11,6 +11,7 @@
 import { openDepenseForm } from "./depense-form.js";
 import { getEnvies, updateEnvieBudget } from "./storage.js";
 import { openEnvie } from "./envie.js";
+import { masquerHub } from "./fiche-hub.js";
 import { showToast } from "./toast.js";
 
 function echapper(texte) {
@@ -42,6 +43,7 @@ export function bilanArgent(voyage) {
 
 function ouvrirRubrique(voyageId, idBouton = null) {
     fermerArgent();
+    masquerHub(voyageId);
     openEnvie(voyageId);
     setTimeout(() => {
         const contenu = document.getElementById("tricountSection");

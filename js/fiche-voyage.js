@@ -22,6 +22,7 @@ import { openSouvenirs } from "./souvenirs.js";
 import { openPret } from "./pret.js";
 import { openProgramme } from "./programme.js";
 import { openEspacePc } from "./espace-pc.js";
+import { ouvrirHub, fermerHub, hubMasque, reinitialiserHub, afficherHub } from "./fiche-hub.js";
 
 /* Chaque accordéon de la fiche appartient à un bloc.
    Tout accordéon non listé ici va dans « Plus d'outils » : rien n'est perdu. */
@@ -237,6 +238,7 @@ function dessiner(envie) {
     racine.className = "niFicheVoyage";
     racine.innerHTML = `
         <div class="niFicheEntete">
+            <button type="button" class="niBouton" id="niRetourHub">← Fiche simplifiée</button>
             <div class="niBarre niBarreClaire"><i style="width:${Math.max(0, Math.min(100, statut.pourcentage || 0))}%"></i></div>
             <span class="niDocSous">Avancement : ${Math.round(statut.pourcentage || 0)} %</span>
         </div>
@@ -260,6 +262,8 @@ function dessiner(envie) {
 
     repartir(envie, phase, racine.querySelector("#niBlocs"));
     masquerBlocsVides();
+
+    racine.querySelector("#niRetourHub")?.addEventListener("click", () => afficherHub(envie.id));
 
     racine.querySelector(".niRaccourcis").addEventListener("click", evenement => {
         const bouton = evenement.target.closest("[data-raccourci]");
@@ -286,21 +290,31 @@ function appliquer() {
     planifie = false;
 
     const recouvrement = document.getElementById("ficheOverlay");
-    if (!recouvrement || recouvrement.classList.contains("hidden")) return;
+    if (!recouvrement) return;
+
+    if (recouvrement.classList.contains("hidden")) {
+        fermerHub();
+        reinitialiserHub();
+        return;
+    }
 
     const envie = getEnvies().find(e => e.id === getCurrentEnvieId());
 
     if (!estVoyage(envie)) {
+        fermerHub();
         retablir();
         return;
     }
 
     if (voyageAffiche === envie.id && document.getElementById("niFicheVoyage")) {
         rafraichirResumes();
-        return;
+    } else {
+        dessiner(envie);
     }
 
-    dessiner(envie);
+    /* Fiche simplifiée par-dessus, sauf si « Toutes les rubriques » a été choisi. */
+    const hub = document.getElementById("niFicheHub");
+    if (!hubMasque(envie.id) && (!hub || hub.dataset.voyage !== envie.id)) ouvrirHub(envie);
 }
 
 function planifier() {

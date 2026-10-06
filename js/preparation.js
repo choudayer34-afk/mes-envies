@@ -58,7 +58,7 @@ export function bilanPreparation(voyage) {
     {
         const ok = enfants.some(estLogement) || billets.some(b => b.type === "logement");
         criteres.push({ id: "logement", titre: "Logement", ratio: ok ? 1 : 0, detail: ok ? "Ajouté au voyage" : "Aucun logement ajouté" });
-        if (!ok) manques.push({ id: "fiche", texte: "Aucun logement ajouté", sous: "Ouvrir la fiche du voyage", bouton: "Ouvrir" });
+        if (!ok) manques.push({ id: "logement", texte: "Aucun logement ajouté", sous: "Ajouter le logement", bouton: "Ajouter" });
     }
 
     /* Programme */
@@ -92,8 +92,8 @@ export function bilanPreparation(voyage) {
                 ? `${nbPieces} pièce${nbPieces > 1 ? "s" : ""}${sansFichier ? ` · ${sansFichier} billet${sansFichier > 1 ? "s" : ""} sans fichier` : ""}${expire ? " · papiers expirés" : ""}`
                 : (expire ? "Papiers expirés" : "Aucun billet")
         });
-        if (sansFichier) manques.push({ id: "fiche", texte: `${sansFichier} billet${sansFichier > 1 ? "s" : ""} sans fichier joint`, sous: "Joindre le document", bouton: "Ouvrir" });
-        if (expire) manques.push({ id: "fiche", texte: "Papiers d'identité expirés avant le départ", sous: "Vérifier les voyageurs", bouton: "Ouvrir" });
+        if (sansFichier) manques.push({ id: "reservations", texte: `${sansFichier} billet${sansFichier > 1 ? "s" : ""} sans fichier joint`, sous: "Joindre le document", bouton: "Ouvrir" });
+        if (expire) manques.push({ id: "voyageurs", texte: "Papiers d'identité expirés avant le départ", sous: "Vérifier les voyageurs", bouton: "Ouvrir" });
     }
 
     /* Listes */

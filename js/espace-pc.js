@@ -20,6 +20,7 @@ import { openFrise } from "./frise.js";
 import { openSouvenirs } from "./souvenirs.js";
 import { openCapturer } from "./capturer.js";
 import { openEnvie } from "./envie.js";
+import { masquerHub } from "./fiche-hub.js";
 import { formatPeriode } from "./periode.js";
 import { showToast } from "./toast.js";
 
@@ -290,6 +291,7 @@ export function openEspacePc(voyageDepart = null) {
     /* Ouvre la fiche puis une rubrique (et éventuellement un bouton de cette rubrique). */
     function ouvrirRubrique(voyageId, cible, idBouton = null) {
         document.getElementById("niPc") && (ecran.style.display = "none");
+        masquerHub(voyageId);
         openEnvie(voyageId);
         setTimeout(() => {
             const contenu = document.getElementById(cible);

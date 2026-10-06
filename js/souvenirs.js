@@ -12,6 +12,7 @@ import { formatPeriode } from "./periode.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { ouvrirPreparationAlbum } from "./album.js";
 import { openEnvie } from "./envie.js";
+import { masquerHub } from "./fiche-hub.js";
 import { showToast } from "./toast.js";
 
 function echapper(texte) {
@@ -46,6 +47,7 @@ function nbJours(voyage) {
 /* Ouvre la fiche puis déroule la rubrique voulue. */
 function ouvrirRubrique(voyageId, cible, motBouton = null) {
     fermerSouvenirs();
+    masquerHub(voyageId);
     openEnvie(voyageId);
     setTimeout(() => {
         const contenu = document.getElementById(cible);
