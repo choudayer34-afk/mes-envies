@@ -1,0 +1,21 @@
+ÉTAPE 15 : ÉCRAN ARGENT
+Cache : envie-cache-v242
+
+À FAIRE : copier chaque fichier du zip à son emplacement, en remplaçant l'existant.
+
+NOUVEAU FICHIER
+- js/argent.js
+
+FICHIER DE L'ANCIENNE APPLICATION MODIFIÉ (ajout seul, validé)
+- js/storage.js : ajout de updateEnvieBudget (champ facultatif "budget" sur le voyage). Rien d'existant n'est modifié.
+
+AUTRES FICHIERS
+ni.css, sw.js, js/nouvelle-interface.js, js/aujourdhui.js, js/fiche-voyage.js
+
+CONTENU
+- Budget (à saisir en touchant la case), dépensé, reste (ou dépassement en rouge), jauge
+- Payé par personne, dernières dépenses
+- « + Dépense » et « Qui doit quoi » ouvrent la rubrique dépenses existante (saisie et répartition inchangées)
+
+OÙ TESTER
+- Aujourd'hui > tuile « Argent », ou fiche du voyage > bouton « Argent »

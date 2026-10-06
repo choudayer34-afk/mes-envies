@@ -593,3 +593,12 @@ body:has(#niPc) .niFeuilleFond{z-index:2250;}
 #niVoyages .niNavPc{display:none;}
 @media (min-width:1100px){ #niVoyages .niNavPc{display:flex;} }
 #niVoyages .niSelecteurVoyage{margin:12px 0 0;padding:2px 0 6px;}
+
+/* ---------- Écran Argent ---------- */
+#niArgent{z-index:2200;}
+.niArgentChiffres{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.niArgentCase{display:flex;flex-direction:column;gap:2px;border:0;background:none;padding:0;font:inherit;color:var(--ni-ink);text-align:left;cursor:default;}
+button.niArgentCase{cursor:pointer;min-height:44px;}
+.niArgentGros{font-size:30px;font-weight:700;line-height:1.1;}
+.niArgentRouge{color:#B42318;}
+#niArgentBudget{z-index:2250;}
