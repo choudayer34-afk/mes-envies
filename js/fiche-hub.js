@@ -20,7 +20,7 @@ import { bilanPreparation } from "./preparation.js";
 import { bilanArgent, openArgent } from "./argent.js";
 import { openListes } from "./listes.js";
 import { openReservations } from "./reservations.js";
-import { openProgramme } from "./programme.js";
+import { openProgramme, horsPeriode } from "./programme.js";
 import { openFrise } from "./frise.js";
 import { openSouvenirs } from "./souvenirs.js";
 import { openPret } from "./pret.js";
@@ -235,7 +235,7 @@ function dessiner(ecran, id) {
             ${carte}
 
             <div class="niHubGrille">
-                ${tuile("programme", "programme", "Programme", jours.total ? `${jours.planifies} / ${jours.total} jours` : "Programme vide", jours.total ? { barre: Math.round(100 * jours.planifies / jours.total) } : {})}
+                ${tuile("programme", "programme", "Programme", (jours.total ? `${jours.planifies} / ${jours.total} jours` : "Programme vide") + (horsPeriode(v).length ? ` · ${horsPeriode(v).length} hors dates` : ""), jours.total ? { barre: Math.round(100 * jours.planifies / jours.total) } : {})}
                 ${tuile("reservations", "resa", "Réservations", nbBillets ? pluriel(nbBillets, "ajoutée") + (manqueBillet ? " · 1 manque" : "") : "Aucune", { alerte: manqueBillet })}
                 ${tuile("documents", "docs", "Documents", pluriel(bilan.pieces, "pièce"))}
                 ${tuile("argent", "argent", "Argent", argent.budget !== null ? (argent.reste >= 0 ? `${Math.round(argent.reste).toLocaleString("fr-FR")} € restants` : "Budget dépassé") : (argent.total ? `${Math.round(argent.total).toLocaleString("fr-FR")} € dépensés` : "Budget à définir"), argent.budget ? { barre: Math.min(100, Math.round(100 * argent.total / argent.budget)) } : {})}

@@ -79,6 +79,15 @@ export function plateau(voyageId) {
         .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 }
 
+/* Étapes datées en dehors des dates du voyage : invisibles dans les jours, donc listées à part. */
+export function horsPeriode(voyage) {
+    const debut = voyage.date?.start;
+    const fin = voyage.date?.end || debut;
+    return etapes(voyage.id)
+        .filter(e => e.date?.start && (!debut || e.date.start < debut || e.date.start > fin))
+        .sort((a, b) => a.date.start.localeCompare(b.date.start));
+}
+
 export function fermerProgramme() {
     document.getElementById("niProgramme")?.remove();
     document.getElementById("niPlacer")?.remove();
@@ -113,6 +122,7 @@ export function openProgramme(voyage, jourDepart = null) {
         const billets = listerBillets(v.id).filter(b => b.dateDepart === jour);
         const libelle = new Date(jour + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
         const idees = plateau(v.id);
+        const dehors = horsPeriode(v);
 
         ecran.innerHTML = `
             <div class="niBarreHaut">
@@ -149,6 +159,20 @@ export function openProgramme(voyage, jourDepart = null) {
                             </div>`).join("")}
                         </div>`}
                 </div>
+
+                ${dehors.length ? `<div class="niSection">
+                    <h2 class="niTitreSection" style="font-size:18px">Hors des dates du voyage <span class="niDocSous">${dehors.length}</span></h2>
+                    <div class="niCarte">
+                        ${dehors.map(e => `
+                        <div class="niDocLigne niLigneStatique" data-etape="${echapper(e.id)}">
+                            <button type="button" class="niDocTexte" data-act="fiche" style="background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer">
+                                <span class="niDocTitre">${echapper(e.titre || "Sans titre")}</span>
+                                <span class="niDocSous">${echapper(new Date(e.date.start + "T12:00:00").toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }))}${e.lieu?.nom ? " · " + echapper(e.lieu.nom) : ""}</span>
+                            </button>
+                            <button type="button" class="niBouton" data-act="placer">Placer</button>
+                        </div>`).join("")}
+                    </div>
+                </div>` : ""}
 
                 <div class="niSection">
                     <h2 class="niTitreSection" style="font-size:18px">Plateau d'idées <span class="niDocSous">${idees.length}</span></h2>
