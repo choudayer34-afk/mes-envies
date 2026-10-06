@@ -169,7 +169,7 @@ export function openEspacePc(voyageDepart = null) {
 
     function colonne(p, i, aujourdhui) {
         const n = p.etapes.length + p.billets.length;
-        const date = new Date(p.jour + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" });
+        const date = new Date(p.jour + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
         return `
         <section class="niPcJour${p.jour === aujourdhui ? " niPcJourAuj" : ""}" data-jour="${p.jour}">
             <div class="niPcEnteteLigne"><span class="niDocTitre">J${i + 1} · ${echapper(date)}</span><span class="niTag${n ? "" : " niTagMaintenant"}">${n ? n + " prévu" + (n > 1 ? "s" : "") : "vide"}</span></div>

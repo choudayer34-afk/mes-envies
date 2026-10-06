@@ -246,6 +246,23 @@ function monterBarre() {
 
     document.body.classList.add("niActive");
     poserRaccourciRecherche();
+
+    /* L'engrenage de l'accueil est masqué par les écrans : l'administration est aussi dans Plus. */
+    const plus = document.getElementById("plusModal");
+    if (plus && !document.getElementById("niPlusAdmin")) {
+        const bouton = document.createElement("button");
+        bouton.id = "niPlusAdmin";
+        bouton.type = "button";
+        bouton.className = "secondaryButton";
+        bouton.style.cssText = "width:100%;margin-bottom:10px;";
+        bouton.textContent = "⚙️ Administration";
+        bouton.addEventListener("click", () => {
+            plus.classList.add("hidden");
+            document.getElementById("btnSettings")?.click();
+        });
+        const premier = document.getElementById("plusBtnJeux");
+        premier?.parentNode?.insertBefore(bouton, premier);
+    }
     monterNavVoyages();
 
     const barre = document.createElement("nav");

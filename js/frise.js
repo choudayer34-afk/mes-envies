@@ -17,6 +17,7 @@ import { ouvrirGoogleMaps } from "./location.js";
 import { openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
 import { libelleMoment, rangMoment } from "./programme.js";
+import { libelleJourCourt } from "./jours.js";
 import { chargerMeteo, meteoEnCache, coordonnees, estimerTrajet, formaterTrajet, lienTrajet, lienJournee } from "./journee-infos.js";
 
 
@@ -136,7 +137,7 @@ export function openFrise(voyage, jourDepart = null) {
             </div>
             <div class="niCorps">
                 <div class="niSelecteurVoyage" role="tablist" aria-label="Jours du voyage">
-                    ${jours.map((j, i) => `<button type="button" role="tab" class="niPuce niPuceJour${j === jour ? " niPuceActive" : ""}" data-jour="${j}" aria-selected="${j === jour}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${new Date(j + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" })}</span></button>`).join("")}
+                    ${jours.map((j, i) => `<button type="button" role="tab" class="niPuce niPuceJour${j === jour ? " niPuceActive" : ""}" data-jour="${j}" aria-selected="${j === jour}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${libelleJourCourt(j, jours)}</span></button>`).join("")}
                 </div>
 
                 <div id="niMeteoJour"></div>

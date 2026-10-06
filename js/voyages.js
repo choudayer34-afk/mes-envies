@@ -197,6 +197,7 @@ function dessiner(ecran) {
             <div class="niVoyagesEntete">
                 <h1 class="niTitrePage">Voyages</h1>
                 <button type="button" class="niBoutonIcone niVoyagesLoupe" id="niVoyagesLoupe" aria-label="Rechercher">🔍</button>
+                <button type="button" class="niBoutonIcone niVoyagesReglages" id="niVoyagesReglages" aria-label="Administration">⚙️</button>
                 <button type="button" class="niBouton niBoutonPrimaire niVoyagesNouveau" id="niVoyagesNouveau">+ Nouveau</button>
             </div>
             <div class="niNavVoyagesFiche" role="tablist">
@@ -245,6 +246,7 @@ function branchements(ecran) {
 
     ecran.querySelector("#niVoyagesTrier")?.addEventListener("click", () => openTrier());
     ecran.querySelector("#niVoyagesPasses")?.addEventListener("click", () => { filtre = "passes"; redessiner(); });
+    ecran.querySelector("#niVoyagesReglages")?.addEventListener("click", () => document.getElementById("btnSettings")?.click());
     ecran.querySelector("#niVoyagesLoupe")?.addEventListener("click", () => openRecherche());
     ecran.querySelector("#niVoyagesNouveau")?.addEventListener("click", () => openNouveauVoyage());
     ecran.querySelector("#niVoyagesAncienne")?.addEventListener("click", () => {
