@@ -64,6 +64,10 @@ export function updateEnvieBudget(id, budget) {
     patchEnvie(id, { budget: budget === null || budget === undefined || Number.isNaN(Number(budget)) ? null : Number(budget) });
 }
 
+export function updateEnvieNumeros(id, numerosUtiles) {
+    patchEnvie(id, { numerosUtiles: Array.isArray(numerosUtiles) ? numerosUtiles : [] });
+}
+
 export function updateEnvieTricount(id, tricount) {
     patchEnvie(id, { tricount });
 }

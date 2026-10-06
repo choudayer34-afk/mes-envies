@@ -24,6 +24,8 @@ import { nombreIdeesATrier, openTrier } from "./trier.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { openEnvie } from "./envie.js";
 import { masquerHub } from "./fiche-hub.js";
+import { openUrgence } from "./urgence.js";
+import { rappelsVoyage } from "./rappels.js";
 import { openVoyageurs } from "./voyageurs-ecran.js";
 import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
 import { showToast } from "./toast.js";
@@ -236,6 +238,22 @@ function blocSuite(donnees, prochain) {
         </div>`;
 }
 
+function blocRappels(voyage) {
+    const liste = rappelsVoyage(voyage);
+    if (!liste.length) return "";
+    return `
+        <div class="niSection">
+            <h2 class="niTitreSection">Rappels</h2>
+            <div class="niCarte">
+                ${liste.slice(0, 4).map((r, i) => `
+                    <button type="button" class="niDocLigne" data-rappel="${i}">
+                        <span class="niIcone${r.niveau === "alerte" ? " niIconeAttention" : ""}">${r.icone}</span>
+                        <span class="niDocTexte"><span class="niDocTitre">${echapper(r.texte)}</span><span class="niDocSous">${echapper(r.sous)}</span></span>
+                    </button>`).join("")}
+            </div>
+        </div>`;
+}
+
 function blocResteAFaire(bilan, phase) {
 
     if (phase.code === "apres" || !bilan.manques.length) return "";
@@ -306,8 +324,9 @@ export function openAujourdhui() {
     ecran.innerHTML = `
         <div class="niCorps">
             <span class="niEtiquette">${echapper(dateLongue)}</span>
-            <h1 class="niTitrePage">Aujourd'hui</h1>
+            <div class="niAujEntete"><h1 class="niTitrePage" style="margin:0">Aujourd'hui</h1><button type="button" class="niBouton niBoutonUrgence" id="niAujUrgence">🆘 Urgence</button></div>
             ${selecteur}
+            ${blocRappels(voyage)}
             ${carteVoyage(voyage, phase, bilan)}
             ${blocProchain(donnees.prochain, donnees.minutesMaintenant)}
             ${blocSuite(donnees, donnees.prochain)}
@@ -387,6 +406,14 @@ export function openAujourdhui() {
             if (idBouton) document.getElementById(idBouton)?.click();
         }, 400);
     };
+    ecran.querySelector("#niAujUrgence")?.addEventListener("click", () => openUrgence(voyage));
+    const rappelsListe = rappelsVoyage(voyage);
+    ecran.querySelectorAll("[data-rappel]").forEach(b => b.addEventListener("click", () => {
+        const r = rappelsListe[Number(b.dataset.rappel)];
+        if (r?.action === "voyageurs") openVoyageurs(voyage);
+        else if (r?.action === "reservations") openReservations(voyage.id);
+        else openPret(voyage);
+    }));
     ecran.querySelector("#niOuvrirListes")?.addEventListener("click", () => openListes(voyage.id));
     ecran.querySelectorAll("[data-faire]").forEach(b => b.addEventListener("click", () => {
         const action = b.dataset.faire;

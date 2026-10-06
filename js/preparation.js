@@ -11,6 +11,7 @@
 import { getEnvies, getEnvieCategories, voyageADocumentExpire } from "./storage.js";
 import { listerBillets } from "./documents.js";
 import { listeJours, etapesDuJour } from "./programme.js";
+import { etatPapiers } from "./papiers.js";
 
 const TRAJETS = ["avion", "train", "busferry"];
 
@@ -94,6 +95,7 @@ export function bilanPreparation(voyage) {
         });
         if (sansFichier) manques.push({ id: "reservations", texte: `${sansFichier} billet${sansFichier > 1 ? "s" : ""} sans fichier joint`, sous: "Joindre le document", bouton: "Ouvrir" });
         if (expire) manques.push({ id: "voyageurs", texte: "Papiers d'identité expirés avant le départ", sous: "Vérifier les voyageurs", bouton: "Ouvrir" });
+        else if (etatPapiers(v).pire === "bientot") manques.push({ id: "voyageurs", texte: "Papiers valables moins de 6 mois après le départ", sous: "Certains pays refusent l'entrée : vérifier les voyageurs", bouton: "Ouvrir" });
     }
 
     /* Listes */

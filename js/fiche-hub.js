@@ -27,6 +27,8 @@ import { openPret } from "./pret.js";
 import { openEspacePc } from "./espace-pc.js";
 import { openBilletForm } from "./billet-form.js";
 import { openVoyageurs } from "./voyageurs-ecran.js";
+import { openUrgence } from "./urgence.js";
+import { etatPapiers } from "./papiers.js";
 import { openNotesLiens } from "./notes-liens.js";
 import { exporterSauvegarde } from "./sauvegarde.js";
 
@@ -156,12 +158,13 @@ function dessiner(ecran, id) {
     const nbBillets = new Set(listerBillets(id).map(b => b._idOrigine || b.id)).size;
     const manqueBillet = bilan.manques.some(m => m.id === "billet");
     const nbVoyageurs = (v.personnesIds || []).length;
-    const alerteDocs = voyageADocumentExpire(v);
+    const papiers = etatPapiers(v);
+    const alerteDocs = papiers.aVerifier.length > 0;
     const nbLiens = (v.urls || []).length;
     const nbPhotos = (v.photos || []).length;
 
     const manques = [
-        ...(alerteDocs ? [{ id: "voyageurs", texte: "Un document d'identité expire avant le départ", bouton: "Vérifier" }] : []),
+        ...(alerteDocs ? [{ id: "voyageurs", texte: papiers.pire === "expire" ? "Un document d'identité expire avant le départ" : "Un document d'identité est valable moins de 6 mois après le départ", bouton: "Vérifier" }] : []),
         ...bilan.manques.filter(m => !(alerteDocs && m.id === "voyageurs"))
     ];
 
@@ -244,11 +247,13 @@ function dessiner(ecran, id) {
                 ${tuile("voyageurs", "gens", "Voyageurs", nbVoyageurs ? pluriel(nbVoyageurs, "personne") + (v.visibilite === "prive" ? " · privé" : "") : "À choisir", { alerte: alerteDocs })}
                 ${tuile("notes", "notes", "Notes et liens", nbLiens ? pluriel(nbLiens, "lien") : (v.description ? "Notes écrites" : "Aucune note"))}
             </div>
+            <button type="button" class="niBouton niHubUrgence" data-action="urgence">🆘 Urgence : billets, logement, numéros utiles</button>
         </div>`;
 
     const voyageActuel = () => getEnvies().find(e => e.id === id) || v;
 
     const actions = {
+        urgence: () => openUrgence(voyageActuel()),
         programme: () => openProgramme(voyageActuel()),
         reservations: () => openReservations(voyageActuel()),
         documents: () => openDocuments(id),
@@ -297,6 +302,7 @@ function ouvrirMenu(id) {
         <div class="niPoignee"></div>
         <h2 class="niTitreSection" style="font-size:22px">${echapper(v?.titre || "Voyage")}</h2>
         <div class="niCarte">
+            <button type="button" class="niDocLigne" data-menu="urgence"><span class="niDocTexte"><span class="niDocTitre">🆘 Urgence</span><span class="niDocSous">Billets du jour, logement, numéros utiles, rappels</span></span></button>
             <button type="button" class="niDocLigne" data-menu="partage"><span class="niDocTexte"><span class="niDocTitre">Partager le voyage</span><span class="niDocSous">Lien en lecture seule pour la famille</span></span></button>
             <button type="button" class="niDocLigne" data-menu="collecte"><span class="niDocTexte"><span class="niDocTitre">Collecter les photos</span><span class="niDocSous">Un lien pour que chacun envoie les siennes</span></span></button>
             <button type="button" class="niDocLigne" data-menu="pc"><span class="niDocTexte"><span class="niDocTitre">Préparer sur grand écran</span><span class="niDocSous">Programme en colonnes, glisser-déposer</span></span></button>
@@ -310,6 +316,7 @@ function ouvrirMenu(id) {
         if (!b) return;
         fond.remove();
         switch (b.dataset.menu) {
+            case "urgence": openUrgence(id); break;
             case "partage": case "collecte": openVoyageurs(id, { section: "partage" }); break;
             case "pc": openEspacePc(getEnvies().find(x => x.id === id)); break;
             case "sauvegarde": exporterSauvegarde(); break;
@@ -369,6 +376,14 @@ function ouvrirModifier(id) {
         const debut = fond.querySelector("#niModDebut").value;
         const fin = fond.querySelector("#niModFin").value;
         if (debut && fin && fin < debut) { showToast("La fin est avant le début"); return; }
+
+        /* Avertit si le nouveau choix de dates laisse des étapes datées hors du voyage. */
+        if (`${debut}|${fin}` !== `${v.date?.start || ""}|${v.date?.end || ""}`) {
+            const finEffective = fin || debut;
+            const dehors = getEnvies().filter(e => e.voyageId === id && !e.supprime && e.date?.start
+                && (!debut || e.date.start < debut || e.date.start > finEffective));
+            if (dehors.length && !confirm(`${dehors.length} étape${dehors.length > 1 ? "s sont datées" : " est datée"} en dehors de ces dates. ${dehors.length > 1 ? "Elles resteront" : "Elle restera"} visible${dehors.length > 1 ? "s" : ""} dans Programme > « Hors des dates du voyage », à replacer. Enregistrer quand même ?`)) return;
+        }
 
         if (titre !== v.titre) updateEnvie(id, titre);
 

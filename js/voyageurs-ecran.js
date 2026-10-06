@@ -15,6 +15,7 @@ import {
 import { getFoyerId } from "./auth.js";
 import { auth } from "./firebase.js";
 import { showToast } from "./toast.js";
+import { niveauDocument } from "./papiers.js";
 
 function echapper(texte) {
     return String(texte ?? "").replace(/[&<>"']/g, c => ({
@@ -85,6 +86,7 @@ export function openVoyageurs(voyageOuId, options = {}) {
             const exp = docDe(p, requis).dateExpiration;
             if (!exp) return { classe: "niTagAttention", texte: "Date non renseignée" };
             if (depart && exp < depart) return { classe: "niTagAttention", texte: `Expire le ${dateFr(exp)} : avant le départ` };
+            if (depart && niveauDocument(exp, depart) === "bientot") return { classe: "niTagAttention", texte: `Expire le ${dateFr(exp)} : moins de 6 mois après le départ` };
             return { classe: "niTagOk", texte: `Valide jusqu'au ${dateFr(exp)}` };
         };
 

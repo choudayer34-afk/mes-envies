@@ -9,6 +9,7 @@
 import { fermerListes } from "./listes.js";
 import { fermerRecherche, poserRaccourciRecherche } from "./recherche.js";
 import { fermerHub } from "./fiche-hub.js";
+import { fermerUrgence, openUrgence } from "./urgence.js";
 import { demarrerHorsLigne } from "./hors-ligne.js";
 import { fermerVoyageurs } from "./voyageurs-ecran.js";
 import { fermerNotesLiens } from "./notes-liens.js";
@@ -124,6 +125,7 @@ function fermerEcransNouveaux() {
     fermerBilletForm();
     fermerListes();
     fermerRecherche();
+    fermerUrgence();
     fermerHub();
     fermerVoyageurs();
     fermerNotesLiens();
@@ -264,6 +266,15 @@ function monterBarre() {
         });
         const premier = document.getElementById("plusBtnJeux");
         premier?.parentNode?.insertBefore(bouton, premier);
+
+        const urgence = document.createElement("button");
+        urgence.id = "niPlusUrgence";
+        urgence.type = "button";
+        urgence.className = "secondaryButton";
+        urgence.style.cssText = "width:100%;margin-bottom:10px;";
+        urgence.textContent = "🆘 Urgence";
+        urgence.addEventListener("click", () => { plus.classList.add("hidden"); openUrgence(); });
+        bouton.parentNode?.insertBefore(urgence, bouton);
     }
     monterNavVoyages();
 
