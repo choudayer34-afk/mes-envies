@@ -6,6 +6,7 @@
 ==========================================================
 */
 
+import { fermerArgent } from "./argent.js";
 import { fermerReservations } from "./reservations.js";
 import { openVoyages, fermerVoyages, configurerVoyages, ancienneListeChoisie } from "./voyages.js";
 import { getModeActif } from "./storage.js";
@@ -111,6 +112,7 @@ function fermerEcransNouveaux() {
     document.getElementById("niIdees")?.remove();
     fermerCapturer();
     fermerVoyages();
+    fermerArgent();
     fermerDocuments();
     fermerReservations();
     fermerPret();

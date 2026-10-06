@@ -10,6 +10,7 @@
 ==========================================================
 */
 
+import { openArgent } from "./argent.js";
 import { openReservations } from "./reservations.js";
 import { getEnvies, isContainerCategory } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
@@ -241,6 +242,7 @@ function dessiner(envie) {
         <div class="niRaccourcis">
             <button type="button" class="niBouton niRaccourciPc" data-raccourci="pc">Grand écran</button>
             <button type="button" class="niBouton" data-raccourci="reservations">Réservations</button>
+            <button type="button" class="niBouton" data-raccourci="argent">Argent</button>
             <button type="button" class="niBouton" data-raccourci="programme">Programme</button>
             <button type="button" class="niBouton" data-raccourci="frise">La journée</button>
             <button type="button" class="niBouton" data-raccourci="pret">Prêt à partir ?</button>
@@ -260,7 +262,7 @@ function dessiner(envie) {
     racine.querySelector(".niRaccourcis").addEventListener("click", evenement => {
         const bouton = evenement.target.closest("[data-raccourci]");
         if (!bouton) return;
-        const ouverture = { pc: openEspacePc, reservations: openReservations, programme: openProgramme, frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
+        const ouverture = { pc: openEspacePc, reservations: openReservations, argent: openArgent, programme: openProgramme, frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
         const voyage = getEnvies().find(e => e.id === envie.id) || envie;
         ouverture?.(voyage);
     });

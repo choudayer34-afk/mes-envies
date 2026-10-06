@@ -6,6 +6,7 @@
 ==========================================================
 */
 
+import { openArgent } from "./argent.js";
 import { openReservations } from "./reservations.js";
 import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import { getEnvies, isContainerCategory, getEnvieCategories } from "./storage.js";
@@ -317,6 +318,10 @@ export function openAujourdhui() {
                     <span class="niTuileTitre">Réservations</span>
                     <span class="niDocSous">${(voyage.billets || []).length} ajoutée${(voyage.billets || []).length > 1 ? "s" : ""}</span>
                 </button>
+                <button type="button" class="niTuile" id="niOuvrirArgent">
+                    <span class="niTuileTitre">Argent</span>
+                    <span class="niDocSous">${typeof voyage.budget === "number" ? `Budget ${Math.round(voyage.budget).toLocaleString("fr-FR")} €` : "Budget à définir"}</span>
+                </button>
                 <button type="button" class="niTuile" id="niOuvrirDocuments">
                     <span class="niTuileTitre">Documents</span>
                     <span class="niDocSous">${bilan.pieces} pièce${bilan.pieces > 1 ? "s" : ""}</span>
@@ -386,6 +391,7 @@ export function openAujourdhui() {
         else ouvrirFiche();
     }));
     ecran.querySelector("#niOuvrirReservations")?.addEventListener("click", () => openReservations(voyage.id));
+    ecran.querySelector("#niOuvrirArgent")?.addEventListener("click", () => openArgent(voyage.id));
     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
     ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
     ecran.querySelector("#niOuvrirProgramme")?.addEventListener("click", () => openProgramme(voyage));

@@ -59,6 +59,11 @@ export function updateUrlNom(envieId, urlId, nom) {
 
 }
 
+/* Budget du voyage en euros (nouvelle interface). Champ facultatif : nombre ou null. */
+export function updateEnvieBudget(id, budget) {
+    patchEnvie(id, { budget: budget === null || budget === undefined || Number.isNaN(Number(budget)) ? null : Number(budget) });
+}
+
 export function updateEnvieTricount(id, tricount) {
     patchEnvie(id, { tricount });
 }
