@@ -14,6 +14,10 @@ import { getEnvies, isContainerCategory } from "./storage.js";
 import { getCurrentEnvieId } from "./envie.js";
 import { computeContainerStatus } from "./progress.js";
 import { phaseDuVoyage } from "./aujourdhui.js";
+import { openFrise } from "./frise.js";
+import { openSouvenirs } from "./souvenirs.js";
+import { openPret } from "./pret.js";
+import { openProgramme } from "./programme.js";
 
 /* Chaque accordéon de la fiche appartient à un bloc.
    Tout accordéon non listé ici va dans « Plus d'outils » : rien n'est perdu. */
@@ -232,6 +236,12 @@ function dessiner(envie) {
             <div class="niBarre niBarreClaire"><i style="width:${Math.max(0, Math.min(100, statut.pourcentage || 0))}%"></i></div>
             <span class="niDocSous">Avancement : ${Math.round(statut.pourcentage || 0)} %</span>
         </div>
+        <div class="niRaccourcis">
+            <button type="button" class="niBouton" data-raccourci="programme">Programme</button>
+            <button type="button" class="niBouton" data-raccourci="frise">La journée</button>
+            <button type="button" class="niBouton" data-raccourci="pret">Prêt à partir ?</button>
+            <button type="button" class="niBouton" data-raccourci="souvenirs">Souvenirs</button>
+        </div>
         <div class="niNavVoyagesFiche" role="tablist" aria-label="Phase du voyage">
             ${PHASES.map(p => `<button type="button" role="tab" class="niNavOnglet${p.id === phase ? " niNavActif" : ""}" data-phase="${p.id}" aria-selected="${p.id === phase}">${p.libelle}</button>`).join("")}
         </div>
@@ -242,6 +252,14 @@ function dessiner(envie) {
 
     repartir(envie, phase, racine.querySelector("#niBlocs"));
     masquerBlocsVides();
+
+    racine.querySelector(".niRaccourcis").addEventListener("click", evenement => {
+        const bouton = evenement.target.closest("[data-raccourci]");
+        if (!bouton) return;
+        const ouverture = { programme: openProgramme, frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
+        const voyage = getEnvies().find(e => e.id === envie.id) || envie;
+        ouverture?.(voyage);
+    });
 
     racine.querySelector(".niNavVoyagesFiche").addEventListener("click", evenement => {
         const bouton = evenement.target.closest("[data-phase]");

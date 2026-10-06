@@ -132,7 +132,7 @@ export function openDocuments(voyageId) {
                     showToast("Aucun fichier joint à ce billet");
                     return;
                 }
-                ouvrirVisionneuse(billet.fichiers, 0);
+                ouvrirVisionneuse(billet.fichiers, 0, { billet });
             });
         });
     }

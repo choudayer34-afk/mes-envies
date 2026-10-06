@@ -11,6 +11,9 @@ import { computeContainerStatus } from "./progress.js";
 import { formatPeriode } from "./periode.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { openPret } from "./pret.js";
+import { openFrise } from "./frise.js";
+import { openProgramme } from "./programme.js";
+import { openSouvenirs } from "./souvenirs.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { openEnvie } from "./envie.js";
 import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
@@ -309,6 +312,18 @@ export function openAujourdhui() {
                     <span class="niTuileTitre">Documents</span>
                     <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
                 </button>
+                <button type="button" class="niTuile" id="niOuvrirProgramme">
+                    <span class="niTuileTitre">Programme</span>
+                    <span class="niDocSous">Jours et idées</span>
+                </button>
+                <button type="button" class="niTuile" id="niOuvrirFrise">
+                    <span class="niTuileTitre">La journée</span>
+                    <span class="niDocSous">Jour par jour</span>
+                </button>
+                <button type="button" class="niTuile" id="niOuvrirSouvenirs">
+                    <span class="niTuileTitre">Souvenirs</span>
+                    <span class="niDocSous">Photos et album</span>
+                </button>
                 <button type="button" class="niTuile" id="niOuvrirPret">
                     <span class="niTuileTitre">Prêt à partir ?</span>
                     <span class="niDocSous">Vérifier et télécharger</span>
@@ -337,11 +352,14 @@ export function openAujourdhui() {
     ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
     ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
+    ecran.querySelector("#niOuvrirProgramme")?.addEventListener("click", () => openProgramme(voyage));
+    ecran.querySelector("#niOuvrirFrise")?.addEventListener("click", () => openFrise(voyage));
+    ecran.querySelector("#niOuvrirSouvenirs")?.addEventListener("click", () => openSouvenirs(voyage));
 
     const prochain = donnees.prochain;
 
     ecran.querySelector("#niProchainBillet")?.addEventListener("click", () => {
-        ouvrirVisionneuse(prochain.billet.fichiers, 0);
+        ouvrirVisionneuse(prochain.billet.fichiers, 0, { billet: prochain.billet });
     });
 
     ecran.querySelector("#niProchainItineraire")?.addEventListener("click", () => {

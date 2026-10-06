@@ -18,6 +18,9 @@ import { fermerVisionneuse } from "./visionneuse.js";
 import { initGestesListes } from "./gestes-listes.js";
 import { openTrier, fermerTrier } from "./trier.js";
 import { fermerNouveauVoyage } from "./nouveau-voyage.js";
+import { fermerFrise } from "./frise.js";
+import { fermerProgramme } from "./programme.js";
+import { fermerSouvenirs } from "./souvenirs.js";
 
 const CLE = "envie_nouvelle_interface";
 
@@ -106,6 +109,9 @@ function fermerEcransNouveaux() {
     fermerCapturer();
     fermerDocuments();
     fermerPret();
+    fermerFrise();
+    fermerProgramme();
+    fermerSouvenirs();
     fermerTrier();
     fermerNouveauVoyage();
     fermerMigration();

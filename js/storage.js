@@ -569,6 +569,11 @@ export function updateEnvieDate(id, date) {
     patchEnvie(id, { date });
 }
 
+/* Moment de la journée (nouvelle interface) : "matin", "midi", "apres-midi", "soir" ou null. Champ facultatif. */
+export function updateEnvieMoment(id, moment) {
+    patchEnvie(id, { moment: moment || null });
+}
+
 export function updateEnviePeinture(id, peinture) {
     patchEnvie(id, { peinture });
 }
