@@ -1,0 +1,18 @@
+ÉTAPE 14 : ALLER-RETOUR SUR UN MÊME BILLET
+Cache : envie-cache-v240
+
+À FAIRE : copier chaque fichier du zip à son emplacement, en remplaçant l'existant.
+
+FICHIERS DE L'ANCIENNE APPLICATION MODIFIÉS (changements minimaux)
+- index.html : case « ↔ Aller-retour (même billet) » dans « Ajouter un billet », avec date, heures et numéro du retour
+- js/billets.js : lecture/enregistrement du retour ; la liste des billets affiche « ↔ retour » ; les billets du jour comptent aussi le retour
+- js/ui.js et js/agenda.js : le retour apparaît à sa date (jour J et agenda)
+
+AUTRES FICHIERS
+js/types-reservation.js, documents.js, reservations.js, preparation.js, aujourdhui.js, frise.js, espace-pc.js, visionneuse.js, programme.js, sw.js
+
+FONCTIONNEMENT
+- Champ optionnel « retour » ajouté au billet : les anciens billets ne changent pas
+- Le retour est lu comme une seconde étape : lieux inversés, mêmes fichiers, même billet à ouvrir
+- Il apparaît à sa date dans Aujourd'hui, Documents, Réservations, La journée, Programme, Agenda
+- Correction : les lieux de billets (objets) s'affichent par leur nom dans les nouveaux écrans

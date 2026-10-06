@@ -2062,6 +2062,21 @@ document.addEventListener("DOMContentLoaded", () => {
     <div id="billetDestinationSuggestions" class="autocompleteSuggestions hidden"></div>
 </div>
 
+<label style="display:flex;align-items:center;gap:10px;margin-top:14px;font-weight:600;">
+    <input type="checkbox" id="billetAllerRetour" style="width:20px;height:20px;">
+    ↔ Aller-retour (même billet)
+</label>
+<div id="billetRetourBloc" class="hidden">
+    <label class="fieldTitle" style="margin-top:12px;">Date du retour</label>
+    <input type="date" id="billetRetourDate" class="numberInput">
+    <div class="peintureAddRow" style="margin-top:12px;">
+        <input type="time" id="billetRetourHeure" class="numberInput" aria-label="Heure de départ du retour">
+        <input type="time" id="billetRetourHeureArrivee" class="numberInput" aria-label="Heure d'arrivée du retour">
+    </div>
+    <label class="fieldTitle" style="margin-top:12px;">Numéro du retour (optionnel)</label>
+    <input type="text" id="billetRetourNumero" placeholder="Si différent de l'aller" class="numberInput">
+</div>
+
 
         <label class="fieldTitle" style="margin-top:12px;">Lien vers l'appli/site (optionnel)</label>
         <input type="text" id="billetLien" placeholder="https://..." class="numberInput">
