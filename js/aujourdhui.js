@@ -9,7 +9,8 @@
 import { getEnvies, isContainerCategory, getEnvieCategories } from "./storage.js";
 import { computeContainerStatus } from "./progress.js";
 import { formatPeriode } from "./periode.js";
-import { ouvrirFichier } from "./billets.js";
+import { ouvrirVisionneuse } from "./visionneuse.js";
+import { openPret } from "./pret.js";
 import { ouvrirGoogleMaps } from "./location.js";
 import { openEnvie } from "./envie.js";
 import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
@@ -71,7 +72,7 @@ export function trouverVoyage() {
     return passes[0] || null;
 }
 
-function phaseDuVoyage(voyage) {
+export function phaseDuVoyage(voyage) {
     const aujourdhui = dateLocaleISO();
     const fin = voyage.date.end || voyage.date.start;
 
@@ -281,6 +282,10 @@ export function openAujourdhui() {
                     <span class="niTuileTitre">Documents</span>
                     <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
                 </button>
+                <button type="button" class="niTuile" id="niOuvrirPret">
+                    <span class="niTuileTitre">Prêt à partir ?</span>
+                    <span class="niDocSous">Vérifier et télécharger</span>
+                </button>
                 <button type="button" class="niTuile" id="niOuvrirFicheTuile">
                     <span class="niTuileTitre">Fiche du voyage</span>
                     <span class="niDocSous">Programme, listes, dépenses</span>
@@ -297,11 +302,12 @@ export function openAujourdhui() {
     ecran.querySelector("#niOuvrirFicheTuile")?.addEventListener("click", ouvrirFiche);
     ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
+    ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
 
     const prochain = donnees.prochain;
 
     ecran.querySelector("#niProchainBillet")?.addEventListener("click", () => {
-        ouvrirFichier(prochain.billet.fichiers, 0);
+        ouvrirVisionneuse(prochain.billet.fichiers, 0);
     });
 
     ecran.querySelector("#niProchainItineraire")?.addEventListener("click", () => {

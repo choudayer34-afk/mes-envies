@@ -38,7 +38,7 @@ function fichierVersDataURL(file) {
 }
 
 function estimerTailleOctets(dataUrl) {
-    return Math.ceil((dataUrl.length * 3) / 4);
+    return Math.ceil(((dataUrl || "").length * 3) / 4);
 }
 
 function formatDateBillet(dateIso) {
@@ -180,7 +180,7 @@ export function ouvrirFichier(fichiers, indexDepart) {
                 </div>
                 <div style="position:relative;flex:1;">
                     ${boutonsNavigation}
-                    <iframe src="${fichier.dataUrl}" style="width:100%;height:100%;border:none;border-radius:12px;background:white;"></iframe>
+                    <iframe src="${fichier.dataUrl || fichier.url}" style="width:100%;height:100%;border:none;border-radius:12px;background:white;"></iframe>
                 </div>
             `;
 
@@ -193,7 +193,7 @@ export function ouvrirFichier(fichiers, indexDepart) {
                 </div>
                 <div style="position:relative;flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;">
                     ${boutonsNavigation}
-                    <img src="${fichier.dataUrl}" style="max-width:100%;max-height:100%;border-radius:12px;">
+                    <img src="${fichier.dataUrl || fichier.url}" style="max-width:100%;max-height:100%;border-radius:12px;">
                 </div>
             `;
 

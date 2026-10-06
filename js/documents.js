@@ -7,7 +7,7 @@
 */
 
 import { getEnvies } from "./storage.js";
-import { ouvrirFichier } from "./billets.js";
+import { ouvrirVisionneuse } from "./visionneuse.js";
 import { showToast } from "./toast.js";
 
 const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
@@ -132,7 +132,7 @@ export function openDocuments(voyageId) {
                     showToast("Aucun fichier joint à ce billet");
                     return;
                 }
-                ouvrirFichier(billet.fichiers, 0);
+                ouvrirVisionneuse(billet.fichiers, 0);
             });
         });
     }

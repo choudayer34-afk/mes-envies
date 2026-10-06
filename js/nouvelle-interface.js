@@ -10,6 +10,11 @@ import { getModeActif } from "./storage.js";
 import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
 import { fermerDocuments } from "./documents.js";
 import { openCapturer, fermerCapturer } from "./capturer.js";
+import { initFicheVoyage } from "./fiche-voyage.js";
+import { exporterSauvegarde } from "./sauvegarde.js";
+import { openMigration, fermerMigration } from "./migration-billets.js";
+import { fermerPret } from "./pret.js";
+import { fermerVisionneuse } from "./visionneuse.js";
 
 const CLE = "envie_nouvelle_interface";
 
@@ -49,6 +54,28 @@ function injecterReglage() {
     });
 
     modale.appendChild(bouton);
+
+    /* Outils de la nouvelle interface : sauvegarde et migration des billets. */
+    if (nouvelleInterfaceActive()) {
+        const outils = [
+            { id: "plusBtnSauvegardeComplete", texte: "💾 Sauvegarde complète (fichier)", action: () => exporterSauvegarde() },
+            { id: "plusBtnMigrationBillets", texte: "📦 Billets : déplacer vers le stockage", action: () => {
+                document.getElementById("plusModal")?.classList.add("hidden");
+                openMigration();
+            } }
+        ];
+        outils.forEach(o => {
+            if (document.getElementById(o.id)) return;
+            const b = document.createElement("button");
+            b.id = o.id;
+            b.type = "button";
+            b.className = "secondaryButton";
+            b.style.cssText = "width:100%;margin-bottom:10px;";
+            b.textContent = o.texte;
+            b.addEventListener("click", o.action);
+            modale.appendChild(b);
+        });
+    }
 }
 
 /* ---------- Barre d'onglets ---------- */
@@ -72,9 +99,90 @@ function cliquerSurPremierVisible(ids) {
 }
 
 function fermerEcransNouveaux() {
+    document.getElementById("niIdees")?.remove();
     fermerCapturer();
     fermerDocuments();
+    fermerPret();
+    fermerMigration();
+    fermerVisionneuse();
     fermerAujourdhui();
+}
+
+
+/* ---------- Navigation Voyages : Liste, Carte, Agenda, Idées ---------- */
+
+function declencher(id) {
+    /* Déclenche le bouton existant, même masqué : la fonction ancienne s'exécute telle quelle. */
+    document.getElementById(id)?.click();
+}
+
+function ouvrirMenuIdees() {
+
+    document.getElementById("niIdees")?.remove();
+
+    const nbATrier = (document.getElementById("inboxBadge")?.textContent || "").trim();
+    const lignes = [
+        { id: "btnInbox", titre: "À trier", sous: "Les idées capturées, à organiser", badge: nbATrier && nbATrier !== "0" ? nbATrier : "" },
+        { id: "btnCatalogue", titre: "Catalogue d'idées", sous: "Tes idées de voyage classées" },
+        { id: "btnIdeesMenu", titre: "Trouver des idées", sous: "Autour de moi, étapes, régions" },
+        { id: "btnCarte", titre: "Carte des lieux", sous: "Tous les lieux sur une carte" }
+    ];
+
+    const fond = document.createElement("div");
+    fond.id = "niIdees";
+    fond.className = "niFeuilleFond";
+    fond.innerHTML = `
+        <div class="niFeuille" role="dialog" aria-label="Idées">
+            <div class="niPoignee"></div>
+            <h2 class="niTitreSection" style="font-size:24px">Idées</h2>
+            <div class="niCarte">
+                ${lignes.map(l => `
+                    <button type="button" class="niDocLigne" data-cible="${l.id}">
+                        <span class="niDocTexte"><span class="niDocTitre">${l.titre}</span><span class="niDocSous">${l.sous}</span></span>
+                        ${l.badge ? `<span class="niTag niTagMaintenant">${l.badge}</span>` : ""}
+                    </button>`).join("")}
+            </div>
+        </div>`;
+    document.body.appendChild(fond);
+
+    fond.addEventListener("click", evenement => {
+        if (evenement.target === fond) { fond.remove(); return; }
+        const ligne = evenement.target.closest("[data-cible]");
+        if (!ligne) return;
+        fond.remove();
+        declencher(ligne.dataset.cible);
+    });
+}
+
+function monterNavVoyages() {
+
+    if (document.getElementById("niNavVoyages")) return;
+
+    const accueil = document.getElementById("headerAccueilActif");
+    const rangeeIcones = accueil?.querySelector(".homeIconRow");
+    if (!accueil || !rangeeIcones) return;
+
+    const nav = document.createElement("div");
+    nav.id = "niNavVoyages";
+    nav.className = "niNavVoyages";
+    nav.setAttribute("role", "tablist");
+    nav.innerHTML = `
+        <button type="button" class="niNavOnglet niNavActif" data-vue="liste">Liste</button>
+        <button type="button" class="niNavOnglet" data-vue="carte">Carte</button>
+        <button type="button" class="niNavOnglet" data-vue="agenda">Agenda</button>
+        <button type="button" class="niNavOnglet" data-vue="idees">Idées</button>`;
+    rangeeIcones.before(nav);
+
+    nav.addEventListener("click", evenement => {
+        const bouton = evenement.target.closest(".niNavOnglet");
+        if (!bouton) return;
+        switch (bouton.dataset.vue) {
+            case "carte": declencher("btnCarteVoyages"); break;
+            case "agenda": declencher("btnAgenda"); break;
+            case "idees": ouvrirMenuIdees(); break;
+            default: window.scrollTo({ top: 0 });
+        }
+    });
 }
 
 function monterBarre() {
@@ -82,6 +190,7 @@ function monterBarre() {
     if (document.getElementById("niBarreOnglets")) return;
 
     document.body.classList.add("niActive");
+    monterNavVoyages();
 
     const barre = document.createElement("nav");
     barre.id = "niBarreOnglets";
@@ -129,6 +238,7 @@ function monterBarre() {
     const actualiser = () => {
         planifie = false;
         const maison = getModeActif() === "maison";
+        document.body.classList.toggle("niModeVoyage", !maison);
         const fenetreOuverte = !!document.querySelector(".modal-overlay:not(.hidden), .authScreen:not(.hidden)");
         const accueilVisible = !!document.getElementById("headerAccueilActif")
             && !document.getElementById("headerAccueilActif").classList.contains("hidden");
@@ -151,5 +261,8 @@ function monterBarre() {
 
 export function initNouvelleInterface() {
     injecterReglage();
-    if (nouvelleInterfaceActive()) monterBarre();
+    if (nouvelleInterfaceActive()) {
+        monterBarre();
+        initFicheVoyage();
+    }
 }
