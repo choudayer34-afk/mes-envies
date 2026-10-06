@@ -1,20 +1,16 @@
-EnVie - Étape 1 : nouvelle interface (bêta)
+EnVie - Étape 2 : feuille Capturer (à appliquer APRÈS l'étape 1)
 
-ARBORESCENCE (à copier à la racine du dépôt, en conservant les dossiers)
-  ni.css                         NOUVEAU
-  js/nouvelle-interface.js       NOUVEAU
-  js/aujourdhui.js               NOUVEAU
-  js/documents.js                NOUVEAU
-  app.js                         MODIFIÉ (+2 lignes : import et appel de initNouvelleInterface)
-  index.html                     MODIFIÉ (+1 ligne : lien vers ni.css)
-  sw.js                          MODIFIÉ (CACHE_NAME v224 + 4 fichiers dans le cache)
+ARBORESCENCE (à copier à la racine du dépôt)
+  js/capturer.js              NOUVEAU
+  js/nouvelle-interface.js    MODIFIÉ (onglet Capturer ouvre la feuille)
+  ni.css                      MODIFIÉ (styles de la feuille ajoutés en fin de fichier)
+  sw.js                       MODIFIÉ (CACHE_NAME v225 + capturer.js dans le cache)
 
-ATTENTION : app.js, index.html et sw.js fournis sont ceux du dépôt au moment du clonage
-(dernier commit : "Update sw.js"). Si tu les as modifiés depuis, ne les remplace pas :
-applique plutôt le patch depuis la racine du dépôt :
-  git apply etape1-nouvelle-interface.patch
+Si tu as modifié sw.js depuis l'étape 1, applique plutôt le patch :
+  git apply etape2-capturer.patch
 
-APRÈS DÉPLOIEMENT
-  1. Ouvrir EnVie, recharger (le cache passe en v224).
-  2. Plus > "Essayer la nouvelle interface (bêta)" : la page se recharge.
-  3. Revenir à l'ancienne : même bouton. Le mode Maison n'est jamais touché.
+Test : bêta activée > onglet Capturer.
+  - Écrire une idée puis Noter : elle arrive dans « À trier ».
+  - Photo : choisir des photos, elles vont dans le voyage sélectionné.
+  - Billet / Dépense : ouvre la fiche du voyage puis la fenêtre d'ajout existante.
+  - Idée détaillée : ancienne fenêtre de création, inchangée.
