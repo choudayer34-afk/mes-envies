@@ -10,6 +10,7 @@
 ==========================================================
 */
 
+import { openBilletForm } from "./billet-form.js";
 import { emojiType, motType, nomLieu } from "./types-reservation.js";
 import { getEnvies, isContainerCategory, updateEnvieDate, updateEnvieMoment, createEnvie } from "./storage.js";
 import { listerBillets, dateLocaleISO } from "./documents.js";
@@ -202,7 +203,7 @@ export function openEspacePc(voyageDepart = null) {
         ecran.querySelector('[data-vue="souvenirs"]')?.addEventListener("click", () => openSouvenirs(v));
 
         ecran.querySelector("#niPcDepenses").addEventListener("click", () => ouvrirRubrique(v.id, "tricountSection"));
-        ecran.querySelector("#niPcBillet").addEventListener("click", () => ouvrirRubrique(v.id, "billetsSection", "addBilletButton"));
+        ecran.querySelector("#niPcBillet").addEventListener("click", () => openBilletForm(v.id, { apres: dessiner }));
 
         ecran.querySelector("#niPcForm").addEventListener("submit", e => {
             e.preventDefault();

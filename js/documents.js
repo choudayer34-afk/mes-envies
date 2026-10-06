@@ -6,7 +6,7 @@
 ==========================================================
 */
 
-import { emojiType, motType, typeReservation, GROUPES_RESERVATION, etapesBillets, nomLieu } from "./types-reservation.js";
+import { emojiType, motType, typeReservation, GROUPES_RESERVATION, etapesBillets, nomLieu, libelleSens } from "./types-reservation.js";
 import { getEnvies } from "./storage.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { showToast } from "./toast.js";
@@ -47,7 +47,7 @@ function ligneBillet(billet, aujourdhui) {
     const nbFichiers = (billet.fichiers || []).length;
     const estAujourdhui = billet.dateDepart === aujourdhui;
     const details = [
-        billet._sens === "retour" ? "Retour" : (billet._sens === "aller" ? "Aller" : ""),
+        libelleSens(billet),
         formatCourt(billet.dateDepart),
         billet.heureDepart,
         billet.compagnie,

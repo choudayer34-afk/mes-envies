@@ -80,3 +80,14 @@ export function nomLieu(lieu) {
     if (!lieu) return "";
     return typeof lieu === "string" ? lieu : (lieu.nom || "");
 }
+
+/* Types qui ont un trajet (De → Vers) et un aller-retour */
+export const TYPES_TRAJET = ["avion", "train", "busferry"];
+
+/* Libellé de l'étape : Aller/Retour pour un trajet, Début/Fin pour le reste */
+export function libelleSens(billet) {
+    if (!billet._sens) return "";
+    const trajet = TYPES_TRAJET.includes(billet.type);
+    if (billet._sens === "retour") return trajet ? "Retour" : "Fin";
+    return trajet ? "Aller" : "Début";
+}

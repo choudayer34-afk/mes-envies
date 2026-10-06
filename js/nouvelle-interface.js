@@ -10,6 +10,8 @@ import { fermerArgent } from "./argent.js";
 import { fermerReservations } from "./reservations.js";
 import { openVoyages, fermerVoyages, configurerVoyages, ancienneListeChoisie } from "./voyages.js";
 import { getModeActif } from "./storage.js";
+import { getCurrentEnvieId } from "./envie.js";
+import { openBilletForm, fermerBilletForm } from "./billet-form.js";
 import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
 import { fermerDocuments } from "./documents.js";
 import { openCapturer, fermerCapturer } from "./capturer.js";
@@ -112,6 +114,7 @@ function fermerEcransNouveaux() {
     document.getElementById("niIdees")?.remove();
     fermerCapturer();
     fermerVoyages();
+    fermerBilletForm();
     fermerArgent();
     fermerDocuments();
     fermerReservations();
@@ -209,6 +212,15 @@ function monterNavVoyages() {
 }
 
 function monterBarre() {
+
+    /* Tout ajout de billet passe par le nouvel écran (y compris les boutons de l'ancienne fiche). */
+    document.addEventListener("click", evenement => {
+        if (!evenement.target.closest?.("#addBilletButton")) return;
+        evenement.preventDefault();
+        evenement.stopImmediatePropagation();
+        const id = getCurrentEnvieId();
+        if (id) openBilletForm(id);
+    }, true);
 
     configurerVoyages({
         carte: () => declencher("btnCarteVoyages"),

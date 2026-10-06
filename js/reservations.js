@@ -9,12 +9,12 @@
 */
 
 import { getEnvies } from "./storage.js";
-import { openEnvie } from "./envie.js";
+import { openBilletForm } from "./billet-form.js";
 import { listerBillets, dateLocaleISO } from "./documents.js";
 import { bilanPreparation } from "./preparation.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
 import { showToast } from "./toast.js";
-import { TYPES_RESERVATION, GROUPES_RESERVATION, typeReservation, titreCourtBillet, nomLieu } from "./types-reservation.js";
+import { TYPES_RESERVATION, GROUPES_RESERVATION, typeReservation, titreCourtBillet, nomLieu, libelleSens } from "./types-reservation.js";
 
 function echapper(texte) {
     return String(texte ?? "").replace(/[&<>"']/g, c => ({
@@ -36,29 +36,19 @@ export function fermerReservations() {
     document.getElementById("niReservations")?.remove();
 }
 
-/* Ouvre la fiche, déroule « Billets », puis ouvre le formulaire avec le type choisi. */
-function ajouterReservation(voyageId, typeId) {
-    fermerReservations();
-    openEnvie(voyageId);
-    setTimeout(() => {
-        const contenu = document.getElementById("billetsSection");
-        if (contenu?.classList.contains("hidden")) {
-            document.querySelector('.accordionHeader[data-target="billetsSection"]')?.click();
-        }
-        document.getElementById("addBilletButton")?.click();
-        setTimeout(() => {
-            if (typeId) document.querySelector(`#billetTypeToggle [data-type="${typeId}"]`)?.click();
-        }, 100);
-    }, 400);
+/* Ouvre le formulaire de billet avec le type choisi ; l'écran se redessine ensuite. */
+function ajouterReservation(voyageId, typeId, billetId = null) {
+    openBilletForm(voyageId, { type: typeId || undefined, billetId, apres: () => openReservations(voyageId) });
 }
 
 function ligne(b, aujourdhui) {
     const t = typeReservation(b.type);
     const nb = (b.fichiers || []).length;
-    const details = [b._sens === "retour" ? "Retour" : (b._sens === "aller" ? "Aller" : ""), formatCourt(b.dateDepart), b.heureDepart, b.compagnie, b.numeroVol]
+    const details = [libelleSens(b), formatCourt(b.dateDepart), b.heureDepart, b.compagnie, b.numeroVol]
         .filter(Boolean).join(" · ");
     const maintenant = b.dateDepart === aujourdhui;
     return `
+        <div class="niLigneAction">
         <button type="button" class="niDocLigne" data-billet="${echapper(b.id)}">
             <span class="niIcone${maintenant ? " niIconeMaintenant" : ""}">${t.emoji}</span>
             <span class="niDocTexte">
@@ -66,7 +56,9 @@ function ligne(b, aujourdhui) {
                 <span class="niDocSous">${echapper(t.libelle)}${details ? " · " + echapper(details) : ""}</span>
             </span>
             <span class="niTag ${nb ? "niTagOk" : "niTagAttention"}">${nb ? "Fichier joint" : "Sans fichier"}</span>
-        </button>`;
+        </button>
+        <button type="button" class="niBoutonIcone niLigneModifier" data-modifier="${echapper(b.id)}" aria-label="Modifier ${echapper(titreBillet(b))}">✏️</button>
+        </div>`;
 }
 
 export function openReservations(voyageOuId) {
@@ -127,6 +119,9 @@ export function openReservations(voyageOuId) {
 
     ecran.querySelectorAll("[data-manque]").forEach(b =>
         b.addEventListener("click", () => ajouterReservation(voyageId, b.dataset.manque === "logement" ? "logement" : null)));
+
+    ecran.querySelectorAll("[data-modifier]").forEach(b =>
+        b.addEventListener("click", () => ajouterReservation(voyageId, null, b.dataset.modifier)));
 
     ecran.querySelectorAll("[data-billet]").forEach(bouton => {
         bouton.addEventListener("click", () => {
