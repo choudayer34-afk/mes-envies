@@ -1,0 +1,351 @@
+/* ==========================================================
+   EnVie - Nouvelle interface (bêta)
+   Tout est préfixé « ni » : aucun effet sur les styles existants.
+   ========================================================== */
+
+:root{
+    --ni-ink:#0E2A33;
+    --ni-muted:#4A6470;
+    --ni-bg:#F2F6F7;
+    --ni-card:#FFFFFF;
+    --ni-line:#D9E4E8;
+    --ni-brand:#0F766E;
+    --ni-brand-d:#0B5A54;
+    --ni-brand-s:#DDF1EE;
+    --ni-now:#B93C0C;
+    --ni-now-s:#FDE9DD;
+    --ni-warn-s:#FFF0D1;
+}
+
+body.niBarreVisible main{
+    padding-bottom:96px;
+}
+
+/* ---------- Barre d'onglets ---------- */
+
+.niBarreOnglets{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:1600;
+    display:flex;
+    background:#fff;
+    border-top:1px solid var(--ni-line);
+    padding:6px 8px calc(10px + env(safe-area-inset-bottom));
+}
+
+.niBarreOnglets.hidden{
+    display:none;
+}
+
+.niOnglet{
+    flex:1;
+    min-height:56px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    background:none;
+    border:0;
+    font:inherit;
+    font-size:12px;
+    font-weight:700;
+    color:var(--ni-muted);
+    cursor:pointer;
+}
+
+.niOngletActif{
+    color:var(--ni-brand-d);
+}
+
+.niIco{
+    width:24px;
+    height:24px;
+    fill:none;
+    stroke:currentColor;
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+}
+
+.niOngletCapturer{
+    color:var(--ni-ink);
+}
+
+.niPastilleCapturer{
+    width:46px;
+    height:46px;
+    margin-top:-22px;
+    border-radius:50%;
+    background:var(--ni-now);
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 4px 12px rgba(14,42,51,.25);
+}
+
+/* ---------- Écrans plein écran ---------- */
+
+.niEcran{
+    position:fixed;
+    inset:0;
+    z-index:1800;
+    background:var(--ni-bg);
+    color:var(--ni-ink);
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    font-size:15px;
+    line-height:1.35;
+}
+
+.niEcranAvecBarre{
+    z-index:1500;
+    padding-bottom:calc(96px + env(safe-area-inset-bottom));
+}
+
+.niBarreHaut{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 12px 4px;
+    position:sticky;
+    top:0;
+    background:var(--ni-bg);
+    z-index:1;
+}
+
+.niBarreTitre{display:flex;flex-direction:column;}
+.niBarreTitre h1{margin:0;font-size:20px;}
+.niBarreTitre span{font-size:13px;color:var(--ni-muted);}
+
+.niBoutonIcone{
+    width:44px;
+    height:44px;
+    border-radius:14px;
+    background:#fff;
+    border:1px solid var(--ni-line);
+    font-size:20px;
+    color:var(--ni-ink);
+    cursor:pointer;
+}
+
+.niCorps{
+    max-width:640px;
+    margin:0 auto;
+    padding:14px 16px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.niTitrePage{
+    margin:-8px 0 0;
+    font-size:30px;
+    line-height:1.08;
+}
+
+.niEtiquette{
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ni-muted);
+}
+
+.niEtiquetteMaintenant{color:var(--ni-now);}
+
+.niSection{display:flex;flex-direction:column;gap:8px;}
+.niTitreSection{margin:0;font-size:19px;}
+
+.niCarte{
+    background:var(--ni-card);
+    border:1px solid var(--ni-line);
+    border-radius:18px;
+    padding:4px 14px;
+}
+
+.niCarteMaintenant{
+    background:var(--ni-now-s);
+    border-color:#F0C3AA;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+.niRecherche{
+    width:100%;
+    min-height:48px;
+    padding:0 14px;
+    border-radius:14px;
+    border:1px solid var(--ni-line);
+    background:#fff;
+    font:inherit;
+    font-size:16px;
+}
+
+/* ---------- Couverture du voyage ---------- */
+
+.niCouverture{
+    min-height:190px;
+    border-radius:20px;
+    border:0;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    align-items:flex-start;
+    text-align:left;
+    background:linear-gradient(135deg,#0F766E 0%,#155E75 55%,#1E3A5F 100%);
+    color:#fff;
+    font:inherit;
+    cursor:pointer;
+}
+
+.niPastille{
+    display:inline-flex;
+    align-items:center;
+    min-height:28px;
+    padding:0 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.22);
+    font-size:12px;
+    font-weight:700;
+}
+
+.niCouvertureBas{display:flex;flex-direction:column;gap:6px;width:100%;}
+.niCouvertureTitre{font-size:32px;font-weight:700;line-height:1.05;}
+.niCouvertureSous{font-size:14px;opacity:.92;}
+
+.niBarre{
+    display:block;
+    height:8px;
+    border-radius:99px;
+    background:rgba(255,255,255,.28);
+    overflow:hidden;
+}
+.niBarre i{display:block;height:100%;background:#fff;border-radius:99px;}
+
+/* ---------- Lignes et icônes ---------- */
+
+.niDocLigne{
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-height:60px;
+    padding:8px 0;
+    background:none;
+    border:0;
+    border-top:1px solid var(--ni-line);
+    font:inherit;
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+}
+
+.niDocLigne:first-child{border-top:0;}
+.niLigneStatique{cursor:default;}
+.niFait{opacity:.6;}
+
+.niDocTexte{flex:1;min-width:0;display:flex;flex-direction:column;}
+.niDocTitre{font-weight:700;}
+.niDocSous{font-size:13px;color:var(--ni-muted);}
+
+.niIcone{
+    width:42px;
+    height:42px;
+    border-radius:13px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex:none;
+    background:var(--ni-brand-s);
+    font-size:20px;
+}
+.niIconeMaintenant{background:var(--ni-now-s);}
+.niIconeAttention{background:var(--ni-warn-s);}
+.niIconeGrande{width:52px;height:52px;font-size:26px;background:#fff;}
+
+.niTag{
+    display:inline-flex;
+    align-items:center;
+    min-height:22px;
+    padding:0 8px;
+    border-radius:999px;
+    background:var(--ni-brand-s);
+    color:var(--ni-brand-d);
+    font-size:11px;
+    font-weight:700;
+    white-space:nowrap;
+}
+.niTagMaintenant{background:var(--ni-now-s);color:var(--ni-now);}
+
+.niHeureCourte{width:48px;font-weight:700;flex:none;}
+.niHeureGrande{font-size:40px;font-weight:700;line-height:1;}
+
+.niProchainLigne{display:flex;align-items:center;gap:14px;}
+
+.niBoutons{display:flex;gap:10px;}
+
+.niBouton{
+    flex:1;
+    min-height:54px;
+    border-radius:14px;
+    border:1px solid var(--ni-line);
+    background:#fff;
+    font:inherit;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ni-ink);
+    cursor:pointer;
+}
+.niBoutonPrimaire{background:var(--ni-brand);border-color:var(--ni-brand);color:#fff;}
+.niBoutonMaintenant{background:var(--ni-now);border-color:var(--ni-now);color:#fff;}
+
+.niTuiles{display:flex;gap:10px;}
+
+.niTuile{
+    flex:1;
+    min-height:76px;
+    padding:12px;
+    border-radius:18px;
+    border:1px solid var(--ni-line);
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    align-items:flex-start;
+    text-align:left;
+    font:inherit;
+    color:inherit;
+    cursor:pointer;
+}
+.niTuileTitre{font-weight:700;}
+
+.niVide,
+.niBandeau{
+    padding:14px;
+    border-radius:16px;
+    background:#fff;
+    border:1px dashed var(--ni-line);
+    color:var(--ni-muted);
+}
+.niBandeauInfo{background:var(--ni-warn-s);border-style:solid;border-color:#F0D69A;color:#7A4E00;font-weight:700;}
+
+/* ---------- Grand écran ---------- */
+
+@media (min-width:900px){
+    .niCorps{max-width:760px;}
+    .niBarreOnglets{
+        left:50%;
+        right:auto;
+        width:520px;
+        transform:translateX(-50%);
+        border:1px solid var(--ni-line);
+        border-radius:20px 20px 0 0;
+    }
+}

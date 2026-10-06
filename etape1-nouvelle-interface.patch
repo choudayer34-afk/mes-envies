@@ -1,0 +1,1035 @@
+diff --git a/app.js b/app.js
+index 44b6b9c..cf0bb9e 100644
+--- a/app.js
++++ b/app.js
+@@ -29,6 +29,7 @@ import { initSurvieImport } from "./js/survie-import.js";
+ import { initPhotoDescription } from "./js/photos.js";
+ import { initPhotoViewer } from "./js/photos.js";
+ import { initPlus } from "./js/plus.js";
++import { initNouvelleInterface } from "./js/nouvelle-interface.js";
+ import { initCatalogue } from "./js/catalogue.js";
+ import { initRegionFinder } from "./js/region.js";
+ import { initPromptRegionSync } from "./js/storage.js";
+@@ -324,6 +325,7 @@ document.getElementById("btnCreerVoyage")?.addEventListener("click", openModalCo
+     initPhotoDescription();
+   
+ initPlus();
++initNouvelleInterface();
+ 
+     initFicheTitre();
+    initFicheDescription();
+diff --git a/index.html b/index.html
+index 52e4d60..74ba8ee 100644
+--- a/index.html
++++ b/index.html
+@@ -124,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
+ <meta name="mobile-web-app-capable" content="yes">
+     <link rel="manifest" href="manifest.json">
+     <link rel="stylesheet" href="styles.css">
++    <link rel="stylesheet" href="ni.css">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+ 
+ </head>
+diff --git a/js/aujourdhui.js b/js/aujourdhui.js
+new file mode 100644
+index 0000000..60194e1
+--- /dev/null
++++ b/js/aujourdhui.js
+@@ -0,0 +1,314 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ aujourdhui.js : écran « Aujourd'hui » (mode voyage)
++ Lecture seule : aucune donnée n'est modifiée.
++==========================================================
++*/
++
++import { getEnvies, isContainerCategory, getEnvieCategories } from "./storage.js";
++import { computeContainerStatus } from "./progress.js";
++import { formatPeriode } from "./periode.js";
++import { ouvrirFichier } from "./billets.js";
++import { ouvrirGoogleMaps } from "./location.js";
++import { openEnvie } from "./envie.js";
++import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
++import { showToast } from "./toast.js";
++
++const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++function joursEntre(isoA, isoB) {
++    const a = new Date(isoA + "T12:00:00");
++    const b = new Date(isoB + "T12:00:00");
++    return Math.round((b - a) / 86400000);
++}
++
++function heureEnMinutes(hhmm) {
++    if (!hhmm) return null;
++    const [h, m] = hhmm.split(":").map(Number);
++    return h * 60 + (m || 0);
++}
++
++function formatCompteARebours(minutes) {
++    if (minutes <= 0) return "maintenant";
++    const h = Math.floor(minutes / 60);
++    const m = minutes % 60;
++    return h > 0 ? `dans ${h} h ${String(m).padStart(2, "0")}` : `dans ${m} min`;
++}
++
++function estLogement(envie) {
++    const cat = getEnvieCategories().find(c => c.id === envie.categorie);
++    return cat?.label?.toLowerCase().includes("logement") || false;
++}
++
++/* ---------- Choix du voyage à afficher ---------- */
++
++export function trouverVoyage() {
++
++    const envies = getEnvies().filter(e => e.contexte === "voyage" && !e.supprime);
++    const parents = new Set(envies.map(e => e.voyageId).filter(Boolean));
++    const aujourdhui = dateLocaleISO();
++
++    const voyages = envies.filter(e =>
++        e.date?.start && (isContainerCategory(e.categorie) || parents.has(e.id))
++    );
++
++    const fin = v => v.date.end || v.date.start;
++
++    const enCours = voyages.filter(v => v.date.start <= aujourdhui && aujourdhui <= fin(v));
++    if (enCours.length) return enCours.sort((a, b) => a.date.start.localeCompare(b.date.start))[0];
++
++    const aVenir = voyages.filter(v => v.date.start > aujourdhui);
++    if (aVenir.length) return aVenir.sort((a, b) => a.date.start.localeCompare(b.date.start))[0];
++
++    const passes = voyages.sort((a, b) => fin(b).localeCompare(fin(a)));
++    return passes[0] || null;
++}
++
++function phaseDuVoyage(voyage) {
++    const aujourdhui = dateLocaleISO();
++    const fin = voyage.date.end || voyage.date.start;
++
++    if (aujourdhui < voyage.date.start) {
++        const n = joursEntre(aujourdhui, voyage.date.start);
++        return { code: "avant", libelle: n === 1 ? "Demain" : `Dans ${n} jours`, jours: n };
++    }
++    if (aujourdhui > fin) return { code: "apres", libelle: "Terminé", jours: 0 };
++
++    const numero = joursEntre(voyage.date.start, aujourdhui) + 1;
++    const total = joursEntre(voyage.date.start, fin) + 1;
++    return { code: "pendant", libelle: total > 1 ? `Jour ${numero} sur ${total}` : "Aujourd'hui", jours: 0 };
++}
++
++/* ---------- Événements du jour ---------- */
++
++function evenementsDuJour(voyage) {
++
++    const aujourdhui = dateLocaleISO();
++    const maintenant = new Date();
++    const minutesMaintenant = maintenant.getHours() * 60 + maintenant.getMinutes();
++
++    const billets = listerBillets(voyage.id)
++        .filter(b => b.dateDepart === aujourdhui)
++        .map(b => ({
++            genre: "billet",
++            billet: b,
++            heure: b.heureDepart || null,
++            minutes: heureEnMinutes(b.heureDepart),
++            titre: `${b.compagnie ? b.compagnie + " " : ""}${b.numeroVol || (b.type === "train" ? "Train" : "Billet")}`.trim(),
++            sous: [b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "),
++            lieu: b.lieuDepart?.nom || b.destination || null,
++            emoji: EMOJI_TYPE[b.type] || "🎫"
++        }))
++        .sort((a, b) => (a.minutes ?? 1e9) - (b.minutes ?? 1e9));
++
++    const activites = getEnvies()
++        .filter(e => e.voyageId === voyage.id && e.date?.start === aujourdhui && !e.supprime)
++        .map(e => ({
++            genre: "activite",
++            envie: e,
++            heure: null,
++            minutes: null,
++            titre: e.titre || "Sans titre",
++            sous: e.lieu?.nom || "",
++            lieu: e.lieu?.nom || null,
++            emoji: estLogement(e) ? "🛏️" : "📍",
++            fait: !!e.realise
++        }));
++
++    const prochainBillet = billets.find(b => b.minutes === null || b.minutes >= minutesMaintenant - 30);
++    const prochain = prochainBillet || activites.find(a => !a.fait) || null;
++
++    return { billets, activites, prochain, minutesMaintenant };
++}
++
++/* ---------- Dessin ---------- */
++
++function carteVoyage(voyage, phase) {
++
++    const statut = computeContainerStatus(voyage);
++    const fond = voyage.photoCouverture
++        ? `background-image:linear-gradient(rgba(14,42,51,.35),rgba(14,42,51,.65)),url('${echapper(voyage.photoCouverture)}');background-size:cover;background-position:center;`
++        : "";
++
++    return `
++        <button type="button" class="niCouverture" id="niOuvrirFiche" style="${fond}" aria-label="Ouvrir la fiche du voyage">
++            <span class="niPastille">${echapper(phase.libelle)}</span>
++            <span class="niCouvertureBas">
++                <span class="niCouvertureTitre">${echapper(voyage.titre || "Voyage")}</span>
++                <span class="niCouvertureSous">${echapper(formatPeriode(voyage.date))}</span>
++                <span class="niBarre"><i style="width:${Math.max(0, Math.min(100, statut.pourcentage || 0))}%"></i></span>
++            </span>
++        </button>`;
++}
++
++function blocProchain(ev, minutesMaintenant) {
++
++    if (!ev) return "";
++
++    const compte = ev.minutes !== null && ev.minutes !== undefined
++        ? formatCompteARebours(ev.minutes - minutesMaintenant)
++        : "aujourd'hui";
++
++    const boutonBillet = ev.genre === "billet" && (ev.billet.fichiers || []).length
++        ? '<button type="button" class="niBouton niBoutonPrimaire" id="niProchainBillet">Billet</button>'
++        : "";
++
++    const boutonItineraire = ev.lieu
++        ? '<button type="button" class="niBouton niBoutonMaintenant" id="niProchainItineraire">Itinéraire</button>'
++        : "";
++
++    return `
++        <div class="niCarte niCarteMaintenant">
++            <span class="niEtiquette niEtiquetteMaintenant">Prochain · ${echapper(compte)}</span>
++            <div class="niProchainLigne">
++                <span class="niIcone niIconeMaintenant niIconeGrande">${ev.emoji}</span>
++                <span class="niDocTexte">
++                    ${ev.heure ? `<span class="niHeureGrande">${echapper(ev.heure)}</span>` : ""}
++                    <span class="niDocTitre">${echapper(ev.titre)}</span>
++                    ${ev.sous ? `<span class="niDocSous">${echapper(ev.sous)}</span>` : ""}
++                </span>
++            </div>
++            ${boutonBillet || boutonItineraire ? `<div class="niBoutons">${boutonBillet}${boutonItineraire}</div>` : ""}
++        </div>`;
++}
++
++function blocSuite(donnees, prochain) {
++
++    const lignes = [
++        ...donnees.billets.map(b => ({ ...b, fait: false })),
++        ...donnees.activites
++    ].filter(l => l !== prochain);
++
++    if (!lignes.length) return "";
++
++    return `
++        <div class="niSection">
++            <h2 class="niTitreSection">${prochain ? "La suite" : "Aujourd'hui"}</h2>
++            <div class="niCarte">
++                ${lignes.map(l => `
++                    <div class="niDocLigne niLigneStatique${l.fait ? " niFait" : ""}">
++                        <span class="niHeureCourte">${echapper(l.heure || "")}</span>
++                        <span class="niDocTexte">
++                            <span class="niDocTitre">${echapper(l.titre)}</span>
++                            ${l.sous ? `<span class="niDocSous">${echapper(l.sous)}</span>` : ""}
++                        </span>
++                        ${l.fait ? '<span class="niTag">Fait</span>' : ""}
++                    </div>`).join("")}
++            </div>
++        </div>`;
++}
++
++function blocResteAFaire(voyage, phase) {
++
++    if (phase.code === "apres") return "";
++
++    const enfants = getEnvies().filter(e => e.voyageId === voyage.id && !e.supprime);
++    const manques = [];
++
++    if (listerBillets(voyage.id).length === 0)
++        manques.push("Aucun billet ajouté");
++    if (!enfants.some(estLogement))
++        manques.push("Aucun logement ajouté");
++    if (enfants.length === 0)
++        manques.push("Programme vide");
++
++    if (!manques.length) return "";
++
++    return `
++        <div class="niSection">
++            <h2 class="niTitreSection">Il reste à faire</h2>
++            <div class="niCarte">
++                ${manques.map(m => `
++                    <button type="button" class="niDocLigne niOuvrirFicheLigne">
++                        <span class="niIcone niIconeAttention">⚠️</span>
++                        <span class="niDocTexte"><span class="niDocTitre">${echapper(m)}</span><span class="niDocSous">Ouvrir la fiche du voyage</span></span>
++                    </button>`).join("")}
++            </div>
++        </div>`;
++}
++
++export function fermerAujourdhui() {
++    document.getElementById("niAujourdhui")?.remove();
++}
++
++export function openAujourdhui() {
++
++    fermerAujourdhui();
++
++    const ecran = document.createElement("div");
++    ecran.id = "niAujourdhui";
++    ecran.className = "niEcran niEcranAvecBarre";
++    ecran.setAttribute("aria-label", "Aujourd'hui");
++    document.body.appendChild(ecran);
++
++    const voyage = trouverVoyage();
++    const dateLongue = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
++
++    if (!voyage) {
++        ecran.innerHTML = `
++            <div class="niCorps">
++                <span class="niEtiquette">${echapper(dateLongue)}</span>
++                <h1 class="niTitrePage">Aujourd'hui</h1>
++                <div class="niVide">Aucun voyage avec des dates pour le moment. Ajoute des dates à un voyage pour le retrouver ici.</div>
++            </div>`;
++        return;
++    }
++
++    const phase = phaseDuVoyage(voyage);
++    const donnees = phase.code === "pendant" || phase.jours <= 1
++        ? evenementsDuJour(voyage)
++        : { billets: [], activites: [], prochain: null, minutesMaintenant: 0 };
++
++    const nbBillets = listerBillets(voyage.id).length;
++
++    ecran.innerHTML = `
++        <div class="niCorps">
++            <span class="niEtiquette">${echapper(dateLongue)}</span>
++            <h1 class="niTitrePage">Aujourd'hui</h1>
++            ${carteVoyage(voyage, phase)}
++            ${blocProchain(donnees.prochain, donnees.minutesMaintenant)}
++            ${blocSuite(donnees, donnees.prochain)}
++            ${blocResteAFaire(voyage, phase)}
++            <div class="niTuiles">
++                <button type="button" class="niTuile" id="niOuvrirDocuments">
++                    <span class="niTuileTitre">Documents</span>
++                    <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
++                </button>
++                <button type="button" class="niTuile" id="niOuvrirFicheTuile">
++                    <span class="niTuileTitre">Fiche du voyage</span>
++                    <span class="niDocSous">Programme, listes, dépenses</span>
++                </button>
++            </div>
++        </div>`;
++
++    const ouvrirFiche = () => {
++        fermerAujourdhui();
++        openEnvie(voyage.id);
++    };
++
++    ecran.querySelector("#niOuvrirFiche")?.addEventListener("click", ouvrirFiche);
++    ecran.querySelector("#niOuvrirFicheTuile")?.addEventListener("click", ouvrirFiche);
++    ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
++    ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
++
++    const prochain = donnees.prochain;
++
++    ecran.querySelector("#niProchainBillet")?.addEventListener("click", () => {
++        ouvrirFichier(prochain.billet.fichiers, 0);
++    });
++
++    ecran.querySelector("#niProchainItineraire")?.addEventListener("click", () => {
++        if (!prochain?.lieu) {
++            showToast("Aucun lieu renseigné");
++            return;
++        }
++        ouvrirGoogleMaps(prochain.lieu);
++    });
++}
+diff --git a/js/documents.js b/js/documents.js
+new file mode 100644
+index 0000000..ecb5a0a
+--- /dev/null
++++ b/js/documents.js
+@@ -0,0 +1,141 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ documents.js : portefeuille de documents d'un voyage
++ Lecture seule : aucune donnée n'est modifiée.
++==========================================================
++*/
++
++import { getEnvies } from "./storage.js";
++import { ouvrirFichier } from "./billets.js";
++import { showToast } from "./toast.js";
++
++const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++export function dateLocaleISO() {
++    const d = new Date();
++    d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
++    return d.toISOString().slice(0, 10);
++}
++
++function formatCourt(iso) {
++    if (!iso) return "";
++    return new Date(iso + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" });
++}
++
++export function listerBillets(voyageId) {
++    const voyage = getEnvies().find(e => e.id === voyageId);
++    return (voyage?.billets || []).slice().sort((a, b) =>
++        `${a.dateDepart || "9999"}${a.heureDepart || ""}`.localeCompare(`${b.dateDepart || "9999"}${b.heureDepart || ""}`)
++    );
++}
++
++function titreBillet(billet) {
++    const depart = billet.lieuDepart?.nom;
++    const arrivee = billet.destination;
++    if (depart && arrivee) return `${depart} → ${arrivee}`;
++    return arrivee || depart || billet.numeroVol || "Billet";
++}
++
++function ligneBillet(billet, aujourdhui) {
++    const nbFichiers = (billet.fichiers || []).length;
++    const estAujourdhui = billet.dateDepart === aujourdhui;
++    const details = [
++        formatCourt(billet.dateDepart),
++        billet.heureDepart,
++        billet.compagnie,
++        billet.numeroVol
++    ].filter(Boolean).join(" · ");
++
++    return `
++        <button type="button" class="niDocLigne" data-billet="${echapper(billet.id)}" aria-label="Ouvrir ${echapper(titreBillet(billet))}">
++            <span class="niIcone${estAujourdhui ? " niIconeMaintenant" : ""}">${EMOJI_TYPE[billet.type] || "🎫"}</span>
++            <span class="niDocTexte">
++                <span class="niDocTitre">${echapper(titreBillet(billet))}</span>
++                <span class="niDocSous">${echapper(details)}${nbFichiers ? ` · ${nbFichiers} fichier${nbFichiers > 1 ? "s" : ""}` : " · aucun fichier"}</span>
++            </span>
++            ${estAujourdhui ? '<span class="niTag niTagMaintenant">Aujourd\'hui</span>' : ""}
++        </button>`;
++}
++
++export function fermerDocuments() {
++    document.getElementById("niDocuments")?.remove();
++}
++
++export function openDocuments(voyageId) {
++
++    fermerDocuments();
++
++    const voyage = getEnvies().find(e => e.id === voyageId);
++    if (!voyage) {
++        showToast("Voyage introuvable");
++        return;
++    }
++
++    const ecran = document.createElement("div");
++    ecran.id = "niDocuments";
++    ecran.className = "niEcran";
++    ecran.setAttribute("role", "dialog");
++    ecran.setAttribute("aria-label", "Documents du voyage");
++    document.body.appendChild(ecran);
++
++    function dessiner(filtre = "") {
++
++        const aujourdhui = dateLocaleISO();
++        const terme = filtre.trim().toLowerCase();
++
++        const billets = listerBillets(voyageId).filter(b =>
++            !terme || `${titreBillet(b)} ${b.compagnie || ""} ${b.numeroVol || ""}`.toLowerCase().includes(terme)
++        );
++
++        const utiles = billets.filter(b => b.dateDepart === aujourdhui);
++        const autres = billets.filter(b => b.dateDepart !== aujourdhui);
++
++        const horsLigne = !navigator.onLine
++            ? '<div class="niBandeau niBandeauInfo">Hors-ligne : les billets déjà chargés restent consultables.</div>'
++            : "";
++
++        ecran.innerHTML = `
++            <div class="niBarreHaut">
++                <button type="button" class="niBoutonIcone" id="niDocRetour" aria-label="Retour">←</button>
++                <div class="niBarreTitre"><h1>Documents</h1><span>${echapper(voyage.titre || "")}</span></div>
++            </div>
++            <div class="niCorps">
++                <input id="niDocRecherche" class="niRecherche" type="search" placeholder="Rechercher un document" aria-label="Rechercher un document" value="${echapper(filtre)}">
++                ${horsLigne}
++                ${utiles.length ? `<div class="niSection"><span class="niEtiquette">Utiles maintenant</span><div class="niCarte">${utiles.map(b => ligneBillet(b, aujourdhui)).join("")}</div></div>` : ""}
++                ${autres.length ? `<div class="niSection"><span class="niEtiquette">${utiles.length ? "Autres documents" : "Billets et titres de transport"}</span><div class="niCarte">${autres.map(b => ligneBillet(b, aujourdhui)).join("")}</div></div>` : ""}
++                ${billets.length === 0 ? `<div class="niVide">${terme ? "Aucun résultat." : "Aucun billet ajouté pour ce voyage. Ajoute-en depuis la fiche du voyage."}</div>` : ""}
++            </div>`;
++
++        ecran.querySelector("#niDocRetour").addEventListener("click", fermerDocuments);
++
++        const champ = ecran.querySelector("#niDocRecherche");
++        champ.addEventListener("input", () => {
++            const position = champ.selectionStart;
++            dessiner(champ.value);
++            const nouveau = ecran.querySelector("#niDocRecherche");
++            nouveau.focus();
++            nouveau.setSelectionRange(position, position);
++        });
++
++        ecran.querySelectorAll(".niDocLigne").forEach(bouton => {
++            bouton.addEventListener("click", () => {
++                const billet = listerBillets(voyageId).find(b => b.id === bouton.dataset.billet);
++                if (!billet || !(billet.fichiers || []).length) {
++                    showToast("Aucun fichier joint à ce billet");
++                    return;
++                }
++                ouvrirFichier(billet.fichiers, 0);
++            });
++        });
++    }
++
++    dessiner();
++}
+diff --git a/js/nouvelle-interface.js b/js/nouvelle-interface.js
+new file mode 100644
+index 0000000..10c8e6e
+--- /dev/null
++++ b/js/nouvelle-interface.js
+@@ -0,0 +1,153 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface (bêta)
++ nouvelle-interface.js : réglage, barre d'onglets, bascule
++ Éteinte par défaut. Aucun effet sur le mode Maison.
++==========================================================
++*/
++
++import { getModeActif } from "./storage.js";
++import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
++import { fermerDocuments } from "./documents.js";
++
++const CLE = "envie_nouvelle_interface";
++
++export function nouvelleInterfaceActive() {
++    try { return localStorage.getItem(CLE) === "1"; }
++    catch { return false; }
++}
++
++function definirActive(valeur) {
++    try { localStorage.setItem(CLE, valeur ? "1" : "0"); }
++    catch { /* stockage indisponible : on ne fait rien */ }
++}
++
++/* ---------- Réglage dans le menu Plus ---------- */
++
++function injecterReglage() {
++
++    const modale = document.querySelector("#plusModal .modal");
++    if (!modale || document.getElementById("plusBtnNouvelleInterface")) return;
++
++    const bouton = document.createElement("button");
++    bouton.id = "plusBtnNouvelleInterface";
++    bouton.type = "button";
++    bouton.className = "secondaryButton";
++    bouton.style.cssText = "width:100%;margin-bottom:10px;";
++
++    const maj = () => {
++        bouton.textContent = nouvelleInterfaceActive()
++            ? "🧪 Nouvelle interface : activée (toucher pour revenir à l'ancienne)"
++            : "🧪 Essayer la nouvelle interface (bêta)";
++    };
++    maj();
++
++    bouton.addEventListener("click", () => {
++        definirActive(!nouvelleInterfaceActive());
++        location.reload();
++    });
++
++    modale.appendChild(bouton);
++}
++
++/* ---------- Barre d'onglets ---------- */
++
++const ICONES = {
++    aujourdhui: '<svg viewBox="0 0 24 24" class="niIco"><path d="M8 12a4 4 0 108 0 4 4 0 10-8 0M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"></path></svg>',
++    voyages: '<svg viewBox="0 0 24 24" class="niIco"><path d="M5 7h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2zM9 7V4h6v3"></path></svg>',
++    capturer: '<svg viewBox="0 0 24 24" class="niIco"><path d="M12 5v14M5 12h14"></path></svg>',
++    plus: '<svg viewBox="0 0 24 24" class="niIco" style="stroke-width:4"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg>'
++};
++
++function cliquerSurPremierVisible(ids) {
++    for (const id of ids) {
++        const el = document.getElementById(id);
++        if (el && el.offsetParent !== null) {
++            el.click();
++            return true;
++        }
++    }
++    return false;
++}
++
++function fermerEcransNouveaux() {
++    fermerDocuments();
++    fermerAujourdhui();
++}
++
++function monterBarre() {
++
++    if (document.getElementById("niBarreOnglets")) return;
++
++    document.body.classList.add("niActive");
++
++    const barre = document.createElement("nav");
++    barre.id = "niBarreOnglets";
++    barre.className = "niBarreOnglets hidden";
++    barre.setAttribute("aria-label", "Navigation");
++    barre.innerHTML = `
++        <button type="button" class="niOnglet" data-onglet="aujourdhui">${ICONES.aujourdhui}<span>Aujourd'hui</span></button>
++        <button type="button" class="niOnglet" data-onglet="voyages">${ICONES.voyages}<span>Voyages</span></button>
++        <button type="button" class="niOnglet niOngletCapturer" data-onglet="capturer"><span class="niPastilleCapturer">${ICONES.capturer}</span><span>Capturer</span></button>
++        <button type="button" class="niOnglet" data-onglet="plus">${ICONES.plus}<span>Plus</span></button>`;
++    document.body.appendChild(barre);
++
++    const marquer = nom => {
++        barre.querySelectorAll(".niOnglet").forEach(b => b.classList.toggle("niOngletActif", b.dataset.onglet === nom));
++    };
++    marquer("voyages");
++
++    barre.addEventListener("click", evenement => {
++
++        const bouton = evenement.target.closest(".niOnglet");
++        if (!bouton) return;
++
++        switch (bouton.dataset.onglet) {
++            case "aujourdhui":
++                fermerDocuments();
++                openAujourdhui();
++                marquer("aujourdhui");
++                break;
++            case "voyages":
++                fermerEcransNouveaux();
++                window.scrollTo({ top: 0 });
++                marquer("voyages");
++                break;
++            case "capturer":
++                cliquerSurPremierVisible(["btnEnvieCompact", "btnEnvie"]);
++                break;
++            case "plus":
++                cliquerSurPremierVisible(["btnPlus"]);
++                break;
++        }
++    });
++
++    /* Visible seulement en mode Voyages, sans fenêtre ancienne ouverte. */
++    let planifie = false;
++    const actualiser = () => {
++        planifie = false;
++        const maison = getModeActif() === "maison";
++        const fenetreOuverte = !!document.querySelector(".modal-overlay:not(.hidden), .authScreen:not(.hidden)");
++        const accueilVisible = !!document.getElementById("headerAccueilActif")
++            && !document.getElementById("headerAccueilActif").classList.contains("hidden");
++        const visible = !maison && !fenetreOuverte && accueilVisible;
++        barre.classList.toggle("hidden", !visible);
++        document.body.classList.toggle("niBarreVisible", visible);
++        if (maison) fermerEcransNouveaux();
++    };
++    const planifier = () => {
++        if (planifie) return;
++        planifie = true;
++        requestAnimationFrame(actualiser);
++    };
++
++    new MutationObserver(planifier).observe(document.body, {
++        subtree: true, attributes: true, attributeFilter: ["class"]
++    });
++    actualiser();
++}
++
++export function initNouvelleInterface() {
++    injecterReglage();
++    if (nouvelleInterfaceActive()) monterBarre();
++}
+diff --git a/ni.css b/ni.css
+new file mode 100644
+index 0000000..ebd4439
+--- /dev/null
++++ b/ni.css
+@@ -0,0 +1,351 @@
++/* ==========================================================
++   EnVie - Nouvelle interface (bêta)
++   Tout est préfixé « ni » : aucun effet sur les styles existants.
++   ========================================================== */
++
++:root{
++    --ni-ink:#0E2A33;
++    --ni-muted:#4A6470;
++    --ni-bg:#F2F6F7;
++    --ni-card:#FFFFFF;
++    --ni-line:#D9E4E8;
++    --ni-brand:#0F766E;
++    --ni-brand-d:#0B5A54;
++    --ni-brand-s:#DDF1EE;
++    --ni-now:#B93C0C;
++    --ni-now-s:#FDE9DD;
++    --ni-warn-s:#FFF0D1;
++}
++
++body.niBarreVisible main{
++    padding-bottom:96px;
++}
++
++/* ---------- Barre d'onglets ---------- */
++
++.niBarreOnglets{
++    position:fixed;
++    left:0;
++    right:0;
++    bottom:0;
++    z-index:1600;
++    display:flex;
++    background:#fff;
++    border-top:1px solid var(--ni-line);
++    padding:6px 8px calc(10px + env(safe-area-inset-bottom));
++}
++
++.niBarreOnglets.hidden{
++    display:none;
++}
++
++.niOnglet{
++    flex:1;
++    min-height:56px;
++    display:flex;
++    flex-direction:column;
++    align-items:center;
++    justify-content:center;
++    gap:3px;
++    background:none;
++    border:0;
++    font:inherit;
++    font-size:12px;
++    font-weight:700;
++    color:var(--ni-muted);
++    cursor:pointer;
++}
++
++.niOngletActif{
++    color:var(--ni-brand-d);
++}
++
++.niIco{
++    width:24px;
++    height:24px;
++    fill:none;
++    stroke:currentColor;
++    stroke-width:2;
++    stroke-linecap:round;
++    stroke-linejoin:round;
++}
++
++.niOngletCapturer{
++    color:var(--ni-ink);
++}
++
++.niPastilleCapturer{
++    width:46px;
++    height:46px;
++    margin-top:-22px;
++    border-radius:50%;
++    background:var(--ni-now);
++    color:#fff;
++    display:flex;
++    align-items:center;
++    justify-content:center;
++    box-shadow:0 4px 12px rgba(14,42,51,.25);
++}
++
++/* ---------- Écrans plein écran ---------- */
++
++.niEcran{
++    position:fixed;
++    inset:0;
++    z-index:1800;
++    background:var(--ni-bg);
++    color:var(--ni-ink);
++    overflow-y:auto;
++    -webkit-overflow-scrolling:touch;
++    font-size:15px;
++    line-height:1.35;
++}
++
++.niEcranAvecBarre{
++    z-index:1500;
++    padding-bottom:calc(96px + env(safe-area-inset-bottom));
++}
++
++.niBarreHaut{
++    display:flex;
++    align-items:center;
++    gap:10px;
++    padding:12px 12px 4px;
++    position:sticky;
++    top:0;
++    background:var(--ni-bg);
++    z-index:1;
++}
++
++.niBarreTitre{display:flex;flex-direction:column;}
++.niBarreTitre h1{margin:0;font-size:20px;}
++.niBarreTitre span{font-size:13px;color:var(--ni-muted);}
++
++.niBoutonIcone{
++    width:44px;
++    height:44px;
++    border-radius:14px;
++    background:#fff;
++    border:1px solid var(--ni-line);
++    font-size:20px;
++    color:var(--ni-ink);
++    cursor:pointer;
++}
++
++.niCorps{
++    max-width:640px;
++    margin:0 auto;
++    padding:14px 16px 24px;
++    display:flex;
++    flex-direction:column;
++    gap:14px;
++}
++
++.niTitrePage{
++    margin:-8px 0 0;
++    font-size:30px;
++    line-height:1.08;
++}
++
++.niEtiquette{
++    font-size:12px;
++    font-weight:700;
++    letter-spacing:.06em;
++    text-transform:uppercase;
++    color:var(--ni-muted);
++}
++
++.niEtiquetteMaintenant{color:var(--ni-now);}
++
++.niSection{display:flex;flex-direction:column;gap:8px;}
++.niTitreSection{margin:0;font-size:19px;}
++
++.niCarte{
++    background:var(--ni-card);
++    border:1px solid var(--ni-line);
++    border-radius:18px;
++    padding:4px 14px;
++}
++
++.niCarteMaintenant{
++    background:var(--ni-now-s);
++    border-color:#F0C3AA;
++    padding:14px;
++    display:flex;
++    flex-direction:column;
++    gap:12px;
++}
++
++.niRecherche{
++    width:100%;
++    min-height:48px;
++    padding:0 14px;
++    border-radius:14px;
++    border:1px solid var(--ni-line);
++    background:#fff;
++    font:inherit;
++    font-size:16px;
++}
++
++/* ---------- Couverture du voyage ---------- */
++
++.niCouverture{
++    min-height:190px;
++    border-radius:20px;
++    border:0;
++    padding:16px;
++    display:flex;
++    flex-direction:column;
++    justify-content:space-between;
++    align-items:flex-start;
++    text-align:left;
++    background:linear-gradient(135deg,#0F766E 0%,#155E75 55%,#1E3A5F 100%);
++    color:#fff;
++    font:inherit;
++    cursor:pointer;
++}
++
++.niPastille{
++    display:inline-flex;
++    align-items:center;
++    min-height:28px;
++    padding:0 12px;
++    border-radius:999px;
++    background:rgba(255,255,255,.22);
++    font-size:12px;
++    font-weight:700;
++}
++
++.niCouvertureBas{display:flex;flex-direction:column;gap:6px;width:100%;}
++.niCouvertureTitre{font-size:32px;font-weight:700;line-height:1.05;}
++.niCouvertureSous{font-size:14px;opacity:.92;}
++
++.niBarre{
++    display:block;
++    height:8px;
++    border-radius:99px;
++    background:rgba(255,255,255,.28);
++    overflow:hidden;
++}
++.niBarre i{display:block;height:100%;background:#fff;border-radius:99px;}
++
++/* ---------- Lignes et icônes ---------- */
++
++.niDocLigne{
++    width:100%;
++    display:flex;
++    align-items:center;
++    gap:12px;
++    min-height:60px;
++    padding:8px 0;
++    background:none;
++    border:0;
++    border-top:1px solid var(--ni-line);
++    font:inherit;
++    color:inherit;
++    text-align:left;
++    cursor:pointer;
++}
++
++.niDocLigne:first-child{border-top:0;}
++.niLigneStatique{cursor:default;}
++.niFait{opacity:.6;}
++
++.niDocTexte{flex:1;min-width:0;display:flex;flex-direction:column;}
++.niDocTitre{font-weight:700;}
++.niDocSous{font-size:13px;color:var(--ni-muted);}
++
++.niIcone{
++    width:42px;
++    height:42px;
++    border-radius:13px;
++    display:flex;
++    align-items:center;
++    justify-content:center;
++    flex:none;
++    background:var(--ni-brand-s);
++    font-size:20px;
++}
++.niIconeMaintenant{background:var(--ni-now-s);}
++.niIconeAttention{background:var(--ni-warn-s);}
++.niIconeGrande{width:52px;height:52px;font-size:26px;background:#fff;}
++
++.niTag{
++    display:inline-flex;
++    align-items:center;
++    min-height:22px;
++    padding:0 8px;
++    border-radius:999px;
++    background:var(--ni-brand-s);
++    color:var(--ni-brand-d);
++    font-size:11px;
++    font-weight:700;
++    white-space:nowrap;
++}
++.niTagMaintenant{background:var(--ni-now-s);color:var(--ni-now);}
++
++.niHeureCourte{width:48px;font-weight:700;flex:none;}
++.niHeureGrande{font-size:40px;font-weight:700;line-height:1;}
++
++.niProchainLigne{display:flex;align-items:center;gap:14px;}
++
++.niBoutons{display:flex;gap:10px;}
++
++.niBouton{
++    flex:1;
++    min-height:54px;
++    border-radius:14px;
++    border:1px solid var(--ni-line);
++    background:#fff;
++    font:inherit;
++    font-size:15px;
++    font-weight:700;
++    color:var(--ni-ink);
++    cursor:pointer;
++}
++.niBoutonPrimaire{background:var(--ni-brand);border-color:var(--ni-brand);color:#fff;}
++.niBoutonMaintenant{background:var(--ni-now);border-color:var(--ni-now);color:#fff;}
++
++.niTuiles{display:flex;gap:10px;}
++
++.niTuile{
++    flex:1;
++    min-height:76px;
++    padding:12px;
++    border-radius:18px;
++    border:1px solid var(--ni-line);
++    background:#fff;
++    display:flex;
++    flex-direction:column;
++    gap:4px;
++    align-items:flex-start;
++    text-align:left;
++    font:inherit;
++    color:inherit;
++    cursor:pointer;
++}
++.niTuileTitre{font-weight:700;}
++
++.niVide,
++.niBandeau{
++    padding:14px;
++    border-radius:16px;
++    background:#fff;
++    border:1px dashed var(--ni-line);
++    color:var(--ni-muted);
++}
++.niBandeauInfo{background:var(--ni-warn-s);border-style:solid;border-color:#F0D69A;color:#7A4E00;font-weight:700;}
++
++/* ---------- Grand écran ---------- */
++
++@media (min-width:900px){
++    .niCorps{max-width:760px;}
++    .niBarreOnglets{
++        left:50%;
++        right:auto;
++        width:520px;
++        transform:translateX(-50%);
++        border:1px solid var(--ni-line);
++        border-radius:20px 20px 0 0;
++    }
++}
+diff --git a/sw.js b/sw.js
+index ca9dbe8..dab1e8e 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,10 +1,14 @@
+-const CACHE_NAME = 'envie-cache-v223';
++const CACHE_NAME = 'envie-cache-v224';
+ 
+  
+  
+ const APP_SHELL = [
+     './index.html',
+     './styles.css',
++    './ni.css',
++    './js/nouvelle-interface.js',
++    './js/aujourdhui.js',
++    './js/documents.js',
+     './share-target.html',
+     './js/share-target.js',
+  './js/corbeille.js',
