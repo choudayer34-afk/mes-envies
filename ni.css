@@ -602,3 +602,30 @@ button.niArgentCase{cursor:pointer;min-height:44px;}
 .niArgentGros{font-size:30px;font-weight:700;line-height:1.1;}
 .niArgentRouge{color:#B42318;}
 #niArgentBudget{z-index:2250;}
+
+/* ---------- Formulaire de billet ---------- */
+#niBilletForm{z-index:2400;}
+.niBfCorps{padding-bottom:calc(110px + env(safe-area-inset-bottom));}
+.niBfBarre{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--ni-bg);border-top:1px solid var(--ni-line);max-width:640px;margin:0 auto;}
+.niBfBarre .niBouton:first-child{flex:0 0 32%;}
+.niBfBarre .niBoutonPrimaire{flex:1;}
+.niBfTypes{display:flex;flex-wrap:wrap;gap:8px;}
+.niBfType{min-height:44px;padding:0 14px;border-radius:999px;border:1px solid var(--ni-line);background:#fff;color:var(--ni-ink);font:inherit;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.niBfTypeActif{background:var(--ni-ink);border-color:var(--ni-ink);color:#fff;}
+.niBfGroupe{display:flex;flex-direction:column;gap:12px;}
+.niBfLabel{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:700;color:var(--ni-muted);flex:1;min-width:0;}
+.niBfLabel .niRecherche{font-weight:400;color:var(--ni-ink);}
+.niBfDeux{display:flex;gap:10px;}
+.niBfTrajet{display:flex;flex-direction:column;gap:6px;align-items:stretch;}
+.niBfEchange{align-self:center;width:44px;height:44px;}
+.niBfLieu{position:relative;}
+.niBfInterrupteur{display:flex;align-items:center;gap:12px;min-height:48px;font-weight:700;cursor:pointer;}
+.niBfInterrupteur input{width:22px;height:22px;flex:none;}
+.niBfPlus summary{min-height:44px;display:flex;align-items:center;font-weight:700;color:var(--ni-muted);cursor:pointer;}
+.niBfPlus .niRecherche{margin-top:6px;}
+
+.niLigneAction{display:flex;align-items:center;gap:8px;border-top:1px solid var(--ni-line);}
+.niLigneAction:first-child{border-top:0;}
+.niLigneAction .niDocLigne{border-top:0;flex:1;min-width:0;width:auto;}
+.niLigneAction .niBoutonIcone{flex:none;width:44px;height:44px;}
+.niBfLieu .autocompleteSuggestions:empty{display:none;}
