@@ -9,6 +9,7 @@
 import { fermerListes } from "./listes.js";
 import { fermerRecherche, poserRaccourciRecherche } from "./recherche.js";
 import { fermerHub } from "./fiche-hub.js";
+import { demarrerHorsLigne } from "./hors-ligne.js";
 import { fermerVoyageurs } from "./voyageurs-ecran.js";
 import { fermerNotesLiens } from "./notes-liens.js";
 import { fermerDepenseForm } from "./depense-form.js";
@@ -246,6 +247,7 @@ function monterBarre() {
 
     document.body.classList.add("niActive");
     poserRaccourciRecherche();
+    demarrerHorsLigne();
 
     /* L'engrenage de l'accueil est masqué par les écrans : l'administration est aussi dans Plus. */
     const plus = document.getElementById("plusModal");

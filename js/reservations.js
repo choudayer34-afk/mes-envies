@@ -8,6 +8,7 @@
 ==========================================================
 */
 
+import { etatHorsLigne } from "./hors-ligne.js";
 import { getEnvies } from "./storage.js";
 import { openBilletForm } from "./billet-form.js";
 import { listerBillets, dateLocaleISO } from "./documents.js";
@@ -55,7 +56,7 @@ function ligne(b, aujourdhui) {
                 <span class="niDocTitre">${echapper(titreBillet(b))}</span>
                 <span class="niDocSous">${echapper(t.libelle)}${details ? " · " + echapper(details) : ""}</span>
             </span>
-            <span class="niTag ${nb ? "niTagOk" : "niTagAttention"}">${nb ? "Fichier joint" : "Sans fichier"}</span>
+            ${(() => { const e = etatHorsLigne(b); return `<span class="niTag ${e === "partiel" || e === "aucun" ? "niTagAttention" : "niTagOk"}">${{ aucun: "Sans fichier", inconnu: "Fichier joint", ok: "Hors ligne ✓", partiel: "En ligne seulement" }[e]}</span>`; })()}
         </button>
         <button type="button" class="niBoutonIcone niLigneModifier" data-modifier="${echapper(b.id)}" aria-label="Modifier ${echapper(titreBillet(b))}">✏️</button>
         </div>`;

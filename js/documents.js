@@ -6,6 +6,7 @@
 ==========================================================
 */
 
+import { etatHorsLigne } from "./hors-ligne.js";
 import { emojiType, motType, typeReservation, GROUPES_RESERVATION, etapesBillets, nomLieu, libelleSens } from "./types-reservation.js";
 import { getEnvies } from "./storage.js";
 import { ouvrirVisionneuse } from "./visionneuse.js";
@@ -59,7 +60,7 @@ function ligneBillet(billet, aujourdhui) {
             <span class="niIcone${estAujourdhui ? " niIconeMaintenant" : ""}">${emojiType(billet.type)}</span>
             <span class="niDocTexte">
                 <span class="niDocTitre">${echapper(titreBillet(billet))}</span>
-                <span class="niDocSous">${echapper(details)}${nbFichiers ? ` · ${nbFichiers} fichier${nbFichiers > 1 ? "s" : ""}` : " · aucun fichier"}</span>
+                <span class="niDocSous">${echapper(details)}${nbFichiers ? ` · ${nbFichiers} fichier${nbFichiers > 1 ? "s" : ""}${{ ok: " · hors ligne ✓", partiel: " · en ligne seulement" }[etatHorsLigne(billet)] || ""}` : " · aucun fichier"}</span>
             </span>
             ${estAujourdhui ? '<span class="niTag niTagMaintenant">Aujourd\'hui</span>' : ""}
         </button>`;
