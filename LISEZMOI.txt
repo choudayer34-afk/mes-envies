@@ -1,18 +1,25 @@
-ENVIE - ÉTAPE 6 : gestes sur les listes + Aujourd'hui multi-voyages
+ENVIE - ÉTAPE 7 : Nouveau voyage, Trier les idées, correction Aujourd'hui
 
 À copier à la racine du dépôt :
-  sw.js                       (cache v230)
-  ni.css
-  js/gestes-listes.js         (nouveau)
-  js/aujourdhui.js            (modifié)
-  js/nouvelle-interface.js    (modifié)
+  sw.js                       (cache v231)
+  ni.css                      (inchangé depuis l'étape 6, inclus par sécurité)
+  js/nouveau-voyage.js        (nouveau)
+  js/trier.js                 (nouveau)
+  js/aujourdhui.js            (modifié : plus de voyages passés)
+  js/capturer.js              (modifié : tuile « Nouveau voyage »)
+  js/nouvelle-interface.js    (modifié : « À trier » ouvre le nouvel écran)
 Aucun ancien fichier de l'application n'est modifié.
 
-Gestes (listes « À emporter » et « Tâches » des voyages, pas Maison) :
-  - glisser une ligne vers la droite : coche / décoche
-  - glisser vers la gauche : supprime, avec la confirmation habituelle
-  - la poignée ⠿, les boutons et le défilement vertical ne changent pas
+Aujourd'hui : seuls les voyages en cours et à venir sont proposés ; le voyage en cours,
+sinon le plus proche, s'affiche par défaut.
 
-Aujourd'hui :
-  - une rangée de puces en haut liste tous les voyages datés (en cours, à venir, passés)
-  - le choix est retenu pendant la session ; il sert aussi au bouton Capturer
+Nouveau voyage (Capturer > Nouveau voyage) :
+  - étape 1 : où (avec la recherche de lieu habituelle), départ/retour, voyageurs
+  - étape 2 : reprendre les listes d'un voyage existant (copie décochée)
+  - ensuite : ouvrir la fiche ou importer des idées avec l'IA
+  - l'ancien bouton de création reste en place
+
+Trier les idées (Voyages > Idées > À trier) :
+  - Retenir : rattache l'idée à un voyage (voyage unique = un seul toucher)
+  - Plus tard : l'idée reste intacte et sort de la liste pour la session
+  - toucher le titre ouvre la fiche ; l'ancien écran reste disponible dans le même menu

@@ -1,0 +1,537 @@
+diff --git a/js/aujourdhui.js b/js/aujourdhui.js
+index 7ba8303..2e0f417 100644
+--- a/js/aujourdhui.js
++++ b/js/aujourdhui.js
+@@ -62,7 +62,7 @@ function memoriserChoix(id) {
+     catch { /* sans effet */ }
+ }
+ 
+-/* Voyages datés, dans l'ordre : en cours, à venir (le plus proche d'abord), puis passés récents. */
++/* Voyages datés non terminés, dans l'ordre : en cours, puis à venir (le plus proche d'abord). */
+ export function listerVoyagesDates() {
+ 
+     const envies = getEnvies().filter(e => e.contexte === "voyage" && !e.supprime);
+@@ -79,13 +79,11 @@ export function listerVoyagesDates() {
+         .sort((a, b) => a.date.start.localeCompare(b.date.start));
+     const aVenir = voyages.filter(v => v.date.start > aujourdhui)
+         .sort((a, b) => a.date.start.localeCompare(b.date.start));
+-    const passes = voyages.filter(v => fin(v) < aujourdhui)
+-        .sort((a, b) => fin(b).localeCompare(fin(a)));
+ 
+-    return [...enCours, ...aVenir, ...passes];
++    return [...enCours, ...aVenir];
+ }
+ 
+-/* Sans choix explicite : voyage en cours, sinon prochain, sinon dernier passé. */
++/* Sans choix explicite : voyage en cours, sinon le plus proche à venir. */
+ export function trouverVoyage(idChoisi = lireChoix()) {
+     const liste = listerVoyagesDates();
+     return liste.find(v => v.id === idChoisi) || liste[0] || null;
+@@ -276,7 +274,7 @@ export function openAujourdhui() {
+             <div class="niCorps">
+                 <span class="niEtiquette">${echapper(dateLongue)}</span>
+                 <h1 class="niTitrePage">Aujourd'hui</h1>
+-                <div class="niVide">Aucun voyage avec des dates pour le moment. Ajoute des dates à un voyage pour le retrouver ici.</div>
++                <div class="niVide">Aucun voyage en cours ou à venir. Ajoute des dates à un voyage pour le retrouver ici.</div>
+             </div>`;
+         return;
+     }
+diff --git a/js/capturer.js b/js/capturer.js
+index 032d6f2..0a80bd9 100644
+--- a/js/capturer.js
++++ b/js/capturer.js
+@@ -10,6 +10,7 @@ import { getEnvies, createEnvie, updateEnviePhotos, isContainerCategory } from "
+ import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
+ import { openEnvie } from "./envie.js";
+ import { trouverVoyage } from "./aujourdhui.js";
++import { openNouveauVoyage } from "./nouveau-voyage.js";
+ import { showToast } from "./toast.js";
+ 
+ function echapper(texte) {
+@@ -131,9 +132,11 @@ export function openCapturer() {
+                 <button type="button" class="niCase" data-action="billet"><span class="niIcone niIconeSombre">${ICONES.billet}</span><span class="niDocTitre">Billet</span></button>
+                 <button type="button" class="niCase" data-action="depense"><span class="niIcone niIconeSombre">${ICONES.depense}</span><span class="niDocTitre">Dépense</span></button>
+                 <button type="button" class="niCase" data-action="idee-complete"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Idée détaillée</span></button>
++                <button type="button" class="niCase" data-action="nouveau-voyage"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Nouveau voyage</span></button>
+             </div>` : `
+             <div class="niGrille">
+                 <button type="button" class="niCase" data-action="idee-complete"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Idée détaillée</span></button>
++                <button type="button" class="niCase" data-action="nouveau-voyage"><span class="niIcone niIconeSombre">${ICONES.plus}</span><span class="niDocTitre">Nouveau voyage</span></button>
+             </div>`}
+         </div>`;
+     document.body.appendChild(fond);
+@@ -170,6 +173,12 @@ export function openCapturer() {
+                 return;
+             }
+ 
++            if (action === "nouveau-voyage") {
++                fermerCapturer();
++                openNouveauVoyage();
++                return;
++            }
++
+             if (action === "idee-complete") {
+                 fermerCapturer();
+                 const ouvrir = ["btnEnvieCompact", "btnEnvie"]
+diff --git a/js/nouveau-voyage.js b/js/nouveau-voyage.js
+new file mode 100644
+index 0000000..0c85fb8
+--- /dev/null
++++ b/js/nouveau-voyage.js
+@@ -0,0 +1,255 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ nouveau-voyage.js : création d'un voyage en deux étapes
++   1. Où, quand, qui voyage
++   2. Pour démarrer plus vite : reprendre les listes d'un voyage passé
++ Crée la fiche avec les mêmes fonctions que l'écran habituel
++ (createEnvie, updateEnviePersonnesIds, setChecklistItems).
++ L'ancien bouton de création n'est pas modifié.
++==========================================================
++*/
++
++import {
++    getEnvies, getEnvieCategories, getPersonnes, createEnvie,
++    updateEnviePersonnesIds, setChecklistItems, isContainerCategory
++} from "./storage.js";
++import { setupAutocomplete } from "./location.js";
++import { openEnvie } from "./envie.js";
++import { openVoyageImport } from "./voyage-import.js";
++import { showToast } from "./toast.js";
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++export function fermerNouveauVoyage() {
++    document.getElementById("niNouveauVoyage")?.remove();
++}
++
++function categorieVoyage() {
++    const categories = getEnvieCategories();
++    return categories.find(c => c.label === "Voyage" && c.conteneur)
++        || categories.find(c => c.conteneur)
++        || null;
++}
++
++function voyagesAvecListe() {
++    return getEnvies()
++        .filter(e => e.contexte === "voyage" && isContainerCategory(e.categorie) && (e.checklist || []).length)
++        .sort((a, b) => (b.date?.start || "").localeCompare(a.date?.start || ""));
++}
++
++function dureeTexte(debut, fin) {
++    if (!debut || !fin) return "";
++    const jours = Math.round((new Date(fin + "T12:00:00") - new Date(debut + "T12:00:00")) / 86400000) + 1;
++    if (jours < 1) return "";
++    return `${jours} jour${jours > 1 ? "s" : ""} · ${Math.max(jours - 1, 0)} nuit${jours - 1 > 1 ? "s" : ""}`;
++}
++
++/* Reprend une liste : nouveaux identifiants, tout décoché, structure conservée. */
++function copierListe(source) {
++    return (source.checklist || []).map(item => {
++        const copie = { ...item, id: crypto.randomUUID(), checked: false };
++        delete copie.checkedBy;
++        return copie;
++    });
++}
++
++export function openNouveauVoyage() {
++
++    fermerNouveauVoyage();
++
++    const personnes = getPersonnes();
++    const etat = {
++        etape: 1,
++        titre: "",
++        lieu: null,
++        debut: "",
++        fin: "",
++        voyageurs: new Set(personnes.map(p => p.id)),
++        reprendre: ""
++    };
++
++    const ecran = document.createElement("div");
++    ecran.id = "niNouveauVoyage";
++    ecran.className = "niEcran";
++    ecran.setAttribute("role", "dialog");
++    ecran.setAttribute("aria-label", "Nouveau voyage");
++    document.body.appendChild(ecran);
++
++    function entete(sousTitre) {
++        return `
++            <div class="niBarreHaut">
++                <button type="button" class="niBoutonIcone" id="niNvRetour" aria-label="Retour">←</button>
++                <div class="niBarreTitre"><h1>Nouveau voyage</h1><span>${sousTitre}</span></div>
++            </div>`;
++    }
++
++    function etape1() {
++
++        const erreurDates = etat.debut && etat.fin && etat.fin < etat.debut;
++
++        ecran.innerHTML = `
++            ${entete("Étape 1 sur 2")}
++            <div class="niCorps">
++                <label class="niChampVoyage">
++                    <span class="niEtiquette">Où ?</span>
++                    <input id="niNvTitre" class="niRecherche" type="text" placeholder="Lisbonne, Brassac, week-end à la mer…" value="${echapper(etat.titre)}" autocomplete="off" enterkeyhint="next">
++                    <div id="niNvSuggestions" class="lieuSuggestions"></div>
++                    ${etat.lieu ? `<span class="niDocSous">📍 ${echapper(etat.lieu.nom)}</span>` : ""}
++                </label>
++
++                <div class="niGrille">
++                    <label class="niChampVoyage"><span class="niEtiquette">Départ</span>
++                        <input id="niNvDebut" class="niRecherche" type="date" value="${echapper(etat.debut)}"></label>
++                    <label class="niChampVoyage"><span class="niEtiquette">Retour</span>
++                        <input id="niNvFin" class="niRecherche" type="date" value="${echapper(etat.fin)}" min="${echapper(etat.debut)}"></label>
++                </div>
++                ${erreurDates
++                    ? '<div class="niBandeau" role="alert">Le retour est avant le départ.</div>'
++                    : (dureeTexte(etat.debut, etat.fin) ? `<span class="niDocSous">${dureeTexte(etat.debut, etat.fin)}</span>` : '<span class="niDocSous">Les dates sont facultatives : tu pourras les ajouter plus tard.</span>')}
++
++                <div class="niSection">
++                    <h2 class="niTitreSection">Qui voyage ?</h2>
++                    ${personnes.length ? `
++                    <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
++                        ${personnes.map(p => `<button type="button" class="niPuce${etat.voyageurs.has(p.id) ? " niPuceActive" : ""}" data-personne="${echapper(p.id)}" aria-pressed="${etat.voyageurs.has(p.id)}"><span class="niPuceTitre">${echapper(p.nom)}</span></button>`).join("")}
++                    </div>` : '<span class="niDocSous">Aucun voyageur enregistré. Tu pourras les ajouter depuis la fiche du voyage.</span>'}
++                </div>
++
++                <div class="niBoutons">
++                    <button type="button" class="niBouton niBoutonPrimaire" id="niNvSuivant" ${etat.titre.trim() && !erreurDates ? "" : "disabled"}>Suivant</button>
++                </div>
++            </div>`;
++
++        const champ = ecran.querySelector("#niNvTitre");
++        champ.addEventListener("input", () => {
++            etat.titre = champ.value;
++            if (etat.lieu && etat.lieu.nom !== champ.value) etat.lieu = null;
++            ecran.querySelector("#niNvSuivant").disabled = !etat.titre.trim() || (etat.debut && etat.fin && etat.fin < etat.debut);
++        });
++
++        setupAutocomplete(champ, ecran.querySelector("#niNvSuggestions"), lieu => {
++            etat.lieu = lieu;
++            /* Titre court : le nom du lieu avant la première virgule. */
++            etat.titre = lieu.nom.split(",")[0].trim() || lieu.nom;
++            etape1();
++        });
++
++        ecran.querySelector("#niNvDebut").addEventListener("change", e => {
++            etat.debut = e.target.value;
++            if (etat.debut && !etat.fin) etat.fin = etat.debut;
++            etape1();
++        });
++        ecran.querySelector("#niNvFin").addEventListener("change", e => { etat.fin = e.target.value; etape1(); });
++
++        ecran.querySelectorAll("[data-personne]").forEach(b => b.addEventListener("click", () => {
++            const id = b.dataset.personne;
++            if (etat.voyageurs.has(id)) etat.voyageurs.delete(id); else etat.voyageurs.add(id);
++            const actif = etat.voyageurs.has(id);
++            b.classList.toggle("niPuceActive", actif);
++            b.setAttribute("aria-pressed", String(actif));
++        }));
++
++        ecran.querySelector("#niNvSuivant").addEventListener("click", () => { etat.etape = 2; etape2(); });
++        ecran.querySelector("#niNvRetour").addEventListener("click", fermerNouveauVoyage);
++    }
++
++    function etape2() {
++
++        const sources = voyagesAvecListe();
++
++        ecran.innerHTML = `
++            ${entete("Étape 2 sur 2")}
++            <div class="niCorps">
++                <h2 class="niTitreSection">Pour démarrer plus vite</h2>
++                ${sources.length ? `
++                <label class="niChampVoyage">
++                    <span class="niEtiquette">Reprendre les listes d'un voyage passé</span>
++                    <select id="niNvReprise" class="niRecherche">
++                        <option value="">Ne rien reprendre</option>
++                        ${sources.map(v => `<option value="${echapper(v.id)}"${etat.reprendre === v.id ? " selected" : ""}>${echapper(v.titre || "Voyage")} · ${(v.checklist || []).length} éléments</option>`).join("")}
++                    </select>
++                    <span class="niDocSous">Valises, achats, documents à prévoir. Tout arrive décoché.</span>
++                </label>` : '<div class="niVide">Aucune liste à reprendre pour le moment.</div>'}
++
++                <div class="niBandeau">Après la création, tu pourras importer des idées avec l'IA depuis l'écran suivant.</div>
++
++                <div class="niBoutons">
++                    <button type="button" class="niBouton" id="niNvPrecedent">Précédent</button>
++                    <button type="button" class="niBouton niBoutonPrimaire" id="niNvCreer">Créer le voyage</button>
++                </div>
++            </div>`;
++
++        ecran.querySelector("#niNvReprise")?.addEventListener("change", e => { etat.reprendre = e.target.value; });
++        ecran.querySelector("#niNvPrecedent").addEventListener("click", () => { etat.etape = 1; etape1(); });
++        ecran.querySelector("#niNvRetour").addEventListener("click", () => { etat.etape = 1; etape1(); });
++        ecran.querySelector("#niNvCreer").addEventListener("click", creer);
++    }
++
++    function creer() {
++
++        const categorie = categorieVoyage();
++        if (!categorie) {
++            showToast("❌ Aucune catégorie « Voyage » trouvée");
++            return;
++        }
++
++        const date = etat.debut
++            ? { type: "range", start: etat.debut, end: etat.fin || etat.debut }
++            : null;
++
++        const id = createEnvie({
++            titre: etat.titre.trim(),
++            categorie: categorie.id,
++            lieu: etat.lieu || { nom: etat.titre.trim() },
++            date,
++            personnes: Math.max(etat.voyageurs.size, 1),
++            contexte: "voyage"
++        });
++
++        if (etat.voyageurs.size) updateEnviePersonnesIds(id, [...etat.voyageurs]);
++
++        const source = etat.reprendre ? getEnvies().find(e => e.id === etat.reprendre) : null;
++        if (source) setChecklistItems(id, copierListe(source));
++
++        confirmation(id);
++    }
++
++    function confirmation(id) {
++
++        ecran.innerHTML = `
++            ${entete("Voyage créé")}
++            <div class="niCorps">
++                <div class="niCarte" style="padding:16px;display:flex;flex-direction:column;gap:6px">
++                    <span class="niDocTitre">✅ ${echapper(etat.titre.trim())}</span>
++                    <span class="niDocSous">${dureeTexte(etat.debut, etat.fin) || "Sans dates pour le moment"}${etat.reprendre ? " · listes reprises" : ""}</span>
++                </div>
++                <div class="niBoutons" style="flex-wrap:wrap">
++                    <button type="button" class="niBouton niBoutonPrimaire" id="niNvOuvrir" disabled>Ouvrir la fiche</button>
++                    <button type="button" class="niBouton" id="niNvIA" disabled>Importer des idées avec l'IA</button>
++                </div>
++            </div>`;
++
++        ecran.querySelector("#niNvRetour").addEventListener("click", fermerNouveauVoyage);
++
++        /* La fiche arrive de la base : on attend qu'elle soit disponible avant d'activer les boutons. */
++        let essais = 0;
++        const attendre = setInterval(() => {
++            const prete = getEnvies().some(e => e.id === id);
++            if (prete || ++essais > 40) {
++                clearInterval(attendre);
++                if (!document.body.contains(ecran)) return;
++                ecran.querySelectorAll("button[disabled]").forEach(b => { b.disabled = !prete; });
++            }
++        }, 150);
++
++        ecran.querySelector("#niNvOuvrir").addEventListener("click", () => { fermerNouveauVoyage(); openEnvie(id); });
++        ecran.querySelector("#niNvIA").addEventListener("click", () => { fermerNouveauVoyage(); openVoyageImport(id); });
++    }
++
++    etape1();
++}
+diff --git a/js/nouvelle-interface.js b/js/nouvelle-interface.js
+index d2d6f3d..a8a6898 100644
+--- a/js/nouvelle-interface.js
++++ b/js/nouvelle-interface.js
+@@ -16,6 +16,8 @@ import { openMigration, fermerMigration } from "./migration-billets.js";
+ import { fermerPret } from "./pret.js";
+ import { fermerVisionneuse } from "./visionneuse.js";
+ import { initGestesListes } from "./gestes-listes.js";
++import { openTrier, fermerTrier } from "./trier.js";
++import { fermerNouveauVoyage } from "./nouveau-voyage.js";
+ 
+ const CLE = "envie_nouvelle_interface";
+ 
+@@ -104,6 +106,8 @@ function fermerEcransNouveaux() {
+     fermerCapturer();
+     fermerDocuments();
+     fermerPret();
++    fermerTrier();
++    fermerNouveauVoyage();
+     fermerMigration();
+     fermerVisionneuse();
+     fermerAujourdhui();
+@@ -123,7 +127,8 @@ function ouvrirMenuIdees() {
+ 
+     const nbATrier = (document.getElementById("inboxBadge")?.textContent || "").trim();
+     const lignes = [
+-        { id: "btnInbox", titre: "À trier", sous: "Les idées capturées, à organiser", badge: nbATrier && nbATrier !== "0" ? nbATrier : "" },
++        { id: "niTrier", titre: "À trier", sous: "Retenir ou laisser les idées capturées", badge: nbATrier && nbATrier !== "0" ? nbATrier : "" },
++        { id: "btnInbox", titre: "À trier (ancien écran)", sous: "Cartes complètes, comme avant" },
+         { id: "btnCatalogue", titre: "Catalogue d'idées", sous: "Tes idées de voyage classées" },
+         { id: "btnIdeesMenu", titre: "Trouver des idées", sous: "Autour de moi, étapes, régions" },
+         { id: "btnCarte", titre: "Carte des lieux", sous: "Tous les lieux sur une carte" }
+@@ -151,6 +156,7 @@ function ouvrirMenuIdees() {
+         const ligne = evenement.target.closest("[data-cible]");
+         if (!ligne) return;
+         fond.remove();
++        if (ligne.dataset.cible === "niTrier") { openTrier(); return; }
+         declencher(ligne.dataset.cible);
+     });
+ }
+diff --git a/js/trier.js b/js/trier.js
+new file mode 100644
+index 0000000..347864f
+--- /dev/null
++++ b/js/trier.js
+@@ -0,0 +1,136 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ trier.js : écran « Trier les idées »
++ Liste les idées non classées (sans voyage, sans date) et permet
++   - Retenir : rattacher l'idée à un voyage (updateEnvieVoyage)
++   - Plus tard : la laisser, elle sort de cet écran pour la session
++   - Ouvrir : la fiche complète
++ Aucune idée n'est supprimée ni modifiée en dehors du rattachement.
++==========================================================
++*/
++
++import { getEnvies, getEnvieCategories, isContainerCategory, updateEnvieVoyage } from "./storage.js";
++import { computeContainerStatus } from "./progress.js";
++import { openEnvie } from "./envie.js";
++import { showToast } from "./toast.js";
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++export function fermerTrier() {
++    document.getElementById("niTrier")?.remove();
++}
++
++function idees(plusTard) {
++    return getEnvies().filter(e =>
++        e.contexte === "voyage"
++        && !e.voyageId
++        && !isContainerCategory(e.categorie)
++        && !e.date?.start
++        && !plusTard.has(e.id)
++    ).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
++}
++
++function voyagesCandidats() {
++    return getEnvies()
++        .filter(e => e.contexte === "voyage" && isContainerCategory(e.categorie)
++            && computeContainerStatus(e).statut !== "termine")
++        .sort((a, b) => (a.date?.start || "9999").localeCompare(b.date?.start || "9999"));
++}
++
++export function openTrier() {
++
++    fermerTrier();
++
++    const plusTard = new Set();
++    let retenues = 0;
++    let choixEnCours = null;   /* id de l'idée dont on choisit le voyage */
++
++    const ecran = document.createElement("div");
++    ecran.id = "niTrier";
++    ecran.className = "niEcran";
++    ecran.setAttribute("role", "dialog");
++    ecran.setAttribute("aria-label", "Trier les idées");
++    document.body.appendChild(ecran);
++
++    function dessiner() {
++
++        const liste = idees(plusTard);
++        const voyages = voyagesCandidats();
++
++        ecran.innerHTML = `
++            <div class="niBarreHaut">
++                <button type="button" class="niBoutonIcone" id="niTrierRetour" aria-label="Retour">←</button>
++                <div class="niBarreTitre"><h1>Trier les idées</h1><span>${liste.length} en attente${retenues ? ` · ${retenues} retenue${retenues > 1 ? "s" : ""}` : ""}</span></div>
++            </div>
++            <div class="niCorps">
++                ${!voyages.length ? '<div class="niBandeau">Aucun voyage en préparation : crée un voyage pour pouvoir y retenir des idées.</div>' : ""}
++                ${liste.length === 0 ? '<div class="niVide">Rien à trier pour le moment.</div>' : `
++                <div class="niSection">
++                    ${liste.map(e => carte(e, voyages)).join("")}
++                </div>`}
++            </div>`;
++
++        ecran.querySelector("#niTrierRetour").addEventListener("click", fermerTrier);
++
++        ecran.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => agir(b, voyages)));
++    }
++
++    function carte(e, voyages) {
++        const categorie = getEnvieCategories().find(c => c.id === e.categorie);
++        const sous = [categorie?.label, e.lieu?.ville || e.lieu?.nom].filter(Boolean).join(" · ");
++        const choix = choixEnCours === e.id && voyages.length > 1;
++        return `
++            <div class="niCarte" style="padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:10px" data-idee="${echapper(e.id)}">
++                <button type="button" class="niDocLigne" data-act="ouvrir" style="padding:0;min-height:0;border:0;background:none">
++                    <span class="niDocTexte"><span class="niDocTitre">${echapper(e.titre || "Idée")}</span>${sous ? `<span class="niDocSous">${echapper(sous)}</span>` : ""}</span>
++                </button>
++                ${choix ? `
++                <span class="niEtiquette">Retenir pour</span>
++                <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
++                    ${voyages.map(v => `<button type="button" class="niPuce" data-act="voyage" data-voyage="${echapper(v.id)}"><span class="niPuceTitre">${echapper(v.titre || "Voyage")}</span></button>`).join("")}
++                </div>` : `
++                <div class="niBoutons">
++                    <button type="button" class="niBouton niBoutonPrimaire" data-act="retenir" ${voyages.length ? "" : "disabled"}>Retenir</button>
++                    <button type="button" class="niBouton" data-act="plustard">Plus tard</button>
++                </div>`}
++            </div>`;
++    }
++
++    function agir(bouton, voyages) {
++
++        const id = bouton.closest("[data-idee]").dataset.idee;
++        const act = bouton.dataset.act;
++
++        if (act === "ouvrir") { fermerTrier(); openEnvie(id); return; }
++
++        if (act === "plustard") { plusTard.add(id); choixEnCours = null; dessiner(); return; }
++
++        if (act === "retenir") {
++            if (voyages.length === 1) { rattacher(id, voyages[0]); return; }
++            choixEnCours = id;
++            dessiner();
++            return;
++        }
++
++        if (act === "voyage") {
++            const voyage = voyages.find(v => v.id === bouton.dataset.voyage);
++            if (voyage) rattacher(id, voyage);
++        }
++    }
++
++    function rattacher(id, voyage) {
++        updateEnvieVoyage(id, voyage.id);
++        retenues++;
++        choixEnCours = null;
++        plusTard.add(id);   /* sort de la liste sans attendre la mise à jour de la base */
++        showToast(`✓ Retenue pour « ${voyage.titre || "voyage"} »`);
++        dessiner();
++    }
++
++    dessiner();
++}
+diff --git a/sw.js b/sw.js
+index 36c2b79..91b250a 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'envie-cache-v230';
++const CACHE_NAME = 'envie-cache-v231';
+ 
+  
+  
+@@ -17,6 +17,8 @@ const APP_SHELL = [
+     './js/migration-billets.js',
+     './js/pret.js',
+     './js/gestes-listes.js',
++    './js/trier.js',
++    './js/nouveau-voyage.js',
+     './share-target.html',
+     './js/share-target.js',
+  './js/corbeille.js',
