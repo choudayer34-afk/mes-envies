@@ -574,3 +574,22 @@ body:has(#niPc) .niFeuilleFond{z-index:2250;}
 /* Types de réservation : les pastilles passent à la ligne (formulaire de billet) */
 #billetTypeToggle{flex-wrap:wrap;}
 #billetTypeToggle .itemTypeChip{flex:1 1 auto;padding:0 12px;white-space:nowrap;}
+
+/* ---------- Écran Voyages (liste) ---------- */
+.niVoyagesEntete{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.niVoyagesEntete .niTitrePage{margin:0;}
+.niVoyagesNouveau{flex:none;min-height:44px;padding:0 16px;}
+.niVoyagesListe{display:flex;flex-direction:column;gap:10px;}
+.niVoyageCarte{display:flex;flex-direction:column;gap:6px;width:100%;padding:14px 16px;border-radius:18px;border:1px solid var(--ni-line);background:#fff;color:var(--ni-ink);font:inherit;text-align:left;cursor:pointer;}
+.niVoyageLigne{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.niVoyageIdees{border-style:dashed;}
+.niVoyageEnCours{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:20px;color:#fff;background:linear-gradient(135deg,#0F766E 0%,#155E75 55%,#1E3A5F 100%);}
+.niVoyageOuvrir{display:flex;flex-direction:column;gap:6px;align-items:flex-start;border:0;background:none;color:inherit;font:inherit;text-align:left;padding:0;cursor:pointer;min-height:44px;}
+.niVoyageOuvrirClair{width:100%;color:var(--ni-ink);}
+.niVoyageActions{display:flex;gap:8px;flex-wrap:wrap;}
+.niPastilleAction{min-height:44px;padding:0 16px;border-radius:999px;border:0;background:rgba(255,255,255,.22);color:#fff;font:inherit;font-weight:700;cursor:pointer;}
+.niPastilleClaire{background:var(--ni-brand-s);color:var(--ni-brand-d);}
+.niLienDiscret{align-self:center;min-height:44px;border:0;background:none;color:var(--ni-muted);font:inherit;text-decoration:underline;cursor:pointer;}
+#niVoyages .niNavPc{display:none;}
+@media (min-width:1100px){ #niVoyages .niNavPc{display:flex;} }
+#niVoyages .niSelecteurVoyage{margin:12px 0 0;padding:2px 0 6px;}

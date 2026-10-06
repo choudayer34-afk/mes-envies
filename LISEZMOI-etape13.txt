@@ -1,0 +1,24 @@
+ÉTAPE 13 : NOUVEL ÉCRAN VOYAGES
+Cache : envie-cache-v239
+
+À FAIRE : copier chaque fichier du zip à son emplacement, en remplaçant l'existant.
+
+NOUVEAU FICHIER
+- js/voyages.js
+
+FICHIERS MODIFIÉS (nouvelle interface uniquement)
+- js/nouvelle-interface.js, ni.css, sw.js
+Aucun fichier de l'ancienne application n'est modifié.
+
+CONTENU
+- Filtres : Tous / En cours / À venir / Passés
+- En cours : carte avec La journée, Billets, Photos
+- À venir : "Prêt à X %", ce qui manque, dans N jours
+- À planifier : voyages sans date (avec le nombre d'idées)
+- Idées à trier : ligne avec le nombre
+- Passés : une seule ligne de regroupement, qui ouvre la liste des voyages terminés avec Souvenirs
+- "+ Nouveau" : crée un voyage
+
+OÙ TESTER
+- Onglet Voyages (s'ouvre aussi au démarrage)
+- Retour à l'ancienne liste : lien "Afficher l'ancienne liste" en bas ; l'ancien bouton Liste ramène au nouvel écran
