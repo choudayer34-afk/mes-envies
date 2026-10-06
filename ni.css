@@ -719,3 +719,6 @@ body.niActive #assignModal,body.niActive #checklistEditItemModal{z-index:2300}
 .niPcCal .niCalGrille{gap:3px}
 .niPcCal .niCalPoint{bottom:3px}
 .niPcCal .niPcSurvol{outline:2px solid var(--ni-brand)}
+
+/* Grand écran : les blocs ne doivent pas être écrasés quand le calendrier est ouvert ; la zone défile. */
+.niPcCentre>*{flex-shrink:0}
