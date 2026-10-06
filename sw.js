@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v232';
+const CACHE_NAME = 'envie-cache-v233';
 
  
  
@@ -19,6 +19,7 @@ const APP_SHELL = [
     './js/gestes-listes.js',
     './js/trier.js',
     './js/frise.js',
+    './js/programme.js',
     './js/souvenirs.js',
     './js/nouveau-voyage.js',
     './share-target.html',

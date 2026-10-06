@@ -1,24 +1,23 @@
-ENVIE - ÉTAPE 8 : La journée, Souvenirs, billet au portique
+ENVIE - ÉTAPE 9 : Programme par jour, plateau d'idées, placement
 
 À copier à la racine du dépôt :
-  sw.js                       (cache v232)
-  ni.css
-  js/frise.js                 (nouveau)
-  js/souvenirs.js             (nouveau)
-  js/visionneuse.js           (modifié : mode portique)
-  js/aujourdhui.js            (modifié : tuiles La journée et Souvenirs)
-  js/documents.js             (modifié : billet ouvert en mode portique)
-  js/fiche-voyage.js          (modifié : raccourcis en tête de fiche)
+  sw.js                       (cache v233)
+  js/programme.js             (nouveau)
+  js/frise.js                 (modifié : moment affiché et trié)
+  js/aujourdhui.js            (modifié : tuile Programme)
+  js/fiche-voyage.js          (modifié : raccourci Programme)
   js/nouvelle-interface.js    (modifié)
-Aucun ancien fichier de l'application n'est modifié.
+  js/storage.js               (ANCIEN FICHIER MODIFIÉ : 5 lignes ajoutées, voir ci-dessous)
+  ni.css                      (inchangé, inclus par sécurité)
 
-La journée : jours J1, J2... du voyage ; billets avec heure, activités, logement ; Billet, Itinéraire,
-  marquer fait, ajouter une idée au jour. Les activités n'ont pas d'heure dans EnVie : elles sont
-  listées « dans la journée ».
-Souvenirs : photos par jour (date de prise de vue, sinon date de l'étape), collecte famille,
-  album PDF, bilan des dépenses (ouvrent les fonctions existantes).
-Billet au portique : fond blanc, trajet et heures en tête, passage d'un billet à l'autre (glisser ou
-  flèches), écran gardé allumé, mention « Sans réseau » si hors ligne.
-  La luminosité maximale ne peut pas être commandée depuis une application web : augmente-la à la main.
-Accès : tuiles sur Aujourd'hui, et raccourcis « La journée / Prêt à partir ? / Souvenirs » en tête de
-  la fiche de chaque voyage (voyages passés compris).
+Modification de js/storage.js : ajout de la fonction updateEnvieMoment (juste après updateEnvieDate).
+  Aucune ligne existante n'est changée. Voir storage.patch.
+  Nouveau champ facultatif sur les étapes : "moment" (matin, midi, apres-midi, soir). Les étapes
+  existantes ne l'ont pas et continuent de fonctionner ; l'ancienne interface ignore ce champ.
+
+Programme : jours J1, J2... ; billets et étapes du jour ; plateau des idées du voyage sans date ;
+  « Placer » = choisir le jour et le moment (date de l'étape + moment) ; « Déplacer » ; « Retirer »
+  (remet l'étape sans date dans le plateau, rien n'est supprimé) ; ajout rapide d'une idée au plateau.
+  Les séjours sur plusieurs jours (logement) ne se déplacent pas d'ici : ils portent la mention « Séjour ».
+  Une alerte s'affiche quand un jour compte déjà 3 étapes.
+Non repris des maquettes : durée du trajet depuis le logement, coût estimé ajouté au budget.

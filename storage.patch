@@ -1,0 +1,16 @@
+diff --git a/js/storage.js b/js/storage.js
+index cb189c8..d063305 100644
+--- a/js/storage.js
++++ b/js/storage.js
+@@ -569,6 +569,11 @@ export function updateEnvieDate(id, date) {
+     patchEnvie(id, { date });
+ }
+ 
++/* Moment de la journée (nouvelle interface) : "matin", "midi", "apres-midi", "soir" ou null. Champ facultatif. */
++export function updateEnvieMoment(id, moment) {
++    patchEnvie(id, { moment: moment || null });
++}
++
+ export function updateEnviePeinture(id, peinture) {
+     patchEnvie(id, { peinture });
+ }

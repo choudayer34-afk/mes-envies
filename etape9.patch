@@ -1,0 +1,406 @@
+diff --git a/js/aujourdhui.js b/js/aujourdhui.js
+index 254236e..3fd46c9 100644
+--- a/js/aujourdhui.js
++++ b/js/aujourdhui.js
+@@ -12,6 +12,7 @@ import { formatPeriode } from "./periode.js";
+ import { ouvrirVisionneuse } from "./visionneuse.js";
+ import { openPret } from "./pret.js";
+ import { openFrise } from "./frise.js";
++import { openProgramme } from "./programme.js";
+ import { openSouvenirs } from "./souvenirs.js";
+ import { ouvrirGoogleMaps } from "./location.js";
+ import { openEnvie } from "./envie.js";
+@@ -311,6 +312,10 @@ export function openAujourdhui() {
+                     <span class="niTuileTitre">Documents</span>
+                     <span class="niDocSous">${nbBillets} billet${nbBillets > 1 ? "s" : ""}</span>
+                 </button>
++                <button type="button" class="niTuile" id="niOuvrirProgramme">
++                    <span class="niTuileTitre">Programme</span>
++                    <span class="niDocSous">Jours et idées</span>
++                </button>
+                 <button type="button" class="niTuile" id="niOuvrirFrise">
+                     <span class="niTuileTitre">La journée</span>
+                     <span class="niDocSous">Jour par jour</span>
+@@ -347,6 +352,7 @@ export function openAujourdhui() {
+     ecran.querySelectorAll(".niOuvrirFicheLigne").forEach(b => b.addEventListener("click", ouvrirFiche));
+     ecran.querySelector("#niOuvrirDocuments")?.addEventListener("click", () => openDocuments(voyage.id));
+     ecran.querySelector("#niOuvrirPret")?.addEventListener("click", () => openPret(voyage));
++    ecran.querySelector("#niOuvrirProgramme")?.addEventListener("click", () => openProgramme(voyage));
+     ecran.querySelector("#niOuvrirFrise")?.addEventListener("click", () => openFrise(voyage));
+     ecran.querySelector("#niOuvrirSouvenirs")?.addEventListener("click", () => openSouvenirs(voyage));
+ 
+diff --git a/js/fiche-voyage.js b/js/fiche-voyage.js
+index 1420b60..c8fc8ad 100644
+--- a/js/fiche-voyage.js
++++ b/js/fiche-voyage.js
+@@ -17,6 +17,7 @@ import { phaseDuVoyage } from "./aujourdhui.js";
+ import { openFrise } from "./frise.js";
+ import { openSouvenirs } from "./souvenirs.js";
+ import { openPret } from "./pret.js";
++import { openProgramme } from "./programme.js";
+ 
+ /* Chaque accordéon de la fiche appartient à un bloc.
+    Tout accordéon non listé ici va dans « Plus d'outils » : rien n'est perdu. */
+@@ -236,6 +237,7 @@ function dessiner(envie) {
+             <span class="niDocSous">Avancement : ${Math.round(statut.pourcentage || 0)} %</span>
+         </div>
+         <div class="niRaccourcis">
++            <button type="button" class="niBouton" data-raccourci="programme">Programme</button>
+             <button type="button" class="niBouton" data-raccourci="frise">La journée</button>
+             <button type="button" class="niBouton" data-raccourci="pret">Prêt à partir ?</button>
+             <button type="button" class="niBouton" data-raccourci="souvenirs">Souvenirs</button>
+@@ -254,7 +256,7 @@ function dessiner(envie) {
+     racine.querySelector(".niRaccourcis").addEventListener("click", evenement => {
+         const bouton = evenement.target.closest("[data-raccourci]");
+         if (!bouton) return;
+-        const ouverture = { frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
++        const ouverture = { programme: openProgramme, frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
+         const voyage = getEnvies().find(e => e.id === envie.id) || envie;
+         ouverture?.(voyage);
+     });
+diff --git a/js/frise.js b/js/frise.js
+index df23b3b..0901452 100644
+--- a/js/frise.js
++++ b/js/frise.js
+@@ -15,6 +15,7 @@ import { ouvrirVisionneuse } from "./visionneuse.js";
+ import { ouvrirGoogleMaps } from "./location.js";
+ import { openEnvie } from "./envie.js";
+ import { showToast } from "./toast.js";
++import { libelleMoment, rangMoment } from "./programme.js";
+ 
+ const EMOJI_TYPE = { avion: "✈️", train: "🚆", autre: "🎫" };
+ 
+@@ -70,11 +71,11 @@ function evenementsDuJour(voyage, jour) {
+ 
+     const activites = enfants
+         .filter(e => e.date.start === jour)
+-        .sort((a, b) => (a.ordre || 0) - (b.ordre || 0))
++        .sort((a, b) => rangMoment(a.moment) - rangMoment(b.moment) || (a.ordre || 0) - (b.ordre || 0))
+         .map(e => ({
+             genre: "activite", envie: e, id: e.id,
+             titre: e.titre || "Sans titre",
+-            sous: e.lieu?.nom || "",
++            sous: [libelleMoment(e.moment), e.lieu?.nom].filter(Boolean).join(" · "),
+             lieu: e.lieu?.nom || null,
+             emoji: estLogement(e) ? "🛏️" : "📍",
+             fait: !!e.realise
+diff --git a/js/nouvelle-interface.js b/js/nouvelle-interface.js
+index f995e18..72f5173 100644
+--- a/js/nouvelle-interface.js
++++ b/js/nouvelle-interface.js
+@@ -19,6 +19,7 @@ import { initGestesListes } from "./gestes-listes.js";
+ import { openTrier, fermerTrier } from "./trier.js";
+ import { fermerNouveauVoyage } from "./nouveau-voyage.js";
+ import { fermerFrise } from "./frise.js";
++import { fermerProgramme } from "./programme.js";
+ import { fermerSouvenirs } from "./souvenirs.js";
+ 
+ const CLE = "envie_nouvelle_interface";
+@@ -109,6 +110,7 @@ function fermerEcransNouveaux() {
+     fermerDocuments();
+     fermerPret();
+     fermerFrise();
++    fermerProgramme();
+     fermerSouvenirs();
+     fermerTrier();
+     fermerNouveauVoyage();
+diff --git a/js/programme.js b/js/programme.js
+new file mode 100644
+index 0000000..40f7999
+--- /dev/null
++++ b/js/programme.js
+@@ -0,0 +1,260 @@
++/*
++==========================================================
++ EnVie - Nouvelle interface
++ programme.js : programme d'un voyage jour par jour
++   - jours J1, J2… avec leurs billets et leurs étapes
++   - plateau des idées retenues (rattachées au voyage, sans date)
++   - placer une idée : choix du jour et du moment
++ Placer = poser la date de l'étape (updateEnvieDate) et son moment
++ (champ facultatif « moment »). Retirer = remettre l'étape sans date.
++ Rien n'est supprimé.
++==========================================================
++*/
++
++import {
++    getEnvies, getEnvieCategories, createEnvie, updateEnvieDate, updateEnvieMoment
++} from "./storage.js";
++import { listerBillets } from "./documents.js";
++import { openEnvie } from "./envie.js";
++import { showToast } from "./toast.js";
++
++export const MOMENTS = [
++    { id: "matin", libelle: "Matin" },
++    { id: "midi", libelle: "Midi" },
++    { id: "apres-midi", libelle: "Après-midi" },
++    { id: "soir", libelle: "Soir" }
++];
++
++export function libelleMoment(id) {
++    return MOMENTS.find(m => m.id === id)?.libelle || "";
++}
++
++export function rangMoment(id) {
++    const i = MOMENTS.findIndex(m => m.id === id);
++    return i === -1 ? 99 : i;
++}
++
++const SEUIL_JOURNEE_CHARGEE = 3;
++
++function echapper(texte) {
++    return String(texte ?? "").replace(/[&<>"']/g, c => ({
++        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
++    }[c]));
++}
++
++function ajouterJours(iso, n) {
++    const d = new Date(iso + "T12:00:00");
++    d.setDate(d.getDate() + n);
++    return d.toISOString().slice(0, 10);
++}
++
++function listeJours(voyage) {
++    const debut = voyage.date?.start;
++    if (!debut) return [];
++    const fin = voyage.date.end || debut;
++    const jours = [];
++    for (let d = debut, i = 0; d <= fin && i < 120; d = ajouterJours(d, 1), i++) jours.push(d);
++    return jours;
++}
++
++function estBillet(envie) {
++    const cat = getEnvieCategories().find(c => c.id === envie.categorie);
++    return cat?.label === "Billets";
++}
++
++function etapes(voyageId) {
++    return getEnvies().filter(e => e.voyageId === voyageId && !e.supprime && !estBillet(e));
++}
++
++function etapesDuJour(voyageId, jour) {
++    return etapes(voyageId)
++        .filter(e => e.date?.start === jour)
++        .sort((a, b) => rangMoment(a.moment) - rangMoment(b.moment) || (a.ordre || 0) - (b.ordre || 0));
++}
++
++function plateau(voyageId) {
++    return etapes(voyageId)
++        .filter(e => !e.date?.start)
++        .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
++}
++
++export function fermerProgramme() {
++    document.getElementById("niProgramme")?.remove();
++    document.getElementById("niPlacer")?.remove();
++}
++
++export function openProgramme(voyage, jourDepart = null) {
++
++    fermerProgramme();
++
++    if (!voyage?.date?.start) {
++        showToast("Ajoute des dates au voyage pour construire le programme");
++        return;
++    }
++
++    const jours = listeJours(voyage);
++    let jour = jourDepart && jours.includes(jourDepart) ? jourDepart : jours[0];
++
++    const ecran = document.createElement("div");
++    ecran.id = "niProgramme";
++    ecran.className = "niEcran";
++    ecran.setAttribute("role", "dialog");
++    ecran.setAttribute("aria-label", "Programme");
++    document.body.appendChild(ecran);
++
++    function dessiner() {
++
++        const v = getEnvies().find(e => e.id === voyage.id) || voyage;
++        const numero = jours.indexOf(jour) + 1;
++        const nbParJour = new Map(jours.map(j => [j, etapesDuJour(v.id, j).length + listerBillets(v.id).filter(b => b.dateDepart === j).length]));
++        const planifies = [...nbParJour.values()].filter(n => n > 0).length;
++        const duJour = etapesDuJour(v.id, jour);
++        const billets = listerBillets(v.id).filter(b => b.dateDepart === jour);
++        const libelle = new Date(jour + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
++        const idees = plateau(v.id);
++
++        ecran.innerHTML = `
++            <div class="niBarreHaut">
++                <button type="button" class="niBoutonIcone" id="niProgRetour" aria-label="Retour">←</button>
++                <div class="niBarreTitre"><h1>Programme</h1><span>${echapper(v.titre || "Voyage")} · ${planifies} jour${planifies > 1 ? "s" : ""} sur ${jours.length} planifié${planifies > 1 ? "s" : ""}</span></div>
++            </div>
++            <div class="niCorps">
++                <div class="niSelecteurVoyage" role="tablist" aria-label="Jours du voyage">
++                    ${jours.map((j, i) => `<button type="button" role="tab" class="niPuce niPuceJour${j === jour ? " niPuceActive" : ""}" data-jour="${j}" aria-selected="${j === jour}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${nbParJour.get(j) ? nbParJour.get(j) + " prévu" + (nbParJour.get(j) > 1 ? "s" : "") : "vide"}</span></button>`).join("")}
++                </div>
++
++                <div class="niSection">
++                    <h2 class="niTitreSection" style="font-size:18px">J${numero} · ${echapper(libelle)}</h2>
++                    ${!duJour.length && !billets.length
++                        ? `<div class="niBandeau">J${numero} est vide. Choisis une idée dans le plateau ci-dessous.</div>`
++                        : `<div class="niCarte">
++                            ${billets.map(b => `
++                            <div class="niDocLigne niLigneStatique">
++                                <span class="niHeureCourte">${echapper(b.heureDepart || "")}</span>
++                                <span class="niDocTexte"><span class="niDocTitre">${b.type === "train" ? "🚆" : b.type === "avion" ? "✈️" : "🎫"} ${echapper([b.compagnie, b.numeroVol].filter(Boolean).join(" ") || "Billet")}</span><span class="niDocSous">${echapper([b.lieuDepart?.nom, b.destination].filter(Boolean).join(" → "))}</span></span>
++                                <span class="niTag">Réservation</span>
++                            </div>`).join("")}
++                            ${duJour.map(e => `
++                            <div class="niDocLigne niLigneStatique" data-etape="${echapper(e.id)}">
++                                <span class="niHeureCourte" style="width:72px;font-size:13px">${echapper(libelleMoment(e.moment) || "Journée")}</span>
++                                <button type="button" class="niDocTexte" data-act="fiche" style="background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer">
++                                    <span class="niDocTitre">${echapper(e.titre || "Sans titre")}</span>
++                                    ${e.lieu?.nom ? `<span class="niDocSous">${echapper(e.lieu.nom)}</span>` : ""}
++                                </button>
++                                ${e.date?.end && e.date.end !== e.date.start
++                                    ? '<span class="niTag">Séjour</span>'
++                                    : `<button type="button" class="niBouton" data-act="deplacer">Déplacer</button>
++                                <button type="button" class="niBouton" data-act="retirer" aria-label="Retirer du jour">Retirer</button>`}
++                            </div>`).join("")}
++                        </div>`}
++                </div>
++
++                <div class="niSection">
++                    <h2 class="niTitreSection" style="font-size:18px">Plateau d'idées <span class="niDocSous">${idees.length}</span></h2>
++                    ${idees.length ? `<div class="niCarte">
++                        ${idees.map(e => `
++                        <div class="niDocLigne niLigneStatique" data-etape="${echapper(e.id)}">
++                            <button type="button" class="niDocTexte" data-act="fiche" style="background:none;border:0;padding:0;text-align:left;font:inherit;color:inherit;cursor:pointer">
++                                <span class="niDocTitre">${echapper(e.titre || "Idée")}</span>
++                                ${e.lieu?.nom ? `<span class="niDocSous">${echapper(e.lieu.nom)}</span>` : ""}
++                            </button>
++                            <button type="button" class="niBouton niBoutonPrimaire" data-act="placer">Placer</button>
++                        </div>`).join("")}
++                    </div>` : '<div class="niVide">Aucune idée en attente. Retiens des idées depuis « À trier », ou ajoute-en une ici.</div>'}
++                    <form id="niProgForm" class="niIdeeForm" autocomplete="off" style="margin-top:10px">
++                        <input id="niProgChamp" class="niRecherche" type="text" placeholder="Nouvelle idée pour ce voyage…" aria-label="Nouvelle idée" enterkeyhint="done">
++                        <button type="submit" class="niBouton niBoutonPrimaire" style="flex:0 0 auto;padding:0 18px">Ajouter</button>
++                    </form>
++                </div>
++            </div>`;
++
++        ecran.querySelector("#niProgRetour").addEventListener("click", fermerProgramme);
++        ecran.querySelectorAll("[data-jour]").forEach(b => b.addEventListener("click", () => { jour = b.dataset.jour; dessiner(); }));
++        ecran.querySelectorAll("[data-act]").forEach(b => b.addEventListener("click", () => agir(b, v)));
++        ecran.querySelector("#niProgForm").addEventListener("submit", e => {
++            e.preventDefault();
++            const champ = ecran.querySelector("#niProgChamp");
++            const titre = champ.value.trim();
++            if (!titre) return;
++            createEnvie({ titre, voyageId: v.id, contexte: "voyage" });
++            showToast("✓ Idée ajoutée au plateau");
++            setTimeout(dessiner, 500);
++        });
++    }
++
++    function agir(bouton, v) {
++        const id = bouton.closest("[data-etape]").dataset.etape;
++        const etape = getEnvies().find(e => e.id === id);
++        if (!etape) return;
++        const act = bouton.dataset.act;
++
++        if (act === "fiche") { fermerProgramme(); openEnvie(id); }
++        if (act === "placer" || act === "deplacer") ouvrirPlacer(v, etape);
++        if (act === "retirer") {
++            updateEnvieDate(id, null);
++            updateEnvieMoment(id, null);
++            showToast("↩ Remise dans le plateau");
++            setTimeout(dessiner, 400);
++        }
++    }
++
++    function ouvrirPlacer(v, etape) {
++
++        document.getElementById("niPlacer")?.remove();
++
++        let choixJour = etape.date?.start && jours.includes(etape.date.start) ? etape.date.start : jour;
++        let choixMoment = etape.moment || "matin";
++
++        const fond = document.createElement("div");
++        fond.id = "niPlacer";
++        fond.className = "niFeuilleFond";
++        document.body.appendChild(fond);
++
++        function rendre() {
++            const numero = jours.indexOf(choixJour) + 1;
++            const dejaLa = etapesDuJour(v.id, choixJour).filter(e => e.id !== etape.id).length;
++            const charge = dejaLa >= SEUIL_JOURNEE_CHARGEE;
++
++            fond.innerHTML = `
++                <div class="niFeuille" role="dialog" aria-label="Placer une idée">
++                    <div class="niPoignee"></div>
++                    <h2 class="niTitreSection" style="font-size:22px">${echapper(etape.titre || "Idée")}</h2>
++                    ${etape.lieu?.nom ? `<span class="niDocSous">${echapper(etape.lieu.nom)}</span>` : ""}
++
++                    <span class="niEtiquette">Quel jour ?</span>
++                    <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
++                        ${jours.map((j, i) => `<button type="button" class="niPuce niPuceJour${j === choixJour ? " niPuceActive" : ""}" data-j="${j}"><span class="niPuceTitre">J${i + 1}</span><span class="niPuceSous">${new Date(j + "T12:00:00").toLocaleDateString("fr-FR", { weekday: "short", day: "numeric" })}</span></button>`).join("")}
++                    </div>
++
++                    <span class="niEtiquette">Quand ?</span>
++                    <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
++                        ${MOMENTS.map(m => `<button type="button" class="niPuce${m.id === choixMoment ? " niPuceActive" : ""}" data-m="${m.id}"><span class="niPuceTitre">${m.libelle}</span></button>`).join("")}
++                    </div>
++
++                    ${charge ? `<div class="niBandeau" role="status">J${numero} compte déjà ${dejaLa} étapes : la journée risque d'être chargée.</div>` : ""}
++
++                    <div class="niBoutons">
++                        <button type="button" class="niBouton" id="niPlacerAnnuler">Annuler</button>
++                        <button type="button" class="niBouton niBoutonPrimaire" id="niPlacerOk">Placer dans J${numero} · ${libelleMoment(choixMoment).toLowerCase()}</button>
++                    </div>
++                </div>`;
++
++            fond.querySelectorAll("[data-j]").forEach(b => b.addEventListener("click", () => { choixJour = b.dataset.j; rendre(); }));
++            fond.querySelectorAll("[data-m]").forEach(b => b.addEventListener("click", () => { choixMoment = b.dataset.m; rendre(); }));
++            fond.querySelector("#niPlacerAnnuler").addEventListener("click", () => fond.remove());
++            fond.querySelector("#niPlacerOk").addEventListener("click", () => {
++                updateEnvieDate(etape.id, { type: "single", start: choixJour, end: null });
++                updateEnvieMoment(etape.id, choixMoment);
++                fond.remove();
++                jour = choixJour;
++                showToast(`✓ Placé dans J${jours.indexOf(choixJour) + 1}`);
++                setTimeout(dessiner, 500);
++            });
++        }
++
++        fond.addEventListener("click", e => { if (e.target === fond) fond.remove(); });
++        rendre();
++    }
++
++    dessiner();
++}
+diff --git a/js/storage.js b/js/storage.js
+index cb189c8..d063305 100644
+--- a/js/storage.js
++++ b/js/storage.js
+@@ -569,6 +569,11 @@ export function updateEnvieDate(id, date) {
+     patchEnvie(id, { date });
+ }
+ 
++/* Moment de la journée (nouvelle interface) : "matin", "midi", "apres-midi", "soir" ou null. Champ facultatif. */
++export function updateEnvieMoment(id, moment) {
++    patchEnvie(id, { moment: moment || null });
++}
++
+ export function updateEnviePeinture(id, peinture) {
+     patchEnvie(id, { peinture });
+ }
+diff --git a/sw.js b/sw.js
+index 7625f39..588997c 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,4 +1,4 @@
+-const CACHE_NAME = 'envie-cache-v232';
++const CACHE_NAME = 'envie-cache-v233';
+ 
+  
+  
+@@ -19,6 +19,7 @@ const APP_SHELL = [
+     './js/gestes-listes.js',
+     './js/trier.js',
+     './js/frise.js',
++    './js/programme.js',
+     './js/souvenirs.js',
+     './js/nouveau-voyage.js',
+     './share-target.html',
