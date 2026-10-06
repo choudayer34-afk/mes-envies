@@ -2026,13 +2026,20 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="itemTypeToggle" id="billetTypeToggle">
             <button type="button" class="itemTypeChip active" data-type="avion">✈️ Avion</button>
             <button type="button" class="itemTypeChip" data-type="train">🚆 Train</button>
+            <button type="button" class="itemTypeChip" data-type="busferry">🚌 Bus / ferry</button>
+            <button type="button" class="itemTypeChip" data-type="voiture">🚗 Location de voiture</button>
+            <button type="button" class="itemTypeChip" data-type="parking">🅿️ Parking</button>
+            <button type="button" class="itemTypeChip" data-type="logement">🛏️ Logement</button>
+            <button type="button" class="itemTypeChip" data-type="restaurant">🍽️ Restaurant</button>
+            <button type="button" class="itemTypeChip" data-type="activite">🎟️ Activité / entrée</button>
+            <button type="button" class="itemTypeChip" data-type="assurance">🛡️ Assurance</button>
             <button type="button" class="itemTypeChip" data-type="autre">🎫 Autre</button>
         </div>
 
         <label class="fieldTitle" style="margin-top:12px;">Compagnie (optionnel)</label>
-        <input type="text" id="billetCompagnie" placeholder="Ex: Air France" class="numberInput">
+        <input type="text" id="billetCompagnie" placeholder="Ex: Air France, Parking P3 Orly, Hôtel…" class="numberInput">
 
-        <label class="fieldTitle" style="margin-top:12px;">Numéro de vol/train (optionnel)</label>
+        <label class="fieldTitle" style="margin-top:12px;">Numéro, référence (optionnel)</label>
         <input type="text" id="billetNumero" placeholder="Ex: AF1234" class="numberInput">
 
   <div class="peintureAddRow" style="margin-top:12px;">

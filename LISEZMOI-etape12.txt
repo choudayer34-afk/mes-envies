@@ -1,0 +1,22 @@
+ÉTAPE 12 : TYPES DE RÉSERVATION + ÉCRAN RÉSERVATIONS
+Cache : envie-cache-v237
+
+À FAIRE : copier chaque fichier du zip à son emplacement (même arborescence), en remplaçant l'existant.
+
+NOUVEAUX FICHIERS
+- js/types-reservation.js : liste unique des types (avion, train, bus/ferry, location de voiture, parking, logement, restaurant, activité/entrée, assurance, autre)
+- js/reservations.js : écran Réservations
+
+FICHIERS DE L'APPLICATION EXISTANTE MODIFIÉS (changement minimal)
+- index.html : 7 pastilles de type ajoutées dans « Ajouter un billet » + libellés des champs ("Numéro, référence")
+- js/billets.js : une seule ligne (la table des emojis vient de types-reservation.js)
+- js/agenda.js : emojis et libellé de repli des billets (même source)
+
+AUTRES FICHIERS DE LA NOUVELLE INTERFACE
+ni.css, sw.js, aujourdhui.js, documents.js, espace-pc.js, fiche-voyage.js, frise.js, nouvelle-interface.js, preparation.js, programme.js, visionneuse.js
+
+OÙ TESTER
+- Aujourd'hui > tuile « Réservations », ou fiche du voyage > bouton « Réservations »
+- Toucher un type (ex. Parking) : la fenêtre « Ajouter un billet » s'ouvre avec ce type choisi ; mettre le nom dans « Compagnie » (ex. Parking P3 Orly)
+- Documents : pastilles Tous / Transport / Logement / Sorties / Autres
+- Les anciens billets (avion, train, autre) ne changent pas

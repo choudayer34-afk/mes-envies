@@ -282,6 +282,8 @@ body.niBarreVisible main{
     font-weight:700;
     white-space:nowrap;
 }
+.niTagOk{background:#E3F4EA;color:#1E6B3C;}
+.niTagAttention{background:var(--ni-warn-s);color:#8A5A00;}
 .niTagMaintenant{background:var(--ni-now-s);color:var(--ni-now);}
 
 .niHeureCourte{width:48px;font-weight:700;flex:none;}
@@ -521,7 +523,7 @@ body.niModeVoyage #todoContainer .checklistRow{touch-action:pan-y;user-select:no
 .niRaccourcis .niBouton{flex:none;}
 
 /* Écrans ouverts depuis la fiche d'un voyage : au-dessus de la fenêtre de la fiche (2100). */
-#niProgramme, #niFrise, #niSouvenirs, #niPret{z-index:2200;}
+#niProgramme, #niFrise, #niSouvenirs, #niPret, #niReservations{z-index:2200;}
 #niPlacer{z-index:2300;}
 
 /* ---------- Préparer sur grand écran ---------- */
@@ -568,3 +570,7 @@ body:has(#niPc) .niFeuilleFond{z-index:2250;}
 .niPc .niPcLateral .niBouton{width:100%;}
 .niPcVideJour{min-height:90px;border:2px dashed var(--ni-line);border-radius:16px;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;color:var(--ni-muted);}
 .niPcEnGlisse .niPcVideJour{display:none;}
+
+/* Types de réservation : les pastilles passent à la ligne (formulaire de billet) */
+#billetTypeToggle{flex-wrap:wrap;}
+#billetTypeToggle .itemTypeChip{flex:1 1 auto;padding:0 12px;white-space:nowrap;}
