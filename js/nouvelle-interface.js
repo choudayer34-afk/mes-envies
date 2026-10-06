@@ -20,6 +20,7 @@ import { openTrier, fermerTrier } from "./trier.js";
 import { fermerNouveauVoyage } from "./nouveau-voyage.js";
 import { fermerFrise } from "./frise.js";
 import { fermerProgramme } from "./programme.js";
+import { openEspacePc, fermerEspacePc } from "./espace-pc.js";
 import { fermerSouvenirs } from "./souvenirs.js";
 
 const CLE = "envie_nouvelle_interface";
@@ -110,6 +111,7 @@ function fermerEcransNouveaux() {
     fermerDocuments();
     fermerPret();
     fermerFrise();
+    fermerEspacePc();
     fermerProgramme();
     fermerSouvenirs();
     fermerTrier();
@@ -183,7 +185,8 @@ function monterNavVoyages() {
         <button type="button" class="niNavOnglet niNavActif" data-vue="liste">Liste</button>
         <button type="button" class="niNavOnglet" data-vue="carte">Carte</button>
         <button type="button" class="niNavOnglet" data-vue="agenda">Agenda</button>
-        <button type="button" class="niNavOnglet" data-vue="idees">Idées</button>`;
+        <button type="button" class="niNavOnglet" data-vue="idees">Idées</button>
+        <button type="button" class="niNavOnglet niNavPc" data-vue="pc">Préparer</button>`;
     rangeeIcones.before(nav);
 
     nav.addEventListener("click", evenement => {
@@ -193,6 +196,7 @@ function monterNavVoyages() {
             case "carte": declencher("btnCarteVoyages"); break;
             case "agenda": declencher("btnAgenda"); break;
             case "idees": ouvrirMenuIdees(); break;
+            case "pc": openEspacePc(); break;
             default: window.scrollTo({ top: 0 });
         }
     });

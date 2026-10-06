@@ -48,7 +48,7 @@ function ajouterJours(iso, n) {
     return d.toISOString().slice(0, 10);
 }
 
-function listeJours(voyage) {
+export function listeJours(voyage) {
     const debut = voyage.date?.start;
     if (!debut) return [];
     const fin = voyage.date.end || debut;
@@ -66,13 +66,13 @@ function etapes(voyageId) {
     return getEnvies().filter(e => e.voyageId === voyageId && !e.supprime && !estBillet(e));
 }
 
-function etapesDuJour(voyageId, jour) {
+export function etapesDuJour(voyageId, jour) {
     return etapes(voyageId)
         .filter(e => e.date?.start === jour)
         .sort((a, b) => rangMoment(a.moment) - rangMoment(b.moment) || (a.ordre || 0) - (b.ordre || 0));
 }
 
-function plateau(voyageId) {
+export function plateau(voyageId) {
     return etapes(voyageId)
         .filter(e => !e.date?.start)
         .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));

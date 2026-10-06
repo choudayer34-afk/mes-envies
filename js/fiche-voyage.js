@@ -18,6 +18,7 @@ import { openFrise } from "./frise.js";
 import { openSouvenirs } from "./souvenirs.js";
 import { openPret } from "./pret.js";
 import { openProgramme } from "./programme.js";
+import { openEspacePc } from "./espace-pc.js";
 
 /* Chaque accordéon de la fiche appartient à un bloc.
    Tout accordéon non listé ici va dans « Plus d'outils » : rien n'est perdu. */
@@ -237,6 +238,7 @@ function dessiner(envie) {
             <span class="niDocSous">Avancement : ${Math.round(statut.pourcentage || 0)} %</span>
         </div>
         <div class="niRaccourcis">
+            <button type="button" class="niBouton niRaccourciPc" data-raccourci="pc">Grand écran</button>
             <button type="button" class="niBouton" data-raccourci="programme">Programme</button>
             <button type="button" class="niBouton" data-raccourci="frise">La journée</button>
             <button type="button" class="niBouton" data-raccourci="pret">Prêt à partir ?</button>
@@ -256,7 +258,7 @@ function dessiner(envie) {
     racine.querySelector(".niRaccourcis").addEventListener("click", evenement => {
         const bouton = evenement.target.closest("[data-raccourci]");
         if (!bouton) return;
-        const ouverture = { programme: openProgramme, frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
+        const ouverture = { pc: openEspacePc, programme: openProgramme, frise: openFrise, pret: openPret, souvenirs: openSouvenirs }[bouton.dataset.raccourci];
         const voyage = getEnvies().find(e => e.id === envie.id) || envie;
         ouverture?.(voyage);
     });
