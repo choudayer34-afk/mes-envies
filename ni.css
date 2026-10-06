@@ -722,3 +722,19 @@ body.niActive #assignModal,body.niActive #checklistEditItemModal{z-index:2300}
 
 /* Grand écran : les blocs ne doivent pas être écrasés quand le calendrier est ouvert ; la zone défile. */
 .niPcCentre>*{flex-shrink:0}
+
+/* Sélecteur de jour des longs voyages : semaine, flèches, calendrier */
+.niSemaine{background:#fff;border:1px solid var(--ni-line);border-radius:16px;padding:8px 8px 10px;margin-bottom:12px}
+.niSemaineEntete{display:flex;align-items:center;gap:6px}
+.niSemaineEntete .niBoutonIcone{flex:none;width:44px;height:44px;font-size:22px}
+.niSemaineEntete .niBoutonIcone:disabled{opacity:.35}
+.niSemaineTitre{flex:1;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:transparent;border:0;font:inherit;font-weight:700;color:var(--ni-ink);cursor:pointer}
+.niSemaineJours{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px}
+.niSemJour{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;border-radius:12px;border:1px solid var(--ni-line);background:#fff;color:var(--ni-ink);font:inherit;padding:0}
+.niSemLettre{font-size:11px;color:var(--ni-muted);font-weight:700}
+.niSemNum{font-size:17px;font-weight:700}
+.niSemHors{background:transparent;border-color:transparent;opacity:.35}
+.niSemChoix{background:var(--ni-ink);color:#fff;border-color:var(--ni-ink)}
+.niSemChoix .niSemLettre{color:rgba(255,255,255,.75)}
+.niSemJour .niCalPoint{bottom:4px}
+.niSemChoix .niCalPoint{background:#fff}
