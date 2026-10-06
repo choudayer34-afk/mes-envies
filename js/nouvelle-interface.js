@@ -11,10 +11,6 @@ import { openAujourdhui, fermerAujourdhui } from "./aujourdhui.js";
 import { fermerDocuments } from "./documents.js";
 import { openCapturer, fermerCapturer } from "./capturer.js";
 import { initFicheVoyage } from "./fiche-voyage.js";
-import { exporterSauvegarde } from "./sauvegarde.js";
-import { openMigration, fermerMigration } from "./migration-billets.js";
-import { fermerPret } from "./pret.js";
-import { fermerVisionneuse } from "./visionneuse.js";
 
 const CLE = "envie_nouvelle_interface";
 
@@ -54,28 +50,6 @@ function injecterReglage() {
     });
 
     modale.appendChild(bouton);
-
-    /* Outils de la nouvelle interface : sauvegarde et migration des billets. */
-    if (nouvelleInterfaceActive()) {
-        const outils = [
-            { id: "plusBtnSauvegardeComplete", texte: "💾 Sauvegarde complète (fichier)", action: () => exporterSauvegarde() },
-            { id: "plusBtnMigrationBillets", texte: "📦 Billets : déplacer vers le stockage", action: () => {
-                document.getElementById("plusModal")?.classList.add("hidden");
-                openMigration();
-            } }
-        ];
-        outils.forEach(o => {
-            if (document.getElementById(o.id)) return;
-            const b = document.createElement("button");
-            b.id = o.id;
-            b.type = "button";
-            b.className = "secondaryButton";
-            b.style.cssText = "width:100%;margin-bottom:10px;";
-            b.textContent = o.texte;
-            b.addEventListener("click", o.action);
-            modale.appendChild(b);
-        });
-    }
 }
 
 /* ---------- Barre d'onglets ---------- */
@@ -102,9 +76,6 @@ function fermerEcransNouveaux() {
     document.getElementById("niIdees")?.remove();
     fermerCapturer();
     fermerDocuments();
-    fermerPret();
-    fermerMigration();
-    fermerVisionneuse();
     fermerAujourdhui();
 }
 
