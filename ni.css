@@ -768,3 +768,6 @@ a.niUrgTel{display:flex;align-items:center;justify-content:space-between;gap:12p
 #niMaisonOffre select.niRecherche,#niMaisonOffre input.niRecherche{width:100%;}
 button.niTag{border:0;font-family:inherit;font-size:11px;cursor:pointer;min-height:28px;padding:0 12px;}
 #niMfRetour{display:block;margin:0 0 8px;padding:6px 0;text-align:left;}
+#niMaisonCalcul{z-index:2250;}
+#niMaisonCalcul .niFeuille{max-height:92vh;overflow-y:auto;}
+#niMaisonCalcul .niBfDeux{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
