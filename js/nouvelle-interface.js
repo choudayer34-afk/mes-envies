@@ -275,6 +275,19 @@ function monterBarre() {
         urgence.textContent = "🆘 Urgence";
         urgence.addEventListener("click", () => { plus.classList.add("hidden"); openUrgence(); });
         bouton.parentNode?.insertBefore(urgence, bouton);
+
+        /* Bascule vers le mode Maison (la bascule de l'accueil est masquée par les écrans). */
+        const maison = document.createElement("button");
+        maison.id = "niPlusMaison";
+        maison.type = "button";
+        maison.className = "secondaryButton";
+        maison.style.cssText = "width:100%;margin-bottom:10px;";
+        maison.textContent = "🛠️ Passer en mode Maison";
+        maison.addEventListener("click", () => {
+            plus.classList.add("hidden");
+            document.querySelector('#modeBascule [data-mode="maison"]')?.click();
+        });
+        urgence.parentNode?.insertBefore(maison, urgence);
     }
     monterNavVoyages();
 
