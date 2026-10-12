@@ -761,3 +761,10 @@ a.niUrgTel{display:flex;align-items:center;justify-content:space-between;gap:12p
 .niCocheFaite{background:var(--ni-brand);border-color:var(--ni-brand);}
 .niLigneTexte{flex:1;min-width:0;display:flex;flex-direction:column;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;}
 #niMaisonCapturer textarea.niRecherche{height:auto;min-height:110px;padding-top:10px;}
+#niMaisonFiche .niCorps{padding-bottom:40px;}
+#niMaisonOffre{z-index:2250;}
+.niMfFaites{margin-top:8px;}
+.niMfFaites summary{cursor:pointer;padding:8px 0;}
+#niMaisonOffre select.niRecherche,#niMaisonOffre input.niRecherche{width:100%;}
+button.niTag{border:0;font-family:inherit;font-size:11px;cursor:pointer;min-height:28px;padding:0 12px;}
+#niMfRetour{display:block;margin:0 0 8px;padding:6px 0;text-align:left;}
