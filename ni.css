@@ -751,3 +751,13 @@ a.niUrgTel{display:flex;align-items:center;justify-content:space-between;gap:12p
 .niAujEntete{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .niBoutonUrgence{flex:none;min-height:44px;padding:0 16px;color:#B42318;border-color:#F0B8B0;background:#FFF4F2;font-weight:700}
 .niHubUrgence{width:100%;margin-top:12px;min-height:48px;color:#B42318;border-color:#F0B8B0;background:#FFF4F2;font-weight:700}
+
+/* ---------- Mode Maison ---------- */
+#niMaisonAuj,#niMaisonProjets{z-index:1500;}
+#niMaisonCapturer{z-index:2250;}
+#niMaisonZone{z-index:2350;}
+.niPastillesLigne{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px;}
+.niCoche{width:28px;height:28px;flex:none;border-radius:9px;border:2px solid var(--ni-line);background:#fff;cursor:pointer;padding:0;}
+.niCocheFaite{background:var(--ni-brand);border-color:var(--ni-brand);}
+.niLigneTexte{flex:1;min-width:0;display:flex;flex-direction:column;background:none;border:0;padding:0;font:inherit;color:inherit;text-align:left;cursor:pointer;}
+#niMaisonCapturer textarea.niRecherche{height:auto;min-height:110px;padding-top:10px;}
