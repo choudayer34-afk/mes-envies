@@ -2023,6 +2023,17 @@ export async function telechargerPhotoDepuisUrl(url) {
 }
 
 let modeActifCache = "voyage";
+let rappelChangementMode = null;
+
+/* Le mode (Voyages / Maison) est propre à chaque appareil ; la valeur du foyer ne sert que de départ. */
+const CLE_MODE_LOCAL = "envie_mode_local";
+
+function lireModeLocal() {
+    try {
+        const v = localStorage.getItem(CLE_MODE_LOCAL);
+        return v === "maison" || v === "voyage" ? v : null;
+    } catch (e) { return null; }
+}
 
 export function getModeActif() {
     return modeActifCache;
@@ -2031,10 +2042,11 @@ export function getModeActif() {
 export function initModeSync(onChange) {
 
     const foyerId = getFoyerId();
+    rappelChangementMode = onChange;
 
     onSnapshot(doc(db, "foyers", foyerId), (snap) => {
 
-        modeActifCache = snap.data()?.modeActif || "voyage";
+        modeActifCache = lireModeLocal() || snap.data()?.modeActif || "voyage";
         onChange();
 
     });
@@ -2043,7 +2055,9 @@ export function initModeSync(onChange) {
 
 export function basculerMode(nouveauMode) {
 
-    updateDoc(doc(db, "foyers", getFoyerId()), { modeActif: nouveauMode }).catch(console.error);
+    try { localStorage.setItem(CLE_MODE_LOCAL, nouveauMode); } catch (e) { /* stockage indisponible */ }
+    modeActifCache = nouveauMode;
+    if (rappelChangementMode) rappelChangementMode();
 
 }
 
