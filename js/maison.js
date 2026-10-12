@@ -16,6 +16,7 @@ import { openEnvie } from "./envie.js";
 import { brancherDictee } from "./capturer.js";
 import { dateLocaleISO } from "./documents.js";
 import { showToast } from "./toast.js";
+import { openMaisonFiche, fermerMaisonFiche } from "./maison-fiche.js";
 
 const ZONES_DEFAUT = ["Jardin", "Salle de bain", "Cuisine", "Garage", "Chambre", "Salon"];
 const LIBELLES_DEVIS = { a_contacter: "À contacter", rdv_planifie: "Rendez-vous", devis_recu: "Devis reçu" };
@@ -127,6 +128,7 @@ export function fermerMaison() {
     document.getElementById("niMaisonProjets")?.remove();
     document.getElementById("niMaisonCapturer")?.remove();
     document.getElementById("niMaisonZone")?.remove();
+    fermerMaisonFiche();
 }
 
 function surveiller(ecran, dessiner) {
@@ -238,7 +240,7 @@ function carteProjet(p) {
         : taches.length ? '<span class="niTag niTagOk">à jour</span>' : "";
     return `
         <div class="niVoyageCarte">
-            <button type="button" class="niVoyageOuvrir" data-ouvrir="${echapper(p.id)}">
+            <button type="button" class="niVoyageOuvrir" data-projet="${echapper(p.id)}">
                 <span class="niVoyageLigne"><span class="niDocTitre">${echapper(p.titre || "Projet")}</span>${etat}</span>
                 <span class="niBarre niBarreClaire"><i style="width:${pourcent}%"></i></span>
                 <span class="niDocSous">${taches.length ? `${faites} tâche${faites > 1 ? "s" : ""} sur ${taches.length}` : "Aucune tâche"}${prochaine ? ` · Prochaine : ${echapper(prochaine.titre || "")}` : ""}</span>
@@ -280,6 +282,7 @@ function dessinerProjets(ecran) {
             ${corps || '<div class="niVide">Aucun projet. Crée le premier avec « Nouveau ».</div>'}
         </div>`;
     brancherOuvrir(ecran);
+    ecran.querySelectorAll("[data-projet]").forEach(b => b.addEventListener("click", () => openMaisonFiche(b.dataset.projet)));
     ecran.querySelectorAll("[data-zonefiltre]").forEach(b => b.addEventListener("click", () => { zoneFiltre = b.dataset.zonefiltre; dessinerProjets(ecran); }));
     ecran.querySelectorAll("[data-zone]").forEach(b => b.addEventListener("click", () => choisirZone(b.dataset.zone)));
     ecran.querySelector("#niMaisonNouveau")?.addEventListener("click", () => openMaisonCapturer({ nouveauProjet: true }));
@@ -298,7 +301,7 @@ export function openMaisonProjets() {
 
 /* ---------- Choix de la zone d'un projet ---------- */
 
-function choisirZone(projetId) {
+export function choisirZone(projetId) {
     document.getElementById("niMaisonZone")?.remove();
     const projet = getEnvies().find(e => e.id === projetId);
     if (!projet) return;
