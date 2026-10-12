@@ -596,6 +596,11 @@ export function updateEnviePersonnesIds(id, personnesIds) {
 }
 
 
+/* Zone d'un projet maison (Jardin, Salle de bain…) : champ facultatif, texte libre. */
+export function updateEnvieZone(id, zone) {
+    patchEnvie(id, { zone: (zone || "").trim() || null });
+}
+
 export function updateEnvieVoyage(id, voyageId) {
     patchEnvie(id, { voyageId });
 }

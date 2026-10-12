@@ -35,6 +35,7 @@ import { fermerFrise } from "./frise.js";
 import { fermerProgramme } from "./programme.js";
 import { openEspacePc, fermerEspacePc } from "./espace-pc.js";
 import { fermerSouvenirs } from "./souvenirs.js";
+import { openMaisonAujourdhui, openMaisonProjets, openMaisonCapturer, fermerMaison } from "./maison.js";
 
 const CLE = "envie_nouvelle_interface";
 
@@ -143,6 +144,7 @@ function fermerEcransNouveaux() {
     fermerMigration();
     fermerVisionneuse();
     fermerAujourdhui();
+    fermerMaison();
 }
 
 
@@ -285,7 +287,8 @@ function monterBarre() {
         maison.textContent = "🛠️ Passer en mode Maison";
         maison.addEventListener("click", () => {
             plus.classList.add("hidden");
-            document.querySelector('#modeBascule [data-mode="maison"]')?.click();
+            const cible = getModeActif() === "maison" ? "voyage" : "maison";
+            document.querySelector(`#modeBascule [data-mode="${cible}"]`)?.click();
         });
         urgence.parentNode?.insertBefore(maison, urgence);
     }
@@ -312,6 +315,16 @@ function monterBarre() {
         const bouton = evenement.target.closest(".niOnglet");
         if (!bouton) return;
 
+        if (getModeActif() === "maison") {
+            switch (bouton.dataset.onglet) {
+                case "aujourdhui": fermerEcransNouveaux(); openMaisonAujourdhui(); marquer("aujourdhui"); break;
+                case "voyages": fermerEcransNouveaux(); openMaisonProjets(); marquer("voyages"); break;
+                case "capturer": openMaisonCapturer(); break;
+                case "plus": declencher("btnPlus"); break;
+            }
+            return;
+        }
+
         switch (bouton.dataset.onglet) {
             case "aujourdhui":
                 fermerDocuments();
@@ -335,21 +348,34 @@ function monterBarre() {
     /* Visible seulement en mode Voyages, sans fenêtre ancienne ouverte. */
     let planifie = false;
     let ouvertAuDemarrage = false;
+    let modePrecedent = null;
     const actualiser = () => {
         planifie = false;
         const maison = getModeActif() === "maison";
         document.body.classList.toggle("niModeVoyage", !maison);
+        barre.querySelector('[data-onglet="voyages"] span').textContent = maison ? "Projets" : "Voyages";
+        const boutonMode = document.getElementById("niPlusMaison");
+        if (boutonMode) boutonMode.textContent = maison ? "✈️ Passer en mode Voyages" : "🛠️ Passer en mode Maison";
+        if (modePrecedent !== null && modePrecedent !== maison) {
+            fermerEcransNouveaux();
+            ouvertAuDemarrage = false;
+        }
+        modePrecedent = maison;
         const fenetreOuverte = !!document.querySelector(".modal-overlay:not(.hidden), .authScreen:not(.hidden)");
         const accueilVisible = !!document.getElementById("headerAccueilActif")
             && !document.getElementById("headerAccueilActif").classList.contains("hidden");
-        const visible = !maison && !fenetreOuverte && accueilVisible;
+        const visible = !fenetreOuverte && accueilVisible;
         barre.classList.toggle("hidden", !visible);
         document.body.classList.toggle("niBarreVisible", visible);
-        if (maison) fermerEcransNouveaux();
-        /* Au démarrage, l'écran Voyages s'ouvre une fois (sauf si l'ancienne liste a été choisie). */
+        /* Au démarrage (ou au changement de mode), l'écran d'accueil du mode s'ouvre une fois. */
         if (visible && !ouvertAuDemarrage) {
             ouvertAuDemarrage = true;
-            if (!ancienneListeChoisie() && !document.querySelector(".niEcran")) openVoyages();
+            if (maison) {
+                if (!document.querySelector(".niEcran")) { openMaisonProjets(); marquer("voyages"); }
+            } else if (!ancienneListeChoisie() && !document.querySelector(".niEcran")) {
+                openVoyages();
+                marquer("voyages");
+            }
         }
     };
     const planifier = () => {

@@ -25,6 +25,7 @@ const ICONES = {
     photo: '<svg viewBox="0 0 24 24" class="niIco"><path d="M4 8h3l2-3h6l2 3h3v11H4zM8.5 13a3.5 3.5 0 107 0 3.5 3.5 0 10-7 0"></path></svg>',
     billet: '<svg viewBox="0 0 24 24" class="niIco"><path d="M21 3L3 10l7 3 3 7z"></path></svg>',
     depense: '<svg viewBox="0 0 24 24" class="niIco"><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2zM3 11h18M16 15h2"></path></svg>',
+    micro: '<svg viewBox="0 0 24 24" class="niIco"><path d="M12 15a3 3 0 003-3V6a3 3 0 00-6 0v6a3 3 0 003 3zM6 11a6 6 0 0012 0M12 17v4"></path></svg>',
     plus: '<svg viewBox="0 0 24 24" class="niIco"><path d="M12 5v14M5 12h14"></path></svg>'
 };
 
@@ -100,6 +101,50 @@ function choisirPhotos(voyageId) {
     champ.click();
 }
 
+/* Dictée : la reconnaissance vocale du navigateur remplit le champ (absente sur certains navigateurs). */
+export function brancherDictee(champ, bouton) {
+
+    const Reconnaissance = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Reconnaissance) { bouton.remove(); return; }
+
+    let rec = null;
+    const arreter = () => {
+        const courante = rec;
+        rec = null;
+        courante?.stop();
+        bouton.classList.remove("niMicroActif");
+        bouton.setAttribute("aria-pressed", "false");
+    };
+
+    bouton.addEventListener("click", () => {
+        if (rec) { arreter(); return; }
+
+        const debut = champ.value.trim();
+        rec = new Reconnaissance();
+        rec.lang = "fr-FR";
+        rec.interimResults = true;
+        rec.continuous = false;
+
+        rec.onresult = e => {
+            const texte = [...e.results].map(r => r[0].transcript).join(" ").trim();
+            champ.value = debut ? `${debut} ${texte}` : texte;
+        };
+        rec.onerror = e => {
+            arreter();
+            showToast(e.error === "not-allowed" ? "Autorise le micro pour dicter" : "La dictée n'a pas fonctionné");
+        };
+        rec.onend = () => { if (rec) arreter(); champ.focus(); };
+
+        try {
+            rec.start();
+            bouton.classList.add("niMicroActif");
+            bouton.setAttribute("aria-pressed", "true");
+        } catch {
+            rec = null;
+        }
+    });
+}
+
 export function openCapturer() {
 
     fermerCapturer();
@@ -118,6 +163,7 @@ export function openCapturer() {
 
             <form id="niIdeeForm" class="niIdeeForm" autocomplete="off">
                 <input id="niIdeeChamp" class="niRecherche" type="text" placeholder="Une idée, un lieu, une envie…" aria-label="Nouvelle idée" enterkeyhint="done">
+                <button type="button" id="niIdeeMicro" class="niBouton niMicro" aria-label="Dicter" aria-pressed="false">${ICONES.micro}</button>
                 <button type="submit" class="niBouton niBoutonPrimaire" style="flex:0 0 auto;padding:0 18px">Noter</button>
             </form>
             <span class="niDocSous">L'idée va dans « À trier » : tu l'organises plus tard.</span>
@@ -144,6 +190,7 @@ export function openCapturer() {
     document.body.appendChild(fond);
 
     const champIdee = fond.querySelector("#niIdeeChamp");
+    brancherDictee(champIdee, fond.querySelector("#niIdeeMicro"));
     setTimeout(() => champIdee?.focus(), 50);
 
     fond.addEventListener("click", evenement => {
@@ -158,6 +205,7 @@ export function openCapturer() {
         evenement.preventDefault();
         const titre = champIdee.value.trim();
         if (!titre) return;
+        fond.querySelector("#niIdeeMicro")?.classList.contains("niMicroActif") && fond.querySelector("#niIdeeMicro").click();
         createEnvie({ titre, contexte: "voyage" });
         showToast("✓ Idée ajoutée dans « À trier »");
         fermerCapturer();
