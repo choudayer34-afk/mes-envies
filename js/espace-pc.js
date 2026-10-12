@@ -24,6 +24,8 @@ import { openEnvie } from "./envie.js";
 import { masquerHub } from "./fiche-hub.js";
 import { formatPeriode } from "./periode.js";
 import { showToast } from "./toast.js";
+import { openNouveauVoyage } from "./nouveau-voyage.js";
+import { openVoyageImport } from "./voyage-import.js";
 
 export const LARGEUR_PC = 1100;
 
@@ -58,7 +60,8 @@ export function openEspacePc(voyageDepart = null) {
     fermerEspacePc();
 
     let voyage = voyageDepart || trouverVoyage();
-    if (!voyage) { showToast("Aucun voyage en cours ou à venir"); return; }
+    /* Aucun voyage à préparer : on propose directement d'en créer un. */
+    if (!voyage) { openNouveauVoyage(); return; }
 
     const ecran = document.createElement("div");
     ecran.id = "niPc";
@@ -105,6 +108,7 @@ export function openEspacePc(voyageDepart = null) {
                 <div class="niPcVoyages">
                     ${voyages.map(x => `<button type="button" class="niPcVoyage${x.id === v.id ? " niPcVoyageActif" : ""}" data-voyage="${echapper(x.id)}">${echapper(x.titre || "Voyage")}<span class="niDocSous">${echapper(formatPeriode(x.date))}</span></button>`).join("")}
                 </div>
+                <button type="button" class="niBouton" id="niPcNouveau" style="width:100%">＋ Nouveau voyage</button>
                 <button type="button" class="niPcLien" id="niPcPlus">Plus</button>
                 <button type="button" class="niPcLien" id="niPcFermer">Revenir à l'affichage habituel</button>
             </aside>
@@ -159,6 +163,7 @@ export function openEspacePc(voyageDepart = null) {
             <aside class="niPcPlateau" id="niPcPlateau" aria-label="Plateau d'idées">
                 <div class="niPcEnteteLigne"><h2 class="niTitreSection" style="margin:0">Plateau d'idées</h2><span class="niTag">${idees.length}</span></div>
                 ${idees.length ? idees.map(e => carteIdee(e)).join("") : '<div class="niVide">Aucune idée en attente.</div>'}
+                <button type="button" class="niBouton" id="niPcIA" style="width:100%">✨ Alimenter les idées avec l'IA</button>
                 <form id="niPcForm" class="niIdeeForm" autocomplete="off">
                     <input id="niPcChamp" class="niRecherche" type="text" placeholder="Nouvelle idée…" aria-label="Nouvelle idée">
                     <button type="submit" class="niBouton niBoutonPrimaire" style="flex:0 0 auto;padding:0 16px">Ajouter</button>
@@ -199,6 +204,8 @@ export function openEspacePc(voyageDepart = null) {
         ecran.querySelector("#niPcPlus").addEventListener("click", () => document.getElementById("btnPlus")?.click());
         ecran.querySelector("#niPcFermer").addEventListener("click", fermerEspacePc);
         ecran.querySelector("#niPcRetour").addEventListener("click", fermerEspacePc);
+        ecran.querySelector("#niPcNouveau").addEventListener("click", () => openNouveauVoyage());
+        ecran.querySelector("#niPcIA").addEventListener("click", () => openVoyageImport(v.id));
         ecran.querySelector("#niPcAujourdhui").addEventListener("click", () => {
             fermerEspacePc();
             document.querySelector('[data-onglet="aujourdhui"]')?.click();
@@ -353,4 +360,16 @@ export function openEspacePc(voyageDepart = null) {
     }
 
     dessiner();
+
+    /* Le plateau et la liste des voyages se mettent à jour après une création ou un import d'idées. */
+    const signaturePc = () => JSON.stringify([listerVoyagesDates().map(x => [x.id, x.titre]), plateau(voyage.id).map(x => x.id)]);
+    let derniere = signaturePc();
+    const minuteur = setInterval(() => {
+        if (!ecran.isConnected) { clearInterval(minuteur); return; }
+        if (glisse || ecran.style.display === "none") return;
+        const actif = document.activeElement;
+        if (actif && ecran.contains(actif) && /^(INPUT|TEXTAREA|SELECT)$/.test(actif.tagName)) return;
+        const s = signaturePc();
+        if (s !== derniere) { derniere = s; dessiner(); }
+    }, 1500);
 }
