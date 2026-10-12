@@ -1,0 +1,26 @@
+ÉTAPE 16 : NOUVEL ÉCRAN « AJOUTER UN BILLET »
+Cache : envie-cache-v243
+
+À FAIRE : copier chaque fichier du zip à son emplacement, en remplaçant l'existant.
+
+NOUVEAU FICHIER
+- js/billet-form.js
+
+FICHIERS MODIFIÉS (nouvelle interface uniquement)
+ni.css, sw.js, js/nouvelle-interface.js, js/reservations.js, js/aujourdhui.js, js/espace-pc.js, js/documents.js, js/types-reservation.js
+Aucun fichier de l'ancienne application n'est modifié dans cette étape.
+
+CONTENU
+- Écran plein écran, barre d'action fixe en bas (Annuler / Ajouter), champs 48 px
+- Fichier en premier : PDF, photo ou appareil photo
+- Type en pastilles ; les champs s'adaptent au type (compagnie, parking, logement, restaurant…)
+- Dates et heures natives (roue sur iPhone), pré-remplies avec les dates du voyage
+- De / Vers avec bouton pour inverser, recherche de lieu ou texte libre (gardé même sans choisir de suggestion)
+- Aller-retour (trajets) ou date de fin (parking, location, logement)
+- Modifier et supprimer un billet : bouton ✏️ dans l'écran Réservations
+- Tous les boutons « Ajouter un billet » (fiche ancienne, Capturer, Aujourd'hui, grand écran) ouvrent ce nouvel écran
+
+FICHIERS DU BILLET
+- Envoyés au stockage en ligne quand le réseau le permet (pas de limite de 700 Ko)
+- Sans réseau ou si l'envoi échoue : copie dans la fiche, avec les limites habituelles
+- Pour revenir à l'ancienne fenêtre : désactiver la nouvelle interface dans Plus
