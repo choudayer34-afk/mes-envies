@@ -771,3 +771,8 @@ button.niTag{border:0;font-family:inherit;font-size:11px;cursor:pointer;min-heig
 #niMaisonCalcul{z-index:2250;}
 #niMaisonCalcul .niFeuille{max-height:92vh;overflow-y:auto;}
 #niMaisonCalcul .niBfDeux{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* Depuis Préparer : création de voyage, import d'idées par l'IA et fiche passent au premier plan. */
+body:has(#niPc) #niNouveauVoyage{z-index:2300;}
+body:has(#niPc) .modal-overlay:not(.hidden){z-index:2300;}
+body:has(#niPc) #niFicheHub{z-index:2310;}
