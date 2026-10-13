@@ -17,7 +17,7 @@ import { showToast } from "./toast.js";
 
 /* Clé publique d'envoi (VAPID) : ce n'est PAS un secret.
    À renseigner avec la clé publique affichée par la page generer-cles-vapid.html. */
-const VAPID_PUBLIC = "";
+const VAPID_PUBLIC = "BGS0XRt6dZyeOz01ifAVkDx1L33FId3mUGa8w0RDVFB5ojKF7ncw4EX_5QrVra2CS21SBR1LcyFkFu7MQLF19Gc";
 
 const CLE_ID_APPAREIL = "envie_appareil_id";
 
