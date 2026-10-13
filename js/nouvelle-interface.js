@@ -1,8 +1,8 @@
 /*
 ==========================================================
- EnVie - Nouvelle interface (bêta)
+ EnVie - Nouvelle interface
  nouvelle-interface.js : réglage, barre d'onglets, bascule
- Éteinte par défaut. Aucun effet sur le mode Maison.
+ Active par défaut ; un réglage de secours dans Plus permet de revenir à l'ancien affichage.
 ==========================================================
 */
 
@@ -39,9 +39,10 @@ import { openMaisonAujourdhui, openMaisonProjets, openMaisonCapturer, fermerMais
 
 const CLE = "envie_nouvelle_interface";
 
+/* Active par défaut ; seul un retour volontaire à l'ancien affichage (valeur "0") la désactive. */
 export function nouvelleInterfaceActive() {
-    try { return localStorage.getItem(CLE) === "1"; }
-    catch { return false; }
+    try { return localStorage.getItem(CLE) !== "0"; }
+    catch { return true; }
 }
 
 function definirActive(valeur) {
@@ -64,8 +65,8 @@ function injecterReglage() {
 
     const maj = () => {
         bouton.textContent = nouvelleInterfaceActive()
-            ? "🧪 Nouvelle interface : activée (toucher pour revenir à l'ancienne)"
-            : "🧪 Essayer la nouvelle interface (bêta)";
+            ? "↩️ Secours : revenir à l'ancien affichage"
+            : "✨ Réactiver la nouvelle interface";
     };
     maj();
 
