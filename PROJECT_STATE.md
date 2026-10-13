@@ -1,10 +1,10 @@
 # PROJECT STATE
 
-Mis à jour le 2026-10-13.
+Mis à jour le 2026-10-13 (livraison 5 : notifications terminées).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v269` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v274` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -12,6 +12,7 @@ Mis à jour le 2026-10-13.
 - Racine : `index.html`, `app.js`, `sw.js`, `styles.css`, `ni.css`, `manifest.json`, pages de partage (`partage.html`, `photo-partage.html`, `share-target.html`).
 - Tous les modules sont dans `js/` ; `app.js` les importe depuis `./js/`.
 - `functions/` : fonctions Cloudflare Pages. `services/` : géocodage. `vendor/` : bibliothèque Firebase.
+- `worker/` : service d'envoi des notifications (Worker Cloudflare, projet séparé `mes-envies-notifications` relié au même dépôt, répertoire racine `worker`). Adresse : `https://mes-envies.choudayer34.workers.dev`. Voir `worker/LISEZMOI.md`.
 - Authentification : Firebase Authentication (e-mail et mot de passe).
 - Données : Firestore par foyer (`foyers/{foyerId}/...`), avec cache hors ligne.
 - Photos : Cloudinary.
@@ -30,27 +31,26 @@ Mis à jour le 2026-10-13.
 
 - `rappels.js` : rappels de voyage calculés à l'ouverture (papiers, départ proche, billets hors ligne).
 - `rappels-calendrier.js` : fichier `.ics` dont les alarmes sont déclenchées par le calendrier du téléphone.
-- Aucun gestionnaire `push` ni `notificationclick` dans `sw.js`.
 
-## Évolution en cours : notifications sur téléphone
+## Notifications sur téléphone (terminé le 2026-10-13)
 
-Décisions du 2026-10-13 :
+Décisions :
 
-- Voie retenue : Firestore + Worker Cloudflare séparé (déclencheur horaire) + Web Push. Pas de ntfy.
+- Voie retenue : Firestore + Worker Cloudflare (déclencheur natif toutes les 15 minutes) + Web Push (VAPID). Pas de ntfy.
 - Appareils : iPhone (application installée sur l'écran d'accueil obligatoire, iOS 16.4 minimum).
-- Destinataires : tous les membres du foyer, réglages par appareil.
-- Rappels de dates : veille, jour J, une semaine avant, délai réglable par envie.
-- Relances périodiques : hebdomadaires, mensuelles ou désactivées, au choix par appareil.
+- Destinataires : tous les membres du foyer, réglages par appareil, heure de Paris pour tout.
+- Une envie privée (`visibilite: "prive"`, `proprietaireId`) ne notifie que son propriétaire.
 - Écarté : rappel par lieu proche en arrière-plan (impossible pour une page web).
-- Une envie privée ne notifie que son propriétaire.
 
-Livraisons prévues :
+Fonctionnement :
 
-1. Règles Firestore et nettoyage du dépôt (fait).
-2. Abonnement push par appareil, gestionnaires `push` et `notificationclick`, guide d'installation iPhone, correction des deux chemins erronés de `sw.js`.
-3. Réglages par appareil et champ « me prévenir X jours avant » dans la fiche d'envie.
-4. Worker Cloudflare : déclencheur horaire, compte de service en secret, envoi Web Push (VAPID), suppression des abonnements périmés.
-5. Bouton « Envoyer un test », numéro de version affiché, mode d'emploi.
+- Application : `js/notifications.js` (abonnement, réglages, tests, mode d'emploi, version, ouverture au toucher), gestionnaires `push` et `notificationclick` dans `sw.js`, menu « Me prévenir avant » dans `js/fiche-hub.js`.
+- Appareil : document `users/{uid}/appareils/{idAppareil}` avec `uid`, `foyerId`, `endpoint`, `cles {p256dh, auth}`, `reglages`, `majLe`, `creeLe`, et `envoyes` (écrit par le Worker, empêche les doublons).
+- Envie : champ optionnel `rappelAvantJours` (entier, absent si aucun rappel supplémentaire).
+- Charge d'une notification : `titre`, `corps`, `tag`, `voyageId` (id de l'envie), `billetId`, `vue`, `mode`. Ouverture : `?ouvrir=&billet=` ou `?vue=trier&mode=voyage|maison`.
+- Worker : dates (semaine, veille, jour J, délai propre), billets (délai par type avant le départ), relances (lundi ou 1er du mois, Voyages et Maison séparés). Secrets Cloudflare : `FIREBASE_SERVICE_ACCOUNT`, `VAPID_PRIVATE`. Variables publiques dans `worker/wrangler.jsonc`.
+- Point d'entrée `POST /test` : jeton Firebase de l'utilisateur, envoi d'un test à son appareil (boutons de l'écran Notifications).
+- Quota : une passe ne lit que les envies utiles (datées des 60 derniers jours, ou tout le foyer le matin d'une relance) ; 30 envois maximum par passe.
 
 ## Règles de livraison
 
