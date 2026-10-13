@@ -1,0 +1,290 @@
+/*
+ rappels.js : décide quelles notifications envoyer à un appareil à un instant donné.
+ Fonctions pures (aucun accès réseau) : elles reçoivent les données déjà lues et renvoient la liste
+ des notifications à envoyer. Les envois déjà faits sont repérés par appareil.envoyes[clé].
+
+ Trois familles :
+ - dates      : une semaine avant, la veille, le jour J, et le délai propre à chaque envie (rappelAvantJours),
+                à l'heure choisie sur l'appareil (heure de Paris) ;
+ - billets    : avant l'heure de départ, selon le type (heure de Paris) ;
+ - relances   : idées à trier (Voyages et Maison séparément), chaque lundi ou chaque 1er du mois.
+*/
+
+import { nettoyerReglages, TYPES_BILLETS } from "./reglages.js";
+import {
+    partiesParis, instantParis, ajouterJours, formaterDateLongue,
+    dateIsoValide, heureValide, formaterDuree, MINUTE, JOUR, HEURE
+} from "./temps.js";
+
+/* Une notification de date ou de relance reste envoyable pendant 3 h après son heure (cron manqué, retard). */
+export const FENETRE_RETARD = 3 * HEURE;
+/* Seuil des idées « anciennes » dans les relances. */
+export const JOURS_ANCIENNETE = 30;
+
+const EMOJI_BILLET = {
+    avion: "✈️", train: "🚆", busferry: "🚌", voiture: "🚗", parking: "🅿️",
+    restaurant: "🍽️", activite: "🎟️", autre: "🎫"
+};
+
+const MOTS_BILLET = {
+    avion: "Vol", train: "Train", busferry: "Trajet", voiture: "Location",
+    parking: "Parking", restaurant: "Restaurant", activite: "Activité", autre: "Réservation"
+};
+
+/* Copie de etapesBillets (js/types-reservation.js) : un aller-retour compte pour deux étapes. */
+export function etapesBillets(billets) {
+    const etapes = [];
+    (Array.isArray(billets) ? billets : []).forEach(b => {
+        if (!b || typeof b !== "object") return;
+        if (!b.retour) { etapes.push(b); return; }
+        etapes.push({ ...b, _sens: "aller" });
+        etapes.push({
+            ...b,
+            id: `${b.id}#retour`,
+            _sens: "retour",
+            dateDepart: b.retour.dateDepart || null,
+            heureDepart: b.retour.heureDepart || null,
+            numeroVol: b.retour.numeroVol || b.numeroVol || null,
+            lieuDepart: b.destination || null,
+            destination: b.lieuDepart || null,
+            retour: null
+        });
+    });
+    return etapes;
+}
+
+function nomLieu(lieu) {
+    if (!lieu) return "";
+    return typeof lieu === "string" ? lieu : (lieu.nom || "");
+}
+
+/* Une envie est visible par l'appareil sauf si elle est privée et appartient à quelqu'un d'autre. */
+export function visiblePour(envie, uid) {
+    if (envie.supprime) return false;
+    if (envie.visibilite === "prive") return envie.proprietaireId === uid;
+    return true;
+}
+
+function libelleDelaiJours(jours) {
+    if (jours === 0) return "Aujourd'hui";
+    if (jours === 1) return "Demain";
+    return `Dans ${jours} jours`;
+}
+
+function dateEnvie(envie) {
+    return dateIsoValide(envie.date?.start) ? envie.date.start : null;
+}
+
+/* ---------- Dates ---------- */
+
+export function rappelsDates(appareil, envies, maintenant) {
+
+    const reglages = appareil.reglages;
+    if (!reglages.dates.actif) return [];
+
+    const sortie = [];
+
+    for (const envie of envies) {
+
+        if (!visiblePour(envie, appareil.uid) || envie.realise || envie.listeLibre) continue;
+
+        const debut = dateEnvie(envie);
+        if (!debut) continue;
+
+        const decalages = new Set();
+        if (reglages.dates.semaine) decalages.add(7);
+        if (reglages.dates.veille) decalages.add(1);
+        if (reglages.dates.jourJ) decalages.add(0);
+        if (Number.isInteger(envie.rappelAvantJours) && envie.rappelAvantJours > 0 && envie.rappelAvantJours <= 365) {
+            decalages.add(envie.rappelAvantJours);
+        }
+
+        for (const jours of decalages) {
+
+            const echeance = instantParis(ajouterJours(debut, -jours), reglages.dates.heure);
+
+            if (maintenant < echeance || maintenant >= echeance + FENETRE_RETARD) continue;
+
+            const fin = dateIsoValide(envie.date?.end) && envie.date.end !== debut ? envie.date.end : null;
+            const quand = fin
+                ? `du ${formaterDateLongue(debut)} au ${formaterDateLongue(fin)}`
+                : formaterDateLongue(debut);
+
+            sortie.push({
+                cle: `d:${envie.id}:${debut}:${jours}`,
+                charge: {
+                    titre: `${libelleDelaiJours(jours)} : ${envie.titre || "Envie"}`,
+                    corps: quand.charAt(0).toUpperCase() + quand.slice(1),
+                    tag: `date-${envie.id}-${jours}`,
+                    voyageId: envie.id, billetId: null, vue: null, mode: null
+                },
+                urgence: "normal",
+                ttl: 6 * 3600
+            });
+
+        }
+
+    }
+
+    return sortie;
+
+}
+
+/* ---------- Billets ---------- */
+
+export function rappelsBillets(appareil, envies, maintenant) {
+
+    const reglages = appareil.reglages;
+    if (!reglages.billets.actif) return [];
+
+    const sortie = [];
+
+    for (const envie of envies) {
+
+        if (!visiblePour(envie, appareil.uid)) continue;
+
+        for (const etape of etapesBillets(envie.billets)) {
+
+            if (!etape.id || !(etape.type in TYPES_BILLETS)) continue;
+            if (!dateIsoValide(etape.dateDepart) || !heureValide(etape.heureDepart)) continue;
+
+            const depart = instantParis(etape.dateDepart, etape.heureDepart);
+            const delai = reglages.billets.delais[etape.type];
+            const echeance = depart - delai * MINUTE;
+
+            if (maintenant < echeance || maintenant >= depart) continue;
+
+            const mot = [etape.compagnie, etape.numeroVol].filter(Boolean).join(" ") || MOTS_BILLET[etape.type];
+            const de = nomLieu(etape.lieuDepart);
+            const vers = nomLieu(etape.destination);
+            const trajet = de && vers ? `${de} → ${vers}` : (de || vers || "");
+
+            sortie.push({
+                cle: `b:${envie.id}:${etape.id}:${etape.dateDepart}:${etape.heureDepart}:${delai}`,
+                charge: {
+                    titre: `${EMOJI_BILLET[etape.type]} ${mot} dans ${formaterDuree(depart - maintenant)}`,
+                    corps: [trajet, `Départ à ${etape.heureDepart}`, envie.titre].filter(Boolean).join(" · "),
+                    tag: `billet-${envie.id}-${etape.id}`,
+                    voyageId: envie.id, billetId: etape.id, vue: null, mode: null
+                },
+                urgence: "high",
+                ttl: Math.max(60, Math.floor((depart - maintenant) / 1000))
+            });
+
+        }
+
+    }
+
+    return sortie;
+
+}
+
+/* ---------- Relances ---------- */
+
+/* Modes dont la relance est due maintenant pour cet appareil : ["voyage"], ["maison"], les deux ou rien. */
+export function relancesDues(appareil, maintenant) {
+
+    const reglages = appareil.reglages;
+    const paris = partiesParis(maintenant);
+    const echeance = instantParis(paris.iso, reglages.dates.heure);
+
+    if (maintenant < echeance || maintenant >= echeance + FENETRE_RETARD) return [];
+
+    return ["voyage", "maison"].filter(mode => {
+        const rythme = reglages.relances[mode].rythme;
+        if (rythme === "hebdo") return paris.jourSemaine === 1;
+        if (rythme === "mensuel") return paris.jour === 1;
+        return false;
+    });
+
+}
+
+export function idees(mode, envies, conteneurs, uid) {
+
+    return envies.filter(e => {
+
+        if (!visiblePour(e, uid) || e.listeLibre) return false;
+        if (conteneurs.has(e.categorie)) return false;
+        if (e.voyageId || dateEnvie(e)) return false;
+
+        if (mode === "maison") return e.contexte === "maison" && !e.realise;
+
+        return (e.contexte || "voyage") === "voyage";
+
+    });
+
+}
+
+export function rappelsRelances(appareil, envies, conteneurs, maintenant) {
+
+    const sortie = [];
+    const iso = partiesParis(maintenant).iso;
+
+    for (const mode of relancesDues(appareil, maintenant)) {
+
+        const liste = idees(mode, envies, conteneurs, appareil.uid);
+        if (!liste.length) continue;
+
+        const anciennes = liste.filter(e => Number.isFinite(e.createdAt) && maintenant - e.createdAt > JOURS_ANCIENNETE * JOUR).length;
+        const n = liste.length;
+        const accord = n > 1 ? "s" : "";
+
+        const corps = anciennes
+            ? `${n} élément${accord} à trier, dont ${anciennes} sans date depuis plus de ${JOURS_ANCIENNETE} jours`
+            : `${n} élément${accord} à trier`;
+
+        sortie.push({
+            cle: `r:${mode}:${iso}`,
+            charge: {
+                titre: mode === "maison" ? "🏠 Maison : à trier" : "✈️ Voyages : idées à trier",
+                corps,
+                tag: `relance-${mode}`,
+                voyageId: null, billetId: null, vue: "trier", mode
+            },
+            urgence: "normal",
+            ttl: 12 * 3600
+        });
+
+    }
+
+    return sortie;
+
+}
+
+/* ---------- Ensemble ---------- */
+
+/*
+ appareil : document de l'appareil (uid, reglages, envoyes)
+ donnees  : { envies, conteneurs (Set ou null) }
+ Retourne les notifications à envoyer, déjà filtrées de ce qui a été envoyé.
+*/
+export function planifier(appareil, donnees, maintenant) {
+
+    const prepare = { ...appareil, reglages: nettoyerReglages(appareil.reglages) };
+    const envoyes = appareil.envoyes && typeof appareil.envoyes === "object" ? appareil.envoyes : {};
+
+    const toutes = [
+        ...rappelsDates(prepare, donnees.envies, maintenant),
+        ...rappelsBillets(prepare, donnees.envies, maintenant),
+        ...(donnees.conteneurs ? rappelsRelances(prepare, donnees.envies, donnees.conteneurs, maintenant) : [])
+    ];
+
+    return toutes.filter(n => !envoyes[n.cle]);
+
+}
+
+/* Besoins de lecture : évite de lire Firestore quand rien ne peut être dû. */
+export function besoins(appareils, maintenant) {
+
+    let dates = false;
+    let relances = false;
+
+    for (const a of appareils) {
+        const r = nettoyerReglages(a.reglages);
+        if (r.dates.actif || r.billets.actif) dates = true;
+        if (relancesDues({ ...a, reglages: r }, maintenant).length) relances = true;
+    }
+
+    return { dates, relances };
+
+}

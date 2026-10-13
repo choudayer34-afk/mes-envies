@@ -1,0 +1,12 @@
+{
+  "name": "mes-envies-notifications",
+  "main": "index.js",
+  "compatibility_date": "2026-01-01",
+  "workers_dev": true,
+  "triggers": { "crons": ["*/15 * * * *"] },
+  "vars": {
+    "VAPID_PUBLIC": "BGS0XRt6dZyeOz01ifAVkDx1L33FId3mUGa8w0RDVFB5ojKF7ncw4EX_5QrVra2CS21SBR1LcyFkFu7MQLF19Gc",
+    "VAPID_SUBJECT": "https://mes-envies.pages.dev",
+    "SITE_URL": "https://mes-envies.pages.dev"
+  }
+}
