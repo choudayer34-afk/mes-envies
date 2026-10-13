@@ -14,6 +14,7 @@ import { closeFiche } from "./envie.js";
 import { setupAutocomplete } from "./location.js";
 import { formatPeriode } from "./periode.js";
 import { showToast } from "./toast.js";
+import { ouvrirReglageRappel } from "./notifications.js";
 import { phaseDuVoyage } from "./aujourdhui.js";
 import { dateLocaleISO, listerBillets, openDocuments } from "./documents.js";
 import { bilanPreparation } from "./preparation.js";
@@ -303,6 +304,7 @@ function ouvrirMenu(id) {
         <h2 class="niTitreSection" style="font-size:22px">${echapper(v?.titre || "Voyage")}</h2>
         <div class="niCarte">
             <button type="button" class="niDocLigne" data-menu="urgence"><span class="niDocTexte"><span class="niDocTitre">🆘 Urgence</span><span class="niDocSous">Billets du jour, logement, numéros utiles, rappels</span></span></button>
+            <button type="button" class="niDocLigne" data-menu="rappel"><span class="niDocTexte"><span class="niDocTitre">🔔 Me prévenir avant</span><span class="niDocSous">Rappel supplémentaire avant la date du voyage</span></span></button>
             <button type="button" class="niDocLigne" data-menu="partage"><span class="niDocTexte"><span class="niDocTitre">Partager le voyage</span><span class="niDocSous">Lien en lecture seule pour la famille</span></span></button>
             <button type="button" class="niDocLigne" data-menu="collecte"><span class="niDocTexte"><span class="niDocTitre">Collecter les photos</span><span class="niDocSous">Un lien pour que chacun envoie les siennes</span></span></button>
             <button type="button" class="niDocLigne" data-menu="pc"><span class="niDocTexte"><span class="niDocTitre">Préparer sur grand écran</span><span class="niDocSous">Programme en colonnes, glisser-déposer</span></span></button>
@@ -317,6 +319,7 @@ function ouvrirMenu(id) {
         fond.remove();
         switch (b.dataset.menu) {
             case "urgence": openUrgence(id); break;
+            case "rappel": ouvrirReglageRappel(id); break;
             case "partage": case "collecte": openVoyageurs(id, { section: "partage" }); break;
             case "pc": openEspacePc(getEnvies().find(x => x.id === id)); break;
             case "sauvegarde": exporterSauvegarde(); break;

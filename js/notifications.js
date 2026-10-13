@@ -2,26 +2,118 @@
 ==========================================================
  EnVie - Notifications
  notifications.js : abonnement de l'appareil aux notifications
- (Web Push), écran de réglage dans Plus, ouverture directe d'un
- billet depuis une notification.
+ (Web Push), réglages propres à chaque appareil, écran dans Plus,
+ ouverture directe d'un billet ou d'un écran depuis une notification,
+ rappel supplémentaire d'un voyage.
  L'envoi des notifications est fait par le Worker Cloudflare
- (livraison 4) ; ce module enregistre seulement l'appareil dans
+ (livraison 4) ; ce module enregistre l'appareil et ses réglages dans
  Firestore : users/{uid}/appareils/{idAppareil}.
 ==========================================================
 */
 
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { doc, getDoc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, setDoc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { auth, db } from "./firebase.js";
+import { getFoyerId } from "./auth.js";
 import { showToast } from "./toast.js";
 
-/* Clé publique d'envoi (VAPID) : ce n'est PAS un secret.
-   À renseigner avec la clé publique affichée par la page generer-cles-vapid.html. */
+/* Clé publique d'envoi (VAPID) : ce n'est PAS un secret. */
 const VAPID_PUBLIC = "BGS0XRt6dZyeOz01ifAVkDx1L33FId3mUGa8w0RDVFB5ojKF7ncw4EX_5QrVra2CS21SBR1LcyFkFu7MQLF19Gc";
 
 const CLE_ID_APPAREIL = "envie_appareil_id";
+const CLE_REGLAGES = "envie_notif_reglages";
+
+/* ---------- Réglages de l'appareil ---------- */
+
+/* Types de billets qui déclenchent un rappel (les logements sont exclus). Délais en minutes. */
+const TYPES_BILLETS = [
+    { id: "avion", libelle: "✈️ Avion", defaut: 180 },
+    { id: "train", libelle: "🚆 Train", defaut: 60 },
+    { id: "busferry", libelle: "🚌 Bus / ferry", defaut: 60 },
+    { id: "voiture", libelle: "🚗 Location de voiture", defaut: 120 },
+    { id: "parking", libelle: "🅿️ Parking", defaut: 60 },
+    { id: "restaurant", libelle: "🍽️ Restaurant", defaut: 60 },
+    { id: "activite", libelle: "🎟️ Activité / entrée", defaut: 60 },
+    { id: "autre", libelle: "🎫 Autre", defaut: 60 }
+];
+
+const DELAIS_BILLETS = [
+    { minutes: 15, libelle: "15 minutes avant" },
+    { minutes: 30, libelle: "30 minutes avant" },
+    { minutes: 60, libelle: "1 heure avant" },
+    { minutes: 120, libelle: "2 heures avant" },
+    { minutes: 180, libelle: "3 heures avant" },
+    { minutes: 240, libelle: "4 heures avant" },
+    { minutes: 360, libelle: "6 heures avant" }
+];
+
+const RYTHMES = [
+    { id: "hebdo", libelle: "Chaque semaine (le lundi)" },
+    { id: "mensuel", libelle: "Chaque mois (le 1er)" },
+    { id: "aucune", libelle: "Désactivée" }
+];
+
+export function reglagesParDefaut() {
+    return {
+        dates: { actif: true, heure: "08:00", veille: true, jourJ: true, semaine: true },
+        billets: {
+            actif: true,
+            delais: Object.fromEntries(TYPES_BILLETS.map(t => [t.id, t.defaut]))
+        },
+        relances: { voyage: { rythme: "hebdo" }, maison: { rythme: "hebdo" } }
+    };
+}
+
+/* Fusionne des réglages lus avec les valeurs par défaut, en écartant tout ce qui est invalide. */
+export function nettoyerReglages(brut) {
+
+    const r = reglagesParDefaut();
+    const b = brut && typeof brut === "object" ? brut : {};
+
+    if (b.dates && typeof b.dates === "object") {
+        if (typeof b.dates.actif === "boolean") r.dates.actif = b.dates.actif;
+        if (typeof b.dates.heure === "string" && /^([01]\d|2[0-3]):[0-5]\d$/.test(b.dates.heure)) r.dates.heure = b.dates.heure;
+        ["veille", "jourJ", "semaine"].forEach(k => {
+            if (typeof b.dates[k] === "boolean") r.dates[k] = b.dates[k];
+        });
+    }
+
+    if (b.billets && typeof b.billets === "object") {
+        if (typeof b.billets.actif === "boolean") r.billets.actif = b.billets.actif;
+        TYPES_BILLETS.forEach(t => {
+            const v = Number(b.billets.delais?.[t.id]);
+            if (DELAIS_BILLETS.some(d => d.minutes === v)) r.billets.delais[t.id] = v;
+        });
+    }
+
+    ["voyage", "maison"].forEach(mode => {
+        const rythme = b.relances?.[mode]?.rythme;
+        if (RYTHMES.some(x => x.id === rythme)) r.relances[mode].rythme = rythme;
+    });
+
+    return r;
+
+}
+
+export function lireReglages() {
+    try {
+        return nettoyerReglages(JSON.parse(localStorage.getItem(CLE_REGLAGES) || "null"));
+    } catch {
+        return reglagesParDefaut();
+    }
+}
+
+function ecrireReglages(reglages) {
+    try { localStorage.setItem(CLE_REGLAGES, JSON.stringify(reglages)); } catch { /* stockage indisponible */ }
+}
 
 /* ---------- Utilitaires ---------- */
+
+function echapper(texte) {
+    return String(texte ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
 
 function base64VersOctets(base64url) {
     const remplissage = "=".repeat((4 - (base64url.length % 4)) % 4);
@@ -86,6 +178,7 @@ async function enregistrerAppareil(abonnement) {
         foyerId,
         endpoint: json.endpoint,
         cles: { p256dh: json.keys?.p256dh || "", auth: json.keys?.auth || "" },
+        reglages: lireReglages(),
         majLe: maintenant
     }, { merge: true });
 
@@ -101,6 +194,28 @@ async function supprimerAppareil() {
     const utilisateur = auth.currentUser;
     if (!utilisateur) return;
     await deleteDoc(doc(db, "users", utilisateur.uid, "appareils", idAppareil()));
+}
+
+/* Envoie les réglages à Firestore peu après le dernier changement (si l'appareil est abonné). */
+let minuteurSynchro = null;
+
+function programmerSynchro() {
+
+    clearTimeout(minuteurSynchro);
+
+    minuteurSynchro = setTimeout(async () => {
+
+        try {
+            const abonnement = await abonnementActuel();
+            if (abonnement && auth.currentUser && Notification.permission === "granted") {
+                await enregistrerAppareil(abonnement);
+            }
+        } catch (err) {
+            console.warn("Synchronisation des réglages : " + err.message);
+        }
+
+    }, 700);
+
 }
 
 /* ---------- Actions ---------- */
@@ -159,18 +274,40 @@ async function desactiver() {
 
 }
 
-async function testerSurAppareil() {
+/* Notification affichée par l'appareil lui-même (sans serveur) : permet de vérifier l'affichage
+   et l'ouverture du bon écran au toucher. */
+const TESTS = {
+    simple: {
+        titre: "EnVie : test",
+        corps: "Cette notification vient de l'appareil lui-même. Si tu la vois, l'affichage fonctionne.",
+        data: { voyageId: null, billetId: null, vue: null, mode: null }
+    },
+    voyage: {
+        titre: "✈️ Voyages : idées à trier (exemple)",
+        corps: "Touche la notification : l'écran « Trier les idées » doit s'ouvrir.",
+        data: { voyageId: null, billetId: null, vue: "trier", mode: "voyage" }
+    },
+    maison: {
+        titre: "🏠 Maison : tâches à trier (exemple)",
+        corps: "Touche la notification : l'écran Maison « Aujourd'hui » doit s'ouvrir, avec la section À trier.",
+        data: { voyageId: null, billetId: null, vue: "trier", mode: "maison" }
+    }
+};
+
+async function testerSurAppareil(nom) {
+
+    const test = TESTS[nom] || TESTS.simple;
 
     try {
 
         const enregistrement = await navigator.serviceWorker.ready;
 
-        await enregistrement.showNotification("EnVie : test", {
-            body: "Cette notification vient de l'appareil lui-même. Si tu la vois, l'affichage fonctionne.",
+        await enregistrement.showNotification(test.titre, {
+            body: test.corps,
             icon: "./icons/icon-192.png",
             badge: "./icons/icon-192.png",
-            tag: "envie-test-appareil",
-            data: { voyageId: null, billetId: null }
+            tag: "envie-test-appareil-" + nom,
+            data: test.data
         });
 
     } catch (err) {
@@ -202,6 +339,86 @@ function creerModale() {
     modale.querySelector("#notifRetour").addEventListener("click", () => modale.classList.add("hidden"));
 
     return modale;
+
+}
+
+function htmlReglages(r) {
+
+    const coche = (chemin, texte, valeur) => `
+        <label style="display:flex;align-items:center;gap:10px;margin:8px 0;">
+            <input type="checkbox" data-r="${chemin}" ${valeur ? "checked" : ""} style="width:20px;height:20px;">
+            <span>${texte}</span>
+        </label>`;
+
+    const liste = (chemin, options, valeur) => `
+        <select data-r="${chemin}" style="min-height:40px;border-radius:10px;padding:0 8px;max-width:60%;">
+            ${options.map(o => `<option value="${echapper(o.valeur)}" ${String(o.valeur) === String(valeur) ? "selected" : ""}>${echapper(o.libelle)}</option>`).join("")}
+        </select>`;
+
+    const ligne = (libelle, controle) => `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;">
+            <span>${libelle}</span>${controle}
+        </div>`;
+
+    const optionsDelais = DELAIS_BILLETS.map(d => ({ valeur: d.minutes, libelle: d.libelle }));
+    const optionsRythmes = RYTHMES.map(x => ({ valeur: x.id, libelle: x.libelle }));
+
+    return `
+        <hr style="margin:18px 0;border:none;border-top:1px solid #ddd;">
+        <h3 style="margin:0 0 6px;">📅 Dates des envies</h3>
+        ${coche("dates.actif", "Me prévenir avant la date d'une envie", r.dates.actif)}
+        <div id="notifDatesDetail" style="${r.dates.actif ? "" : "opacity:.45;"}">
+            ${ligne("Heure d'envoi (heure de Paris)", `<input type="time" data-r="dates.heure" value="${echapper(r.dates.heure)}" style="min-height:40px;border-radius:10px;padding:0 8px;">`)}
+            ${coche("dates.semaine", "Une semaine avant", r.dates.semaine)}
+            ${coche("dates.veille", "La veille", r.dates.veille)}
+            ${coche("dates.jourJ", "Le jour même", r.dates.jourJ)}
+        </div>
+        <p style="font-size:13px;opacity:.7;">Un rappel supplémentaire peut être ajouté voyage par voyage : menu « … » de la fiche, « Me prévenir avant ».</p>
+
+        <h3 style="margin:18px 0 6px;">🎫 Billets et réservations</h3>
+        ${coche("billets.actif", "Me prévenir avant l'heure d'un billet", r.billets.actif)}
+        <div id="notifBilletsDetail" style="${r.billets.actif ? "" : "opacity:.45;"}">
+            ${TYPES_BILLETS.map(t => ligne(t.libelle, liste(`billets.delais.${t.id}`, optionsDelais, r.billets.delais[t.id]))).join("")}
+        </div>
+        <p style="font-size:13px;opacity:.7;">Toucher la notification ouvre directement le billet.</p>
+
+        <h3 style="margin:18px 0 6px;">🧹 Relances</h3>
+        <p style="font-size:13px;opacity:.7;margin-top:0;">Idées à trier et idées sans date depuis plus de 30 jours, au même horaire que les dates.</p>
+        ${ligne("✈️ Voyages", liste("relances.voyage.rythme", optionsRythmes, r.relances.voyage.rythme))}
+        ${ligne("🏠 Maison", liste("relances.maison.rythme", optionsRythmes, r.relances.maison.rythme))}`;
+
+}
+
+function appliquerChangement(champ) {
+
+    const chemin = champ.dataset.r;
+    if (!chemin) return;
+
+    const reglages = lireReglages();
+    const morceaux = chemin.split(".");
+    let cible = reglages;
+
+    for (let i = 0; i < morceaux.length - 1; i++) cible = cible[morceaux[i]];
+
+    const derniere = morceaux[morceaux.length - 1];
+
+    if (champ.type === "checkbox") {
+        cible[derniere] = champ.checked;
+    } else if (chemin.startsWith("billets.delais.")) {
+        cible[derniere] = Number(champ.value);
+    } else {
+        cible[derniere] = champ.value;
+    }
+
+    const propres = nettoyerReglages(reglages);
+    ecrireReglages(propres);
+    programmerSynchro();
+
+    /* Grisage des blocs désactivés */
+    const dates = document.getElementById("notifDatesDetail");
+    const billets = document.getElementById("notifBilletsDetail");
+    if (dates) dates.style.opacity = propres.dates.actif ? "" : ".45";
+    if (billets) billets.style.opacity = propres.billets.actif ? "" : ".45";
 
 }
 
@@ -253,7 +470,11 @@ async function dessinerModale() {
             ? bouton("notifDesactiver", "Désactiver sur cet appareil")
             : bouton("notifActiver", "Activer sur cet appareil", true)}
         ${bouton("notifTest", "Envoyer un test (sur cet appareil)")}
-        <p style="font-size:13px;opacity:.7;">Le test vérifie seulement l'affichage sur cet appareil, pas l'envoi par le serveur.</p>`;
+        ${bouton("notifTestVoyage", "Test : relance Voyages")}
+        ${bouton("notifTestMaison", "Test : relance Maison")}
+        <p style="font-size:13px;opacity:.7;">Ces tests vérifient l'affichage et l'ouverture du bon écran sur cet appareil, pas l'envoi par le serveur.</p>
+        ${htmlReglages(lireReglages())}
+        <p style="font-size:13px;opacity:.7;margin-top:18px;">Ces réglages sont propres à cet appareil.</p>`;
 
     contenu.querySelector("#notifActiver")?.addEventListener("click", async () => {
         await activer();
@@ -265,7 +486,13 @@ async function dessinerModale() {
         dessinerModale();
     });
 
-    contenu.querySelector("#notifTest")?.addEventListener("click", testerSurAppareil);
+    contenu.querySelector("#notifTest")?.addEventListener("click", () => testerSurAppareil("simple"));
+    contenu.querySelector("#notifTestVoyage")?.addEventListener("click", () => testerSurAppareil("voyage"));
+    contenu.querySelector("#notifTestMaison")?.addEventListener("click", () => testerSurAppareil("maison"));
+
+    contenu.querySelectorAll("[data-r]").forEach(champ => {
+        champ.addEventListener("change", () => appliquerChangement(champ));
+    });
 
 }
 
@@ -297,20 +524,90 @@ function injecterBouton() {
 
 }
 
-/* ---------- Ouverture directe d'un billet ---------- */
+/* ---------- Rappel supplémentaire d'un voyage ---------- */
 
-async function attendreVoyage(voyageId, delaiMax = 20000) {
+const JOURS_RAPPEL = [0, 1, 2, 3, 5, 7, 10, 14, 21, 30];
+
+export async function ouvrirReglageRappel(envieId) {
 
     const { getEnvies } = await import("./storage.js");
+    const envie = getEnvies().find(e => e.id === envieId);
+    if (!envie) return;
+
+    document.getElementById("notifRappelFeuille")?.remove();
+
+    const actuel = Number.isInteger(envie.rappelAvantJours) ? envie.rappelAvantJours : 0;
+
+    const fond = document.createElement("div");
+    fond.id = "notifRappelFeuille";
+    fond.className = "niFeuilleFond";
+    fond.innerHTML = `
+        <div class="niFeuille" role="dialog" aria-label="Me prévenir avant">
+            <div class="niPoignee"></div>
+            <h2 class="niTitreSection" style="font-size:22px">🔔 Me prévenir avant</h2>
+            <p id="notifRappelTitre" style="font-weight:700;margin:4px 0 10px;"></p>
+            <p style="font-size:14px;">En plus des rappels réglés dans Plus, Notifications (une semaine avant, la veille, le jour même), tu peux ajouter un rappel.</p>
+            ${envie.date?.start ? "" : `<p style="font-size:14px;">Ce voyage n'a pas encore de date : le rappel partira une fois la date renseignée.</p>`}
+            <select id="notifRappelJours" style="width:100%;min-height:44px;border-radius:12px;padding:0 10px;margin:8px 0 14px;">
+                ${JOURS_RAPPEL.map(j => `<option value="${j}" ${j === actuel ? "selected" : ""}>${j === 0 ? "Pas de rappel supplémentaire" : (j === 1 ? "1 jour avant" : j + " jours avant")}</option>`).join("")}
+            </select>
+            <div style="display:flex;gap:10px;">
+                <button id="notifRappelEnregistrer" type="button" class="niBouton niBoutonPrimaire" style="flex:1;">Enregistrer</button>
+                <button id="notifRappelAnnuler" type="button" class="niBouton" style="flex:1;">Annuler</button>
+            </div>
+        </div>`;
+
+    fond.querySelector("#notifRappelTitre").textContent = envie.titre || "Voyage";
+
+    fond.addEventListener("click", (evenement) => {
+        if (evenement.target === fond) fond.remove();
+    });
+
+    fond.querySelector("#notifRappelAnnuler").addEventListener("click", () => fond.remove());
+
+    fond.querySelector("#notifRappelEnregistrer").addEventListener("click", async () => {
+
+        const jours = Number(fond.querySelector("#notifRappelJours").value);
+
+        try {
+
+            await updateDoc(doc(db, "foyers", getFoyerId(), "envies", envieId), {
+                rappelAvantJours: jours > 0 ? jours : null,
+                updatedAt: Date.now()
+            });
+
+            showToast(jours > 0 ? `✓ Rappel ${jours} jour${jours > 1 ? "s" : ""} avant` : "✓ Rappel supplémentaire retiré");
+            fond.remove();
+
+        } catch (err) {
+            console.error("Enregistrement du rappel : " + err.message);
+            showToast("❌ Enregistrement impossible");
+        }
+
+    });
+
+    document.body.appendChild(fond);
+
+}
+
+/* ---------- Ouverture directe depuis une notification ---------- */
+
+async function attendre(condition, delaiMax = 20000, pas = 300) {
+
     const debut = Date.now();
 
     while (Date.now() - debut < delaiMax) {
-        if (getEnvies().some(e => e.id === voyageId)) return true;
-        await new Promise(resolve => setTimeout(resolve, 300));
+        if (condition()) return true;
+        await new Promise(resolve => setTimeout(resolve, pas));
     }
 
     return false;
 
+}
+
+async function attendreVoyage(voyageId, delaiMax = 20000) {
+    const { getEnvies } = await import("./storage.js");
+    return attendre(() => getEnvies().some(e => e.id === voyageId), delaiMax);
 }
 
 export async function ouvrirBillet(voyageId, billetId, { ouvrirVoyage = false } = {}) {
@@ -338,23 +635,64 @@ export async function ouvrirBillet(voyageId, billetId, { ouvrirVoyage = false } 
 
 }
 
+/* Relances : ouvre l'écran des idées à trier du bon mode (Voyages ou Maison). */
+export async function ouvrirVue(vue, mode) {
+
+    if (vue !== "trier" || !["voyage", "maison"].includes(mode)) return;
+
+    const stockage = await import("./storage.js");
+
+    /* Données chargées (le foyer peut aussi être vide : on n'attend alors qu'un court délai) */
+    await attendre(() => stockage.getEnvies().length > 0, 12000);
+
+    if (stockage.getModeActif() !== mode) {
+        stockage.basculerMode(mode);
+        await attendre(() => stockage.getModeActif() === mode, 8000);
+        await new Promise(resolve => setTimeout(resolve, 900));
+    }
+
+    const nouvelleInterface = document.body.classList.contains("niActive");
+
+    if (mode === "voyage") {
+
+        if (nouvelleInterface) {
+            (await import("./trier.js")).openTrier();
+        } else {
+            document.getElementById("btnInbox")?.click();
+        }
+
+    } else if (nouvelleInterface) {
+
+        (await import("./maison.js")).openMaisonAujourdhui();
+
+    }
+
+}
+
 function brancherOuvertureDepuisNotification() {
 
     /* Notification touchée alors que l'application est déjà ouverte */
     navigator.serviceWorker?.addEventListener("message", (event) => {
+
         if (event.data?.type === "OUVRIR_BILLET") {
             ouvrirBillet(event.data.voyageId, event.data.billetId, { ouvrirVoyage: true });
+        } else if (event.data?.type === "OUVRIR_VUE") {
+            ouvrirVue(event.data.vue, event.data.mode);
         }
+
     });
 
-    /* Application ouverte par la notification : adresse ?ouvrir=<voyage>&billet=<billet>.
-       On attend que les données soient chargées avant d'ouvrir le voyage, puis le billet. */
+    /* Application ouverte par la notification :
+       ?ouvrir=<voyage>&billet=<billet>  ou  ?vue=trier&mode=voyage|maison.
+       On attend que les données soient chargées avant d'ouvrir. */
     const params = new URLSearchParams(window.location.search);
     const voyageId = params.get("ouvrir");
     const billetId = params.get("billet");
 
     if (voyageId && billetId) {
         ouvrirBillet(voyageId, billetId, { ouvrirVoyage: true });
+    } else if (params.get("vue")) {
+        ouvrirVue(params.get("vue"), params.get("mode"));
     }
 
 }
