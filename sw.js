@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v270';
+const CACHE_NAME = 'envie-cache-v271';
 
  
  
@@ -297,7 +297,7 @@ self.addEventListener('push', (event) => {
         icon: './icons/icon-192.png',
         badge: './icons/icon-192.png',
         tag: donnees.tag || undefined,
-        data: { voyageId: donnees.voyageId || null, billetId: donnees.billetId || null }
+        data: { voyageId: donnees.voyageId || null, billetId: donnees.billetId || null, vue: donnees.vue || null, mode: donnees.mode || null }
     };
 
     /* Sur iPhone, chaque message push doit afficher une notification. */
@@ -314,6 +314,12 @@ function adresseDepuisNotification(data) {
 
     if (data?.billetId)
         params.set('billet', data.billetId);
+
+    if (!data?.voyageId && data?.vue) {
+        params.set('vue', data.vue);
+        if (data.mode)
+            params.set('mode', data.mode);
+    }
 
     const texte = params.toString();
 
@@ -339,6 +345,8 @@ self.addEventListener('notificationclick', (event) => {
 
                 if (data.voyageId) {
                     fenetre.postMessage({ type: 'OUVRIR_BILLET', voyageId: data.voyageId, billetId: data.billetId || null });
+                } else if (data.vue) {
+                    fenetre.postMessage({ type: 'OUVRIR_VUE', vue: data.vue, mode: data.mode || null });
                 }
 
                 return;
