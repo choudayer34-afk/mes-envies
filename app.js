@@ -30,6 +30,7 @@ import { initPhotoDescription } from "./js/photos.js";
 import { initPhotoViewer } from "./js/photos.js";
 import { initPlus } from "./js/plus.js";
 import { initNouvelleInterface } from "./js/nouvelle-interface.js";
+import { initNotifications } from "./js/notifications.js";
 import { initCatalogue } from "./js/catalogue.js";
 import { initRegionFinder } from "./js/region.js";
 import { initPromptRegionSync } from "./js/storage.js";
@@ -326,6 +327,7 @@ document.getElementById("btnCreerVoyage")?.addEventListener("click", openModalCo
   
 initPlus();
 initNouvelleInterface();
+initNotifications();
 
     initFicheTitre();
    initFicheDescription();

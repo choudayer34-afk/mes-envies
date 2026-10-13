@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v269';
+const CACHE_NAME = 'envie-cache-v270';
 
  
  
@@ -57,7 +57,8 @@ const APP_SHELL = [
      './js/calendrier.js',
     './js/itineraire.js',
     './js/tableau-saisie.js',
- './js/ autour-de-moi.js',
+ './js/autour-de-moi.js',
+    './js/notifications.js',
     './js/album.js',
     './js/album-pdf.js',
     './js/etape-finder.js',
@@ -67,7 +68,6 @@ const APP_SHELL = [
     './js/utils.js',
     './js/verrouillage.js',
     './js/db.js',
-    './js/geocoding.js',
     './js/outils.js',
     './js/agenda-local.js',
     './js/carte-voyages.js',
@@ -274,5 +274,81 @@ self.addEventListener('message', (event) => {
     if (event.data?.type === 'GET_VERSION') {
         event.source.postMessage({ type: 'VERSION', version: CACHE_NAME });
     }
+
+});
+
+
+/* ---------- Notifications push ---------- */
+
+self.addEventListener('push', (event) => {
+
+    let donnees = {};
+
+    try {
+        donnees = event.data ? event.data.json() : {};
+    } catch (err) {
+        donnees = { titre: "EnVie", corps: event.data ? event.data.text() : "" };
+    }
+
+    const titre = donnees.titre || "EnVie";
+
+    const options = {
+        body: donnees.corps || "",
+        icon: './icons/icon-192.png',
+        badge: './icons/icon-192.png',
+        tag: donnees.tag || undefined,
+        data: { voyageId: donnees.voyageId || null, billetId: donnees.billetId || null }
+    };
+
+    /* Sur iPhone, chaque message push doit afficher une notification. */
+    event.waitUntil(self.registration.showNotification(titre, options));
+
+});
+
+function adresseDepuisNotification(data) {
+
+    const params = new URLSearchParams();
+
+    if (data?.voyageId)
+        params.set('ouvrir', data.voyageId);
+
+    if (data?.billetId)
+        params.set('billet', data.billetId);
+
+    const texte = params.toString();
+
+    return new URL('./index.html' + (texte ? '?' + texte : ''), self.registration.scope).href;
+
+}
+
+self.addEventListener('notificationclick', (event) => {
+
+    event.notification.close();
+
+    const data = event.notification.data || {};
+
+    event.waitUntil((async () => {
+
+        const fenetres = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+
+        for (const fenetre of fenetres) {
+
+            if ('focus' in fenetre) {
+
+                await fenetre.focus();
+
+                if (data.voyageId) {
+                    fenetre.postMessage({ type: 'OUVRIR_BILLET', voyageId: data.voyageId, billetId: data.billetId || null });
+                }
+
+                return;
+
+            }
+
+        }
+
+        await self.clients.openWindow(adresseDepuisNotification(data));
+
+    })());
 
 });
