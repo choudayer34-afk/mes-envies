@@ -634,17 +634,20 @@ async function attendreVoyage(voyageId, delaiMax = 20000) {
 
 export async function ouvrirBillet(voyageId, billetId, { ouvrirVoyage = false } = {}) {
 
-    if (!voyageId || !billetId) return;
+    if (!voyageId) return;
 
     if (!(await attendreVoyage(voyageId))) return;
 
     await fermerFenetresOuvertes();
 
-    if (ouvrirVoyage) {
+    if (ouvrirVoyage || !billetId) {
         const { openEnvie } = await import("./envie.js");
         openEnvie(voyageId, null);
-        await new Promise(resolve => setTimeout(resolve, 900));
+        await new Promise(resolve => setTimeout(resolve, billetId ? 900 : 100));
     }
+
+    /* Rappel de date : on s'arrête sur la fiche, sans billet à ouvrir. */
+    if (!billetId) return;
 
     const { listerBillets } = await import("./documents.js");
     const billet = listerBillets(voyageId).find(b => b.id === billetId);
@@ -717,7 +720,7 @@ function brancherOuvertureDepuisNotification() {
     const voyageId = params.get("ouvrir");
     const billetId = params.get("billet");
 
-    if (voyageId && billetId) {
+    if (voyageId) {
         ouvrirBillet(voyageId, billetId, { ouvrirVoyage: true });
     } else if (params.get("vue")) {
         ouvrirVue(params.get("vue"), params.get("mode"));
