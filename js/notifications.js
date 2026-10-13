@@ -541,6 +541,8 @@ export async function ouvrirReglageRappel(envieId) {
     const fond = document.createElement("div");
     fond.id = "notifRappelFeuille";
     fond.className = "niFeuilleFond";
+    /* Chaque écran a son propre niveau d'empilement dans ni.css (fiche du voyage : 2150, son menu : 2250). */
+    fond.style.zIndex = "2400";
     fond.innerHTML = `
         <div class="niFeuille" role="dialog" aria-label="Me prévenir avant">
             <div class="niPoignee"></div>
@@ -592,6 +594,26 @@ export async function ouvrirReglageRappel(envieId) {
 
 /* ---------- Ouverture directe depuis une notification ---------- */
 
+/* Referme les fenêtres qui pourraient masquer l'écran à ouvrir (réglage des notifications, menu Plus,
+   feuilles, fiche ouverte). Sans cela, l'écran s'ouvre mais reste caché derrière la fenêtre. */
+async function fermerFenetresOuvertes() {
+
+    document.getElementById("notifModal")?.classList.add("hidden");
+    document.getElementById("plusModal")?.classList.add("hidden");
+    document.querySelectorAll(".niFeuilleFond").forEach(feuille => feuille.remove());
+
+    const fiche = document.getElementById("ficheOverlay");
+
+    if (fiche && !fiche.classList.contains("hidden")) {
+        try {
+            (await import("./envie.js")).closeFiche();
+        } catch (err) {
+            console.warn("Fermeture de la fiche : " + err.message);
+        }
+    }
+
+}
+
 async function attendre(condition, delaiMax = 20000, pas = 300) {
 
     const debut = Date.now();
@@ -615,6 +637,8 @@ export async function ouvrirBillet(voyageId, billetId, { ouvrirVoyage = false } 
     if (!voyageId || !billetId) return;
 
     if (!(await attendreVoyage(voyageId))) return;
+
+    await fermerFenetresOuvertes();
 
     if (ouvrirVoyage) {
         const { openEnvie } = await import("./envie.js");
@@ -651,12 +675,16 @@ export async function ouvrirVue(vue, mode) {
         await new Promise(resolve => setTimeout(resolve, 900));
     }
 
+    await fermerFenetresOuvertes();
+
     const nouvelleInterface = document.body.classList.contains("niActive");
 
     if (mode === "voyage") {
 
         if (nouvelleInterface) {
             (await import("./trier.js")).openTrier();
+            /* Au-dessus de la fiche d'un voyage ou d'un autre écran resté ouvert (ni.css : jusqu'à 2400). */
+            document.getElementById("niTrier")?.style.setProperty("z-index", "2450");
         } else {
             document.getElementById("btnInbox")?.click();
         }
