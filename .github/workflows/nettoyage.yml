@@ -1,0 +1,29 @@
+name: Nettoyage unique du dépôt
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  nettoyage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Nettoyer
+        run: |
+          set -e
+          mv -f nouvelle-interface.js js/nouvelle-interface.js
+          for f in *.js; do
+            case "$f" in app.js|sw.js) continue;; esac
+            if [ -f "js/$f" ] && cmp -s "$f" "js/$f"; then git rm -q "$f"; fi
+          done
+          git rm -q --ignore-unmatch wrangler.jsonc download firebase.json ". gitignore" etape*.patch storage.patch LISEZMOI-etape*.txt
+          sed -i "s/envie-cache-v268/envie-cache-v269/" sw.js
+          git add -A
+          git config user.name "nettoyage-depot"
+          git config user.email "nettoyage@users.noreply.github.com"
+          git commit -m "Nettoyage du dépôt : doublons et fichiers hors sujet"
+          git push
