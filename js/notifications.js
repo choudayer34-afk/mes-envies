@@ -18,6 +18,8 @@ import { getFoyerId } from "./auth.js";
 import { showToast } from "./toast.js";
 
 /* Clé publique d'envoi (VAPID) : ce n'est PAS un secret. */
+/* Adresse du service d'envoi (Worker Cloudflare, dossier worker/). Publique. */
+const URL_SERVEUR = "https://mes-envies.choudayer34.workers.dev";
 const VAPID_PUBLIC = "BGS0XRt6dZyeOz01ifAVkDx1L33FId3mUGa8w0RDVFB5ojKF7ncw4EX_5QrVra2CS21SBR1LcyFkFu7MQLF19Gc";
 
 const CLE_ID_APPAREIL = "envie_appareil_id";
@@ -317,6 +319,50 @@ async function testerSurAppareil(nom) {
 
 }
 
+/* Test envoyé par le serveur : vérifie toute la chaîne (connexion, Firestore, Worker, service de notification). */
+async function testerParServeur(type, boutonTest) {
+
+    const utilisateur = auth.currentUser;
+
+    if (!utilisateur) {
+        showToast("Connecte-toi d'abord");
+        return;
+    }
+
+    if (boutonTest) boutonTest.disabled = true;
+
+    try {
+
+        /* L'appareil doit être à jour dans Firestore avant que le serveur le cherche. */
+        const abonnement = await abonnementActuel();
+        if (!abonnement) throw new Error("Notifications non activées sur cet appareil");
+        await enregistrerAppareil(abonnement);
+
+        const jeton = await utilisateur.getIdToken();
+
+        const reponse = await fetch(`${URL_SERVEUR}/test`, {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${jeton}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ appareilId: idAppareil(), type })
+        });
+
+        if (!reponse.ok) {
+            let message = `Erreur ${reponse.status}`;
+            try { message = (await reponse.json()).erreur || message; } catch { /* réponse non JSON */ }
+            throw new Error(message);
+        }
+
+        showToast("✓ Envoyé par le serveur : la notification arrive dans quelques secondes");
+
+    } catch (err) {
+        console.error("Test serveur : " + err.message);
+        showToast("❌ " + err.message);
+    } finally {
+        if (boutonTest) boutonTest.disabled = false;
+    }
+
+}
+
 /* ---------- Écran de réglage ---------- */
 
 function creerModale() {
@@ -422,6 +468,57 @@ function appliquerChangement(champ) {
 
 }
 
+/* Version de l'application : nom du cache du service worker (envie-cache-vNNN). */
+async function afficherVersion(element) {
+
+    if (!element) return;
+
+    try {
+        const noms = (await caches.keys()).filter(n => n.startsWith("envie-cache-v"));
+        const numero = noms.map(n => Number(n.replace("envie-cache-v", ""))).filter(Number.isFinite).sort((a, b) => b - a)[0];
+        if (numero) element.textContent = `Version v${numero}`;
+    } catch (err) {
+        /* version non disponible : rien à afficher */
+    }
+
+}
+
+function htmlModeEmploi() {
+    return `
+        <details style="margin-top:18px;">
+            <summary style="cursor:pointer;"><strong>Mode d'emploi</strong></summary>
+            <div style="margin-top:8px;font-size:14px;line-height:1.5;">
+                <p><strong>Activer</strong></p>
+                <ul>
+                    <li>Sur iPhone : installe d'abord EnVie sur l'écran d'accueil (Partager, « Sur l'écran d'accueil »), puis ouvre l'application depuis l'icône.</li>
+                    <li>Touche « Activer sur cet appareil » et accepte l'autorisation.</li>
+                    <li>Chaque téléphone s'active séparément, avec ses propres réglages.</li>
+                </ul>
+                <p><strong>Rappels de dates</strong></p>
+                <ul>
+                    <li>Une semaine avant, la veille et le jour J, à l'heure choisie (heure de Paris).</li>
+                    <li>Pour un voyage ou une envie : menu « … », « Me prévenir avant », pour ajouter un délai de ton choix.</li>
+                </ul>
+                <p><strong>Billets</strong></p>
+                <ul>
+                    <li>Un rappel avant l'heure de départ, selon le type (par exemple 3 h avant un vol, 1 h avant un train).</li>
+                    <li>Touche la notification : le billet s'ouvre directement.</li>
+                </ul>
+                <p><strong>Relances</strong></p>
+                <ul>
+                    <li>Chaque lundi ou chaque 1er du mois, séparément pour Voyages et Maison.</li>
+                    <li>Elles comptent les éléments à trier. Touche la notification : l'écran « Trier » s'ouvre.</li>
+                </ul>
+                <p><strong>Bon à savoir</strong></p>
+                <ul>
+                    <li>Une envie privée ne prévient que son propriétaire.</li>
+                    <li>Le serveur vérifie toutes les 15 minutes : un rappel peut arriver avec un léger décalage.</li>
+                    <li>Si rien n'arrive : vérifie « Activées sur cet appareil » ci-dessus, puis fais un test par le serveur.</li>
+                </ul>
+            </div>
+        </details>`;
+}
+
 async function dessinerModale() {
 
     const contenu = document.getElementById("notifContenu");
@@ -469,12 +566,27 @@ async function dessinerModale() {
         ${actif
             ? bouton("notifDesactiver", "Désactiver sur cet appareil")
             : bouton("notifActiver", "Activer sur cet appareil", true)}
-        ${bouton("notifTest", "Envoyer un test (sur cet appareil)")}
-        ${bouton("notifTestVoyage", "Test : relance Voyages")}
-        ${bouton("notifTestMaison", "Test : relance Maison")}
-        <p style="font-size:13px;opacity:.7;">Ces tests vérifient l'affichage et l'ouverture du bon écran sur cet appareil, pas l'envoi par le serveur.</p>
+        ${actif ? `
+        <p style="margin:14px 0 6px;"><strong>Test par le serveur</strong></p>
+        ${bouton("notifServeurSimple", "Envoyer un test")}
+        ${bouton("notifServeurVoyage", "Test : relance Voyages")}
+        ${bouton("notifServeurMaison", "Test : relance Maison")}
+        <p style="font-size:13px;opacity:.7;">Ces tests passent par le serveur, comme les vrais rappels. Touche ensuite la notification : l'écran « Trier les idées » doit s'ouvrir.</p>` : ""}
+        <details style="margin:14px 0;">
+            <summary style="cursor:pointer;"><strong>Test sur l'appareil seul</strong></summary>
+            <div style="margin-top:8px;">
+                ${bouton("notifTest", "Envoyer un test (sur cet appareil)")}
+                ${bouton("notifTestVoyage", "Test local : relance Voyages")}
+                ${bouton("notifTestMaison", "Test local : relance Maison")}
+                <p style="font-size:13px;opacity:.7;">Ces tests vérifient l'affichage et l'ouverture du bon écran, sans passer par le serveur.</p>
+            </div>
+        </details>
         ${htmlReglages(lireReglages())}
-        <p style="font-size:13px;opacity:.7;margin-top:18px;">Ces réglages sont propres à cet appareil.</p>`;
+        <p style="font-size:13px;opacity:.7;margin-top:18px;">Ces réglages sont propres à cet appareil.</p>
+        ${htmlModeEmploi()}
+        <p id="notifVersion" style="font-size:12px;opacity:.55;text-align:center;margin-top:14px;"></p>`;
+
+    afficherVersion(contenu.querySelector("#notifVersion"));
 
     contenu.querySelector("#notifActiver")?.addEventListener("click", async () => {
         await activer();
@@ -485,6 +597,10 @@ async function dessinerModale() {
         await desactiver();
         dessinerModale();
     });
+
+    contenu.querySelector("#notifServeurSimple")?.addEventListener("click", (e) => testerParServeur("simple", e.currentTarget));
+    contenu.querySelector("#notifServeurVoyage")?.addEventListener("click", (e) => testerParServeur("voyage", e.currentTarget));
+    contenu.querySelector("#notifServeurMaison")?.addEventListener("click", (e) => testerParServeur("maison", e.currentTarget));
 
     contenu.querySelector("#notifTest")?.addEventListener("click", () => testerSurAppareil("simple"));
     contenu.querySelector("#notifTestVoyage")?.addEventListener("click", () => testerSurAppareil("voyage"));
