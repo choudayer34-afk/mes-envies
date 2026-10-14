@@ -17,6 +17,7 @@ import { brancherDictee } from "./capturer.js";
 import { dateLocaleISO } from "./documents.js";
 import { showToast } from "./toast.js";
 import { openMaisonFiche, fermerMaisonFiche } from "./maison-fiche.js";
+import { installerBalayage, balayageEnCours } from "./balayage.js";
 
 const ZONES_DEFAUT = ["Jardin", "Salle de bain", "Cuisine", "Garage", "Chambre", "Salon"];
 const LIBELLES_DEVIS = { a_contacter: "À contacter", rdv_planifie: "Rendez-vous", devis_recu: "Devis reçu" };
@@ -137,7 +138,7 @@ function surveiller(ecran, dessiner) {
     minuteur = setInterval(() => {
         if (!ecran.isConnected) { clearInterval(minuteur); return; }
         const s = signature();
-        if (s !== derniere) { derniere = s; dessiner(); }
+        if (s !== derniere && !balayageEnCours()) { derniere = s; dessiner(); }
     }, 1000);
 }
 
@@ -218,6 +219,7 @@ export function openMaisonAujourdhui() {
     ecran.className = "niEcran niEcranAvecBarre";
     ecran.setAttribute("aria-label", "Aujourd'hui");
     document.body.appendChild(ecran);
+    installerBalayage(ecran);
     dessinerAujourdhui(ecran);
     surveiller(ecran, () => dessinerAujourdhui(ecran));
 }

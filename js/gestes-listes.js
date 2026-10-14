@@ -5,21 +5,14 @@
    - vers la droite : cocher / décocher
    - vers la gauche : supprimer (avec la confirmation habituelle)
  S'appuie sur les boutons existants : aucune logique dupliquée.
- Listes des voyages seulement (pas Maison). Glisser-déposer
+ Voyages et Maison. Glisser-déposer
  par la poignée ⠿ et boutons de chaque ligne inchangés.
 ==========================================================
 */
 
-import { getModeActif } from "./storage.js";
-
 const SEUIL = 80;          /* distance pour déclencher l'action */
 const DEMARRAGE = 12;      /* distance avant de considérer un glissement horizontal */
 const CONTENEURS = ["checklistContainer", "todoContainer"];
-
-function gestesPermis() {
-    return getModeActif() !== "maison"
-        && document.getElementById("ficheModeIcone")?.textContent.trim() !== "🏠";
-}
 
 function installer(conteneur) {
 
@@ -38,7 +31,6 @@ function installer(conteneur) {
 
     conteneur.addEventListener("pointerdown", e => {
         if (e.pointerType === "mouse" && e.button !== 0) return;
-        if (!gestesPermis()) return;
         const cible = e.target.closest(".checklistRow");
         if (!cible || !conteneur.contains(cible)) return;
         if (e.target.closest(".dragHandle, button, a, input, select, textarea")) return;

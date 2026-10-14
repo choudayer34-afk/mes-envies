@@ -10,12 +10,13 @@
 import {
     getEnvies, createEnvie, isContainerCategory, updateEnvieRealise,
     updateEnvieDevis, updateEnvieComparateur, synchroniserChecklistDepuisProduit,
-    updateEnviePeinture, updateEnvieBois
+    updateEnviePeinture, updateEnvieBois, supprimerVoyageEtContenu
 } from "./storage.js";
 import { openEnvie } from "./envie.js";
 import { dateLocaleISO } from "./documents.js";
 import { choisirZone } from "./maison.js";
 import { showToast } from "./toast.js";
+import { installerBalayage, balayageEnCours } from "./balayage.js";
 
 let minuteur = null;
 
@@ -245,11 +246,13 @@ function dessiner(ecran, id) {
             </div>
 
             <button type="button" class="niLienDiscret" id="niMfComplete">Ouvrir la fiche complète (photos, notes, liens…)</button>
+            <button type="button" class="niLienDiscret" id="niMfSupprimer" style="color:#B42318;margin-top:18px">Supprimer le projet</button>
         </div>`;
 
     ecran.querySelector("#niMfRetour").addEventListener("click", fermerMaisonFiche);
     ecran.querySelector("#niMfZone").addEventListener("click", () => choisirZone(id));
     ecran.querySelector("#niMfComplete").addEventListener("click", () => openEnvie(id));
+    ecran.querySelector("#niMfSupprimer").addEventListener("click", () => confirmerSuppressionProjet(id));
     ecran.querySelectorAll("[data-ouvrir]").forEach(b => b.addEventListener("click", () => openEnvie(b.dataset.ouvrir)));
     ecran.querySelectorAll("[data-coche]").forEach(b => b.addEventListener("click", () => {
         const e = getEnvies().find(x => x.id === b.dataset.coche);
@@ -271,6 +274,54 @@ function dessiner(ecran, id) {
     });
     ecran.querySelector("#niMfDevis").addEventListener("click", () => ouvrirFormulaire(id, "devis"));
     ecran.querySelector("#niMfProduit").addEventListener("click", () => ouvrirFormulaire(id, "produit"));
+}
+
+/* Confirmation dans l'application : le projet et ses tâches vont dans la corbeille. */
+function confirmerSuppressionProjet(id) {
+
+    const projet = projetDe(id);
+    if (!projet) return;
+
+    const nb = tachesDe(id).length;
+
+    document.getElementById("niMfSuppression")?.remove();
+
+    const fond = document.createElement("div");
+    fond.id = "niMfSuppression";
+    fond.className = "niFeuilleFond";
+    fond.style.zIndex = "2400";
+    fond.innerHTML = `
+        <div class="niFeuille" role="dialog" aria-label="Supprimer le projet">
+            <div class="niPoignee"></div>
+            <h2 class="niTitreSection" style="font-size:22px">Supprimer « ${echapper(projet.titre || "ce projet")} » ?</h2>
+            <p style="margin:8px 0 16px;line-height:1.45;">Le projet${nb ? ` et ses ${nb} tâche${nb > 1 ? "s" : ""}` : ""} iront dans la corbeille. Tu pourras les restaurer depuis Plus, Corbeille.</p>
+            <button type="button" id="niMfSupprConfirmer" class="niBouton niBoutonPrimaire" style="width:100%;margin-bottom:10px;background:#B42318;border-color:#B42318;">Supprimer le projet</button>
+            <button type="button" id="niMfSupprAnnuler" class="niBouton" style="width:100%;">Annuler</button>
+        </div>`;
+    document.body.appendChild(fond);
+
+    fond.addEventListener("click", e => { if (e.target === fond) fond.remove(); });
+    fond.querySelector("#niMfSupprAnnuler").addEventListener("click", () => fond.remove());
+
+    const boutonConfirmer = fond.querySelector("#niMfSupprConfirmer");
+
+    boutonConfirmer.addEventListener("click", async () => {
+
+        boutonConfirmer.disabled = true;
+
+        try {
+            await supprimerVoyageEtContenu(id);
+            fond.remove();
+            fermerMaisonFiche();
+            showToast("✓ Projet déplacé dans la corbeille");
+        } catch (err) {
+            console.error("Suppression du projet : " + err.message);
+            boutonConfirmer.disabled = false;
+            showToast("❌ Suppression impossible : " + err.message);
+        }
+
+    });
+
 }
 
 function ouvrirFormulaire(projetId, sorte) {
@@ -343,12 +394,13 @@ export function openMaisonFiche(projetId) {
     ecran.className = "niEcran";
     ecran.setAttribute("aria-label", "Projet");
     document.body.appendChild(ecran);
+    installerBalayage(ecran);
     dessiner(ecran, projetId);
     let derniere = signature(projetId);
     minuteur = setInterval(() => {
         if (!ecran.isConnected) { clearInterval(minuteur); return; }
         const s = signature(projetId);
-        if (s !== derniere) { derniere = s; dessiner(ecran, projetId); }
+        if (s !== derniere && !balayageEnCours()) { derniere = s; dessiner(ecran, projetId); }
     }, 1000);
 }
 
