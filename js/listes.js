@@ -28,6 +28,7 @@ export function fermerListes() {
     document.getElementById("niListes")?.remove();
     document.getElementById("niListesReprise")?.remove();
     document.getElementById("niListesModeles")?.remove();
+    document.getElementById("niListesSuppression")?.remove();
 }
 
 function listeDe(voyageId) {
@@ -54,6 +55,8 @@ export function openListes(voyageOuId) {
     document.body.appendChild(ecran);
 
     const etat = { statut: "tous", personne: "", modifier: false, categorie: "" };
+    let glissement = false;      /* un glissement est en cours : pas de redessin */
+    let derniere = "";
 
     function dessiner() {
 
@@ -88,7 +91,7 @@ export function openListes(voyageOuId) {
                 <div class="niListePers">${i.assignedTo.map(pid => `<button type="button" class="niPuceMini${i.checkedBy?.[pid] ? " niPuceMiniOk" : ""}" data-item="${echapper(i.id)}" data-pers="${echapper(pid)}" aria-pressed="${!!i.checkedBy?.[pid]}">${echapper(nomPersonne(pid))}</button>`).join("")}</div>` : "";
             const qui = !plusieurs && (i.assignedTo || []).length === 1 ? nomPersonne(i.assignedTo[0]) : "";
             return `
-                <div class="niListeLigne${i.checked ? " niFait" : ""}">
+                <div class="niListeLigne${i.checked ? " niFait" : ""}" data-id="${echapper(i.id)}">
                     <button type="button" class="niListeCase" data-coche="${echapper(i.id)}" aria-pressed="${!!i.checked}" aria-label="${i.checked ? "Décocher" : "Cocher"} ${echapper(i.texte)}">${i.checked ? "✓" : ""}</button>
                     <div class="niDocTexte">
                         <span class="niDocTitre">${echapper(i.texte)}${i.quantite > 1 ? ` <span class="niTag">× ${i.quantite}</span>` : ""}</span>
@@ -143,12 +146,16 @@ export function openListes(voyageOuId) {
         ecran.querySelectorAll("[data-personne]").forEach(b => b.addEventListener("click", () => { etat.personne = etat.personne === b.dataset.personne ? "" : b.dataset.personne; dessiner(); }));
 
         ecran.querySelectorAll("[data-coche]").forEach(b => b.addEventListener("click", () => {
+            const avant = signature(voyageId);
             toggleChecklistItem(voyageId, b.dataset.coche);
             dessiner();
+            redessinerQuandMisAJour(avant);
         }));
         ecran.querySelectorAll("[data-pers]").forEach(b => b.addEventListener("click", () => {
+            const avant = signature(voyageId);
             toggleChecklistItemForPersonne(voyageId, b.dataset.item, b.dataset.pers);
             dessiner();
+            redessinerQuandMisAJour(avant);
         }));
         ecran.querySelectorAll("[data-edit]").forEach(b => b.addEventListener("click", () => {
             const item = listeDe(voyageId).find(i => i.id === b.dataset.edit);
@@ -158,12 +165,7 @@ export function openListes(voyageOuId) {
             const item = listeDe(voyageId).find(i => i.id === b.dataset.assign);
             if (item) openAssignModal(voyageId, item);
         }));
-        ecran.querySelectorAll("[data-suppr]").forEach(b => b.addEventListener("click", () => {
-            const item = listeDe(voyageId).find(i => i.id === b.dataset.suppr);
-            if (!confirm(`Supprimer « ${item?.texte || "cet article"} » ?`)) return;
-            deleteChecklistItem(voyageId, b.dataset.suppr);
-            dessiner();
-        }));
+        ecran.querySelectorAll("[data-suppr]").forEach(b => b.addEventListener("click", () => demanderSuppression(b.dataset.suppr)));
 
         ecran.querySelector("#niListesAjout").addEventListener("submit", evenement => {
             evenement.preventDefault();
@@ -171,13 +173,141 @@ export function openListes(voyageOuId) {
             const texte = champ.value.trim();
             if (!texte) return;
             etat.categorie = ecran.querySelector("#niListesCat").value;
+            const avant = signature(voyageId);
             addChecklistItem(voyageId, texte, 1, etat.categorie || null);
             dessiner();
             ecran.querySelector("#niListesTexte").focus();
+            redessinerQuandMisAJour(avant, { focus: true });
         });
 
         ecran.querySelector("#niListesReprendre").addEventListener("click", () => ouvrirReprise());
         ecran.querySelector("#niListesModele").addEventListener("click", () => ouvrirModeles());
+    }
+
+    /* Les données de l'écran arrivent de Firestore un instant après l'action : on redessine dès qu'elles ont changé
+       (sans cela, un article ajouté n'apparaît qu'à la saisie suivante). */
+    function redessinerQuandMisAJour(avant, { focus = false } = {}) {
+
+        let essais = 0;
+
+        const attente = setInterval(() => {
+
+            essais++;
+
+            if (!ecran.isConnected) { clearInterval(attente); return; }
+
+            if (signature(voyageId) !== avant) {
+                clearInterval(attente);
+                derniere = signature(voyageId);
+                const texte = ecran.querySelector("#niListesTexte")?.value || "";
+                dessiner();
+                const champ = ecran.querySelector("#niListesTexte");
+                if (champ && texte) champ.value = texte;
+                if (focus) champ?.focus();
+            } else if (essais >= 40) {
+                clearInterval(attente);
+            }
+
+        }, 75);
+
+    }
+
+    /* Confirmation dans l'application (les fenêtres natives confirm() sont écartées du projet). */
+    function demanderSuppression(itemId) {
+
+        const item = listeDe(voyageId).find(i => i.id === itemId);
+        if (!item) return;
+
+        document.getElementById("niListesSuppression")?.remove();
+
+        const fond = document.createElement("div");
+        fond.id = "niListesSuppression";
+        fond.className = "niFeuilleFond";
+        fond.style.zIndex = "2400";
+        fond.innerHTML = `
+            <div class="niFeuille" role="dialog" aria-label="Supprimer l'article">
+                <div class="niPoignee"></div>
+                <h2 class="niTitreSection" style="font-size:22px">Supprimer « ${echapper(item.texte || "cet article")} » ?</h2>
+                <button type="button" id="niListesSupprConfirmer" class="niBouton niBoutonPrimaire" style="width:100%;margin:12px 0 10px;background:#B42318;border-color:#B42318;">Supprimer</button>
+                <button type="button" id="niListesSupprAnnuler" class="niBouton" style="width:100%;">Annuler</button>
+            </div>`;
+        document.body.appendChild(fond);
+
+        fond.addEventListener("click", e => { if (e.target === fond) fond.remove(); });
+        fond.querySelector("#niListesSupprAnnuler").addEventListener("click", () => fond.remove());
+        fond.querySelector("#niListesSupprConfirmer").addEventListener("click", () => {
+            const avant = signature(voyageId);
+            deleteChecklistItem(voyageId, itemId);
+            fond.remove();
+            dessiner();
+            redessinerQuandMisAJour(avant);
+        });
+
+    }
+
+    /* Glisser une ligne : vers la droite, coche ou décoche ; vers la gauche, supprime (après confirmation). */
+    function installerGestes() {
+
+        /* Le défilement vertical reste libre ; l'horizontal est réservé au geste. */
+        ecran.style.touchAction = "pan-y";
+
+        const SEUIL = 80, DEMARRAGE = 12;
+        let ligne = null, x0 = 0, y0 = 0, dx = 0, actif = false, annule = false, vientDeGlisser = false;
+
+        function reinitialiser() {
+            if (ligne) {
+                const l = ligne;
+                l.style.transition = "transform .18s ease, background-color .18s ease";
+                l.style.transform = "";
+                l.style.backgroundColor = "";
+                setTimeout(() => { l.style.transition = ""; }, 200);
+            }
+            ligne = null; dx = 0; actif = false; annule = false;
+            glissement = false;
+        }
+
+        ecran.addEventListener("pointerdown", e => {
+            if (e.pointerType === "mouse" && e.button !== 0) return;
+            const cible = e.target.closest(".niListeLigne");
+            if (!cible || !ecran.contains(cible)) return;
+            if (e.target.closest("button, a, input, select, textarea")) return;
+            ligne = cible; x0 = e.clientX; y0 = e.clientY; dx = 0; actif = false; annule = false;
+        });
+
+        ecran.addEventListener("pointermove", e => {
+            if (!ligne || annule) return;
+            dx = e.clientX - x0;
+            const dy = e.clientY - y0;
+            if (!actif) {
+                if (Math.abs(dy) > DEMARRAGE && Math.abs(dy) > Math.abs(dx)) { annule = true; ligne = null; return; }
+                if (Math.abs(dx) < DEMARRAGE || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+                actif = true;
+                glissement = true;
+                ligne.setPointerCapture?.(e.pointerId);
+            }
+            ligne.style.transform = `translateX(${Math.max(-140, Math.min(140, dx))}px)`;
+            const force = Math.min(1, Math.abs(dx) / SEUIL);
+            ligne.style.backgroundColor = dx > 0 ? `rgba(15,118,110,${0.18 * force})` : `rgba(190,60,60,${0.18 * force})`;
+        });
+
+        function fin() {
+            if (!ligne) return;
+            const cible = ligne, distance = dx, etaitActif = actif;
+            reinitialiser();
+            if (!etaitActif) return;
+            vientDeGlisser = false;   /* le clic de l'action elle-même ne doit pas être ignoré */
+            if (distance >= SEUIL) cible.querySelector(".niListeCase")?.click();
+            else if (distance <= -SEUIL && cible.dataset.id) demanderSuppression(cible.dataset.id);
+            vientDeGlisser = true;
+            setTimeout(() => { vientDeGlisser = false; }, 400);
+        }
+
+        ecran.addEventListener("pointerup", fin);
+        ecran.addEventListener("pointercancel", reinitialiser);
+        ecran.addEventListener("click", e => {
+            if (vientDeGlisser && e.target.closest(".niListeLigne")) { e.preventDefault(); e.stopPropagation(); }
+        }, true);
+
     }
 
     /* Modèles : même calcul que la fiche (par personne : une ligne répartie sur les voyageurs ;
@@ -280,11 +410,12 @@ export function openListes(voyageOuId) {
     }
 
     dessiner();
+    installerGestes();
 
-    let derniere = signature(voyageId);
+    derniere = signature(voyageId);
     minuteur = setInterval(() => {
         if (!ecran.isConnected) { clearInterval(minuteur); return; }
         const s = signature(voyageId);
-        if (s !== derniere && document.activeElement?.id !== "niListesTexte") { derniere = s; dessiner(); }
+        if (s !== derniere && !glissement && document.activeElement?.id !== "niListesTexte") { derniere = s; dessiner(); }
     }, 1000);
 }
