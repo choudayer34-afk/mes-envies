@@ -1,7 +1,7 @@
 /*
 ==========================================================
  EnVie - Nouvelle interface
- notes-liens.js : « Notes et liens » d'un voyage
+ notes-liens.js : « Notes et liens » d'un voyage ou d'un projet Maison
  Description (voyage.description) et liens (voyage.urls).
  Les liens-fichiers de l'ancienne fiche restent visibles.
 ==========================================================
@@ -30,7 +30,7 @@ export function openNotesLiens(voyageOuId) {
 
     const id = typeof voyageOuId === "object" ? voyageOuId.id : voyageOuId;
     const voyage = getEnvies().find(e => e.id === id);
-    if (!voyage) { showToast("Voyage introuvable"); return; }
+    if (!voyage) { showToast("Fiche introuvable"); return; }
 
     const ecran = document.createElement("div");
     ecran.id = "niNotesLiens";
@@ -52,7 +52,7 @@ export function openNotesLiens(voyageOuId) {
             </div>
             <div class="niCorps niBfCorps">
                 <div class="niSection"><span class="niEtiquette">Notes</span>
-                    <textarea id="niNlTexte" class="niRecherche" rows="6" style="padding:12px;line-height:1.4" placeholder="Idées, consignes, codes d'accès, rappels…" aria-label="Notes du voyage">${echapper(description)}</textarea>
+                    <textarea id="niNlTexte" class="niRecherche" rows="6" style="padding:12px;line-height:1.4" placeholder="Idées, consignes, codes d'accès, rappels…" aria-label="Notes">${echapper(description)}</textarea>
                     <span class="niDocSous" id="niNlEtat">Enregistré automatiquement.</span>
                 </div>
 

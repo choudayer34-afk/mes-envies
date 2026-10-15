@@ -640,6 +640,11 @@ export function basculerInteret(id, uid, valeur) {
     patchEnvie(id, { [`interets.${uid}`]: !!valeur });
 }
 
+/* Anciennes rubriques « Checklist » et « À faire » reprises en tâches (Maison) : marque pour ne pas recommencer. */
+export function marquerListesConverties(id) {
+    patchEnvie(id, { listesConverties: true });
+}
+
 /* « Toujours envie ? » → oui : l'idée n'est plus signalée comme ancienne avant 30 jours. */
 export function marquerEnvieRevue(id, revueLe = Date.now()) {
     patchEnvie(id, { revueLe: revueLe || null });

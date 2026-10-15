@@ -177,7 +177,12 @@ function surveiller(ecran, dessiner) {
 }
 
 function brancherOuvrir(ecran) {
-    ecran.querySelectorAll("[data-ouvrir]").forEach(b => b.addEventListener("click", () => openEnvie(b.dataset.ouvrir)));
+    /* Une tâche s'ouvre dans la feuille simple de la nouvelle fiche ; le reste dans la fiche existante. */
+    ecran.querySelectorAll("[data-ouvrir]").forEach(b => b.addEventListener("click", async () => {
+        const envie = getEnvies().find(e => e.id === b.dataset.ouvrir);
+        if (envie && !isContainerCategory(envie.categorie)) (await import("./maison-fiche-plus.js")).ouvrirTache(envie.id);
+        else openEnvie(b.dataset.ouvrir);
+    }));
     ecran.querySelectorAll("[data-coche]").forEach(b => b.addEventListener("click", () => {
         const envie = getEnvies().find(e => e.id === b.dataset.coche);
         if (envie) updateEnvieRealise(envie.id, !envie.realise);

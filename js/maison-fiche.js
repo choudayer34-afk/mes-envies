@@ -18,6 +18,7 @@ import { choisirZone } from "./maison.js";
 import { showToast } from "./toast.js";
 import { installerBalayage, balayageEnCours } from "./balayage.js";
 import { noterOuverture } from "./prochaine-etape.js";
+import { blocInfos, blocPhotos, blocNotesOutils, ouvrirTache, convertirAnciennesListes, brancherFichePlus } from "./maison-fiche-plus.js";
 
 let minuteur = null;
 
@@ -160,7 +161,7 @@ function supprimerEntree(e) {
 function signature(id) {
     const p = projetDe(id);
     if (!p) return "";
-    return JSON.stringify(proprietaires(p).map(o => [o.id, o.titre, o.realise, o.date?.start, o.zone, o.devis, o.comparateur, o.peinture, o.bois]));
+    return JSON.stringify(proprietaires(p).map(o => [o.id, o.titre, o.realise, o.date, o.zone, o.devis, o.comparateur, o.peinture, o.bois, o.photos?.length, o.description, o.urls?.length, o.croquis?.length, o.budget]));
 }
 
 const LIBELLES = { a_contacter: "À contacter", rdv_planifie: "Rendez-vous", devis_recu: "Devis reçu" };
@@ -212,7 +213,8 @@ function dessiner(ecran, id) {
     const projet = projetDe(id);
     if (!projet) { fermerMaisonFiche(); return; }
 
-    const taches = tachesDe(id);
+    let taches = tachesDe(id);
+    if (convertirAnciennesListes(projet, taches)) taches = tachesDe(id);
     const ouvertes = taches.filter(t => !t.realise);
     const faites = taches.filter(t => t.realise);
     const pourcent = taches.length ? Math.round(faites.length / taches.length * 100) : 0;
@@ -229,6 +231,7 @@ function dessiner(ecran, id) {
             <button type="button" class="niLienDiscret" id="niMfRetour">← Projets</button>
             <h1 class="niTitrePage">${echapper(projet.titre || "Projet")}</h1>
             <div class="niPastillesLigne"><button type="button" class="niPastilleAction niPastilleClaire" id="niMfZone">Zone : ${echapper(projet.zone || "aucune")}</button></div>
+            ${blocInfos(projet)}
             <span class="niBarre niBarreClaire"><i style="width:${pourcent}%"></i></span>
             <span class="niDocSous">${taches.length ? `${faites.length} tâche${faites.length > 1 ? "s" : ""} sur ${taches.length}` : "Aucune tâche"}</span>
 
@@ -264,9 +267,11 @@ function dessiner(ecran, id) {
                 ${budgetPrevu != null && budgetOffres > budgetPrevu ? '<span class="niTag niTagMaintenant">Dépassé</span>' : ""}</div>
             </div>
 
+            ${blocPhotos(projet)}
+            ${blocNotesOutils(projet)}
             ${blocHistorique(projet, taches)}
 
-            <button type="button" class="niLienDiscret" id="niMfComplete">Ouvrir la fiche complète (photos, notes, liens…)</button>
+            <button type="button" class="niLienDiscret" id="niMfComplete">Ancienne fiche (secours)</button>
             <button type="button" class="niLienDiscret" id="niMfSupprimer" style="color:#B42318;margin-top:18px">Supprimer le projet</button>
         </div>`;
 
@@ -274,11 +279,12 @@ function dessiner(ecran, id) {
     ecran.querySelector("#niMfZone").addEventListener("click", () => choisirZone(id));
     ecran.querySelector("#niMfComplete").addEventListener("click", () => openEnvie(id));
     ecran.querySelector("#niMfSupprimer").addEventListener("click", () => confirmerSuppressionProjet(id));
-    ecran.querySelectorAll("[data-ouvrir]").forEach(b => b.addEventListener("click", () => openEnvie(b.dataset.ouvrir)));
+    ecran.querySelectorAll("[data-ouvrir]").forEach(b => b.addEventListener("click", () => ouvrirTache(b.dataset.ouvrir)));
     ecran.querySelectorAll("[data-coche]").forEach(b => b.addEventListener("click", () => {
         const e = getEnvies().find(x => x.id === b.dataset.coche);
         if (e) updateEnvieRealise(e.id, !e.realise);
     }));
+    brancherFichePlus(ecran, projet);
     ecran.querySelectorAll("[data-retenir]").forEach(b => b.addEventListener("click", () => {
         const [ownerId, sorte, offreId] = b.dataset.retenir.split("|");
         basculerRetenu(ownerId, sorte, offreId);
