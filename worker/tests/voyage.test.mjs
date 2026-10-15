@@ -201,3 +201,21 @@ test("anciens rappels inchangés : billet et date", () => {
     const liste = cles(planifier(appareil(), donnees, a("2026-10-16", "07:35")));
     assert.ok(liste.some(c => c.startsWith("b:v1:b1:")));
 });
+
+/* ---------- Lot 2 : relances et « Plus tard » ---------- */
+
+import { rappelsRelances } from "../rappels.js";
+
+test("relance : les idées en pause ne comptent pas, revueLe remet l'ancienneté à zéro", () => {
+    const lundi = a("2026-10-19", "08:05");
+    const vieux = lundi - 60 * 86400000;
+    const envies = [
+        { id: "i1", titre: "Idée 1", contexte: "voyage", createdAt: vieux },
+        { id: "i2", titre: "Idée 2", contexte: "voyage", createdAt: vieux, revoirLe: "2026-10-25" },
+        { id: "i3", titre: "Idée 3", contexte: "voyage", createdAt: vieux, revueLe: lundi - 86400000 },
+        { id: "i4", titre: "Idée 4", contexte: "voyage", createdAt: vieux, revoirLe: "2026-10-19" }
+    ];
+    const r = rappelsRelances({ uid: UID, reglages: nettoyerReglages({}) }, envies, new Set(), lundi);
+    const voyage = r.find(n => n.cle.startsWith("r:voyage"));
+    assert.equal(voyage.charge.corps, "3 éléments à trier, dont 2 sans date depuis plus de 30 jours");
+});
