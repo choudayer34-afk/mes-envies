@@ -545,6 +545,11 @@ function htmlModeEmploi() {
                     <li>Chaque lundi ou chaque 1er du mois, séparément pour Voyages et Maison.</li>
                     <li>Elles comptent les éléments à trier. Touche la notification : l'écran « Trier » s'ouvre.</li>
                 </ul>
+                <p><strong>Maison</strong></p>
+                <ul>
+                    <li>Rendez-vous d'un artisan (devis au statut « Rendez-vous ») : la veille et le jour même, à l'heure des dates.</li>
+                    <li>La relance Maison compte aussi les devis à suivre et les projets en sommeil (rien de fait depuis 3 semaines).</li>
+                </ul>
                 <p><strong>Le voyage au bon moment</strong></p>
                 <ul>
                     <li>Papiers d'identité expirés ou trop justes : 30 et 7 jours avant le départ.</li>
@@ -799,7 +804,19 @@ const ECRANS_VOYAGE = {
     programme: async v => (await import("./programme.js")).openProgramme(v),
     depense: async v => (await import("./depense-form.js")).openDepenseForm(v.id),
     souvenirs: async v => (await import("./souvenirs.js")).openSouvenirs(v),
-    voyageurs: async v => (await import("./voyageurs-ecran.js")).openVoyageurs(v.id)
+    voyageurs: async v => (await import("./voyageurs-ecran.js")).openVoyageurs(v.id),
+    /* Rendez-vous d'artisan : la fiche du projet Maison (en passant en mode Maison si besoin). */
+    projet: async v => {
+        const stockage = await import("./storage.js");
+        if (stockage.getModeActif() !== "maison") {
+            stockage.basculerMode("maison");
+            await attendre(() => stockage.getModeActif() === "maison", 8000);
+            await new Promise(resolve => setTimeout(resolve, 900));
+        }
+        const projetId = stockage.isContainerCategory(v.categorie) ? v.id : v.voyageId;
+        if (projetId) (await import("./maison-fiche.js")).openMaisonFiche(projetId);
+        else (await import("./envie.js")).openEnvie(v.id);
+    }
 };
 
 export async function ouvrirEcranVoyage(voyageId, vue) {

@@ -10,8 +10,11 @@
 import {
     getEnvies, createEnvie, isContainerCategory, getEnvieCategories,
     updateEnvieRealise, updateEnvieZone, assurerCategorieProjetMaison,
-    updateEnvieDate, deleteEnvie, restaurerEnvie, supprimerDefinitivement
+    updateEnvieDate, deleteEnvie, restaurerEnvie, supprimerDefinitivement,
+    marquerEnvieRevue, synchroniserDatesRdv
 } from "./storage.js";
+import { nombreAchats, openMagasin } from "./magasin.js";
+import { fetchMeteoSemaine } from "./meteo.js";
 import { computeContainerStatus } from "./progress.js";
 import { openEnvie } from "./envie.js";
 import { brancherDictee } from "./capturer.js";
@@ -53,6 +56,22 @@ function tachesDe(projetId) {
 
 function nomProjet(id) {
     return enviesMaison().find(e => e.id === id)?.titre || "";
+}
+
+/* ---------- Projets en sommeil ---------- */
+
+const JOURS_SOMMEIL = 21;
+
+/* Projet en cours, avec des tâches ouvertes, sans activité depuis 21 jours (ni « plus tard » récent). */
+function enSommeil(p, maintenant = Date.now()) {
+    const taches = tachesDe(p.id);
+    if (!taches.some(t => !t.realise)) return false;
+    const derniere = Math.max(Number(p.updatedAt) || 0, Number(p.revueLe) || 0, ...taches.map(t => Number(t.updatedAt) || 0));
+    return derniere > 0 && maintenant - derniere > JOURS_SOMMEIL * 86400000;
+}
+
+function projetsEnSommeil() {
+    return listerProjets().filter(p => computeContainerStatus(p).statut !== "termine" && enSommeil(p));
 }
 
 /* Zone d'une tâche : celle du projet, sinon la sienne. */
@@ -212,6 +231,8 @@ function dessinerAujourdhui(ecran) {
             </div>
             ${pastilles ? `<div class="niPastillesLigne">${pastilles}</div>` : ""}
             ${blocReprise()}
+            <div id="niMeteoProjet"></div>
+            ${blocMagasin()}
             ${blocProchaine(b)}
             ${b.enRetard.length ? `<div class="niSection">
                 <div class="niAujEntete"><h2 class="niTitreSection">En retard</h2>${b.enRetard.length > 1 ? '<button type="button" class="niLienDiscret" id="niToutDemain">Tout à demain</button>' : ""}</div>
@@ -220,11 +241,120 @@ function dessinerAujourdhui(ecran) {
             ${section("Aujourd'hui", lignesJour)}
             ${section("À relancer", lignesSuivi)}
             ${section("Cette semaine", b.semaine.map(e => ligneTache(e, b)).join(""))}
+            ${blocSommeil()}
             ${section(`À trier · ${b.aTrier.length}`, b.aTrier.slice(0, 5).map(e => ligneTache(e, b)).join(""))}
             ${rien ? '<div class="niVide">Rien de prévu. Capture une tâche avec le bouton +.</div>' : ""}
         </div>`;
     brancherOuvrir(ecran);
     brancherAujourdhui(ecran, b);
+}
+
+/* ---------- En magasin, projets en sommeil ---------- */
+
+function blocMagasin() {
+    const n = nombreAchats();
+    if (!n) return "";
+    return `
+        <button type="button" class="niDocLigne" id="niOuvrirMagasin" style="margin-bottom:12px;border-radius:14px;padding:12px 14px;background:var(--ni-surface, #fff)">
+            <span class="niDocTexte"><span class="niDocTitre">🛒 En magasin</span><span class="niDocSous">${n} achat${n > 1 ? "s" : ""} pour les projets en cours</span></span>
+        </button>`;
+}
+
+function blocSommeil() {
+    const liste = projetsEnSommeil().slice(0, 3);
+    if (!liste.length) return "";
+    return section("En sommeil", liste.map(p => `
+        <div class="niDocLigne niLigneStatique" style="gap:8px">
+            <button type="button" class="niLigneTexte" data-sommeil-ouvrir="${echapper(p.id)}">
+                <span class="niDocTitre">${echapper(p.titre || "Projet")}</span>
+                <span class="niDocSous">Rien de fait depuis plus de 3 semaines</span>
+            </button>
+            <button type="button" class="niPastilleAction niPastilleClaire" data-sommeil-plustard="${echapper(p.id)}" style="flex:none">Plus tard</button>
+        </div>`).join(""));
+}
+
+/* ---------- Bonne météo pour un projet extérieur ---------- */
+
+const ZONES_EXTERIEURES = /jardin|terrasse|fa[cç]ade|ext[eé]rieur|balcon|potager|cour\b|toit|piscine|cl[oô]ture|portail|all[eé]e/i;
+const CLE_POSITION = "envie_position_maison";
+const CLE_METEO = "envie_meteo_weekend";
+
+function lireJson(stockage, cle) {
+    try { return JSON.parse(stockage.getItem(cle) || "null"); } catch { return null; }
+}
+
+function ecrireJson(stockage, cle, valeur) {
+    try { stockage.setItem(cle, JSON.stringify(valeur)); } catch { /* stockage indisponible */ }
+}
+
+/* Position de la maison : mémorisée la première fois que l'écran Maison obtient la position du téléphone. */
+function positionMaison() {
+    const memo = lireJson(localStorage, CLE_POSITION);
+    if (memo?.lat != null) return Promise.resolve(memo);
+    if (!("geolocation" in navigator)) return Promise.resolve(null);
+    return new Promise(resolve => {
+        navigator.geolocation.getCurrentPosition(
+            pos => {
+                const p = { lat: Math.round(pos.coords.latitude * 100) / 100, lon: Math.round(pos.coords.longitude * 100) / 100 };
+                ecrireJson(localStorage, CLE_POSITION, p);
+                resolve(p);
+            },
+            () => resolve(null),
+            { maximumAge: 3600000, timeout: 8000 }
+        );
+    });
+}
+
+/* Prochain week-end (samedi et dimanche à venir, aujourd'hui compris). */
+function joursWeekend(aujourdhui) {
+    const jours = [];
+    for (let i = 0; i < 7 && jours.length < 2; i++) {
+        const iso = jourPlus(aujourdhui, i);
+        const j = new Date(iso + "T12:00:00").getDay();
+        if (j === 6 || j === 0) jours.push(iso);
+        if (j === 0) break;
+    }
+    return jours;
+}
+
+async function afficherMeteoProjet(ecran) {
+
+    const zone = ecran.querySelector("#niMeteoProjet");
+    if (!zone) return;
+
+    const projets = listerProjets().filter(p =>
+        computeContainerStatus(p).statut !== "termine" && ZONES_EXTERIEURES.test(p.zone || "") && tachesDe(p.id).some(t => !t.realise));
+    if (!projets.length) return;
+
+    const aujourdhui = dateLocaleISO();
+    let meteo = lireJson(sessionStorage, CLE_METEO);
+
+    if (!meteo || meteo.jour !== aujourdhui) {
+        const position = await positionMaison();
+        if (!position) return;
+        try {
+            const jours = await fetchMeteoSemaine(position.lat, position.lon);
+            const weekend = joursWeekend(aujourdhui).map(d => jours.find(j => j.date === d)).filter(Boolean);
+            const sec = weekend.length > 0 && weekend.every(j => j.code <= 3 && (j.pluie == null || j.pluie <= 30));
+            meteo = { jour: aujourdhui, sec, emoji: weekend[0]?.emoji || "☀️", tempMax: Math.max(...weekend.map(j => j.tempMax)) };
+            ecrireJson(sessionStorage, CLE_METEO, meteo);
+        } catch (err) {
+            console.warn("Météo du week-end : " + err.message);
+            return;
+        }
+    }
+
+    if (!meteo.sec || !zone.isConnected) return;
+
+    const projet = projets[0];
+    zone.innerHTML = `
+        <button type="button" class="niDocLigne" id="niMeteoProjetOuvrir" style="margin-bottom:12px;border-radius:14px;padding:12px 14px;background:#FFF8E1">
+            <span class="niDocTexte">
+                <span class="niDocTitre">${meteo.emoji} Week-end au sec${Number.isFinite(meteo.tempMax) ? ` (${meteo.tempMax}°)` : ""}</span>
+                <span class="niDocSous">Bon moment pour « ${echapper(projet.titre || "le projet")} »${projets.length > 1 ? ` et ${projets.length - 1} autre${projets.length > 2 ? "s" : ""}` : ""}</span>
+            </span>
+        </button>`;
+    zone.querySelector("#niMeteoProjetOuvrir").addEventListener("click", () => openMaisonFiche(projet.id));
 }
 
 /* ---------- Reprendre où j'en étais ---------- */
@@ -339,6 +469,18 @@ function ouvrirDecoupage(envie, ecran) {
 
 function brancherAujourdhui(ecran, b) {
 
+    ecran.querySelector("#niOuvrirMagasin")?.addEventListener("click", () => openMagasin());
+
+    ecran.querySelectorAll("[data-sommeil-ouvrir]").forEach(bouton => bouton.addEventListener("click", () => openMaisonFiche(bouton.dataset.sommeilOuvrir)));
+    ecran.querySelectorAll("[data-sommeil-plustard]").forEach(bouton => bouton.addEventListener("click", () => {
+        const id = bouton.dataset.sommeilPlustard;
+        marquerEnvieRevue(id);
+        showToast("Ce projet ne sera plus signalé avant 3 semaines");
+        setTimeout(() => ecran.isConnected && dessinerAujourdhui(ecran), 700);
+    }));
+
+    afficherMeteoProjet(ecran);
+
     ecran.querySelector("#niMaisonVersVoyages")?.addEventListener("click", () => basculerVersMode("voyage"));
 
     ecran.querySelector("#niMaisonChercher")?.addEventListener("click", async () => {
@@ -389,8 +531,14 @@ function brancherAujourdhui(ecran, b) {
     });
 }
 
+let datesRdvSynchronisees = false;
+
 export function openMaisonAujourdhui() {
     fermerMaison();
+    if (!datesRdvSynchronisees) {
+        datesRdvSynchronisees = true;
+        setTimeout(() => synchroniserDatesRdv(enviesMaison()), 1500);
+    }
     const ecran = document.createElement("div");
     ecran.id = "niMaisonAuj";
     ecran.className = "niEcran niEcranAvecBarre";
@@ -416,6 +564,7 @@ function carteProjet(p) {
     const etat = termine ? '<span class="niTag niTagOk">Terminé</span>'
         : retard ? `<span class="niTag niTagMaintenant">${retard} en retard</span>`
         : devis.length ? '<span class="niTag niTagAttention">devis à suivre</span>'
+        : enSommeil(p) ? '<span class="niTag niTagAttention">en sommeil</span>'
         : taches.length ? '<span class="niTag niTagOk">à jour</span>' : "";
     return `
         <div class="niVoyageCarte">

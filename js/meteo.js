@@ -29,6 +29,24 @@ export async function fetchMeteo3Jours(latitude, longitude) {
 
 }
 
+/* 7 jours avec la probabilité de pluie (bandeau « bonne météo » du mode Maison). */
+export async function fetchMeteoSemaine(latitude, longitude) {
+
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=weathercode,precipitation_probability_max,temperature_2m_max&timezone=auto&forecast_days=7`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    return data.daily.time.map((date, i) => ({
+        date,
+        code: data.daily.weathercode[i],
+        emoji: emojiFor(data.daily.weathercode[i]),
+        pluie: data.daily.precipitation_probability_max?.[i] ?? null,
+        tempMax: Math.round(data.daily.temperature_2m_max[i])
+    }));
+
+}
+
 export function renderMeteoWidget(container, jours) {
 
     if (!container)

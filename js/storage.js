@@ -305,8 +305,27 @@ export function initMagasinsSync(onChange) {
 
 }
 
+/* Dates des rendez-vous d'un devis (statut « rendez-vous », non retenu) : lues par le service
+   de notifications pour prévenir la veille et le jour même sans lire tout le foyer. */
+export function datesRdvDe(devis) {
+    return [...new Set((devis?.entries || [])
+        .filter(d => d.statut === "rdv_planifie" && d.dateRdv && !d.retenu)
+        .map(d => d.dateRdv))].sort();
+}
+
 export function updateEnvieDevis(id, devis) {
-    patchEnvie(id, { devis });
+    patchEnvie(id, { devis, datesRdv: datesRdvDe(devis) });
+}
+
+/* Remet à jour datesRdv sur les envies dont les rendez-vous ont été saisis avant ce champ. */
+export function synchroniserDatesRdv(envies) {
+    envies.forEach(e => {
+        if (!e.devis?.entries?.length) return;
+        const attendu = datesRdvDe(e.devis);
+        const actuel = Array.isArray(e.datesRdv) ? e.datesRdv : [];
+        /* Sans toucher à updatedAt : ce rattrapage n'est pas une activité sur le projet. */
+        if (JSON.stringify(attendu) !== JSON.stringify(actuel)) updateDoc(envieRef(e.id), { datesRdv: attendu }).catch(console.error);
+    });
 }
 
 export function updateEnvieCroquis(id, croquis) {
