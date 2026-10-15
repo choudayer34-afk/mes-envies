@@ -629,6 +629,17 @@ export function updateEnvieRevoirLe(id, revoirLe) {
     patchEnvie(id, { revoirLe: revoirLe || null });
 }
 
+/* Envie de saison : mois idéal (1 à 12) et retour dans « À trier » au 1er de ce mois. */
+export function updateEnvieSaison(id, moisIdeal, revoirLe) {
+    patchEnvie(id, { moisIdeal: moisIdeal || null, revoirLe: revoirLe || null });
+}
+
+/* Intérêt du foyer : un cœur par membre (champ interets.{uid}). */
+export function basculerInteret(id, uid, valeur) {
+    if (!uid) return;
+    patchEnvie(id, { [`interets.${uid}`]: !!valeur });
+}
+
 /* « Toujours envie ? » → oui : l'idée n'est plus signalée comme ancienne avant 30 jours. */
 export function marquerEnvieRevue(id, revueLe = Date.now()) {
     patchEnvie(id, { revueLe: revueLe || null });

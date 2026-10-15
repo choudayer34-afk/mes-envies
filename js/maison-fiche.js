@@ -57,6 +57,24 @@ function proprietaires(projet) {
     return [projet, ...tachesDe(projet.id)];
 }
 
+/* ---------- Historique court : création, tâches ajoutées, tâches terminées ---------- */
+
+function blocHistorique(projet, taches) {
+    const evenements = [];
+    if (projet.createdAt) evenements.push({ quand: projet.createdAt, texte: "Projet créé" });
+    taches.forEach(t => {
+        if (t.createdAt) evenements.push({ quand: t.createdAt, texte: `Ajoutée : ${t.titre || "tâche"}` });
+        if (t.realise && t.realiseAt) evenements.push({ quand: t.realiseAt, texte: `✓ ${t.titre || "tâche"}` });
+    });
+    if (!evenements.length) return "";
+    const date = ms => new Date(ms).toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    const derniers = evenements.sort((a, b) => b.quand - a.quand).slice(0, 6);
+    return `
+        <div class="niSection"><h2 class="niTitreSection">Historique</h2>
+            ${derniers.map(e => `<div class="niDocLigne niLigneStatique"><span class="niDocTexte"><span class="niDocTitre" style="font-weight:500">${echapper(e.texte)}</span><span class="niDocSous">${date(e.quand)}</span></span></div>`).join("")}
+        </div>`;
+}
+
 function listerOffres(projet) {
     const sortie = [];
     proprietaires(projet).forEach(o => {
@@ -245,6 +263,8 @@ function dessiner(ecran, id) {
                 <div class="niDocLigne niLigneStatique"><span class="niDocTexte"><span class="niDocTitre">${euros(budgetOffres)}</span><span class="niDocSous">${[retenues.length ? `${retenues.length} offre${retenues.length > 1 ? "s" : ""} retenue${retenues.length > 1 ? "s" : ""}` : "", estimes ? `matériaux estimés ${euros(estimes)}` : ""].filter(Boolean).join(" · ") || "Aucune offre retenue avec un prix"}${budgetPrevu != null ? ` · prévu ${euros(budgetPrevu)}` : ""}</span></span>
                 ${budgetPrevu != null && budgetOffres > budgetPrevu ? '<span class="niTag niTagMaintenant">Dépassé</span>' : ""}</div>
             </div>
+
+            ${blocHistorique(projet, taches)}
 
             <button type="button" class="niLienDiscret" id="niMfComplete">Ouvrir la fiche complète (photos, notes, liens…)</button>
             <button type="button" class="niLienDiscret" id="niMfSupprimer" style="color:#B42318;margin-top:18px">Supprimer le projet</button>

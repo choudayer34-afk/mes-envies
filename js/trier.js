@@ -9,6 +9,9 @@
    - Ouvrir : la fiche complète
    - Supprimer : mise à la corbeille, avec « Annuler » pendant 5 s
    - « Toujours envie ? » sur les idées de plus de 30 jours : garder (revueLe) ou corbeille
+   - À la saison : choix d'un mois (moisIdeal), l'idée revient au 1er de ce mois
+   - Cœur : intérêt de chaque membre du foyer (interets.{uid})
+   - En faire un voyage : créer un voyage à partir de l'idée (elle y est rattachée)
  Deux affichages : une idée à la fois (glisser à droite = Retenir, à gauche = Plus tard)
  ou toutes les idées.
 ==========================================================
@@ -16,13 +19,15 @@
 
 import {
     getEnvies, getEnvieCategories, isContainerCategory, updateEnvieVoyage, deleteEnvie, restaurerEnvie,
-    updateEnvieRevoirLe, marquerEnvieRevue
+    updateEnvieRevoirLe, marquerEnvieRevue, updateEnvieSaison, basculerInteret
 } from "./storage.js";
+import { auth } from "./firebase.js";
+import { openNouveauVoyage } from "./nouveau-voyage.js";
 import { computeContainerStatus } from "./progress.js";
 import { openEnvie } from "./envie.js";
 import { showToast } from "./toast.js";
 import { dateLocaleISO } from "./documents.js";
-import { CHOIX_PLUS_TARD, dateRevoir, libelleRetour, enPause, dormante, joursDepuis } from "./tri-outils.js";
+import { CHOIX_PLUS_TARD, dateRevoir, libelleRetour, enPause, dormante, joursDepuis, MOIS, dateSaison } from "./tri-outils.js";
 
 const CLE_AFFICHAGE = "envie_tri_affichage";
 const SEUIL_GLISSER = 80;
@@ -89,6 +94,7 @@ export function openTrier() {
     const masquees = new Set();       /* sorties de l'écran sans attendre la mise à jour de la base */
     const revuesIci = new Set();      /* « oui, toujours envie » répondu pendant cette ouverture */
     const pausees = new Map();        /* id -> date de retour choisie pendant cette ouverture */
+    const coeursIci = new Map();      /* id -> mon cœur, en attendant la mise à jour de la base */
     let retenues = 0;
     let choixEnCours = null;          /* { id, type: "voyage" | "plustard" } */
     let affichage = lireAffichage();
@@ -183,7 +189,15 @@ export function openTrier() {
 
         const categorie = getEnvieCategories().find(c => c.id === e.categorie);
         const age = joursDepuis(e, Date.now());
-        const sous = [categorie?.label, e.lieu?.ville || e.lieu?.nom, age >= 2 ? `notée il y a ${age} jours` : ""].filter(Boolean).join(" · ");
+        const sous = [
+            categorie?.label, e.lieu?.ville || e.lieu?.nom,
+            e.moisIdeal ? `idéale en ${MOIS[e.moisIdeal - 1]}` : "",
+            age >= 2 ? `notée il y a ${age} jours` : ""
+        ].filter(Boolean).join(" · ");
+        const uid = auth.currentUser?.uid;
+        const interets = uid && coeursIci.has(e.id) ? { ...(e.interets || {}), [uid]: coeursIci.get(e.id) } : (e.interets || {});
+        const coeurs = Object.values(interets).filter(Boolean).length;
+        const aime = !!(uid && interets[uid]);
         const question = dormante(e, Date.now()) && !revuesIci.has(e.id);
         const choix = choixEnCours?.id === e.id ? choixEnCours.type : null;
 
@@ -194,6 +208,13 @@ export function openTrier() {
                 <span class="niEtiquette">Retenir pour</span>
                 <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
                     ${voyages.map(v => `<button type="button" class="niPuce" data-act="voyage" data-voyage="${echapper(v.id)}"><span class="niPuceTitre">${echapper(v.titre || "Voyage")}</span></button>`).join("")}
+                </div>
+                <button type="button" class="niLienDiscret" data-act="fermerchoix" style="align-self:flex-start;min-height:44px">Annuler</button>`;
+        } else if (choix === "saison") {
+            actions = `
+                <span class="niEtiquette">Idéale en</span>
+                <div class="niSelecteurVoyage" style="flex-wrap:wrap;overflow:visible;margin:0;padding:0">
+                    ${MOIS.map((m, i) => `<button type="button" class="niPuce" data-act="mois" data-mois="${i + 1}"><span class="niPuceTitre">${m.charAt(0).toUpperCase() + m.slice(1)}</span></button>`).join("")}
                 </div>
                 <button type="button" class="niLienDiscret" data-act="fermerchoix" style="align-self:flex-start;min-height:44px">Annuler</button>`;
         } else if (choix === "plustard") {
@@ -209,8 +230,9 @@ export function openTrier() {
                     <button type="button" class="niBouton niBoutonPrimaire" data-act="retenir" ${voyages.length ? "" : "disabled"}>Retenir</button>
                     <button type="button" class="niBouton" data-act="plustard">Plus tard</button>
                 </div>
-                <div style="display:flex;justify-content:space-between;gap:10px">
+                <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
                     <button type="button" class="niLienDiscret" data-act="ouvrir" style="min-height:44px">Ouvrir</button>
+                    <button type="button" class="niLienDiscret" data-act="lancer" style="min-height:44px">En faire un voyage</button>
                     <button type="button" class="niLienDiscret" data-act="supprimer" style="min-height:44px;color:#B42318">Supprimer</button>
                 </div>`;
         }
@@ -226,7 +248,10 @@ export function openTrier() {
 
         return `
             <div class="niCarte" ${grande ? "data-glisser" : ""} style="padding:${grande ? "20px" : "14px"};display:flex;flex-direction:column;gap:10px;margin-bottom:10px;${grande ? "touch-action:pan-y;" : ""}" data-idee="${echapper(e.id)}">
-                <span class="niDocTexte"><span class="niDocTitre" style="${grande ? "font-size:20px;" : ""}">${echapper(e.titre || "Idée")}</span>${sous ? `<span class="niDocSous">${echapper(sous)}</span>` : ""}</span>
+                <div style="display:flex;align-items:flex-start;gap:10px">
+                    <span class="niDocTexte" style="flex:1"><span class="niDocTitre" style="${grande ? "font-size:20px;" : ""}">${echapper(e.titre || "Idée")}</span>${sous ? `<span class="niDocSous">${echapper(sous)}</span>` : ""}</span>
+                    <button type="button" class="niBouton" data-act="coeur" aria-pressed="${aime}" aria-label="${aime ? "Retirer mon cœur" : "Ça me plaît"}" style="flex:none;min-height:40px;padding:0 12px">${aime ? "❤️" : "🤍"}${coeurs ? ` ${coeurs}` : ""}</button>
+                </div>
                 ${bandeau}
                 ${actions}
             </div>`;
@@ -254,7 +279,32 @@ export function openTrier() {
 
         if (act === "plustard") { choixEnCours = { id, type: "plustard" }; dessiner(); return; }
 
-        if (act === "pause") { mettreEnPause(id, bouton.dataset.choix); return; }
+        if (act === "pause") {
+            if (bouton.dataset.choix === "saison") { choixEnCours = { id, type: "saison" }; dessiner(); return; }
+            mettreEnPause(id, bouton.dataset.choix);
+            return;
+        }
+
+        if (act === "mois") { mettreEnSaison(id, Number(bouton.dataset.mois)); return; }
+
+        if (act === "coeur") {
+            const uid = auth.currentUser?.uid;
+            const idee = getEnvies().find(e => e.id === id);
+            if (!uid || !idee) return;
+            const valeur = !idee.interets?.[uid];
+            basculerInteret(id, uid, valeur);
+            coeursIci.set(id, valeur);
+            dessiner();
+            return;
+        }
+
+        if (act === "lancer") {
+            const idee = getEnvies().find(e => e.id === id);
+            if (!idee) return;
+            fermerTrier();
+            openNouveauVoyage({ idee });
+            return;
+        }
 
         if (act === "reprendre") {
             updateEnvieRevoirLe(id, null);
@@ -309,6 +359,28 @@ export function openTrier() {
             action: "Annuler",
             surAction: () => {
                 updateEnvieRevoirLe(id, null);
+                masquees.delete(id);
+                pausees.delete(id);
+                redessinerPlusTard();
+            }
+        });
+        dessiner();
+    }
+
+    function mettreEnSaison(id, mois) {
+        const aujourdhui = dateLocaleISO();
+        const date = dateSaison(mois, aujourdhui);
+        if (!date) return;
+        const idee = getEnvies().find(e => e.id === id);
+        const avant = { mois: idee?.moisIdeal || null, revoir: idee?.revoirLe || null };
+        updateEnvieSaison(id, mois, date);
+        choixEnCours = null;
+        masquees.add(id);
+        pausees.set(id, date);
+        showToast(`🌸 Revient en ${MOIS[mois - 1]}`, {
+            action: "Annuler",
+            surAction: () => {
+                updateEnvieSaison(id, avant.mois, avant.revoir);
                 masquees.delete(id);
                 pausees.delete(id);
                 redessinerPlusTard();

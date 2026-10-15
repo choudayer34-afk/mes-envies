@@ -237,7 +237,8 @@ function monterNavVoyages() {
 const PLUS_VISIBLES = ["niPlusMaison", "plusBtnNotifications", "niPlusUrgence", "plusBtnCorbeille", "plusBtnJeux", "niPlusAdmin"];
 const PLUS_AUTRES = [
     "plusMeteoLieu", "plusMeteoWidget", "plusBtnSurvie", "plusBtnGuide", "plusBtnAPropos", "plusBtnNouveautes",
-    "plusBtnRevoirOnboarding", "plusBtnSauvegardeComplete", "plusBtnMigrationBillets", "plusBtnNouvelleInterface"
+    "plusBtnRevoirOnboarding", "plusBtnSauvegardeComplete", "plusBtnMigrationBillets", "plusBtnNouvelleInterface",
+    "plusBtnRevue"
 ];
 
 function rangerMenuPlus() {
@@ -274,6 +275,7 @@ function rangerMenuPlus() {
 function surveillerMenuPlus() {
     const plus = document.getElementById("plusModal");
     if (!plus) return;
+    import("./revue.js").then(m => { m.injecterBoutonRevue(); rangerMenuPlus(); }).catch(err => console.warn("Revue : " + err.message));
     rangerMenuPlus();
     new MutationObserver(() => {
         if (!plus.classList.contains("hidden")) rangerMenuPlus();

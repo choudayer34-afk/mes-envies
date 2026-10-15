@@ -305,12 +305,12 @@ const TESTS = {
     },
     voyage: {
         titre: "✈️ Voyages : idées à trier (exemple)",
-        corps: "Touche la notification : l'écran « Trier les idées » doit s'ouvrir.",
+        corps: "Touche la notification : la revue de la semaine doit s'ouvrir.",
         data: { voyageId: null, billetId: null, vue: "trier", mode: "voyage" }
     },
     maison: {
         titre: "🏠 Maison : tâches à trier (exemple)",
-        corps: "Touche la notification : l'écran Maison « Aujourd'hui » doit s'ouvrir, avec la section À trier.",
+        corps: "Touche la notification : la revue de la semaine Maison doit s'ouvrir.",
         data: { voyageId: null, billetId: null, vue: "trier", mode: "maison" }
     }
 };
@@ -543,7 +543,7 @@ function htmlModeEmploi() {
                 <p><strong>Relances</strong></p>
                 <ul>
                     <li>Chaque lundi ou chaque 1er du mois, séparément pour Voyages et Maison.</li>
-                    <li>Elles comptent les éléments à trier. Touche la notification : l'écran « Trier » s'ouvre.</li>
+                    <li>Elles comptent les éléments à trier (et, en Maison, les devis à suivre et projets en sommeil). Touche la notification : la revue de la semaine s'ouvre, pas à pas.</li>
                 </ul>
                 <p><strong>Maison</strong></p>
                 <ul>
@@ -621,7 +621,7 @@ async function dessinerModale() {
         ${bouton("notifServeurSimple", "Envoyer un test")}
         ${bouton("notifServeurVoyage", "Test : relance Voyages")}
         ${bouton("notifServeurMaison", "Test : relance Maison")}
-        <p style="font-size:13px;opacity:.7;">Ces tests passent par le serveur, comme les vrais rappels. Touche ensuite la notification : l'écran « Trier les idées » doit s'ouvrir.</p>` : ""}
+        <p style="font-size:13px;opacity:.7;">Ces tests passent par le serveur, comme les vrais rappels. Touche ensuite la notification : la revue de la semaine doit s'ouvrir.</p>` : ""}
         <details style="margin:14px 0;">
             <summary style="cursor:pointer;"><strong>Test sur l'appareil seul</strong></summary>
             <div style="margin-top:8px;">
@@ -892,11 +892,17 @@ export async function ouvrirVue(vue, mode) {
 
     const nouvelleInterface = document.body.classList.contains("niActive");
 
+    /* Nouvelle interface : la relance ouvre la revue de la semaine (qui commence par le tri). */
+    if (nouvelleInterface) {
+        /* Écran de même niveau que Trier ou une fiche projet : ce qu'on ouvre depuis la revue passe au-dessus. */
+        await (await import("./revue.js")).openRevue(mode);
+        return;
+    }
+
     if (mode === "voyage") {
 
         if (nouvelleInterface) {
             (await import("./trier.js")).openTrier();
-            /* Au-dessus de la fiche d'un voyage ou d'un autre écran resté ouvert (ni.css : jusqu'à 2400). */
             document.getElementById("niTrier")?.style.setProperty("z-index", "2450");
         } else {
             document.getElementById("btnInbox")?.click();

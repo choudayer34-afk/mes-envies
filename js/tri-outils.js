@@ -16,8 +16,20 @@ export const CHOIX_PLUS_TARD = [
     { id: "demain", libelle: "Demain" },
     { id: "weekend", libelle: "Ce week-end" },
     { id: "semaine", libelle: "Dans 1 semaine" },
-    { id: "mois", libelle: "Dans 1 mois" }
+    { id: "mois", libelle: "Dans 1 mois" },
+    { id: "saison", libelle: "À la saison…" }
 ];
+
+export const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+
+/* Envie de saison : le 1er du mois choisi (1 à 12), l'an prochain si ce mois est déjà commencé. */
+export function dateSaison(mois, aujourdhuiIso) {
+    const m = Number(mois);
+    if (!Number.isInteger(m) || m < 1 || m > 12) return null;
+    const [annee, moisActuel] = aujourdhuiIso.split("-").map(Number);
+    const an = m > moisActuel ? annee : annee + 1;
+    return `${an}-${String(m).padStart(2, "0")}-01`;
+}
 
 function versDate(iso) {
     const [a, m, j] = iso.split("-").map(Number);

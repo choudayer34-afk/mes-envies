@@ -12,7 +12,7 @@
 
 import {
     getEnvies, getEnvieCategories, getPersonnes, createEnvie,
-    updateEnviePersonnesIds, setChecklistItems, isContainerCategory
+    updateEnviePersonnesIds, setChecklistItems, isContainerCategory, updateEnvieVoyage
 } from "./storage.js";
 import { setupAutocomplete } from "./location.js";
 import { openEnvie } from "./envie.js";
@@ -58,15 +58,16 @@ function copierListe(source) {
     });
 }
 
-export function openNouveauVoyage() {
+/* idee (facultatif) : « Lancer une envie » ; le voyage reprend son titre et son lieu, et l'idée y est rattachée. */
+export function openNouveauVoyage({ idee = null } = {}) {
 
     fermerNouveauVoyage();
 
     const personnes = getPersonnes();
     const etat = {
         etape: 1,
-        titre: "",
-        lieu: null,
+        titre: idee?.titre || "",
+        lieu: idee?.lieu?.nom ? { ...idee.lieu } : null,
         debut: "",
         fin: "",
         voyageurs: new Set(personnes.map(p => p.id)),
@@ -212,6 +213,7 @@ export function openNouveauVoyage() {
         });
 
         if (etat.voyageurs.size) updateEnviePersonnesIds(id, [...etat.voyageurs]);
+        if (idee) updateEnvieVoyage(idee.id, id);
 
         const source = etat.reprendre ? getEnvies().find(e => e.id === etat.reprendre) : null;
         if (source) setChecklistItems(id, copierListe(source));

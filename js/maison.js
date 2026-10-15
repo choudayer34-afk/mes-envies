@@ -11,7 +11,7 @@ import {
     getEnvies, createEnvie, isContainerCategory, getEnvieCategories,
     updateEnvieRealise, updateEnvieZone, assurerCategorieProjetMaison,
     updateEnvieDate, deleteEnvie, restaurerEnvie, supprimerDefinitivement,
-    marquerEnvieRevue, synchroniserDatesRdv
+    marquerEnvieRevue, synchroniserDatesRdv, updateEnvieVoyage
 } from "./storage.js";
 import { nombreAchats, openMagasin } from "./magasin.js";
 import { fetchMeteoSemaine } from "./meteo.js";
@@ -68,6 +68,18 @@ function enSommeil(p, maintenant = Date.now()) {
     if (!taches.some(t => !t.realise)) return false;
     const derniere = Math.max(Number(p.updatedAt) || 0, Number(p.revueLe) || 0, ...taches.map(t => Number(t.updatedAt) || 0));
     return derniere > 0 && maintenant - derniere > JOURS_SOMMEIL * 86400000;
+}
+
+/* Dernière action sur un projet : modification du projet ou d'une de ses tâches. */
+export function derniereActivite(p) {
+    return Math.max(Number(p.updatedAt) || 0, ...tachesDe(p.id).map(t => Math.max(Number(t.updatedAt) || 0, Number(t.realiseAt) || 0)));
+}
+
+function libelleDerniereAction(p) {
+    const quand = derniereActivite(p);
+    if (!quand) return "";
+    const jours = Math.floor((Date.now() - quand) / 86400000);
+    return jours <= 0 ? "dernière action aujourd'hui" : jours === 1 ? "dernière action hier" : `dernière action il y a ${jours} jours`;
 }
 
 function projetsEnSommeil() {
@@ -172,6 +184,30 @@ function brancherOuvrir(ecran) {
     }));
 }
 
+/* ---------- Résumé pour la revue de la semaine (js/revue.js) ---------- */
+
+export function resumeMaison() {
+    const b = bilanJour();
+    return {
+        aujourdhui: b.aujourdhui,
+        aTrier: b.aTrier,
+        enRetard: b.enRetard,
+        devis: [...b.relances, ...b.recus].map(d => ({ ...d, projet: nomProjet(d.projetId) })),
+        sommeil: projetsEnSommeil()
+    };
+}
+
+/* Tout ce qui est en retard passe à demain (avec Annuler). Utilisé par Aujourd'hui et la revue. */
+export function toutReporterADemain(taches, aujourdhui) {
+    const demain = dateRevoir("demain", aujourdhui);
+    const anciennes = taches.map(e => [e.id, e.date ? { ...e.date } : null]);
+    taches.forEach(e => updateEnvieDate(e.id, { ...(e.date || {}), type: e.date?.type || "single", start: demain, end: null }));
+    showToast(`${anciennes.length} tâche${anciennes.length > 1 ? "s" : ""} reportée${anciennes.length > 1 ? "s" : ""} à demain`, {
+        action: "Annuler",
+        surAction: () => anciennes.forEach(([id, date]) => updateEnvieDate(id, date))
+    });
+}
+
 /* ---------- Écran Aujourd'hui ---------- */
 
 function ligneTache(e, bilan, retard = false) {
@@ -242,7 +278,7 @@ function dessinerAujourdhui(ecran) {
             ${section("À relancer", lignesSuivi)}
             ${section("Cette semaine", b.semaine.map(e => ligneTache(e, b)).join(""))}
             ${blocSommeil()}
-            ${section(`À trier · ${b.aTrier.length}`, b.aTrier.slice(0, 5).map(e => ligneTache(e, b)).join(""))}
+            ${section(`À trier · ${b.aTrier.length}`, b.aTrier.slice(0, 5).map(e => ligneTache(e, b).replace(/<\/div>\s*$/, `<button type="button" class="niPastilleAction niPastilleClaire" data-lancer="${echapper(e.id)}" style="flex:none">En projet</button></div>`)).join(""))}
             ${rien ? '<div class="niVide">Rien de prévu. Capture une tâche avec le bouton +.</div>' : ""}
         </div>`;
     brancherOuvrir(ecran);
@@ -471,6 +507,16 @@ function brancherAujourdhui(ecran, b) {
 
     ecran.querySelector("#niOuvrirMagasin")?.addEventListener("click", () => openMagasin());
 
+    /* « Lancer une envie » : la tâche à trier devient un projet, dont elle est la première tâche. */
+    ecran.querySelectorAll("[data-lancer]").forEach(bouton => bouton.addEventListener("click", async () => {
+        const tache = getEnvies().find(e => e.id === bouton.dataset.lancer);
+        if (!tache) return;
+        const projetId = await creerProjet(tache.titre || "Projet", tache.zone || "");
+        updateEnvieVoyage(tache.id, projetId);
+        showToast(`✓ Projet « ${tache.titre || "Projet"} » créé`);
+        setTimeout(() => openMaisonFiche(projetId), 600);
+    }));
+
     ecran.querySelectorAll("[data-sommeil-ouvrir]").forEach(bouton => bouton.addEventListener("click", () => openMaisonFiche(bouton.dataset.sommeilOuvrir)));
     ecran.querySelectorAll("[data-sommeil-plustard]").forEach(bouton => bouton.addEventListener("click", () => {
         const id = bouton.dataset.sommeilPlustard;
@@ -520,13 +566,7 @@ function brancherAujourdhui(ecran, b) {
     }));
 
     ecran.querySelector("#niToutDemain")?.addEventListener("click", () => {
-        const demain = dateRevoir("demain", b.aujourdhui);
-        const anciennes = b.enRetard.map(e => [e.id, e.date ? { ...e.date } : null]);
-        b.enRetard.forEach(e => updateEnvieDate(e.id, { ...(e.date || {}), type: e.date?.type || "single", start: demain, end: null }));
-        showToast(`${anciennes.length} tâches reportées à demain`, {
-            action: "Annuler",
-            surAction: () => anciennes.forEach(([id, date]) => updateEnvieDate(id, date))
-        });
+        toutReporterADemain(b.enRetard, b.aujourdhui);
         setTimeout(() => ecran.isConnected && dessinerAujourdhui(ecran), 700);
     });
 }
@@ -571,7 +611,7 @@ function carteProjet(p) {
             <button type="button" class="niVoyageOuvrir" data-projet="${echapper(p.id)}">
                 <span class="niVoyageLigne"><span class="niDocTitre">${echapper(p.titre || "Projet")}</span>${etat}</span>
                 <span class="niBarre niBarreClaire"><i style="width:${pourcent}%"></i></span>
-                <span class="niDocSous">${taches.length ? `${faites} tâche${faites > 1 ? "s" : ""} sur ${taches.length}` : "Aucune tâche"}${prochaine ? ` · Prochaine : ${echapper(prochaine.titre || "")}` : ""}</span>
+                <span class="niDocSous">${taches.length ? `${faites} tâche${faites > 1 ? "s" : ""} sur ${taches.length}` : "Aucune tâche"}${prochaine ? ` · Prochaine : ${echapper(prochaine.titre || "")}` : ""}${libelleDerniereAction(p) ? ` · ${libelleDerniereAction(p)}` : ""}</span>
             </button>
             <div class="niVoyageActions"><button type="button" class="niPastilleAction niPastilleClaire" data-zone="${echapper(p.id)}">Zone : ${echapper(p.zone || "aucune")}</button></div>
         </div>`;
