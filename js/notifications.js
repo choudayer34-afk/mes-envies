@@ -62,9 +62,20 @@ export function reglagesParDefaut() {
             actif: true,
             delais: Object.fromEntries(TYPES_BILLETS.map(t => [t.id, t.defaut]))
         },
-        relances: { voyage: { rythme: "hebdo" }, maison: { rythme: "hebdo" } }
+        relances: { voyage: { rythme: "hebdo" }, maison: { rythme: "hebdo" } },
+        voyage: {
+            actif: true,
+            papiers: true, enregistrement: true, depart: true, valise: true,
+            programme: true, heureProgramme: "08:00",
+            depenses: true, heureDepenses: "20:00",
+            retour: true
+        }
     };
 }
+
+/* Doit rester identique à worker/reglages.js. */
+const CLES_VOYAGE = ["actif", "papiers", "enregistrement", "depart", "valise", "programme", "depenses", "retour"];
+const HEURE_VALIDE = /^([01]\d|2[0-3]):[0-5]\d$/;
 
 /* Fusionne des réglages lus avec les valeurs par défaut, en écartant tout ce qui est invalide. */
 export function nettoyerReglages(brut) {
@@ -92,6 +103,14 @@ export function nettoyerReglages(brut) {
         const rythme = b.relances?.[mode]?.rythme;
         if (RYTHMES.some(x => x.id === rythme)) r.relances[mode].rythme = rythme;
     });
+
+    if (b.voyage && typeof b.voyage === "object") {
+        CLES_VOYAGE.forEach(k => {
+            if (typeof b.voyage[k] === "boolean") r.voyage[k] = b.voyage[k];
+        });
+        if (HEURE_VALIDE.test(b.voyage.heureProgramme || "")) r.voyage.heureProgramme = b.voyage.heureProgramme;
+        if (HEURE_VALIDE.test(b.voyage.heureDepenses || "")) r.voyage.heureDepenses = b.voyage.heureDepenses;
+    }
 
     return r;
 
@@ -431,7 +450,22 @@ function htmlReglages(r) {
         <h3 style="margin:18px 0 6px;">🧹 Relances</h3>
         <p style="font-size:13px;opacity:.7;margin-top:0;">Idées à trier et idées sans date depuis plus de 30 jours, au même horaire que les dates.</p>
         ${ligne("✈️ Voyages", liste("relances.voyage.rythme", optionsRythmes, r.relances.voyage.rythme))}
-        ${ligne("🏠 Maison", liste("relances.maison.rythme", optionsRythmes, r.relances.maison.rythme))}`;
+        ${ligne("🏠 Maison", liste("relances.maison.rythme", optionsRythmes, r.relances.maison.rythme))}
+
+        <h3 style="margin:18px 0 6px;">🧳 Le voyage au bon moment</h3>
+        ${coche("voyage.actif", "Me prévenir aux moments clés d'un voyage", r.voyage.actif)}
+        <div id="notifVoyageDetail" style="${r.voyage.actif ? "" : "opacity:.45;"}">
+            ${coche("voyage.papiers", "Papiers d'identité à vérifier (30 et 7 jours avant)", r.voyage.papiers)}
+            ${coche("voyage.enregistrement", "Enregistrement en ligne d'un vol (24 h avant)", r.voyage.enregistrement)}
+            ${coche("voyage.valise", "Valise à préparer (2 jours avant)", r.voyage.valise)}
+            ${coche("voyage.depart", "Liste « Le jour du départ » (avant le premier transport)", r.voyage.depart)}
+            ${coche("voyage.programme", "Programme du jour, chaque matin", r.voyage.programme)}
+            ${ligne("Heure du programme", `<input type="time" data-r="voyage.heureProgramme" value="${echapper(r.voyage.heureProgramme)}" style="min-height:40px;border-radius:10px;padding:0 8px;">`)}
+            ${coche("voyage.depenses", "Dépenses du jour, chaque soir", r.voyage.depenses)}
+            ${ligne("Heure des dépenses", `<input type="time" data-r="voyage.heureDepenses" value="${echapper(r.voyage.heureDepenses)}" style="min-height:40px;border-radius:10px;padding:0 8px;">`)}
+            ${coche("voyage.retour", "Après le retour : photos, dépenses, adresses (2 jours après)", r.voyage.retour)}
+        </div>
+        <p style="font-size:13px;opacity:.7;">Pour la liste du départ : crée dans Paramètres une catégorie de liste nommée « Le jour du départ » et range-y ce qu'on oublie toujours.</p>`;
 
 }
 
@@ -463,8 +497,10 @@ function appliquerChangement(champ) {
     /* Grisage des blocs désactivés */
     const dates = document.getElementById("notifDatesDetail");
     const billets = document.getElementById("notifBilletsDetail");
+    const voyage = document.getElementById("notifVoyageDetail");
     if (dates) dates.style.opacity = propres.dates.actif ? "" : ".45";
     if (billets) billets.style.opacity = propres.billets.actif ? "" : ".45";
+    if (voyage) voyage.style.opacity = propres.voyage.actif ? "" : ".45";
 
 }
 
@@ -508,6 +544,15 @@ function htmlModeEmploi() {
                 <ul>
                     <li>Chaque lundi ou chaque 1er du mois, séparément pour Voyages et Maison.</li>
                     <li>Elles comptent les éléments à trier. Touche la notification : l'écran « Trier » s'ouvre.</li>
+                </ul>
+                <p><strong>Le voyage au bon moment</strong></p>
+                <ul>
+                    <li>Papiers d'identité expirés ou trop justes : 30 et 7 jours avant le départ.</li>
+                    <li>Enregistrement d'un vol : 24 h avant, la notification ouvre le billet.</li>
+                    <li>Valise : 2 jours avant, s'il reste des choses non cochées.</li>
+                    <li>« Le jour du départ » : 2 h avant le rappel du premier billet de transport, ou le matin du départ sans billet.</li>
+                    <li>Pendant le voyage : le programme du jour le matin, les dépenses le soir.</li>
+                    <li>2 jours après le retour : photos, dépenses partagées, adresses.</li>
                 </ul>
                 <p><strong>Bon à savoir</strong></p>
                 <ul>
@@ -748,9 +793,41 @@ async function attendreVoyage(voyageId, delaiMax = 20000) {
     return attendre(() => getEnvies().some(e => e.id === voyageId), delaiMax);
 }
 
-export async function ouvrirBillet(voyageId, billetId, { ouvrirVoyage = false } = {}) {
+/* Écrans d'un voyage ouverts depuis une notification « le voyage au bon moment ». */
+const ECRANS_VOYAGE = {
+    listes: async v => (await import("./listes.js")).openListes(v.id),
+    programme: async v => (await import("./programme.js")).openProgramme(v),
+    depense: async v => (await import("./depense-form.js")).openDepenseForm(v.id),
+    souvenirs: async v => (await import("./souvenirs.js")).openSouvenirs(v),
+    voyageurs: async v => (await import("./voyageurs-ecran.js")).openVoyageurs(v.id)
+};
+
+export async function ouvrirEcranVoyage(voyageId, vue) {
+
+    const ouvrir = ECRANS_VOYAGE[vue];
+    if (!ouvrir || !voyageId) return false;
+
+    if (!(await attendreVoyage(voyageId))) return false;
+
+    await fermerFenetresOuvertes();
+
+    try {
+        const { getEnvies } = await import("./storage.js");
+        await ouvrir(getEnvies().find(e => e.id === voyageId));
+        return true;
+    } catch (err) {
+        console.warn("Ouverture depuis la notification : " + err.message);
+        return false;
+    }
+
+}
+
+export async function ouvrirBillet(voyageId, billetId, { ouvrirVoyage = false, vue = null } = {}) {
 
     if (!voyageId) return;
+
+    /* Écran précis d'un voyage (listes, programme…) ; à défaut, la fiche du voyage. */
+    if (vue && !billetId && (await ouvrirEcranVoyage(voyageId, vue))) return;
 
     if (!(await attendreVoyage(voyageId))) return;
 
@@ -822,7 +899,7 @@ function brancherOuvertureDepuisNotification() {
     navigator.serviceWorker?.addEventListener("message", (event) => {
 
         if (event.data?.type === "OUVRIR_BILLET") {
-            ouvrirBillet(event.data.voyageId, event.data.billetId, { ouvrirVoyage: true });
+            ouvrirBillet(event.data.voyageId, event.data.billetId, { ouvrirVoyage: true, vue: event.data.vue || null });
         } else if (event.data?.type === "OUVRIR_VUE") {
             ouvrirVue(event.data.vue, event.data.mode);
         }
@@ -837,7 +914,7 @@ function brancherOuvertureDepuisNotification() {
     const billetId = params.get("billet");
 
     if (voyageId) {
-        ouvrirBillet(voyageId, billetId, { ouvrirVoyage: true });
+        ouvrirBillet(voyageId, billetId, { ouvrirVoyage: true, vue: params.get("vue") });
     } else if (params.get("vue")) {
         ouvrirVue(params.get("vue"), params.get("mode"));
     }
