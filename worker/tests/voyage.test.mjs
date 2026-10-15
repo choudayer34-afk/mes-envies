@@ -219,3 +219,43 @@ test("relance : les idées en pause ne comptent pas, revueLe remet l'ancienneté
     const voyage = r.find(n => n.cle.startsWith("r:voyage"));
     assert.equal(voyage.charge.corps, "3 éléments à trier, dont 2 sans date depuis plus de 30 jours");
 });
+
+/* ---------- Lot 4 : Maison ---------- */
+
+import { rappelsRendezVous, suiviMaison, joursRdvACherche } from "../maison.js";
+
+test("rendez-vous : la veille et le jour même, à l'heure des dates", () => {
+    const app = { uid: UID, reglages: nettoyerReglages({}) };
+    const envies = [{ id: "t1", titre: "Salle de bain", contexte: "maison", devis: { entries: [{ id: "d1", societe: "Plombier Exemple", statut: "rdv_planifie", dateRdv: "2026-10-16" }] } }];
+    const veille = rappelsRendezVous(app, envies, a("2026-10-15", "08:05"));
+    assert.equal(veille.length, 1);
+    assert.equal(veille[0].charge.titre, "🛠️ Rendez-vous demain : Plombier Exemple");
+    assert.equal(veille[0].charge.vue, "projet");
+    assert.equal(rappelsRendezVous(app, envies, a("2026-10-16", "08:05"))[0].charge.titre, "🛠️ Rendez-vous aujourd'hui : Plombier Exemple");
+    assert.equal(rappelsRendezVous(app, envies, a("2026-10-15", "12:30")).length, 0);
+    const sansVeille = { uid: UID, reglages: nettoyerReglages({ dates: { veille: false } }) };
+    assert.equal(rappelsRendezVous(sansVeille, envies, a("2026-10-15", "08:05")).length, 0);
+});
+
+test("rendez-vous : recherche seulement à l'heure des rappels", () => {
+    const apps = [{ reglages: nettoyerReglages({}) }];
+    assert.deepEqual(joursRdvACherche(apps, a("2026-10-15", "08:05")), ["2026-10-15", "2026-10-16"]);
+    assert.deepEqual(joursRdvACherche(apps, a("2026-10-15", "14:00")), []);
+});
+
+test("suivi Maison : devis à suivre et projets en sommeil dans la relance", () => {
+    const lundi = a("2026-10-19", "08:05");
+    const vieux = lundi - 30 * 86400000;
+    const envies = [
+        { id: "p1", titre: "Mur", contexte: "maison", categorie: "projet", updatedAt: vieux },
+        { id: "t1", contexte: "maison", voyageId: "p1", updatedAt: vieux, devis: { entries: [{ statut: "a_contacter" }, { statut: "devis_recu" }] } },
+        { id: "p2", titre: "Cuisine", contexte: "maison", categorie: "projet", updatedAt: lundi - 86400000 },
+        { id: "t2", contexte: "maison", voyageId: "p2", updatedAt: lundi - 86400000 }
+    ];
+    const conteneurs = new Set(["projet"]);
+    assert.deepEqual(suiviMaison(envies, conteneurs, UID, lundi), { devis: 2, sommeil: 1 });
+    const r = rappelsRelances({ uid: UID, reglages: nettoyerReglages({}) }, envies, conteneurs, lundi);
+    const maison = r.find(n => n.cle.startsWith("r:maison"));
+    assert.equal(maison.charge.titre, "🏠 Maison : à suivre");
+    assert.equal(maison.charge.corps, "2 devis à suivre · 1 projet en sommeil");
+});
