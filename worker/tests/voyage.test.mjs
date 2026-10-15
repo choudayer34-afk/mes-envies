@@ -102,6 +102,25 @@ test("jour du départ : sans billet de transport, le matin du départ", () => {
     assert.ok(n);
 });
 
+test("jour du départ : sans catégorie départ, cite les éléments non cochés de toutes les listes", () => {
+    const sansCategorie = { ...donnees, categoriesListes: [] };
+    const n = planifier(appareil(), sansCategorie, a("2026-10-16", "05:35")).find(x => x.cle.startsWith("vd:"));
+    assert.equal(n.charge.corps, "Chargeurs, Clés, Crème solaire");
+});
+
+test("jour du départ : plus de 5 éléments, les autres sont comptés", () => {
+    const items = Array.from({ length: 7 }, (_, i) => ({ id: `i${i}`, texte: `Objet ${i + 1}`, checked: false }));
+    const plein = { ...donnees, categoriesListes: [], envies: [voyage({ checklist: items })] };
+    const n = planifier(appareil(), plein, a("2026-10-16", "05:35")).find(x => x.cle.startsWith("vd:"));
+    assert.equal(n.charge.corps, "Objet 1, Objet 2, Objet 3, Objet 4, Objet 5 et 2 autres");
+});
+
+test("jour du départ : tout est coché, rappel fixe", () => {
+    const fait = { ...donnees, envies: [voyage({ checklist: [{ id: "x", texte: "ok", checked: true }] })] };
+    const n = planifier(appareil(), fait, a("2026-10-16", "05:35")).find(x => x.cle.startsWith("vd:"));
+    assert.equal(n.charge.corps, "Clés, chargeurs, papiers, billets : dernière vérification");
+});
+
 test("premier transport : le logement est ignoré", () => {
     assert.equal(premierTransport(voyage()).id, "b1");
 });
