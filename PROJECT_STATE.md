@@ -4,7 +4,7 @@ Mis à jour le 2026-10-15 (fiche projet Maison complète).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v285` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v286` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -117,6 +117,10 @@ Fonctionnement :
 - Anciennes rubriques « Checklist » et « À faire » : leurs éléments non cochés sont repris une fois en tâches du projet (date conservée) ; champ `listesConverties: true` sur le projet ou la tâche d'origine ; listes d'origine conservées en base.
 - Lieu et Évaluation ne sont plus proposés pour les projets Maison (données conservées).
 - L'ancienne fiche reste accessible en bas : « Ancienne fiche (secours) ».
+
+## Listes d'un voyage (2026-10-15)
+
+- `js/listes.js` : par défaut « À prendre » n'affiche que les éléments non cochés, par catégorie ; les cochés sont repliés dans « Déjà pris (n) » en bas ; filtres « À prendre » et « Déjà pris » ; cocher affiche « Annuler » 5 s ; en-tête « Reste N à prendre ».
 
 ## Règles de livraison
 
