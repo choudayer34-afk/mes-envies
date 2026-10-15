@@ -1,10 +1,10 @@
 # PROJECT STATE
 
-Mis à jour le 2026-10-15 (lot 5 : enrichir les envies).
+Mis à jour le 2026-10-15 (fiche projet Maison complète).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v284` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v285` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -102,7 +102,6 @@ Fonctionnement :
 - Revue de la semaine (`js/revue.js`) : ouverte par la relance (nouvelle interface) et par Plus > Autres. Voyages : idées à trier, prochains départs à 30 jours (score et premier manque). Maison : à trier, en retard (tout à demain), devis à suivre, projets en sommeil. Étapes vides sautées. `resumeMaison` et `toutReporterADemain` exportés par `js/maison.js`.
 - Dernière action : « dernière action il y a X jours » sur les cartes Projets (`derniereActivite`) ; section « Historique » (6 derniers : projet créé, tâches ajoutées, terminées) dans la fiche projet Maison.
 - Écarté : « Pourquoi j'en ai envie ».
-- À faire : revoir la fiche complète des projets Maison (ancienne fiche ouverte par « Ouvrir la fiche complète »), jugée inadaptée.
 
 ## Temps de calcul du service de notifications (2026-10-15)
 
@@ -110,6 +109,14 @@ Fonctionnement :
 - `worker/temps.js` : décalage de Paris calculé sans Intl (règle européenne, dernier dimanche de mars et d'octobre à 1 h UTC), résultats d'`instantParis` et `ajouterJours` mémorisés ; vérifié contre Intl de 2025 à 2030 (`worker/tests/temps.test.mjs`).
 - `worker/voyage.js` : programme et dépenses n'examinent que le jour en cours (et la veille pour la fenêtre de 3 h).
 - Journal du service : onglet Observability du Worker « mes-envies » (adresse mes-envies.choudayer34.workers.dev) ; ligne « Passe terminée » avec le bilan toutes les 15 minutes.
+
+## Fiche projet Maison complète (2026-10-15)
+
+- Plus besoin de l'ancienne fiche : `js/maison-fiche-plus.js` ajoute à la fiche projet (`js/maison-fiche.js`) : Infos (titre, dates, budget prévu, feuille « Modifier »), Photos (ajout via Cloudinary, visionneuse, suppression avec Annuler), Notes et liens (écran `js/notes-liens.js`, désormais générique), Outils (Croquis, Simulation IA : ouvrent l'ancienne fiche directement sur la rubrique).
+- Tâches : feuille simple (titre, date, terminer, supprimer avec Annuler), aussi depuis Aujourd'hui Maison ; lien « Photos, devis ou outils propres à cette tâche » vers l'ancienne fiche de la tâche.
+- Anciennes rubriques « Checklist » et « À faire » : leurs éléments non cochés sont repris une fois en tâches du projet (date conservée) ; champ `listesConverties: true` sur le projet ou la tâche d'origine ; listes d'origine conservées en base.
+- Lieu et Évaluation ne sont plus proposés pour les projets Maison (données conservées).
+- L'ancienne fiche reste accessible en bas : « Ancienne fiche (secours) ».
 
 ## Règles de livraison
 
