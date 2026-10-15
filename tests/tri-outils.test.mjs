@@ -44,3 +44,12 @@ test("doublons : idée active d'abord, sinon corbeille", () => {
     assert.equal(r.supprimee, true);
     assert.equal(trouverDoublon("Fado", [{ id: "l", titre: "Fado", listeLibre: true }]), null);
 });
+
+import { dateSaison } from "../js/tri-outils.js";
+
+test("envie de saison : 1er du mois, l'an prochain si le mois est commencé", () => {
+    assert.equal(dateSaison(3, "2026-10-15"), "2027-03-01");
+    assert.equal(dateSaison(12, "2026-10-15"), "2026-12-01");
+    assert.equal(dateSaison(10, "2026-10-15"), "2027-10-01");
+    assert.equal(dateSaison(13, "2026-10-15"), null);
+});
