@@ -104,6 +104,13 @@ Fonctionnement :
 - Écarté : « Pourquoi j'en ai envie ».
 - À faire : revoir la fiche complète des projets Maison (ancienne fiche ouverte par « Ouvrir la fiche complète »), jugée inadaptée.
 
+## Temps de calcul du service de notifications (2026-10-15)
+
+- Limite gratuite Cloudflare : 10 ms de calcul par passe. Une passe mesurait 34 ms : l'essentiel venait d'Intl.DateTimeFormat (heure de Paris).
+- `worker/temps.js` : décalage de Paris calculé sans Intl (règle européenne, dernier dimanche de mars et d'octobre à 1 h UTC), résultats d'`instantParis` et `ajouterJours` mémorisés ; vérifié contre Intl de 2025 à 2030 (`worker/tests/temps.test.mjs`).
+- `worker/voyage.js` : programme et dépenses n'examinent que le jour en cours (et la veille pour la fenêtre de 3 h).
+- Journal du service : onglet Observability du Worker « mes-envies » (adresse mes-envies.choudayer34.workers.dev) ; ligne « Passe terminée » avec le bilan toutes les 15 minutes.
+
 ## Règles de livraison
 
 - Tests avant livraison.
