@@ -7,17 +7,21 @@
  - dates      : une semaine avant, la veille, le jour J, et le délai propre à chaque envie (rappelAvantJours),
                 à l'heure choisie sur l'appareil (heure de Paris) ;
  - billets    : avant l'heure de départ, selon le type (heure de Paris) ;
- - relances   : idées à trier (Voyages et Maison séparément), chaque lundi ou chaque 1er du mois.
+ - relances   : idées à trier (Voyages et Maison séparément), chaque lundi ou chaque 1er du mois ;
+ - voyage     : le voyage au bon moment (papiers, enregistrement, départ, valise, programme,
+                dépenses du soir, retour) : voir voyage.js.
 */
 
 import { nettoyerReglages, TYPES_BILLETS } from "./reglages.js";
+import { FENETRE_RETARD, etapesBillets, visiblePour, nomLieu } from "./commun.js";
+import { rappelsVoyage } from "./voyage.js";
+
+export { FENETRE_RETARD, etapesBillets, visiblePour };
 import {
     partiesParis, instantParis, ajouterJours, formaterDateLongue,
     dateIsoValide, heureValide, formaterDuree, MINUTE, JOUR, HEURE
 } from "./temps.js";
 
-/* Une notification de date ou de relance reste envoyable pendant 3 h après son heure (cron manqué, retard). */
-export const FENETRE_RETARD = 3 * HEURE;
 /* Seuil des idées « anciennes » dans les relances. */
 export const JOURS_ANCIENNETE = 30;
 
@@ -30,40 +34,6 @@ const MOTS_BILLET = {
     avion: "Vol", train: "Train", busferry: "Trajet", voiture: "Location",
     parking: "Parking", restaurant: "Restaurant", activite: "Activité", autre: "Réservation"
 };
-
-/* Copie de etapesBillets (js/types-reservation.js) : un aller-retour compte pour deux étapes. */
-export function etapesBillets(billets) {
-    const etapes = [];
-    (Array.isArray(billets) ? billets : []).forEach(b => {
-        if (!b || typeof b !== "object") return;
-        if (!b.retour) { etapes.push(b); return; }
-        etapes.push({ ...b, _sens: "aller" });
-        etapes.push({
-            ...b,
-            id: `${b.id}#retour`,
-            _sens: "retour",
-            dateDepart: b.retour.dateDepart || null,
-            heureDepart: b.retour.heureDepart || null,
-            numeroVol: b.retour.numeroVol || b.numeroVol || null,
-            lieuDepart: b.destination || null,
-            destination: b.lieuDepart || null,
-            retour: null
-        });
-    });
-    return etapes;
-}
-
-function nomLieu(lieu) {
-    if (!lieu) return "";
-    return typeof lieu === "string" ? lieu : (lieu.nom || "");
-}
-
-/* Une envie est visible par l'appareil sauf si elle est privée et appartient à quelqu'un d'autre. */
-export function visiblePour(envie, uid) {
-    if (envie.supprime) return false;
-    if (envie.visibilite === "prive") return envie.proprietaireId === uid;
-    return true;
-}
 
 function libelleDelaiJours(jours) {
     if (jours === 0) return "Aujourd'hui";
@@ -255,7 +225,7 @@ export function rappelsRelances(appareil, envies, conteneurs, maintenant) {
 
 /*
  appareil : document de l'appareil (uid, reglages, envoyes)
- donnees  : { envies, conteneurs (Set ou null) }
+ donnees  : { envies, conteneurs (Set ou null), personnes?, categoriesListes? }
  Retourne les notifications à envoyer, déjà filtrées de ce qui a été envoyé.
 */
 export function planifier(appareil, donnees, maintenant) {
@@ -266,7 +236,8 @@ export function planifier(appareil, donnees, maintenant) {
     const toutes = [
         ...rappelsDates(prepare, donnees.envies, maintenant),
         ...rappelsBillets(prepare, donnees.envies, maintenant),
-        ...(donnees.conteneurs ? rappelsRelances(prepare, donnees.envies, donnees.conteneurs, maintenant) : [])
+        ...(donnees.conteneurs ? rappelsRelances(prepare, donnees.envies, donnees.conteneurs, maintenant) : []),
+        ...rappelsVoyage(prepare, donnees, maintenant)
     ];
 
     return toutes.filter(n => !envoyes[n.cle]);
@@ -281,10 +252,12 @@ export function besoins(appareils, maintenant) {
 
     for (const a of appareils) {
         const r = nettoyerReglages(a.reglages);
-        if (r.dates.actif || r.billets.actif) dates = true;
+        if (r.dates.actif || r.billets.actif || r.voyage.actif) dates = true;
         if (relancesDues({ ...a, reglages: r }, maintenant).length) relances = true;
     }
 
-    return { dates, relances };
+    const voyage = appareils.some(a => nettoyerReglages(a.reglages).voyage.actif);
+
+    return { dates, relances, voyage };
 
 }

@@ -24,9 +24,18 @@ export function reglagesParDefaut() {
     return {
         dates: { actif: true, heure: "08:00", veille: true, jourJ: true, semaine: true },
         billets: { actif: true, delais: { ...TYPES_BILLETS } },
-        relances: { voyage: { rythme: "hebdo" }, maison: { rythme: "hebdo" } }
+        relances: { voyage: { rythme: "hebdo" }, maison: { rythme: "hebdo" } },
+        voyage: {
+            actif: true,
+            papiers: true, enregistrement: true, depart: true, valise: true,
+            programme: true, heureProgramme: "08:00",
+            depenses: true, heureDepenses: "20:00",
+            retour: true
+        }
     };
 }
+
+export const CLES_VOYAGE = ["actif", "papiers", "enregistrement", "depart", "valise", "programme", "depenses", "retour"];
 
 export function nettoyerReglages(brut) {
 
@@ -52,6 +61,14 @@ export function nettoyerReglages(brut) {
     for (const mode of ["voyage", "maison"]) {
         const rythme = b.relances?.[mode]?.rythme;
         if (RYTHMES.includes(rythme)) r.relances[mode].rythme = rythme;
+    }
+
+    if (b.voyage && typeof b.voyage === "object") {
+        for (const k of CLES_VOYAGE) {
+            if (typeof b.voyage[k] === "boolean") r.voyage[k] = b.voyage[k];
+        }
+        if (heureValide(b.voyage.heureProgramme)) r.voyage.heureProgramme = b.voyage.heureProgramme;
+        if (heureValide(b.voyage.heureDepenses)) r.voyage.heureDepenses = b.voyage.heureDepenses;
     }
 
     return r;

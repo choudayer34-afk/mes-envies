@@ -8,6 +8,7 @@
 import { creerClient } from "./firebase.js";
 import { envoyerPush } from "./webpush.js";
 import { planifier, besoins } from "./rappels.js";
+import { voyageProche } from "./voyage.js";
 import { partiesParis, ajouterJours, JOUR } from "./temps.js";
 
 /* Limite de requêtes d'un Worker gratuit : 50 par passe. Le reste part à la passe suivante. */
@@ -76,8 +77,18 @@ export async function executer(env, { maintenant = Date.now(), fetchFn = fetch, 
             bilan.lectures += envies.length;
         }
 
+        /* Personnes (papiers) et catégories de listes (« Le jour du départ ») : seulement si un voyage est proche. */
+        let personnes = [];
+        let categoriesListes = [];
+
+        if (necessaire.voyage && liste.some(a => voyageProche(envies, a.uid, partiesParis(maintenant).iso))) {
+            personnes = await client.requete(`foyers/${foyerId}`, { from: [{ collectionId: "personnes" }] });
+            categoriesListes = await client.requete(`foyers/${foyerId}`, { from: [{ collectionId: "checklistCategories" }] });
+            bilan.lectures += personnes.length + categoriesListes.length;
+        }
+
         for (const appareil of liste) {
-            for (const notification of planifier(appareil, { envies, conteneurs }, maintenant)) {
+            for (const notification of planifier(appareil, { envies, conteneurs, personnes, categoriesListes }, maintenant)) {
                 envois.push({ appareil, notification });
             }
         }

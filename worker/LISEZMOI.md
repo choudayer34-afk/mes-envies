@@ -11,6 +11,7 @@ Petit service Cloudflare (un « Worker ») qui, toutes les 15 minutes, regarde l
 - Dates : une semaine avant, la veille, le jour J, et le délai propre à chaque envie, à l'heure choisie sur l'appareil.
 - Billets : avant l'heure de départ, selon le type (avion, train, bus/ferry, voiture, parking, restaurant, activité, autre). Un toucher ouvre le billet.
 - Relances : chaque lundi (hebdo) ou chaque 1er du mois (mensuel), séparément pour Voyages et Maison. Un toucher ouvre « Trier les idées » du bon côté.
+- Le voyage au bon moment : papiers à vérifier (30 et 7 jours avant), enregistrement d'un vol (24 h avant), valise (2 jours avant), liste « Le jour du départ » (avant le premier transport), programme du jour chaque matin, dépenses chaque soir, retour (2 jours après). Un toucher ouvre l'écran concerné.
 - Une envie privée n'est notifiée qu'à son propriétaire.
 
 ## Mise en route (une seule fois)
@@ -34,13 +35,15 @@ Petit service Cloudflare (un « Worker ») qui, toutes les 15 minutes, regarde l
 
 ## Lectures Firestore
 
-Pour rester dans le quota gratuit, une passe ne lit que ce qui est utile : les appareils, puis uniquement les envies datées des 60 derniers jours (ou tout le foyer le matin d'une relance). Aucune lecture d'envies si aucun appareil n'a de rappel actif.
+Pour rester dans le quota gratuit, une passe ne lit que ce qui est utile : les appareils, puis uniquement les envies datées des 60 derniers jours (ou tout le foyer le matin d'une relance). Les personnes et les catégories de listes ne sont lues que si un voyage commence dans le mois ou est en cours. Aucune lecture d'envies si aucun appareil n'a de rappel actif.
 
 ## Fichiers
 
 - `index.js` : déclencheur et point d'entrée `/test`.
 - `executer.js` : une passe complète.
 - `rappels.js` : décide quoi envoyer.
+- `voyage.js` : notifications du voyage au bon moment. `commun.js` : outils partagés.
+- `tests/voyage.test.mjs` : tests (`node --test tests/voyage.test.mjs`).
 - `firebase.js`, `idtoken.js` : accès à Firestore et vérification de la connexion.
 - `webpush.js` : chiffrement et envoi (VAPID).
 - `temps.js`, `reglages.js` : heure de Paris et réglages (identiques à l'application).
