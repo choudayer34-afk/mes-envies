@@ -8,7 +8,8 @@
 
 import { openBilletForm } from "./billet-form.js";
 import { openDepenseForm } from "./depense-form.js";
-import { getEnvies, createEnvie, updateEnviePhotos, isContainerCategory } from "./storage.js";
+import { getEnvies, getEnviesCorbeille, createEnvie, updateEnviePhotos, isContainerCategory, restaurerEnvie } from "./storage.js";
+import { trouverDoublon } from "./tri-outils.js";
 import { compresserImageAvantEnvoi, uploadToCloudinary } from "./photos.js";
 import { openEnvie } from "./envie.js";
 import { trouverVoyage } from "./aujourdhui.js";
@@ -166,6 +167,7 @@ export function openCapturer() {
                 <button type="button" id="niIdeeMicro" class="niBouton niMicro" aria-label="Dicter" aria-pressed="false">${ICONES.micro}</button>
                 <button type="submit" class="niBouton niBoutonPrimaire" style="flex:0 0 auto;padding:0 18px">Noter</button>
             </form>
+            <div id="niDoublon" class="niBandeau" style="display:none;margin:0;flex-direction:column;gap:8px"></div>
             <span class="niDocSous">L'idée va dans « À trier » : tu l'organises plus tard.</span>
 
             ${voyages.length ? `
@@ -201,14 +203,59 @@ export function openCapturer() {
         voyageId = evenement.target.value;
     });
 
+    /* Titre déjà vérifié : un second « Noter » sur le même texte crée l'idée malgré le doublon. */
+    let titreVerifie = null;
+
+    function noter(titre) {
+        createEnvie({ titre, contexte: "voyage" });
+        showToast("✓ Idée ajoutée dans « À trier »");
+        fermerCapturer();
+    }
+
+    function dateCourte(ms) {
+        return ms ? new Date(ms).toLocaleDateString("fr-FR", { day: "numeric", month: "long" }) : "";
+    }
+
     fond.querySelector("#niIdeeForm").addEventListener("submit", evenement => {
         evenement.preventDefault();
         const titre = champIdee.value.trim();
         if (!titre) return;
         fond.querySelector("#niIdeeMicro")?.classList.contains("niMicroActif") && fond.querySelector("#niIdeeMicro").click();
-        createEnvie({ titre, contexte: "voyage" });
-        showToast("✓ Idée ajoutée dans « À trier »");
-        fermerCapturer();
+
+        if (titreVerifie === titre) { noter(titre); return; }
+
+        const doublon = trouverDoublon(titre, getEnvies().filter(e => !isContainerCategory(e.categorie)), getEnviesCorbeille());
+        if (!doublon) { noter(titre); return; }
+
+        titreVerifie = titre;
+        const existante = doublon.envie;
+        const quand = dateCourte(existante.createdAt);
+        const zone = fond.querySelector("#niDoublon");
+        zone.style.display = "flex";
+        zone.innerHTML = `
+            <span><strong>Déjà noté${quand ? ` le ${echapper(quand)}` : ""}${doublon.supprimee ? " (dans la corbeille)" : ""}</strong> : « ${echapper(existante.titre || "Idée")} »</span>
+            <div class="niBoutons">
+                <button type="button" class="niBouton niBoutonPrimaire" id="niDoublonExistante">${doublon.supprimee ? "La restaurer" : "Ouvrir l'existante"}</button>
+                <button type="button" class="niBouton" id="niDoublonNoter">Noter quand même</button>
+            </div>`;
+
+        zone.querySelector("#niDoublonNoter").addEventListener("click", () => noter(titre));
+        zone.querySelector("#niDoublonExistante").addEventListener("click", () => {
+            fermerCapturer();
+            if (doublon.supprimee) {
+                restaurerEnvie(existante.id);
+                showToast("✓ Idée restaurée");
+            } else {
+                openEnvie(existante.id);
+            }
+        });
+    });
+
+    /* Le texte change : on vérifiera de nouveau. */
+    champIdee.addEventListener("input", () => {
+        titreVerifie = null;
+        const zone = fond.querySelector("#niDoublon");
+        if (zone) zone.style.display = "none";
     });
 
     fond.querySelectorAll(".niCase").forEach(bouton => {

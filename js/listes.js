@@ -212,40 +212,35 @@ export function openListes(voyageOuId) {
 
     }
 
-    /* Confirmation dans l'application (les fenêtres natives confirm() sont écartées du projet). */
+    /* Suppression immédiate, avec « Annuler » pendant 5 s : l'article revient à sa place. */
     function demanderSuppression(itemId) {
 
-        const item = listeDe(voyageId).find(i => i.id === itemId);
-        if (!item) return;
+        const avantListe = listeDe(voyageId);
+        const position = avantListe.findIndex(i => i.id === itemId);
+        if (position === -1) return;
+        const item = JSON.parse(JSON.stringify(avantListe[position]));
 
-        document.getElementById("niListesSuppression")?.remove();
+        const avant = signature(voyageId);
+        deleteChecklistItem(voyageId, itemId);
+        dessiner();
+        redessinerQuandMisAJour(avant);
 
-        const fond = document.createElement("div");
-        fond.id = "niListesSuppression";
-        fond.className = "niFeuilleFond";
-        fond.style.zIndex = "2400";
-        fond.innerHTML = `
-            <div class="niFeuille" role="dialog" aria-label="Supprimer l'article">
-                <div class="niPoignee"></div>
-                <h2 class="niTitreSection" style="font-size:22px">Supprimer « ${echapper(item.texte || "cet article")} » ?</h2>
-                <button type="button" id="niListesSupprConfirmer" class="niBouton niBoutonPrimaire" style="width:100%;margin:12px 0 10px;background:#B42318;border-color:#B42318;">Supprimer</button>
-                <button type="button" id="niListesSupprAnnuler" class="niBouton" style="width:100%;">Annuler</button>
-            </div>`;
-        document.body.appendChild(fond);
-
-        fond.addEventListener("click", e => { if (e.target === fond) fond.remove(); });
-        fond.querySelector("#niListesSupprAnnuler").addEventListener("click", () => fond.remove());
-        fond.querySelector("#niListesSupprConfirmer").addEventListener("click", () => {
-            const avant = signature(voyageId);
-            deleteChecklistItem(voyageId, itemId);
-            fond.remove();
-            dessiner();
-            redessinerQuandMisAJour(avant);
+        showToast(`« ${item.texte || "Article"} » supprimé`, {
+            action: "Annuler",
+            surAction: () => {
+                const actuels = listeDe(voyageId);
+                if (actuels.some(i => i.id === item.id)) return;
+                const remis = [...actuels];
+                remis.splice(Math.min(position, remis.length), 0, item);
+                const signatureAvant = signature(voyageId);
+                setChecklistItems(voyageId, remis);
+                if (ecran.isConnected) redessinerQuandMisAJour(signatureAvant);
+            }
         });
 
     }
 
-    /* Glisser une ligne : vers la droite, coche ou décoche ; vers la gauche, supprime (après confirmation). */
+    /* Glisser une ligne : vers la droite, coche ou décoche ; vers la gauche, supprime (avec « Annuler »). */
     function installerGestes() {
 
         /* Le défilement vertical reste libre ; l'horizontal est réservé au geste. */

@@ -605,6 +605,16 @@ export function updateEnvieVoyage(id, voyageId) {
     patchEnvie(id, { voyageId });
 }
 
+/* « Plus tard » : l'idée sort de « À trier » jusqu'à cette date (AAAA-MM-JJ) ; null = tout de suite. */
+export function updateEnvieRevoirLe(id, revoirLe) {
+    patchEnvie(id, { revoirLe: revoirLe || null });
+}
+
+/* « Toujours envie ? » → oui : l'idée n'est plus signalée comme ancienne avant 30 jours. */
+export function marquerEnvieRevue(id, revueLe = Date.now()) {
+    patchEnvie(id, { revueLe: revueLe || null });
+}
+
 export function updateEnvieRealise(id, realise) {
     patchEnvie(id, { realise, realiseAt: realise ? Date.now() : null });
 }
