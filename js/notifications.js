@@ -458,14 +458,14 @@ function htmlReglages(r) {
             ${coche("voyage.papiers", "Papiers d'identité à vérifier (30 et 7 jours avant)", r.voyage.papiers)}
             ${coche("voyage.enregistrement", "Enregistrement en ligne d'un vol (24 h avant)", r.voyage.enregistrement)}
             ${coche("voyage.valise", "Valise à préparer (2 jours avant)", r.voyage.valise)}
-            ${coche("voyage.depart", "Liste « Le jour du départ » (avant le premier transport)", r.voyage.depart)}
+            ${coche("voyage.depart", "Avant de partir : ce qui n'est pas coché (avant le premier transport)", r.voyage.depart)}
             ${coche("voyage.programme", "Programme du jour, chaque matin", r.voyage.programme)}
             ${ligne("Heure du programme", `<input type="time" data-r="voyage.heureProgramme" value="${echapper(r.voyage.heureProgramme)}" style="min-height:40px;border-radius:10px;padding:0 8px;">`)}
             ${coche("voyage.depenses", "Dépenses du jour, chaque soir", r.voyage.depenses)}
             ${ligne("Heure des dépenses", `<input type="time" data-r="voyage.heureDepenses" value="${echapper(r.voyage.heureDepenses)}" style="min-height:40px;border-radius:10px;padding:0 8px;">`)}
             ${coche("voyage.retour", "Après le retour : photos, dépenses, adresses (2 jours après)", r.voyage.retour)}
         </div>
-        <p style="font-size:13px;opacity:.7;">Pour la liste du départ : crée dans Paramètres une catégorie de liste nommée « Le jour du départ » et range-y ce qu'on oublie toujours.</p>`;
+        <p style="font-size:13px;opacity:.7;">Avant de partir : la notification cite les éléments non cochés des listes du voyage, sans rien saisir. Une catégorie nommée « Le jour du départ » passe en priorité si elle existe.</p>`;
 
 }
 
@@ -550,7 +550,7 @@ function htmlModeEmploi() {
                     <li>Papiers d'identité expirés ou trop justes : 30 et 7 jours avant le départ.</li>
                     <li>Enregistrement d'un vol : 24 h avant, la notification ouvre le billet.</li>
                     <li>Valise : 2 jours avant, s'il reste des choses non cochées.</li>
-                    <li>« Le jour du départ » : 2 h avant le rappel du premier billet de transport, ou le matin du départ sans billet.</li>
+                    <li>Avant de partir : 2 h avant le rappel du premier billet de transport (ou le matin du départ sans billet), les éléments non cochés des listes ; si tout est coché, un rappel clés, chargeurs, papiers, billets.</li>
                     <li>Pendant le voyage : le programme du jour le matin, les dépenses le soir.</li>
                     <li>2 jours après le retour : photos, dépenses partagées, adresses.</li>
                 </ul>
