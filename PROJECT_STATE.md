@@ -1,10 +1,10 @@
 # PROJECT STATE
 
-Mis à jour le 2026-10-15 (lot 1 : le voyage au bon moment).
+Mis à jour le 2026-10-15 (lot 2 : ne rien perdre).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v280` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v281` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -63,6 +63,17 @@ Fonctionnement :
 - Clés d'envoi : `vp:`, `ve:`, `vd:`, `vv:`, `vg:`, `vm:`, `vr:`.
 - Tests : `cd worker && node --test tests/voyage.test.mjs` (données factices).
 - Écartés : date limite d'annulation (pas de nouveau champ), capture par Siri.
+
+## Ne rien perdre (lot 2, 2026-10-15)
+
+- `js/tri-outils.js` (fonctions pures) : dates « Plus tard », idée en pause, idée dormante (plus de 30 jours), doublons de titre.
+- Trier les idées (`js/trier.js`) : affichage « Une à la fois » (par défaut, glisser à droite = Retenir, à gauche = Plus tard) ou « Toutes » (mémorisé sur l'appareil) ; Plus tard = Demain, Ce week-end (samedi suivant), Dans 1 semaine, Dans 1 mois ; section repliable « En pause » avec « Maintenant » ; « Toujours envie ? » sur les idées de plus de 30 jours : garder (`revueLe`) ou corbeille.
+- Champs d'envie facultatifs : `revoirLe` (AAAA-MM-JJ, l'idée sort d'À trier jusqu'à cette date), `revueLe` (horodatage de la dernière réponse « oui, toujours envie »). Fonctions `updateEnvieRevoirLe`, `marquerEnvieRevue` dans `js/storage.js`.
+- « Annuler » 5 s à la place des confirmations : `showToast(message, { action, surAction })` dans `js/toast.js` ; utilisé dans Trier (retenir, plus tard, corbeille) et Listes (suppression d'un article, remis à sa place).
+- Capturer : doublon repéré (idée active ou corbeille) ; « Ouvrir l'existante » / « La restaurer » ou « Noter quand même ».
+- Worker : les relances ignorent les idées en pause et comptent l'ancienneté depuis `revueLe` si plus récent (aucune lecture en plus).
+- Tests : `node --test tests/tri-outils.test.mjs` (racine) et `cd worker && node --test tests/voyage.test.mjs`.
+- Choix : une idée abandonnée va dans la corbeille (pas d'espace « Idées écartées »).
 
 ## Règles de livraison
 

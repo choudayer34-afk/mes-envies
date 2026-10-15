@@ -356,6 +356,39 @@ main{
     opacity:1;
 }
 
+/* Message avec bouton (Annuler) : cliquable, au-dessus des écrans */
+.toast.toastAvecAction{
+    z-index:3000;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:8px 8px 8px 20px;
+    width:max-content;
+    max-width:calc(100vw - 32px);
+    box-sizing:border-box;
+}
+
+.toast.toastAvecAction > span{
+    flex:1;
+    min-width:0;
+}
+
+.toast:not(.visible){
+    pointer-events:none;
+}
+
+.toastAction{
+    background:none;
+    border:0;
+    color:#7FD8CF;
+    font-weight:700;
+    font-size:15px;
+    min-height:40px;
+    padding:0 12px;
+    border-radius:999px;
+    cursor:pointer;
+}
+
 .hidden {
     display: none;
 }
