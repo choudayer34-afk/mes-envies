@@ -169,11 +169,13 @@ export function relancesDues(appareil, maintenant) {
 
 }
 
-export function idees(mode, envies, conteneurs, uid) {
+/* aujourdhuiIso (facultatif) : les idées mises « Plus tard » jusqu'à une date future ne comptent pas. */
+export function idees(mode, envies, conteneurs, uid, aujourdhuiIso = null) {
 
     return envies.filter(e => {
 
         if (!visiblePour(e, uid) || e.listeLibre) return false;
+        if (aujourdhuiIso && typeof e.revoirLe === "string" && e.revoirLe > aujourdhuiIso) return false;
         if (conteneurs.has(e.categorie)) return false;
         if (e.voyageId || dateEnvie(e)) return false;
 
@@ -192,10 +194,14 @@ export function rappelsRelances(appareil, envies, conteneurs, maintenant) {
 
     for (const mode of relancesDues(appareil, maintenant)) {
 
-        const liste = idees(mode, envies, conteneurs, appareil.uid);
+        const liste = idees(mode, envies, conteneurs, appareil.uid, iso);
         if (!liste.length) continue;
 
-        const anciennes = liste.filter(e => Number.isFinite(e.createdAt) && maintenant - e.createdAt > JOURS_ANCIENNETE * JOUR).length;
+        /* Ancienneté depuis la création, ou depuis la dernière réponse « oui, toujours envie » (revueLe). */
+        const anciennes = liste.filter(e => {
+            const reference = Math.max(Number(e.createdAt) || 0, Number(e.revueLe) || 0);
+            return reference > 0 && maintenant - reference > JOURS_ANCIENNETE * JOUR;
+        }).length;
         const n = liste.length;
         const accord = n > 1 ? "s" : "";
 
