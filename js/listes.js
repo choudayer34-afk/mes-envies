@@ -54,7 +54,7 @@ export function openListes(voyageOuId) {
     ecran.setAttribute("aria-label", "Listes du voyage");
     document.body.appendChild(ecran);
 
-    const etat = { statut: "tous", personne: "", modifier: false, categorie: "" };
+    const etat = { statut: "tous", personne: "", modifier: false, categorie: "", prisOuvert: false };
     let glissement = false;      /* un glissement est en cours : pas de redessin */
     let derniere = "";
 
@@ -72,10 +72,13 @@ export function openListes(voyageOuId) {
         const faits = items.filter(i => i.checked).length;
         const pct = total ? Math.round(faits / total * 100) : 0;
 
+        /* « Tous » : seuls les éléments restants sont listés par catégorie ; les cochés vont dans
+           « Déjà pris », replié en bas, pour voir d'un coup d'œil ce qu'il reste à prendre. */
+        const dePersonne = i => !etat.personne || (i.assignedTo || []).includes(etat.personne);
         const visibles = items.filter(i =>
-            (etat.statut === "tous" || (etat.statut === "afaire" ? !i.checked : i.checked)) &&
-            (!etat.personne || (i.assignedTo || []).includes(etat.personne))
+            (etat.statut === "tous" ? !i.checked : etat.statut === "afaire" ? !i.checked : i.checked) && dePersonne(i)
         );
+        const dejaPris = etat.statut === "tous" ? items.filter(i => i.checked && dePersonne(i)) : [];
 
         const groupes = new Map();
         visibles.forEach(i => {
@@ -110,12 +113,12 @@ export function openListes(voyageOuId) {
             </div>
             <div class="niCorps niBfCorps">
                 <div class="niCarte" style="padding:14px;display:flex;flex-direction:column;gap:8px">
-                    <div class="niVoyageLigne"><span class="niEtiquette">Avancement</span><span class="niDocTitre">${faits} / ${total}</span></div>
+                    <div class="niVoyageLigne"><span class="niEtiquette">${total - faits ? `Reste ${total - faits} à prendre` : "Tout est pris"}</span><span class="niDocTitre">${faits} / ${total}</span></div>
                     <span class="niBarre niBarreClaire"><i style="width:${pct}%"></i></span>
                 </div>
 
                 <div class="niSelecteurVoyage" role="group" aria-label="Filtrer">
-                    ${[["tous", "Tous"], ["afaire", "À faire"], ["fait", "Fait"]].map(([id, l]) => `<button type="button" class="niPuce${etat.statut === id ? " niPuceActive" : ""}" data-statut="${id}"><span class="niPuceTitre">${l}</span></button>`).join("")}
+                    ${[["tous", "À prendre"], ["fait", "Déjà pris"]].map(([id, l]) => `<button type="button" class="niPuce${etat.statut === id ? " niPuceActive" : ""}" data-statut="${id}"><span class="niPuceTitre">${l}</span></button>`).join("")}
                     ${idsPersonnes.length > 1 ? `<span class="niPuceSeparateur"></span>${idsPersonnes.map(id => `<button type="button" class="niPuce${etat.personne === id ? " niPuceActive" : ""}" data-personne="${echapper(id)}"><span class="niPuceTitre">${echapper(nomPersonne(id))}</span></button>`).join("")}` : ""}
                 </div>
 
@@ -126,7 +129,13 @@ export function openListes(voyageOuId) {
                         <div class="niCarte" style="padding:4px 14px">${liste.map(ligne).join("")}</div></div>`;
                 }).join("")}
 
-                ${!visibles.length ? `<div class="niVide">${total ? "Rien dans ce filtre." : "Aucun article pour ce voyage. Ajoute-en ci-dessous."}</div>` : ""}
+                ${!visibles.length ? `<div class="niVide">${!total ? "Aucun article pour ce voyage. Ajoute-en ci-dessous." : etat.statut === "fait" ? "Rien de coché pour le moment." : "✓ Tout est pris."}</div>` : ""}
+
+                ${dejaPris.length ? `
+                <details class="niSection" id="niListesPris"${etat.prisOuvert ? " open" : ""}>
+                    <summary class="niEtiquette" style="cursor:pointer;min-height:44px;display:flex;align-items:center">Déjà pris (${dejaPris.length})</summary>
+                    <div class="niCarte" style="padding:4px 14px">${dejaPris.map(ligne).join("")}</div>
+                </details>` : ""}
 
                 <button type="button" class="niBouton" id="niListesModele" style="width:100%">Appliquer un modèle</button>
                 <button type="button" class="niLienDiscret" id="niListesReprendre">Reprendre une liste d'un voyage passé</button>
@@ -145,11 +154,28 @@ export function openListes(voyageOuId) {
         ecran.querySelectorAll("[data-statut]").forEach(b => b.addEventListener("click", () => { etat.statut = b.dataset.statut; dessiner(); }));
         ecran.querySelectorAll("[data-personne]").forEach(b => b.addEventListener("click", () => { etat.personne = etat.personne === b.dataset.personne ? "" : b.dataset.personne; dessiner(); }));
 
+        ecran.querySelector("#niListesPris")?.addEventListener("toggle", e => { etat.prisOuvert = e.currentTarget.open; });
+
         ecran.querySelectorAll("[data-coche]").forEach(b => b.addEventListener("click", () => {
+            const id = b.dataset.coche;
+            const item = listeDe(voyageId).find(i => i.id === id);
+            const etaitCoche = !!item?.checked;
             const avant = signature(voyageId);
-            toggleChecklistItem(voyageId, b.dataset.coche);
+            toggleChecklistItem(voyageId, id);
             dessiner();
             redessinerQuandMisAJour(avant);
+            /* L'élément coché quitte la liste : on peut revenir en arrière pendant 5 s. */
+            if (item && !etaitCoche) {
+                showToast(`✓ ${item.texte || "Article"}`, {
+                    action: "Annuler",
+                    surAction: () => {
+                        if (!listeDe(voyageId).find(i => i.id === id)?.checked) return;
+                        const signatureAvant = signature(voyageId);
+                        toggleChecklistItem(voyageId, id);
+                        if (ecran.isConnected) redessinerQuandMisAJour(signatureAvant);
+                    }
+                });
+            }
         }));
         ecran.querySelectorAll("[data-pers]").forEach(b => b.addEventListener("click", () => {
             const avant = signature(voyageId);
