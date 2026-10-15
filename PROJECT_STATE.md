@@ -1,10 +1,10 @@
 # PROJECT STATE
 
-Mis à jour le 2026-10-15 (lot 3 : se recentrer).
+Mis à jour le 2026-10-15 (lot 4 : Maison au bon moment).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v282` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v283` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -84,6 +84,15 @@ Fonctionnement :
 - Recherche (`js/recherche.js`) : aussi les projets et tâches Maison.
 - Menu Plus : visibles = mode, Notifications, Urgence, Corbeille, Jeux, Administration ; le reste dans « Autres » repliable (rangement refait à chaque ouverture, rien supprimé) : `rangerMenuPlus` dans `js/nouvelle-interface.js`.
 - Tests : `node --test tests/prochaine-etape.test.mjs`.
+
+## Maison au bon moment (lot 4, 2026-10-15)
+
+- Rendez-vous d'artisan (devis `rdv_planifie` avec `dateRdv`, non retenu) : notification la veille et le jour même à l'heure des dates (réglages « La veille », « Le jour même »). Toucher ouvre la fiche du projet Maison (`vue: "projet"`, bascule en mode Maison si besoin).
+- Champ d'envie `datesRdv` (tableau de dates AAAA-MM-JJ) tenu à jour par `updateEnvieDevis` (`datesRdvDe` dans `js/storage.js`) ; rattrapage des anciens devis par `synchroniserDatesRdv` à la première ouverture d'Aujourd'hui Maison (sans toucher `updatedAt`). Le Worker lit seulement les envies `datesRdv` ARRAY_CONTAINS_ANY [aujourd'hui, demain], et seulement à l'heure des rappels.
+- Relance Maison : ajoute les devis à suivre (à contacter, reçus sans choix) et les projets en sommeil ; part aussi s'il n'y a rien à trier (« Maison : à suivre »). Calcul dans `worker/maison.js` (aucune lecture en plus : la relance lit déjà tout le foyer).
+- Projet en sommeil : tâches ouvertes et aucune activité (`updatedAt` du projet et de ses tâches, `revueLe`) depuis 21 jours. Étiquette « en sommeil » dans Projets ; section « En sommeil » dans Aujourd'hui Maison (Ouvrir, Plus tard = `revueLe`).
+- En magasin (`js/magasin.js`) : produits retenus des comparateurs (par magasin), planches, peinture à prévoir ; cocher « acheté » enregistre `achete` sur le produit ou la planche (la peinture : session seulement). Accès : ligne « 🛒 En magasin » d'Aujourd'hui Maison.
+- Bonne météo : bandeau dans Aujourd'hui Maison si le prochain week-end est sec (code météo ≤ 3, pluie ≤ 30 %) et qu'un projet d'une zone extérieure a des tâches ouvertes. Open-Meteo appelé par l'appli (`fetchMeteoSemaine` dans `js/meteo.js`), une fois par jour et par session ; position de la maison mémorisée sur l'appareil (`envie_position_maison`, arrondie au centième) à la première ouverture.
 
 ## Règles de livraison
 
