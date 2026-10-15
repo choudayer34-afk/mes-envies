@@ -17,6 +17,7 @@ import { dateLocaleISO } from "./documents.js";
 import { choisirZone } from "./maison.js";
 import { showToast } from "./toast.js";
 import { installerBalayage, balayageEnCours } from "./balayage.js";
+import { noterOuverture } from "./prochaine-etape.js";
 
 let minuteur = null;
 
@@ -389,6 +390,7 @@ function ouvrirFormulaire(projetId, sorte) {
 
 export function openMaisonFiche(projetId) {
     fermerMaisonFiche();
+    noterOuverture(projetId, "maison");
     const ecran = document.createElement("div");
     ecran.id = "niMaisonFiche";
     ecran.className = "niEcran";

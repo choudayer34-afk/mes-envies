@@ -229,6 +229,57 @@ function monterNavVoyages() {
     });
 }
 
+/* ---------- Menu Plus allégé ---------- */
+
+/* Boutons toujours visibles, dans cet ordre ; les autres (connus) vont dans « Autres », repliable.
+   Les boutons sont ajoutés par plusieurs modules à des moments différents : le rangement est refait
+   à chaque ouverture du menu. Rien n'est supprimé. */
+const PLUS_VISIBLES = ["niPlusMaison", "plusBtnNotifications", "niPlusUrgence", "plusBtnCorbeille", "plusBtnJeux", "niPlusAdmin"];
+const PLUS_AUTRES = [
+    "plusMeteoLieu", "plusMeteoWidget", "plusBtnSurvie", "plusBtnGuide", "plusBtnAPropos", "plusBtnNouveautes",
+    "plusBtnRevoirOnboarding", "plusBtnSauvegardeComplete", "plusBtnMigrationBillets", "plusBtnNouvelleInterface"
+];
+
+function rangerMenuPlus() {
+
+    const modale = document.querySelector("#plusModal .modal");
+    if (!modale) return;
+
+    let autres = document.getElementById("niPlusAutres");
+    if (!autres) {
+        autres = document.createElement("details");
+        autres.id = "niPlusAutres";
+        autres.style.cssText = "margin-top:14px;";
+        autres.innerHTML = '<summary style="cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:700;">Autres</summary><div id="niPlusAutresContenu" style="margin-top:8px;"></div>';
+    }
+    modale.appendChild(autres);
+
+    const titre = modale.querySelector("h2");
+    let repere = titre;
+    PLUS_VISIBLES.forEach(id => {
+        const element = document.getElementById(id);
+        if (!element || !repere) return;
+        repere.after(element);
+        repere = element;
+    });
+
+    const contenu = autres.querySelector("#niPlusAutresContenu");
+    PLUS_AUTRES.forEach(id => {
+        const element = document.getElementById(id);
+        if (element && element.parentElement !== contenu) contenu.appendChild(element);
+    });
+
+}
+
+function surveillerMenuPlus() {
+    const plus = document.getElementById("plusModal");
+    if (!plus) return;
+    rangerMenuPlus();
+    new MutationObserver(() => {
+        if (!plus.classList.contains("hidden")) rangerMenuPlus();
+    }).observe(plus, { attributes: true, attributeFilter: ["class"] });
+}
+
 function monterBarre() {
 
     /* Tout ajout de billet passe par le nouvel écran (y compris les boutons de l'ancienne fiche). */
@@ -294,6 +345,7 @@ function monterBarre() {
         urgence.parentNode?.insertBefore(maison, urgence);
     }
     monterNavVoyages();
+    surveillerMenuPlus();
 
     const barre = document.createElement("nav");
     barre.id = "niBarreOnglets";

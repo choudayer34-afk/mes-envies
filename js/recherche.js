@@ -2,8 +2,8 @@
 ==========================================================
  EnVie - Nouvelle interface
  recherche.js : recherche globale (voyages, lieux, réservations,
- listes, dépenses, notes et liens). Lecture seule.
- Ouverture : loupe de l'écran Voyages, Ctrl+K ou « / ».
+ listes, dépenses, notes et liens ; projets et tâches Maison). Lecture seule.
+ Ouverture : loupe de l'écran Voyages ou d'Aujourd'hui Maison, Ctrl+K ou « / ».
 ==========================================================
 */
 
@@ -92,6 +92,25 @@ export function construireIndex() {
         }
     });
 
+    /* Maison : projets et tâches */
+    const maison = getEnvies().filter(e => e.contexte === "maison" && !e.supprime && !e.listeLibre);
+    const projetsMaison = new Map(maison.filter(e => isContainerCategory(e.categorie)).map(p => [p.id, p]));
+    const ouvrirProjet = async id => (await import("./maison-fiche.js")).openMaisonFiche(id);
+
+    maison.forEach(e => {
+        if (projetsMaison.has(e.id)) {
+            lignes.push({ groupe: "Projets Maison", icone: "🛠️", titre: e.titre || "Projet", sous: e.zone || "", texte: [e.titre, e.zone, e.description].join(" "), ouvrir: () => ouvrirProjet(e.id) });
+            return;
+        }
+        const projet = projetsMaison.get(e.voyageId);
+        lignes.push({
+            groupe: "Tâches Maison", icone: e.realise ? "☑️" : "⬜", titre: e.titre || "Tâche",
+            sous: [projet?.titre || "À trier", e.date?.start || ""].filter(Boolean).join(" · "),
+            texte: [e.titre, e.zone, e.description, projet?.titre].join(" "),
+            ouvrir: () => projet ? ouvrirProjet(projet.id) : openEnvie(e.id)
+        });
+    });
+
     return lignes;
 }
 
@@ -124,7 +143,7 @@ export function openRecherche() {
     ecran.innerHTML = `
         <div class="niBarreHaut">
             <button type="button" class="niBoutonIcone" id="niRechercheRetour" aria-label="Retour">←</button>
-            <input id="niRechercheChamp" class="niRecherche" type="search" placeholder="Voyage, lieu, billet, article, dépense…" aria-label="Rechercher" autocomplete="off" enterkeyhint="search">
+            <input id="niRechercheChamp" class="niRecherche" type="search" placeholder="Voyage, lieu, billet, projet, tâche…" aria-label="Rechercher" autocomplete="off" enterkeyhint="search">
         </div>
         <div class="niCorps" id="niRechercheCorps"></div>`;
     document.body.appendChild(ecran);
@@ -137,7 +156,7 @@ export function openRecherche() {
         const q = champ.value.trim();
         if (!q) {
             courants = [];
-            corps.innerHTML = '<div class="niVide">Cherche dans tes voyages, lieux, réservations, listes, dépenses, notes et liens.</div>';
+            corps.innerHTML = '<div class="niVide">Cherche dans tes voyages, lieux, réservations, listes, dépenses, notes et liens, et dans tes projets Maison.</div>';
             return;
         }
         courants = chercher(index, q);

@@ -29,6 +29,7 @@ import { rappelsVoyage } from "./rappels.js";
 import { openVoyageurs } from "./voyageurs-ecran.js";
 import { openDocuments, listerBillets, dateLocaleISO } from "./documents.js";
 import { showToast } from "./toast.js";
+import { derniereOuverture, oublierReprise, basculerVersMode } from "./prochaine-etape.js";
 
 
 function echapper(texte) {
@@ -115,6 +116,43 @@ export function phaseDuVoyage(voyage) {
     const numero = joursEntre(voyage.date.start, aujourdhui) + 1;
     const total = joursEntre(voyage.date.start, fin) + 1;
     return { code: "pendant", libelle: total > 1 ? `Jour ${numero} sur ${total}` : "Aujourd'hui", jours: 0 };
+}
+
+/* ---------- En-tête : bascule vers Maison, reprise ---------- */
+
+function boutonMaison() {
+    return '<button type="button" class="niBouton" id="niAujVersMaison" style="flex:none;min-height:44px;padding:0 14px">🛠️ Maison</button>';
+}
+
+/* « Reprendre » : le dernier voyage ouvert, s'il n'est pas déjà celui affiché. */
+function blocReprise(voyageAffiche) {
+    const d = derniereOuverture("voyage");
+    if (!d || d.id === voyageAffiche?.id) return "";
+    const voyage = getEnvies().find(e => e.id === d.id && e.contexte === "voyage");
+    if (!voyage) return "";
+    return `
+        <div class="niCarte" style="padding:4px 14px;margin-bottom:12px">
+            <div class="niDocLigne" style="gap:10px">
+                <button type="button" class="niLigneTexte" id="niAujReprendre" data-voyage-reprise="${echapper(voyage.id)}">
+                    <span class="niDocTitre">↩ Reprendre : ${echapper(voyage.titre || "Voyage")}</span>
+                    <span class="niDocSous">Le dernier voyage que tu as ouvert</span>
+                </button>
+                <button type="button" class="niBoutonIcone" id="niAujRepriseFermer" aria-label="Masquer">×</button>
+            </div>
+        </div>`;
+}
+
+function brancherEntete(ecran) {
+    ecran.querySelector("#niAujVersMaison")?.addEventListener("click", () => basculerVersMode("maison"));
+    ecran.querySelector("#niAujReprendre")?.addEventListener("click", evenement => {
+        const id = evenement.currentTarget.dataset.voyageReprise;
+        fermerAujourdhui();
+        openEnvie(id);
+    });
+    ecran.querySelector("#niAujRepriseFermer")?.addEventListener("click", () => {
+        oublierReprise();
+        ecran.querySelector("#niAujReprendre")?.closest(".niCarte")?.remove();
+    });
 }
 
 /* ---------- Événements du jour ---------- */
@@ -297,9 +335,11 @@ export function openAujourdhui() {
         ecran.innerHTML = `
             <div class="niCorps">
                 <span class="niEtiquette">${echapper(dateLongue)}</span>
-                <h1 class="niTitrePage">Aujourd'hui</h1>
+                <div class="niAujEntete"><h1 class="niTitrePage" style="margin:0">Aujourd'hui</h1>${boutonMaison()}</div>
+                ${blocReprise(null)}
                 <div class="niVide">Aucun voyage en cours ou à venir. Ajoute des dates à un voyage pour le retrouver ici.</div>
             </div>`;
+        brancherEntete(ecran);
         return;
     }
 
@@ -324,7 +364,8 @@ export function openAujourdhui() {
     ecran.innerHTML = `
         <div class="niCorps">
             <span class="niEtiquette">${echapper(dateLongue)}</span>
-            <div class="niAujEntete"><h1 class="niTitrePage" style="margin:0">Aujourd'hui</h1><button type="button" class="niBouton niBoutonUrgence" id="niAujUrgence">🆘 Urgence</button></div>
+            <div class="niAujEntete"><h1 class="niTitrePage" style="margin:0">Aujourd'hui</h1><div style="display:flex;gap:8px">${boutonMaison()}<button type="button" class="niBouton niBoutonUrgence" id="niAujUrgence">🆘 Urgence</button></div></div>
+            ${blocReprise(voyage)}
             ${selecteur}
             ${blocRappels(voyage)}
             ${carteVoyage(voyage, phase, bilan)}
@@ -375,6 +416,8 @@ export function openAujourdhui() {
                 </button>
             </div>
         </div>`;
+
+    brancherEntete(ecran);
 
     ecran.querySelectorAll(".niPuce").forEach(puce => {
         puce.addEventListener("click", () => {

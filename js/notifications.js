@@ -677,8 +677,8 @@ function injecterBouton() {
 
     const reperage = document.getElementById("plusBtnNouveautes");
 
-    if (reperage) {
-        modalePlus.insertBefore(bouton, reperage);
+    if (reperage?.parentNode) {
+        reperage.parentNode.insertBefore(bouton, reperage);
     } else {
         modalePlus.appendChild(bouton);
     }

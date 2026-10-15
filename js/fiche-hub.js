@@ -10,6 +10,7 @@
 */
 
 import { getEnvies, updateEnvie, updateEnvieDate, updateEnvieLieu, voyageADocumentExpire, supprimerVoyageEtContenu } from "./storage.js";
+import { noterOuverture } from "./prochaine-etape.js";
 import { closeFiche } from "./envie.js";
 import { setupAutocomplete } from "./location.js";
 import { formatPeriode } from "./periode.js";
@@ -123,6 +124,8 @@ export function ouvrirHub(voyageOuId) {
     const id = typeof voyageOuId === "object" ? voyageOuId.id : voyageOuId;
     const voyage = getEnvies().find(e => e.id === id);
     if (!voyage) return;
+
+    noterOuverture(id, "voyage");
 
     let ecran = document.getElementById("niFicheHub");
     if (!ecran) {

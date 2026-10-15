@@ -9,7 +9,8 @@
 
 import {
     getEnvies, createEnvie, isContainerCategory, getEnvieCategories,
-    updateEnvieRealise, updateEnvieZone, assurerCategorieProjetMaison
+    updateEnvieRealise, updateEnvieZone, assurerCategorieProjetMaison,
+    updateEnvieDate, deleteEnvie, restaurerEnvie, supprimerDefinitivement
 } from "./storage.js";
 import { computeContainerStatus } from "./progress.js";
 import { openEnvie } from "./envie.js";
@@ -18,6 +19,8 @@ import { dateLocaleISO } from "./documents.js";
 import { showToast } from "./toast.js";
 import { openMaisonFiche, fermerMaisonFiche } from "./maison-fiche.js";
 import { installerBalayage, balayageEnCours } from "./balayage.js";
+import { prochaineEtape, lireIgnorees, ignorer, derniereOuverture, oublierReprise, basculerVersMode } from "./prochaine-etape.js";
+import { dateRevoir, libelleRetour } from "./tri-outils.js";
 
 const ZONES_DEFAUT = ["Jardin", "Salle de bain", "Cuisine", "Garage", "Chambre", "Salon"];
 const LIBELLES_DEVIS = { a_contacter: "À contacter", rdv_planifie: "Rendez-vous", devis_recu: "Devis reçu" };
@@ -163,7 +166,7 @@ function ligneTache(e, bilan, retard = false) {
                 <span class="niDocTitre">${echapper(e.titre || "Tâche")}</span>
                 ${sous ? `<span class="niDocSous">${echapper(sous)}</span>` : ""}
             </button>
-            ${retard ? '<span class="niTag niTagMaintenant">En retard</span>' : ""}
+            ${retard ? `<button type="button" class="niPastilleAction niPastilleClaire" data-reporter="${echapper(e.id)}" style="flex:none">Reporter</button>` : ""}
         </div>`;
 }
 
@@ -200,9 +203,20 @@ function dessinerAujourdhui(ecran) {
     ecran.innerHTML = `
         <div class="niCorps">
             <span class="niEtiquette">${echapper(dateLongue)}</span>
-            <h1 class="niTitrePage">Aujourd'hui</h1>
+            <div class="niAujEntete">
+                <h1 class="niTitrePage" style="margin:0">Aujourd'hui</h1>
+                <div style="display:flex;gap:8px">
+                    <button type="button" class="niBoutonIcone" id="niMaisonChercher" aria-label="Rechercher">🔍</button>
+                    <button type="button" class="niBouton" id="niMaisonVersVoyages" style="flex:none;min-height:44px;padding:0 14px">✈️ Voyages</button>
+                </div>
+            </div>
             ${pastilles ? `<div class="niPastillesLigne">${pastilles}</div>` : ""}
-            ${section("En retard", b.enRetard.map(e => ligneTache(e, b, true)).join(""))}
+            ${blocReprise()}
+            ${blocProchaine(b)}
+            ${b.enRetard.length ? `<div class="niSection">
+                <div class="niAujEntete"><h2 class="niTitreSection">En retard</h2>${b.enRetard.length > 1 ? '<button type="button" class="niLienDiscret" id="niToutDemain">Tout à demain</button>' : ""}</div>
+                ${b.enRetard.map(e => ligneTache(e, b, true)).join("")}
+            </div>` : ""}
             ${section("Aujourd'hui", lignesJour)}
             ${section("À relancer", lignesSuivi)}
             ${section("Cette semaine", b.semaine.map(e => ligneTache(e, b)).join(""))}
@@ -210,6 +224,169 @@ function dessinerAujourdhui(ecran) {
             ${rien ? '<div class="niVide">Rien de prévu. Capture une tâche avec le bouton +.</div>' : ""}
         </div>`;
     brancherOuvrir(ecran);
+    brancherAujourdhui(ecran, b);
+}
+
+/* ---------- Reprendre où j'en étais ---------- */
+
+function blocReprise() {
+    const d = derniereOuverture("maison");
+    const projet = d && listerProjets().find(p => p.id === d.id);
+    if (!projet) return "";
+    const restantes = tachesDe(projet.id).filter(t => !t.realise).length;
+    if (!restantes) return "";
+    return `
+        <div class="niCarte" style="padding:4px 14px;margin-bottom:12px">
+            <div class="niDocLigne" style="gap:10px">
+                <button type="button" class="niLigneTexte" id="niReprendre" data-projet-reprise="${echapper(projet.id)}">
+                    <span class="niDocTitre">↩ Reprendre : ${echapper(projet.titre || "Projet")}</span>
+                    <span class="niDocSous">${restantes} tâche${restantes > 1 ? "s" : ""} à faire</span>
+                </button>
+                <button type="button" class="niBoutonIcone" id="niRepriseFermer" aria-label="Masquer">×</button>
+            </div>
+        </div>`;
+}
+
+/* ---------- Prochaine étape ---------- */
+
+function tachesMaison() {
+    return enviesMaison().filter(e => !isContainerCategory(e.categorie) && !e.listeLibre);
+}
+
+function blocProchaine(b) {
+    const choix = prochaineEtape(tachesMaison(), b.aujourdhui, lireIgnorees());
+    if (!choix) return "";
+    const e = choix.envie;
+    const sous = [choix.raison, e.voyageId ? nomProjet(e.voyageId) : "", e.date?.start && e.date.start !== b.aujourdhui ? formatCourt(e.date.start) : ""].filter(Boolean).join(" · ");
+    return `
+        <div class="niCarte" style="padding:16px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px;border:2px solid var(--ni-accent, #0F766E)" data-prochaine="${echapper(e.id)}">
+            <span class="niEtiquette">Prochaine étape</span>
+            <button type="button" class="niLigneTexte" data-ouvrir="${echapper(e.id)}" style="padding:0">
+                <span class="niDocTitre" style="font-size:19px">${echapper(e.titre || "Tâche")}</span>
+                <span class="niDocSous">${echapper(sous)}</span>
+            </button>
+            <div class="niBoutons">
+                <button type="button" class="niBouton niBoutonPrimaire" data-etape="fait">Fait</button>
+                <button type="button" class="niBouton" data-etape="plustard">Pas maintenant</button>
+            </div>
+            <button type="button" class="niLienDiscret" data-etape="decouper" style="align-self:flex-start">Trop gros ? Découper en petites étapes</button>
+        </div>`;
+}
+
+function feuille(id, contenu) {
+    document.getElementById(id)?.remove();
+    const fond = document.createElement("div");
+    fond.id = id;
+    fond.className = "niFeuilleFond";
+    fond.style.zIndex = "2400";
+    fond.innerHTML = `<div class="niFeuille" role="dialog"><div class="niPoignee"></div>${contenu}</div>`;
+    fond.addEventListener("click", e => { if (e.target === fond) fond.remove(); });
+    document.body.appendChild(fond);
+    return fond;
+}
+
+function reporter(envie, nouvelle, ecran) {
+    const ancienne = envie.date ? { ...envie.date } : null;
+    updateEnvieDate(envie.id, { ...(envie.date || {}), type: envie.date?.type || "single", start: nouvelle, end: null });
+    showToast(`Reportée ${libelleRetour(nouvelle, dateLocaleISO())}`, {
+        action: "Annuler",
+        surAction: () => { updateEnvieDate(envie.id, ancienne); }
+    });
+    setTimeout(() => ecran.isConnected && dessinerAujourdhui(ecran), 700);
+}
+
+function ouvrirReport(envie, ecran) {
+    const choix = [["demain", "Demain"], ["weekend", "Ce week-end"], ["semaine", "Dans 1 semaine"]];
+    const fond = feuille("niMaisonReport", `
+        <h2 class="niTitreSection" style="font-size:22px">Reporter « ${echapper(envie.titre || "la tâche")} »</h2>
+        <div class="niCarte" style="padding:4px 14px">
+            ${choix.map(([id, libelle]) => `<button type="button" class="niDocLigne" data-choix="${id}"><span class="niDocTitre">${libelle}</span></button>`).join("")}
+        </div>`);
+    fond.querySelectorAll("[data-choix]").forEach(bouton => bouton.addEventListener("click", () => {
+        fond.remove();
+        reporter(envie, dateRevoir(bouton.dataset.choix, dateLocaleISO()), ecran);
+    }));
+}
+
+function ouvrirDecoupage(envie, ecran) {
+    const fond = feuille("niMaisonDecouper", `
+        <h2 class="niTitreSection" style="font-size:22px">Découper « ${echapper(envie.titre || "la tâche")} »</h2>
+        <p class="niDocSous" style="margin:4px 0 10px">Une petite étape par ligne. Elles remplacent la tâche, dans le même projet.</p>
+        <textarea id="niDecouperTexte" class="niRecherche" rows="5" style="height:auto;min-height:120px;padding-top:10px" placeholder="Acheter les vis&#10;Mesurer le mur&#10;…"></textarea>
+        <button type="button" id="niDecouperValider" class="niBouton niBoutonPrimaire" style="width:100%;margin-top:12px">Créer les étapes</button>`);
+    const champ = fond.querySelector("#niDecouperTexte");
+    setTimeout(() => champ.focus(), 50);
+    fond.querySelector("#niDecouperValider").addEventListener("click", () => {
+        const titres = champ.value.split("\n").map(t => t.trim()).filter(Boolean);
+        if (!titres.length) { champ.focus(); return; }
+        const crees = titres.map((titre, i) => {
+            const id = createEnvie({ titre, contexte: "maison", voyageId: envie.voyageId || null, date: envie.date || null });
+            if (!envie.voyageId && envie.zone) updateEnvieZone(id, envie.zone);
+            return id;
+        });
+        deleteEnvie(envie.id);
+        fond.remove();
+        showToast(`✓ ${crees.length} étape${crees.length > 1 ? "s" : ""} créée${crees.length > 1 ? "s" : ""}`, {
+            action: "Annuler",
+            surAction: () => {
+                crees.forEach(id => supprimerDefinitivement(id).catch(console.error));
+                restaurerEnvie(envie.id);
+            }
+        });
+        setTimeout(() => ecran.isConnected && dessinerAujourdhui(ecran), 700);
+    });
+}
+
+function brancherAujourdhui(ecran, b) {
+
+    ecran.querySelector("#niMaisonVersVoyages")?.addEventListener("click", () => basculerVersMode("voyage"));
+
+    ecran.querySelector("#niMaisonChercher")?.addEventListener("click", async () => {
+        (await import("./recherche.js")).openRecherche();
+    });
+
+    ecran.querySelector("#niReprendre")?.addEventListener("click", evenement => {
+        openMaisonFiche(evenement.currentTarget.dataset.projetReprise);
+    });
+    ecran.querySelector("#niRepriseFermer")?.addEventListener("click", () => {
+        oublierReprise();
+        dessinerAujourdhui(ecran);
+    });
+
+    const carte = ecran.querySelector("[data-prochaine]");
+    if (carte) {
+        const envie = getEnvies().find(e => e.id === carte.dataset.prochaine);
+        carte.querySelectorAll("[data-etape]").forEach(bouton => bouton.addEventListener("click", () => {
+            if (!envie) return;
+            const action = bouton.dataset.etape;
+            if (action === "fait") {
+                updateEnvieRealise(envie.id, true);
+                showToast("✓ Fait", { action: "Annuler", surAction: () => updateEnvieRealise(envie.id, false) });
+                setTimeout(() => ecran.isConnected && dessinerAujourdhui(ecran), 700);
+            } else if (action === "plustard") {
+                ignorer(envie.id);
+                dessinerAujourdhui(ecran);
+            } else if (action === "decouper") {
+                ouvrirDecoupage(envie, ecran);
+            }
+        }));
+    }
+
+    ecran.querySelectorAll("[data-reporter]").forEach(bouton => bouton.addEventListener("click", () => {
+        const envie = getEnvies().find(e => e.id === bouton.dataset.reporter);
+        if (envie) ouvrirReport(envie, ecran);
+    }));
+
+    ecran.querySelector("#niToutDemain")?.addEventListener("click", () => {
+        const demain = dateRevoir("demain", b.aujourdhui);
+        const anciennes = b.enRetard.map(e => [e.id, e.date ? { ...e.date } : null]);
+        b.enRetard.forEach(e => updateEnvieDate(e.id, { ...(e.date || {}), type: e.date?.type || "single", start: demain, end: null }));
+        showToast(`${anciennes.length} tâches reportées à demain`, {
+            action: "Annuler",
+            surAction: () => anciennes.forEach(([id, date]) => updateEnvieDate(id, date))
+        });
+        setTimeout(() => ecran.isConnected && dessinerAujourdhui(ecran), 700);
+    });
 }
 
 export function openMaisonAujourdhui() {
