@@ -1,10 +1,10 @@
 # PROJECT STATE
 
-Mis à jour le 2026-10-13 (livraison 5 : notifications terminées).
+Mis à jour le 2026-10-15 (lot 1 : le voyage au bon moment).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v274` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v279` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -51,6 +51,18 @@ Fonctionnement :
 - Worker : dates (semaine, veille, jour J, délai propre), billets (délai par type avant le départ), relances (lundi ou 1er du mois, Voyages et Maison séparés). Secrets Cloudflare : `FIREBASE_SERVICE_ACCOUNT`, `VAPID_PRIVATE`. Variables publiques dans `worker/wrangler.jsonc`.
 - Point d'entrée `POST /test` : jeton Firebase de l'utilisateur, envoi d'un test à son appareil (boutons de l'écran Notifications).
 - Quota : une passe ne lit que les envies utiles (datées des 60 derniers jours, ou tout le foyer le matin d'une relance) ; 30 envois maximum par passe.
+
+## Le voyage au bon moment (lot 1, 2026-10-15)
+
+- Worker : `worker/voyage.js` (fonctions pures), appelé par `planifier` de `worker/rappels.js`. Outils partagés dans `worker/commun.js`.
+- Notifications : papiers (30 et 7 jours avant), enregistrement des vols (24 h avant, aller et retour, ouvre le billet), valise (J-2 s'il reste des éléments non cochés), « Le jour du départ » (2 h avant le rappel du premier billet de transport du jour du départ, sinon le matin du départ à l'heure des dates), programme du jour (chaque matin du voyage, 08:00 réglable), dépenses du soir (20:00 réglable), retour (2 jours après la fin).
+- Liste du départ : éléments non cochés des catégories de liste dont le nom contient « départ » ou « jour J ».
+- Réglages de l'appareil : bloc `voyage` { actif, papiers, enregistrement, depart, valise, programme, heureProgramme, depenses, heureDepenses, retour }, identique dans `js/notifications.js` et `worker/reglages.js`.
+- Lectures en plus : `personnes` et `checklistCategories` du foyer, seulement si un voyage commence dans les 31 jours ou est en cours.
+- Ouverture : charge `voyageId` + `vue` (listes, programme, depense, souvenirs, voyageurs) ; `sw.js` transmet `vue` ; `ouvrirEcranVoyage` dans `js/notifications.js`.
+- Clés d'envoi : `vp:`, `ve:`, `vd:`, `vv:`, `vg:`, `vm:`, `vr:`.
+- Tests : `cd worker && node --test tests/voyage.test.mjs` (données factices).
+- Écartés : date limite d'annulation (pas de nouveau champ), capture par Siri.
 
 ## Règles de livraison
 

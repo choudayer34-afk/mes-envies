@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v278';
+const CACHE_NAME = 'envie-cache-v279';
 
  
  
@@ -315,9 +315,9 @@ function adresseDepuisNotification(data) {
     if (data?.billetId)
         params.set('billet', data.billetId);
 
-    if (!data?.voyageId && data?.vue) {
+    if (data?.vue) {
         params.set('vue', data.vue);
-        if (data.mode)
+        if (data.mode && !data.voyageId)
             params.set('mode', data.mode);
     }
 
@@ -344,7 +344,7 @@ self.addEventListener('notificationclick', (event) => {
                 await fenetre.focus();
 
                 if (data.voyageId) {
-                    fenetre.postMessage({ type: 'OUVRIR_BILLET', voyageId: data.voyageId, billetId: data.billetId || null });
+                    fenetre.postMessage({ type: 'OUVRIR_BILLET', voyageId: data.voyageId, billetId: data.billetId || null, vue: data.vue || null });
                 } else if (data.vue) {
                     fenetre.postMessage({ type: 'OUVRIR_VUE', vue: data.vue, mode: data.mode || null });
                 }
