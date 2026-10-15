@@ -31,7 +31,7 @@ Petit service Cloudflare (un « Worker ») qui, toutes les 15 minutes, regarde l
 4. Vérifier
    - Ouvrir l'adresse `https://mes-envies-notifications.<ton-sous-domaine>.workers.dev` : le texte « EnVie : service de notifications actif » doit s'afficher.
    - Onglet « Déclencheurs » : le déclencheur `*/15 * * * *` doit apparaître.
-   - Onglet « Journaux » : toutes les 15 minutes une ligne « Passe terminée » avec le bilan.
+   - Onglet « Observability » : toutes les 15 minutes une ligne « Passe terminée » avec le bilan (journal activé dans `wrangler.jsonc`, gratuit jusqu'à 200 000 messages par jour, conservés 3 jours).
 
 ## Lectures Firestore
 
