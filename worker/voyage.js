@@ -4,8 +4,9 @@
 
  - papiers        : papiers d'identité expirés ou trop justes, 30 jours et 7 jours avant le départ ;
  - enregistrement : 24 h avant chaque vol (aller et retour), ouvre le billet ;
- - depart         : liste « Le jour du départ », avant le premier transport du jour du départ
-                    (ou, sans billet de transport à l'heure connue, le matin du départ) ;
+ - depart         : avant le premier transport du jour du départ (ou, sans billet de transport
+                    à l'heure connue, le matin du départ) : les éléments non cochés des listes
+                    (catégorie « départ » en priorité), sinon un rappel fixe ;
  - valise         : 2 jours avant le départ, s'il reste des choses non cochées dans les listes ;
  - programme      : chaque matin du voyage, le programme du jour (étapes et billets) ;
  - depenses       : chaque soir du voyage, « Ajoute les dépenses du jour » ;
@@ -167,7 +168,7 @@ export function premierTransport(voyage) {
 export function elementsDepart(voyage, categories) {
     const ids = new Set(categories.filter(c => /depart|jour j/.test(normaliser(c.nom))).map(c => c.id));
     const items = (voyage.checklist || []).filter(i => !i.checked);
-    return { categorie: ids.size > 0, items: items.filter(i => ids.has(i.categorieId)), restants: items.length };
+    return { items: items.filter(i => ids.has(i.categorieId)), restants: items };
 }
 
 function rappelDepart(r, voyage, categories, maintenant) {
@@ -187,16 +188,16 @@ function rappelDepart(r, voyage, categories, maintenant) {
 
     if (!dans(maintenant, echeance, limite)) return [];
 
-    const { categorie, items, restants } = elementsDepart(voyage, categories);
+    /* Priorité aux éléments de la catégorie « départ » ; sinon tous les éléments non cochés des listes ;
+       sinon un rappel fixe. Aucune saisie n'est nécessaire. */
+    const { items, restants } = elementsDepart(voyage, categories);
+    const aCiter = items.length ? items : restants;
     let corps;
 
-    if (items.length) {
-        const noms = items.slice(0, 5).map(i => i.texte).filter(Boolean);
-        corps = noms.join(", ") + (items.length > noms.length ? ` et ${items.length - noms.length} autre${items.length - noms.length > 1 ? "s" : ""}` : "");
-    } else if (categorie) {
-        corps = "Tout est coché dans « Le jour du départ ». Bon voyage !";
-    } else if (restants) {
-        corps = `${restants} chose${restants > 1 ? "s" : ""} pas encore cochée${restants > 1 ? "s" : ""} dans les listes`;
+    if (aCiter.length) {
+        const noms = aCiter.map(i => i.texte).filter(Boolean).slice(0, 5);
+        const reste = aCiter.length - noms.length;
+        corps = noms.join(", ") + (reste > 0 ? ` et ${reste} autre${reste > 1 ? "s" : ""}` : "");
     } else {
         corps = "Clés, chargeurs, papiers, billets : dernière vérification";
     }
