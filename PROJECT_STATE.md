@@ -1,10 +1,10 @@
 # PROJECT STATE
 
-Mis à jour le 2026-10-15 (lot 2 : ne rien perdre).
+Mis à jour le 2026-10-15 (lot 3 : se recentrer).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v281` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v282` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -74,6 +74,16 @@ Fonctionnement :
 - Worker : les relances ignorent les idées en pause et comptent l'ancienneté depuis `revueLe` si plus récent (aucune lecture en plus).
 - Tests : `node --test tests/tri-outils.test.mjs` (racine) et `cd worker && node --test tests/voyage.test.mjs`.
 - Choix : une idée abandonnée va dans la corbeille (pas d'espace « Idées écartées »).
+
+## Se recentrer (lot 3, 2026-10-15)
+
+- `js/prochaine-etape.js` : choix de la prochaine étape Maison (fonction pure : en retard la plus ancienne, puis du jour, puis la suivante du projet le plus avancé, puis à venir) ; « Pas maintenant » mémorisé pour la session ; dernière fiche ouverte (`envie_derniere_fiche`, 7 jours) ; `basculerVersMode`.
+- Aujourd'hui Maison (`js/maison.js`) : bouton ✈️ Voyages et loupe dans l'en-tête ; ligne « Reprendre » (dernier projet ouvert) ; carte « Prochaine étape » (Fait, Pas maintenant, Découper : une étape par ligne, remplace la tâche dans le même projet, Annuler 5 s) ; « Reporter » sur chaque tâche en retard (Demain, Ce week-end, Dans 1 semaine) et « Tout à demain ».
+- Aujourd'hui Voyages (`js/aujourdhui.js`) : bouton 🛠️ Maison ; ligne « Reprendre » si le dernier voyage ouvert n'est pas celui affiché.
+- Dernière fiche notée par `ouvrirHub` (`js/fiche-hub.js`) et `openMaisonFiche` (`js/maison-fiche.js`).
+- Recherche (`js/recherche.js`) : aussi les projets et tâches Maison.
+- Menu Plus : visibles = mode, Notifications, Urgence, Corbeille, Jeux, Administration ; le reste dans « Autres » repliable (rangement refait à chaque ouverture, rien supprimé) : `rangerMenuPlus` dans `js/nouvelle-interface.js`.
+- Tests : `node --test tests/prochaine-etape.test.mjs`.
 
 ## Règles de livraison
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'envie-cache-v281';
+const CACHE_NAME = 'envie-cache-v282';
 
  
  
