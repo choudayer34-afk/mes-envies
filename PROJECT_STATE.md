@@ -4,7 +4,7 @@ Mis à jour le 2026-10-15 (lot 1 : le voyage au bon moment).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v279` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v280` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -56,7 +56,7 @@ Fonctionnement :
 
 - Worker : `worker/voyage.js` (fonctions pures), appelé par `planifier` de `worker/rappels.js`. Outils partagés dans `worker/commun.js`.
 - Notifications : papiers (30 et 7 jours avant), enregistrement des vols (24 h avant, aller et retour, ouvre le billet), valise (J-2 s'il reste des éléments non cochés), « Le jour du départ » (2 h avant le rappel du premier billet de transport du jour du départ, sinon le matin du départ à l'heure des dates), programme du jour (chaque matin du voyage, 08:00 réglable), dépenses du soir (20:00 réglable), retour (2 jours après la fin).
-- Liste du départ : éléments non cochés des catégories de liste dont le nom contient « départ » ou « jour J ».
+- Liste du départ (automatique, rien à saisir) : éléments non cochés des catégories de liste dont le nom contient « départ » ou « jour J » ; à défaut, tous les éléments non cochés des listes du voyage (5 cités, les autres comptés) ; si tout est coché, rappel fixe « Clés, chargeurs, papiers, billets ».
 - Réglages de l'appareil : bloc `voyage` { actif, papiers, enregistrement, depart, valise, programme, heureProgramme, depenses, heureDepenses, retour }, identique dans `js/notifications.js` et `worker/reglages.js`.
 - Lectures en plus : `personnes` et `checklistCategories` du foyer, seulement si un voyage commence dans les 31 jours ou est en cours.
 - Ouverture : charge `voyageId` + `vue` (listes, programme, depense, souvenirs, voyageurs) ; `sw.js` transmet `vue` ; `ouvrirEcranVoyage` dans `js/notifications.js`.
