@@ -1,10 +1,10 @@
 # PROJECT STATE
 
-Mis à jour le 2026-10-15 (lot 4 : Maison au bon moment).
+Mis à jour le 2026-10-15 (lot 5 : enrichir les envies).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v283` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v284` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -93,6 +93,16 @@ Fonctionnement :
 - Projet en sommeil : tâches ouvertes et aucune activité (`updatedAt` du projet et de ses tâches, `revueLe`) depuis 21 jours. Étiquette « en sommeil » dans Projets ; section « En sommeil » dans Aujourd'hui Maison (Ouvrir, Plus tard = `revueLe`).
 - En magasin (`js/magasin.js`) : produits retenus des comparateurs (par magasin), planches, peinture à prévoir ; cocher « acheté » enregistre `achete` sur le produit ou la planche (la peinture : session seulement). Accès : ligne « 🛒 En magasin » d'Aujourd'hui Maison.
 - Bonne météo : bandeau dans Aujourd'hui Maison si le prochain week-end est sec (code météo ≤ 3, pluie ≤ 30 %) et qu'un projet d'une zone extérieure a des tâches ouvertes. Open-Meteo appelé par l'appli (`fetchMeteoSemaine` dans `js/meteo.js`), une fois par jour et par session ; position de la maison mémorisée sur l'appareil (`envie_position_maison`, arrondie au centième) à la première ouverture.
+
+## Enrichir les envies (lot 5, 2026-10-15)
+
+- Envie de saison : « Plus tard » → « À la saison… » → mois ; champs `moisIdeal` (1 à 12) et `revoirLe` = 1er de ce mois (l'an prochain si le mois est commencé) ; `updateEnvieSaison` (`js/storage.js`), `dateSaison` et `MOIS` (`js/tri-outils.js`). Affiché « idéale en mars » sur l'idée.
+- Intérêt du foyer : cœur par membre sur les idées de Trier ; champ `interets.{uid}` (booléen) ; `basculerInteret`.
+- Lancer une envie : Voyages : « En faire un voyage » dans Trier ouvre Nouveau voyage prérempli (titre, lieu), l'idée est rattachée au voyage créé (`openNouveauVoyage({ idee })`). Maison : bouton « En projet » sur les tâches à trier d'Aujourd'hui Maison (projet créé, la tâche en devient la première).
+- Revue de la semaine (`js/revue.js`) : ouverte par la relance (nouvelle interface) et par Plus > Autres. Voyages : idées à trier, prochains départs à 30 jours (score et premier manque). Maison : à trier, en retard (tout à demain), devis à suivre, projets en sommeil. Étapes vides sautées. `resumeMaison` et `toutReporterADemain` exportés par `js/maison.js`.
+- Dernière action : « dernière action il y a X jours » sur les cartes Projets (`derniereActivite`) ; section « Historique » (6 derniers : projet créé, tâches ajoutées, terminées) dans la fiche projet Maison.
+- Écarté : « Pourquoi j'en ai envie ».
+- À faire : revoir la fiche complète des projets Maison (ancienne fiche ouverte par « Ouvrir la fiche complète »), jugée inadaptée.
 
 ## Règles de livraison
 
