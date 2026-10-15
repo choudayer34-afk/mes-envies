@@ -9,6 +9,8 @@ import { creerClient } from "./firebase.js";
 import { envoyerPush } from "./webpush.js";
 import { planifier, besoins } from "./rappels.js";
 import { voyageProche } from "./voyage.js";
+import { joursRdvACherche } from "./maison.js";
+import { nettoyerReglages } from "./reglages.js";
 import { partiesParis, ajouterJours, JOUR } from "./temps.js";
 
 /* Limite de requêtes d'un Worker gratuit : 50 par passe. Le reste part à la passe suivante. */
@@ -61,6 +63,18 @@ export async function executer(env, { maintenant = Date.now(), fetchFn = fetch, 
         const necessaire = besoins(liste, maintenant);
         if (!necessaire.dates && !necessaire.relances) continue;
 
+        /* Rendez-vous d'artisans du jour et du lendemain : seulement les envies concernées (champ datesRdv),
+           et seulement à l'heure des rappels. */
+        let rendezVous = [];
+        const joursRdv = joursRdvACherche(liste.map(a => ({ ...a, reglages: nettoyerReglages(a.reglages) })), maintenant);
+        if (joursRdv.length) {
+            rendezVous = await client.requete(`foyers/${foyerId}`, {
+                from: [{ collectionId: "envies" }],
+                where: { fieldFilter: { field: { fieldPath: "datesRdv" }, op: "ARRAY_CONTAINS_ANY", value: { arrayValue: { values: joursRdv.map(j => ({ stringValue: j })) } } } }
+            });
+            bilan.lectures += Math.max(rendezVous.length, 1);
+        }
+
         let envies;
         let conteneurs = null;
 
@@ -88,7 +102,7 @@ export async function executer(env, { maintenant = Date.now(), fetchFn = fetch, 
         }
 
         for (const appareil of liste) {
-            for (const notification of planifier(appareil, { envies, conteneurs, personnes, categoriesListes }, maintenant)) {
+            for (const notification of planifier(appareil, { envies, conteneurs, personnes, categoriesListes, rendezVous }, maintenant)) {
                 envois.push({ appareil, notification });
             }
         }

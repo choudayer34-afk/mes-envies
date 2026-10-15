@@ -8,6 +8,8 @@
                 à l'heure choisie sur l'appareil (heure de Paris) ;
  - billets    : avant l'heure de départ, selon le type (heure de Paris) ;
  - relances   : idées à trier (Voyages et Maison séparément), chaque lundi ou chaque 1er du mois ;
+ - maison     : rendez-vous d'artisans (veille, jour même), devis à suivre et projets en sommeil
+                dans la relance Maison : voir maison.js ;
  - voyage     : le voyage au bon moment (papiers, enregistrement, départ, valise, programme,
                 dépenses du soir, retour) : voir voyage.js.
 */
@@ -15,6 +17,7 @@
 import { nettoyerReglages, TYPES_BILLETS } from "./reglages.js";
 import { FENETRE_RETARD, etapesBillets, visiblePour, nomLieu } from "./commun.js";
 import { rappelsVoyage } from "./voyage.js";
+import { rappelsRendezVous, suiviMaison } from "./maison.js";
 
 export { FENETRE_RETARD, etapesBillets, visiblePour };
 import {
@@ -195,7 +198,8 @@ export function rappelsRelances(appareil, envies, conteneurs, maintenant) {
     for (const mode of relancesDues(appareil, maintenant)) {
 
         const liste = idees(mode, envies, conteneurs, appareil.uid, iso);
-        if (!liste.length) continue;
+        const suivi = mode === "maison" ? suiviMaison(envies, conteneurs, appareil.uid, maintenant) : { devis: 0, sommeil: 0 };
+        if (!liste.length && !suivi.devis && !suivi.sommeil) continue;
 
         /* Ancienneté depuis la création, ou depuis la dernière réponse « oui, toujours envie » (revueLe). */
         const anciennes = liste.filter(e => {
@@ -205,14 +209,18 @@ export function rappelsRelances(appareil, envies, conteneurs, maintenant) {
         const n = liste.length;
         const accord = n > 1 ? "s" : "";
 
-        const corps = anciennes
+        const morceaux = [];
+        if (n) morceaux.push(anciennes
             ? `${n} élément${accord} à trier, dont ${anciennes} sans date depuis plus de ${JOURS_ANCIENNETE} jours`
-            : `${n} élément${accord} à trier`;
+            : `${n} élément${accord} à trier`);
+        if (suivi.devis) morceaux.push(`${suivi.devis} devis à suivre`);
+        if (suivi.sommeil) morceaux.push(`${suivi.sommeil} projet${suivi.sommeil > 1 ? "s" : ""} en sommeil`);
+        const corps = morceaux.join(" · ");
 
         sortie.push({
             cle: `r:${mode}:${iso}`,
             charge: {
-                titre: mode === "maison" ? "🏠 Maison : à trier" : "✈️ Voyages : idées à trier",
+                titre: mode === "maison" ? (n ? "🏠 Maison : à trier" : "🏠 Maison : à suivre") : "✈️ Voyages : idées à trier",
                 corps,
                 tag: `relance-${mode}`,
                 voyageId: null, billetId: null, vue: "trier", mode
@@ -231,7 +239,7 @@ export function rappelsRelances(appareil, envies, conteneurs, maintenant) {
 
 /*
  appareil : document de l'appareil (uid, reglages, envoyes)
- donnees  : { envies, conteneurs (Set ou null), personnes?, categoriesListes? }
+ donnees  : { envies, conteneurs (Set ou null), personnes?, categoriesListes?, rendezVous? }
  Retourne les notifications à envoyer, déjà filtrées de ce qui a été envoyé.
 */
 export function planifier(appareil, donnees, maintenant) {
@@ -243,7 +251,8 @@ export function planifier(appareil, donnees, maintenant) {
         ...rappelsDates(prepare, donnees.envies, maintenant),
         ...rappelsBillets(prepare, donnees.envies, maintenant),
         ...(donnees.conteneurs ? rappelsRelances(prepare, donnees.envies, donnees.conteneurs, maintenant) : []),
-        ...rappelsVoyage(prepare, donnees, maintenant)
+        ...rappelsVoyage(prepare, donnees, maintenant),
+        ...rappelsRendezVous(prepare, donnees.rendezVous || [], maintenant)
     ];
 
     return toutes.filter(n => !envoyes[n.cle]);
