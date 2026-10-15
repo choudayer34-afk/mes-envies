@@ -1,46 +1,63 @@
 /*
- temps.js : calculs de dates en heure de Paris.
+ temps.js : calculs de dates en heure de Paris (sans Intl pour le décalage : voir decalageParis).
  Les heures saisies dans EnVie (billets, heure d'envoi des rappels) n'ont pas de fuseau :
  elles sont interprétées en heure de Paris, été comme hiver.
 */
-
-const FORMAT_PARIS = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Europe/Paris",
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit",
-    hourCycle: "h23"
-});
 
 export const MINUTE = 60 * 1000;
 export const HEURE = 60 * MINUTE;
 export const JOUR = 24 * HEURE;
 
+/*
+ Décalage de Paris calculé sans Intl (règle européenne en vigueur depuis 1996 : heure d'été
+ du dernier dimanche de mars, 1 h UTC, au dernier dimanche d'octobre, 1 h UTC).
+ Intl.DateTimeFormat coûtait l'essentiel du temps de calcul d'une passe (limite gratuite : 10 ms).
+ Vérifié contre Intl dans tests/temps.test.mjs.
+*/
+function dernierDimancheUtc(annee, mois) {
+    const dernierJour = new Date(Date.UTC(annee, mois + 1, 0));
+    return Date.UTC(annee, mois, dernierJour.getUTCDate() - dernierJour.getUTCDay(), 1);
+}
+
+const debutsEte = new Map();
+
+export function decalageParis(instant) {
+    const annee = new Date(instant).getUTCFullYear();
+    let bornes = debutsEte.get(annee);
+    if (!bornes) {
+        bornes = [dernierDimancheUtc(annee, 2), dernierDimancheUtc(annee, 9)];
+        debutsEte.set(annee, bornes);
+    }
+    return instant >= bornes[0] && instant < bornes[1] ? 2 * HEURE : HEURE;
+}
+
 /* Éléments de la date et de l'heure de Paris pour un instant donné (millisecondes). */
 export function partiesParis(instant) {
 
-    const valeurs = {};
-
-    for (const morceau of FORMAT_PARIS.formatToParts(new Date(instant))) {
-        if (morceau.type !== "literal") valeurs[morceau.type] = Number(morceau.value);
-    }
-
-    const iso = `${String(valeurs.year).padStart(4, "0")}-${String(valeurs.month).padStart(2, "0")}-${String(valeurs.day).padStart(2, "0")}`;
+    const d = new Date(instant + decalageParis(instant));
+    const annee = d.getUTCFullYear(), mois = d.getUTCMonth() + 1, jour = d.getUTCDate();
 
     return {
-        annee: valeurs.year,
-        mois: valeurs.month,
-        jour: valeurs.day,
-        heure: valeurs.hour,
-        minute: valeurs.minute,
-        iso,
+        annee,
+        mois,
+        jour,
+        heure: d.getUTCHours(),
+        minute: d.getUTCMinutes(),
+        iso: `${String(annee).padStart(4, "0")}-${String(mois).padStart(2, "0")}-${String(jour).padStart(2, "0")}`,
         /* 0 = dimanche, 1 = lundi, ... */
-        jourSemaine: new Date(Date.UTC(valeurs.year, valeurs.month - 1, valeurs.day)).getUTCDay()
+        jourSemaine: d.getUTCDay()
     };
 
 }
 
 /* Instant (millisecondes) correspondant à « date ISO + heure HH:MM » à Paris. */
+const memoInstants = new Map();
+
 export function instantParis(dateIso, heure) {
+
+    const cle = dateIso + "T" + heure;
+    if (memoInstants.has(cle)) return memoInstants.get(cle);
+    if (memoInstants.size > 5000) memoInstants.clear();
 
     const [annee, mois, jour] = dateIso.split("-").map(Number);
     const [h, m] = heure.split(":").map(Number);
@@ -55,13 +72,23 @@ export function instantParis(dateIso, heure) {
         essai -= obtenu - voulu;
     }
 
+    memoInstants.set(cle, essai);
     return essai;
 
 }
 
+const memoJours = new Map();
+
 export function ajouterJours(dateIso, nombre) {
-    const [annee, mois, jour] = dateIso.split("-").map(Number);
-    return new Date(Date.UTC(annee, mois - 1, jour + nombre)).toISOString().slice(0, 10);
+    const cle = dateIso + "|" + nombre;
+    let r = memoJours.get(cle);
+    if (r === undefined) {
+        if (memoJours.size > 5000) memoJours.clear();
+        const [annee, mois, jour] = dateIso.split("-").map(Number);
+        r = new Date(Date.UTC(annee, mois - 1, jour + nombre)).toISOString().slice(0, 10);
+        memoJours.set(cle, r);
+    }
+    return r;
 }
 
 export function formaterDateLongue(dateIso) {

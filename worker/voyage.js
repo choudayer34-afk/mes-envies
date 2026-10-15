@@ -17,7 +17,7 @@
 */
 
 import { etapesBillets, visiblePour, FENETRE_RETARD, nomLieu } from "./commun.js";
-import { instantParis, ajouterJours, dateIsoValide, heureValide, formaterDateLongue, MINUTE, HEURE } from "./temps.js";
+import { instantParis, ajouterJours, dateIsoValide, heureValide, formaterDateLongue, partiesParis, MINUTE, HEURE } from "./temps.js";
 
 /* Billets qui comptent comme « le transport du départ ». */
 export const TYPES_TRANSPORT = ["avion", "train", "busferry", "voiture"];
@@ -64,13 +64,6 @@ export function voyagesDe(envies, uid) {
 
 function finDe(voyage) {
     return dateIsoValide(voyage.date?.end) && voyage.date.end >= voyage.date.start ? voyage.date.end : voyage.date.start;
-}
-
-function joursDuVoyage(voyage) {
-    const jours = [];
-    const fin = finDe(voyage);
-    for (let d = voyage.date.start, i = 0; d <= fin && i < 120; d = ajouterJours(d, 1), i++) jours.push(d);
-    return jours;
 }
 
 /* ---------- Papiers ---------- */
@@ -255,11 +248,18 @@ export function programmeDuJour(voyage, envies, jour) {
 
 }
 
+/* Jours du voyage à examiner maintenant : aujourd'hui et hier (fenêtre de 3 h), s'ils font partie du voyage. */
+function joursUtiles(voyage, maintenant) {
+    const aujourdhui = partiesParis(maintenant).iso;
+    const fin = finDe(voyage);
+    return [ajouterJours(aujourdhui, -1), aujourdhui].filter(j => j >= voyage.date.start && j <= fin);
+}
+
 function rappelsProgramme(r, voyage, envies, maintenant) {
 
     const sortie = [];
 
-    for (const jour of joursDuVoyage(voyage)) {
+    for (const jour of joursUtiles(voyage, maintenant)) {
 
         const echeance = instantParis(jour, r.voyage.heureProgramme);
         if (!dans(maintenant, echeance)) continue;
@@ -286,7 +286,7 @@ function rappelsDepenses(r, voyage, maintenant) {
 
     const sortie = [];
 
-    for (const jour of joursDuVoyage(voyage)) {
+    for (const jour of joursUtiles(voyage, maintenant)) {
 
         const echeance = instantParis(jour, r.voyage.heureDepenses);
         if (!dans(maintenant, echeance)) continue;
