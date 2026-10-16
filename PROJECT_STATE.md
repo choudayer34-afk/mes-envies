@@ -4,7 +4,7 @@ Mis à jour le 2026-10-15 (fiche projet Maison complète).
 
 ## Version
 
-- Version du cache du service worker : `envie-cache-v286` (à incrémenter à chaque livraison).
+- Version du cache du service worker : `envie-cache-v287` (à incrémenter à chaque livraison).
 
 ## Architecture
 
@@ -121,6 +121,17 @@ Fonctionnement :
 ## Listes d'un voyage (2026-10-15)
 
 - `js/listes.js` : par défaut « À prendre » n'affiche que les éléments non cochés, par catégorie ; les cochés sont repliés dans « Déjà pris (n) » en bas ; filtres « À prendre » et « Déjà pris » ; cocher affiche « Annuler » 5 s ; en-tête « Reste N à prendre ».
+
+## Notes des billets (2026-10-16)
+
+- Champ facultatif `notes` sur un billet (chauffeur, téléphone, code, consignes), saisi dans le formulaire (`js/billet-form.js`). Un billet peut n'avoir qu'une note.
+- Affichage : billet en grand (`js/visionneuse.js`), avec liens et numéros cliquables (`notesEnHtml` dans `js/types-reservation.js`) ; aperçu 📝 dans Réservations.
+- Un billet sans fichier s'ouvre quand même (résumé, notes, « Aucun fichier joint ») depuis Réservations, Documents, Aujourd'hui et les notifications.
+- Bouton « ✏️ Modifier » en haut du billet affiché en grand (`options.voyageId`, sinon retrouvé par l'identifiant du billet).
+
+## À faire (prochaine fois)
+
+- Billets : ajouter un bouton « Modifier » sur chaque ligne de l'écran Documents (le billet affiché en grand l'a depuis le 16/10).
 
 ## Règles de livraison
 
