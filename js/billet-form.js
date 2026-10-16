@@ -126,6 +126,7 @@ export function openBilletForm(voyageId, options = {}) {
         retourArrivee: existant?.retour?.heureArrivee || "",
         retourNumero: existant?.retour?.numeroVol || "",
         lien: existant?.lienApp || "",
+        notes: existant?.notes || "",
         de: nomDuLieu(existant?.lieuDepart),
         vers: nomDuLieu(existant?.destination)
     };
@@ -138,7 +139,7 @@ export function openBilletForm(voyageId, options = {}) {
     document.body.appendChild(ecran);
 
     function lireChamps() {
-        ["nom", "numero", "date", "heure", "arrivee", "dateArrivee", "retourDate", "retourHeure", "retourArrivee", "retourDateArrivee", "retourNumero", "lien", "de", "vers"].forEach(k => {
+        ["nom", "numero", "date", "heure", "arrivee", "dateArrivee", "retourDate", "retourHeure", "retourArrivee", "retourDateArrivee", "retourNumero", "lien", "notes", "de", "vers"].forEach(k => {
             const el = ecran.querySelector(`[data-champ="${k}"]`);
             if (el) valeurs[k] = el.value;
         });
@@ -232,6 +233,11 @@ export function openBilletForm(voyageId, options = {}) {
                         <label class="niBfLabel">Numéro du retour (si différent)<input class="niRecherche" data-champ="retourNumero" type="text" value="${echapper(valeurs.retourNumero)}" autocomplete="off"></label>`
                     : `<label class="niBfLabel">${p.fin}<input class="niRecherche" data-champ="retourDate" type="date" value="${echapper(valeurs.retourDate)}"></label>`) : ""}
                 </div>` : ""}
+
+                <label class="niBfChamp" style="display:flex;flex-direction:column;gap:6px">
+                    <span class="niEtiquette">Notes</span>
+                    <textarea class="niRecherche" data-champ="notes" rows="3" style="height:auto;min-height:84px;padding:10px;line-height:1.4" placeholder="Chauffeur, téléphone, code d'accès, consignes… (liens et numéros cliquables)">${echapper(valeurs.notes)}</textarea>
+                </label>
 
                 <details class="niBfPlus">
                     <summary>Lien vers l'appli ou le site</summary>
@@ -450,8 +456,8 @@ export function openBilletForm(voyageId, options = {}) {
         const depart = trajet ? lieuDepuisChamp(valeurs.de, etat.depart) : null;
         const destination = (trajet || p.lieu) ? lieuDepuisChamp(valeurs.vers, etat.vers) : null;
 
-        if (!etat.fichiers.length && !valeurs.nom.trim() && !valeurs.numero.trim() && !destination && !depart && !valeurs.date) {
-            showToast("Ajoute au moins un fichier, un nom ou une date");
+        if (!etat.fichiers.length && !valeurs.nom.trim() && !valeurs.numero.trim() && !destination && !depart && !valeurs.date && !valeurs.notes.trim()) {
+            showToast("Ajoute au moins un fichier, un nom, une date ou une note");
             return;
         }
 
@@ -477,6 +483,7 @@ export function openBilletForm(voyageId, options = {}) {
             lieuDepart: depart,
             destination,
             lienApp: valeurs.lien.trim() || null,
+            notes: valeurs.notes.trim() || null,
             retour,
             fichiers: etat.fichiers
         };
