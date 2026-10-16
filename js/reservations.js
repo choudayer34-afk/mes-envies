@@ -55,6 +55,7 @@ function ligne(b, aujourdhui) {
             <span class="niDocTexte">
                 <span class="niDocTitre">${echapper(titreBillet(b))}</span>
                 <span class="niDocSous">${echapper(t.libelle)}${details ? " · " + echapper(details) : ""}</span>
+                ${b.notes ? `<span class="niDocSous">📝 ${echapper(b.notes.split("\n")[0].slice(0, 60))}</span>` : ""}
             </span>
             ${(() => { const e = etatHorsLigne(b); return `<span class="niTag ${e === "partiel" || e === "aucun" ? "niTagAttention" : "niTagOk"}">${{ aucun: "Sans fichier", inconnu: "Fichier joint", ok: "Hors ligne ✓", partiel: "En ligne seulement" }[e]}</span>`; })()}
         </button>
@@ -128,11 +129,7 @@ export function openReservations(voyageOuId) {
         bouton.addEventListener("click", () => {
             const billet = listerBillets(voyageId).find(b => b.id === bouton.dataset.billet);
             if (!billet) return;
-            if (!(billet.fichiers || []).length) {
-                showToast("Aucun fichier joint : ouvre la fiche pour en ajouter");
-                return;
-            }
-            ouvrirVisionneuse(billet.fichiers, 0, { billet });
+            ouvrirVisionneuse(billet.fichiers || [], 0, { billet, voyageId });
         });
     });
 }
