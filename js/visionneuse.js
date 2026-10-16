@@ -7,7 +7,7 @@
 ==========================================================
 */
 
-import { emojiType, motType, nomLieu } from "./types-reservation.js";
+import { emojiType, motType, nomLieu, notesEnHtml } from "./types-reservation.js";
 import { resoudreSource } from "./hors-ligne.js";
 
 let verrouEcran = null;
@@ -50,9 +50,20 @@ export async function ouvrirVisionneuse(fichiers, indexDepart = 0, options = {})
     fermerVisionneuse();
 
     const liste = (fichiers || []).filter(f => f && (f.dataUrl || f.url));
-    if (!liste.length) return;
+    /* Un billet sans fichier s'affiche quand même (résumé, notes, Modifier). */
+    if (!liste.length && !options.billet) return;
 
-    let index = Math.min(Math.max(indexDepart, 0), liste.length - 1);
+    let index = Math.min(Math.max(indexDepart, 0), Math.max(liste.length - 1, 0));
+
+    /* Voyage du billet : pour le bouton « Modifier ». */
+    let voyageDuBillet = options.voyageId || null;
+    if (options.billet && !voyageDuBillet) {
+        try {
+            const { getEnvies } = await import("./storage.js");
+            const idOrigine = String(options.billet._idOrigine || options.billet.id || "").split("#")[0];
+            voyageDuBillet = getEnvies().find(e => (e.billets || []).some(b => b.id === idOrigine))?.id || null;
+        } catch { voyageDuBillet = null; }
+    }
 
     const fond = document.createElement("div");
     fond.id = "niVisionneuse";
@@ -77,10 +88,12 @@ export async function ouvrirVisionneuse(fichiers, indexDepart = 0, options = {})
     async function dessiner() {
 
         const fichier = liste[index];
-        const source = await resoudreSource(fichier);
+        const source = fichier ? await resoudreSource(fichier) : "";
         const plusieurs = liste.length > 1;
 
-        const contenu = fichier.type === "pdf"
+        const contenu = !fichier
+            ? '<div class="niVisionneuseLigne2" style="margin:auto;text-align:center;opacity:.8">Aucun fichier joint</div>'
+            : fichier.type === "pdf"
             ? `<iframe class="niVisionneuseCadre" src="${source}" title="Document"></iframe>`
             : `<img class="niVisionneuseImage" src="${source}" alt="Billet">`;
 
@@ -90,6 +103,7 @@ export async function ouvrirVisionneuse(fichiers, indexDepart = 0, options = {})
         fond.innerHTML = `
             <div class="niVisionneuseHaut">
                 <button type="button" class="niVisionneuseBouton" id="niVisFermer">← Retour</button>
+                ${billet && voyageDuBillet ? '<button type="button" class="niVisionneuseBouton" id="niVisModifier">✏️ Modifier</button>' : ""}
                 ${horsLigne ? '<span class="niVisionneuseCompteur">Sans réseau</span>' : ""}
                 ${plusieurs ? `<span class="niVisionneuseCompteur">${billet ? "Billet" : "Fichier"} ${index + 1} / ${liste.length}</span>` : ""}
             </div>
@@ -98,6 +112,7 @@ export async function ouvrirVisionneuse(fichiers, indexDepart = 0, options = {})
                 <span class="niVisionneuseLigne1">${echapper(resume.ligne1)}${resume.trajet ? " · " + echapper(resume.trajet) : ""}</span>
                 ${resume.ligne2 ? `<span class="niVisionneuseLigne2">${echapper(resume.ligne2)}</span>` : ""}
                 ${resume.reference ? `<span class="niVisionneuseLigne2">Réf. ${echapper(resume.reference)}</span>` : ""}
+                ${billet.notes ? `<span class="niVisionneuseLigne2 niVisionneuseNotes" style="white-space:normal;user-select:text">${notesEnHtml(billet.notes)}</span>` : ""}
             </div>` : ""}
             <div class="niVisionneuseCorps">
                 ${plusieurs ? '<button type="button" class="niVisionneuseNav niVisionneusePrec" id="niVisPrec" aria-label="Précédent">‹</button>' : ""}
@@ -106,6 +121,12 @@ export async function ouvrirVisionneuse(fichiers, indexDepart = 0, options = {})
             </div>`;
 
         fond.querySelector("#niVisFermer").addEventListener("click", fermerVisionneuse);
+        fond.querySelector("#niVisModifier")?.addEventListener("click", async () => {
+            fermerVisionneuse();
+            (await import("./billet-form.js")).openBilletForm(voyageDuBillet, { billetId: billet._idOrigine || billet.id });
+        });
+        /* Les liens des notes s'ouvrent sans changer de fichier. */
+        fond.querySelectorAll(".niVisionneuseNotes a").forEach(a => a.addEventListener("touchend", e => e.stopPropagation()));
         fond.querySelector("#niVisPrec")?.addEventListener("click", () => aller(-1));
         fond.querySelector("#niVisSuiv")?.addEventListener("click", () => aller(1));
     }
