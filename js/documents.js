@@ -141,11 +141,8 @@ export function openDocuments(voyageId) {
         ecran.querySelectorAll(".niDocLigne").forEach(bouton => {
             bouton.addEventListener("click", () => {
                 const billet = listerBillets(voyageId).find(b => b.id === bouton.dataset.billet);
-                if (!billet || !(billet.fichiers || []).length) {
-                    showToast("Aucun fichier joint à ce billet");
-                    return;
-                }
-                ouvrirVisionneuse(billet.fichiers, 0, { billet });
+                if (!billet) return;
+                ouvrirVisionneuse(billet.fichiers || [], 0, { billet, voyageId });
             });
         });
     }
