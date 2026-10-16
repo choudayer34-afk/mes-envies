@@ -479,7 +479,7 @@ export function openAujourdhui() {
     const prochain = donnees.prochain;
 
     ecran.querySelector("#niProchainBillet")?.addEventListener("click", () => {
-        ouvrirVisionneuse(prochain.billet.fichiers, 0, { billet: prochain.billet });
+        ouvrirVisionneuse(prochain.billet.fichiers || [], 0, { billet: prochain.billet, voyageId: voyage.id });
     });
 
     ecran.querySelector("#niProchainItineraire")?.addEventListener("click", () => {
