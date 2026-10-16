@@ -100,3 +100,14 @@ export function libelleSens(billet) {
     if (billet._sens === "retour") return trajet ? "Retour" : "Fin";
     return trajet ? "Aller" : "Début";
 }
+
+
+/* Notes d'un billet (chauffeur, téléphone, code, consignes) : texte échappé, liens et numéros de téléphone cliquables. */
+export function notesEnHtml(texte) {
+    const echappe = String(texte ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    return echappe
+        .replace(/https?:\/\/[^\s<]+/g, url => `<a href="${url}" target="_blank" rel="noopener">${url}</a>`)
+        /* Numéro : international (+212 6…, +33 6…) ou français à 10 chiffres (06 12 34 56 78). */
+        .replace(/(^|[\s(:])(\+\d{2,3}[ .-]?\d(?:[ .-]?\d){7,10}|0\d(?:[ .-]?\d{2}){4})(?![\d-])/g, (tout, avant, num) => `${avant}<a href="tel:${num.replace(/[ .-]/g, "")}">${num}</a>`)
+        .replace(/\n/g, "<br>");
+}
