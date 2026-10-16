@@ -862,13 +862,10 @@ export async function ouvrirBillet(voyageId, billetId, { ouvrirVoyage = false, v
     const { listerBillets } = await import("./documents.js");
     const billet = listerBillets(voyageId).find(b => b.id === billetId);
 
-    if (!billet || !(billet.fichiers || []).length) {
-        showToast("Aucun fichier joint à ce billet");
-        return;
-    }
+    if (!billet) return;
 
     const { ouvrirVisionneuse } = await import("./visionneuse.js");
-    ouvrirVisionneuse(billet.fichiers, 0, { billet });
+    ouvrirVisionneuse(billet.fichiers || [], 0, { billet, voyageId });
 
 }
 
